@@ -1,0 +1,90 @@
+# Genel IDE/Editor dosyaları
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+target/
+.gradle/
+build/
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Veritabanı
+*.sqlite
+*.db
+*.sql
+
+# Log dosyaları
+*.log
+logs/
+
+# Çevre değişkenleri
+.env
+.env.local
+.env.*.local
+
+# Geçici dosyalar
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# İşletim Sistemi
+Thumbs.db
+Desktop.ini
+
+# Proje özel dosyalar (gerekirse ekleyin)
+config/local.json
+secrets/
+credentials/
+
