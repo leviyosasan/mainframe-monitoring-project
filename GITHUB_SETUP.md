@@ -25,12 +25,8 @@ GitHub'da repository oluşturduktan sonra, aşağıdaki komutları sırayla çal
 # Develop branch'i oluşturun (ekip çalışması için)
 git checkout -b develop
 
-# GitHub repository'nizi remote olarak ekleyin
-# [username] kısmını GitHub kullanıcı adınızla değiştirin
-git remote add origin https://github.com/[username]/BMC-MAINVIEW-PROJECT.git
-
-# Veya SSH kullanıyorsanız:
-# git remote add origin git@github.com:[username]/BMC-MAINVIEW-PROJECT.git
+# GitHub repository'nizi remote olarak ekleyin (✅ TAMAMLANDI)
+git remote add origin https://github.com/leviyosasan/mainframe-monitoring-project.git
 
 # Remote bağlantısını kontrol edin
 git remote -v
@@ -66,8 +62,8 @@ git push -u origin develop
 2. Davet linkine tıklayın ve kabul edin
 3. Projeyi klonlayın:
 ```bash
-git clone https://github.com/[username]/BMC-MAINVIEW-PROJECT.git
-cd BMC-MAINVIEW-PROJECT
+git clone https://github.com/leviyosasan/mainframe-monitoring-project.git
+cd mainframe-monitoring-project
 git checkout develop
 ```
 

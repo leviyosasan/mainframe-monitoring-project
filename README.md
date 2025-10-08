@@ -17,10 +17,10 @@ Bu proje BMC MainView ile ilgili geliştirmeler için oluşturulmuş ortak çal�
 ### Kurulum
 ```bash
 # Projeyi klonlayın
-git clone [repository-url]
+git clone https://github.com/leviyosasan/mainframe-monitoring-project.git
 
 # Proje dizinine gidin
-cd "BMC MAINVIEW PROJECT"
+cd mainframe-monitoring-project
 
 # Gerekli bağımlılıkları yükleyin
 # [Kurulum adımlarını buraya ekleyin]
