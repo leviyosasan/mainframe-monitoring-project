@@ -72,4 +72,3 @@ cd mainframe-monitoring-project
 
 ## 📄 Lisans
 [Lisans bilgisi]
-
