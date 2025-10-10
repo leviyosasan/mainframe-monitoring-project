@@ -31,7 +31,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('RMF_ASRM/rmf_asrm.log', encoding='utf-8'),
+        logging.FileHandler('mainframe-monitoring-project/rmf_asrm.log', encoding='utf-8'),
         logging.StreamHandler()
     ]
 )
