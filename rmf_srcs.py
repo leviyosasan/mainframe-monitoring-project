@@ -22,7 +22,7 @@ POSTGRES_CONFIG = {
 }
 
 # Log Dosyası İsimleri
-JSON_LOG_FILE_SRCS = "rmf_srcs_log.json"
+JSON_LOG_FILE_SRCS = "mainframe-monitoring-project/rmf_srcs_log.json"
 
 # -------------------
 # Logging konfigürasyonu
