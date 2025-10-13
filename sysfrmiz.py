@@ -14,7 +14,7 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S"
 )
 
-# --- CONFIGURATION (Please verify your actual DB and API details) ---
+# --- CONFIGURATION ---
 CONFIG = {
     'database': {
         'host': "192.168.60.145",
@@ -35,10 +35,11 @@ CONFIG = {
     }
 }
 
-TABLE_NAME = "mainview_sysfrmiz"
-MONITOR_INTERVAL_SECONDS = 60 # Monitoring cycle interval
+# --- TABLO ADI GÜNCELLENDİ ---
+TABLE_NAME = "mainview_storage_sysfrmiz"
+MONITOR_INTERVAL_SECONDS = 60 
 
-# --- STATIC URLs (Constructed from CONFIG without f-strings) ---
+# --- STATIC URLs ---
 LOGON_URL = CONFIG['api']['protocol'] + "://" + CONFIG['api']['address'] + ":" + str(CONFIG['api']['port']) + "/cra/serviceGateway/services/" + CONFIG['api']['system'] + "/logon"
 DATA_URL = CONFIG['api']['protocol'] + "://" + CONFIG['api']['address'] + ":" + str(CONFIG['api']['port']) + "/cra/serviceGateway/services/" + CONFIG['api']['system'] + "/products/" + CONFIG['api']['products'] + "/views/" + CONFIG['api']['views'] + "/data"
 
@@ -58,13 +59,12 @@ def get_db_connection():
         return None
 
 def create_table_if_not_exists():
-    """Checks for and creates the required table (mainview_sysfrmiz) if it does not exist."""
+    """Checks for and creates the required table (mainview_storage_sysfrmiz) if it does not exist."""
     conn = get_db_connection()
     if not conn: return False
     
     try:
         with conn.cursor() as cur:
-            # Table schema based on Word doc analysis (BIGINT for counts, NUMERIC for percentages)
             create_query = sql.SQL("""
                 CREATE TABLE IF NOT EXISTS {table_name} (
                     id SERIAL PRIMARY KEY,
@@ -165,10 +165,8 @@ def safe_numeric_convert(value, is_integer=False):
     try:
         dec_val = Decimal(str(value).strip())
         if is_integer:
-            # Convert to int for BIGINT columns
             return int(dec_val.to_integral_value())
         else:
-            # Keep as Decimal for NUMERIC columns
             return dec_val
     except Exception as e:
         logging.warning(f"⚠️ Data conversion error: Could not convert '{value}' to number.")
@@ -281,7 +279,7 @@ def main():
                 if not get_token():
                     logging.error("Fatal: Re-authentication failed. Program terminating.")
                     return
-                sysfrmiz_data = fetch_sysfrmiz_data() # Retry with new token
+                sysfrmiz_data = fetch_sysfrmiz_data() 
             
             # Save data if fetch was successful
             if sysfrmiz_data:
