@@ -1,4 +1,4 @@
-#TRX,ASRM,SRSC python dosyalarının BİRLEŞMİŞ halidir.
+# Combined version of TRX, ASRM, SRCS Python files.
 
 import psycopg2
 import requests
@@ -9,11 +9,11 @@ import urllib3
 import json
 import os
 
-# SSL uyarılarını kapat
+# Disable SSL warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # -------------------
-# Global Sabitler ve PostgreSQL bağlantı ayarları
+# Global Constants and PostgreSQL Connection Settings
 # -------------------
 POSTGRES_CONFIG = {
     'host': '192.168.60.145',
@@ -26,7 +26,7 @@ POSTGRES_CONFIG = {
 logger = logging.getLogger(__name__)
 
 # -------------------
-# API URL'leri
+# API URLs
 # -------------------
 logon_url = "http://192.168.60.20:15565/cra/serviceGateway/services/MVERESTAPI_VBT1_3940/logon"
 trx_url = "http://192.168.60.20:15565/cra/serviceGateway/services/MVERESTAPI_VBT1_3940/products/MVMVS/views/TRX/data"
@@ -37,17 +37,17 @@ api_token = None
 token_expiry_time = None
 
 # -------------------
-# Ortak Yardımcı Fonksiyonlar
+# Common Helper Functions
 # -------------------
-def get_postgres_connection(): #PostgreSQL bağlantısı oluşturur
+def get_postgres_connection(): # Creates PostgreSQL connection
     try:
         connection = psycopg2.connect(**POSTGRES_CONFIG)
         return connection
     except Exception as e:
-        logger.error(f"PostgreSQL bağlantı hatası: {e}")
+        logger.error(f"PostgreSQL connection error: {e}")
         return None
 
-def execute_query(query, params=None): #Verilen sorguyu çalıştırır
+def execute_query(query, params=None): # Executes the given query
     connection = None
     try:
         connection = get_postgres_connection()
@@ -62,13 +62,13 @@ def execute_query(query, params=None): #Verilen sorguyu çalıştırır
         cursor.close()
         return True
     except Exception as e:
-        logger.error(f"Query hatası: {e}")
+        logger.error(f"Query error: {e}")
         return False
     finally:
         if connection:
             connection.close()
 
-def get_token(): #Token alınıyor
+def get_token(): # Gets token
     global api_token, token_expiry_time
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     data = {"username": "VOBA", "password": "OZAN1238"}
@@ -80,15 +80,15 @@ def get_token(): #Token alınıyor
             if new_token:
                 api_token = new_token
                 token_expiry_time = datetime.now(timezone.utc) + timedelta(minutes=15)
-                print(f"✅ API Token başarıyla alındı ve kaydedildi")
+                print(f"✅ API Token successfully obtained and saved")
                 return api_token
-        print(f"❌ Token alınamadı! HTTP Durum Kodu: {response.status_code}")
+        print(f"❌ Token could not be obtained! HTTP Status Code: {response.status_code}")
         return None
     except requests.exceptions.RequestException as e:
-        print(f"❌ API Bağlantı Hatası: {e}")
+        print(f"❌ API Connection Error: {e}")
         return None
 
-def get_common_headers_and_params(): #Token ile birlikte headers ve params oluşturur
+def get_common_headers_and_params(): # Creates headers and params with token
     headers = {'Authorization': f'Bearer {api_token}'}
     params = {
         'context': 'ALL',
@@ -99,34 +99,34 @@ def get_common_headers_and_params(): #Token ile birlikte headers ve params oluş
     }
     return headers, params
 
-def check_and_refresh_token(): #Token süresi dolduysa yenileniyor
+def check_and_refresh_token(): # Refreshes token if expired
     global api_token, token_expiry_time
     if api_token is None or token_expiry_time is None or datetime.now(timezone.utc) >= token_expiry_time:
-        print("🔄 Token süresi dolmuş, yeni token alınıyor...")
+        print("🔄 Token expired, getting new token...")
         return get_token()
     return api_token
 
-def extract_numeric_from_api_list(raw_list): #Bu fonksiyon, listenin içindeki tek sayısal değeri (string veya dict içinde olabilir) float'a dönüştürür.
-    # Bu fonksiyon, listenin içindeki tek sayısal değeri (string veya dict içinde olabilir) float'a dönüştürür.
+def extract_numeric_from_api_list(raw_list): # This function converts the single numeric value in the list (which may be in string or dict format) to float.
+    # This function converts the single numeric value in the list (which may be in string or dict format) to float.
     if not isinstance(raw_list, list) or not raw_list:
         return 0.0
     first_item = raw_list[0]
     if isinstance(first_item, dict):
         try:
-            # Sözlükten ilk değeri (value) almayı dener
+            # Tries to get the first value from the dictionary
             value_str = next(iter(first_item.values())) 
             return float(value_str)
         except (StopIteration, ValueError, TypeError):
             return 0.0
     try:
-        # Doğrudan dize veya sayı ise dönüştürür
+        # Converts if it's a direct string or number
         return float(first_item)
     except (ValueError, TypeError):
         return 0.0
 
-def execute_many(query, data_list):#Verilen sorguyu kullanarak birden fazla veriyi tek seferde veritabanına ekler
+def execute_many(query, data_list): # Adds multiple data to database at once using the given query
     if not data_list:
-        print("⚠️  UYARI: Toplu veri ekleme için veri bulunamadı!")
+        print("⚠️  WARNING: No data found for batch insert!")
         return False
         
     connection = None
@@ -139,10 +139,10 @@ def execute_many(query, data_list):#Verilen sorguyu kullanarak birden fazla veri
         cursor.executemany(query, data_list)
         connection.commit()
         cursor.close()
-        logger.info(f"Toplam {len(data_list)} adet veri başarıyla veritabanına eklendi.")
+        logger.info(f"Total {len(data_list)} records successfully added to database.")
         return True
     except Exception as e:
-        logger.error(f"Toplu ekleme (executemany) hatası: {e}")
+        logger.error(f"Batch insert (executemany) error: {e}")
         if connection:
             connection.rollback()
         return False
@@ -151,10 +151,10 @@ def execute_many(query, data_list):#Verilen sorguyu kullanarak birden fazla veri
             connection.close()
 
 # -------------------
-# Tablo Oluşturma
+# Table Creation
 # -------------------
 
-def trx_create_table(): #TRX tablosu oluşturur
+def trx_create_table(): # Creates TRX table
     query = """
         CREATE TABLE IF NOT EXISTS mainview_rmf_trx (
             id SERIAL PRIMARY KEY,
@@ -169,11 +169,11 @@ def trx_create_table(): #TRX tablosu oluşturur
         )
     """
     if execute_query(query):
-        print("✅ TRX tablosu (mainview_rmf_trx) başarıyla oluşturuldu/hazır")
+        print("✅ TRX table (mainview_rmf_trx) successfully created/ready")
     else:
-        print("❌ TRX tablosu oluşturulamadı! Veritabanı bağlantısını kontrol edin")
+        print("❌ TRX table could not be created! Check database connection")
 
-def asrm_create_table(): #ASRM tablosu oluşturur
+def asrm_create_table(): # Creates ASRM table
     create_query = """
     CREATE TABLE IF NOT EXISTS mainview_rmf_asrm (
         id SERIAL PRIMARY KEY,
@@ -194,11 +194,11 @@ def asrm_create_table(): #ASRM tablosu oluşturur
     );
     """
     if execute_query(create_query):
-        print("✅ ASRM tablosu (mainview_rmf_asrm) başarıyla oluşturuldu/hazır")
+        print("✅ ASRM table (mainview_rmf_asrm) successfully created/ready")
     else:
-        print("❌ ASRM tablosu oluşturulamadı! Veritabanı bağlantısını kontrol edin")
+        print("❌ ASRM table could not be created! Check database connection")
 
-def srcs_create_table(): #SRCS tablosu oluşturur
+def srcs_create_table(): # Creates SRCS table
     query = """
         CREATE TABLE IF NOT EXISTS mainview_rmf_srcs (
             id SERIAL PRIMARY KEY,
@@ -221,34 +221,34 @@ def srcs_create_table(): #SRCS tablosu oluşturur
         )
     """
     if execute_query(query):
-        print("✅ SRCS tablosu (mainview_rmf_srcs) başarıyla oluşturuldu/hazır")
+        print("✅ SRCS table (mainview_rmf_srcs) successfully created/ready")
     else:
-        print("❌ SRCS tablosu oluşturulamadı! Veritabanı bağlantısını kontrol edin")
+        print("❌ SRCS table could not be created! Check database connection")
 
 
 # -------------------
-# DB'ye Yazma Fonksiyonları
+# Database Write Functions
 # -------------------
 
-def trx_process_row(rows): #TRX API yanıtını çeker ve veritabanına yazar
+def trx_process_row(rows): # Fetches TRX API response and writes to database
     if not isinstance(rows, list):
-        print("⚠️  TRX API UYARISI: Beklenmedik veri formatı - satırlar liste formatında değil!")
+        print("⚠️  TRX API WARNING: Unexpected data format - rows are not in list format!")
         return
 
     for row in rows:
         bmctime = datetime.now(timezone.utc)
         time_t = datetime.now().replace(tzinfo=None, microsecond=0)
 
-        # String alanlar
+        # String fields
         mxgcnm_value = str(row.get("MXGCNM", ""))
         mxgcpn_value = str(row.get("MXGCPN", ""))
         mxgtypc_value = str(row.get("MXGTYPC", ""))
         
-        # Float alanlar
+        # Float fields
         mxiasac_value = float(row.get("MXIASAC", 0))
         mxixavg_value = extract_numeric_from_api_list(row.get("MXIXAVG", []))
         
-        # Integer alanlar
+        # Integer fields
         mxircp_value = int(float(row.get("MXIRCP", 0)))
 
         query = """
@@ -262,22 +262,22 @@ def trx_process_row(rows): #TRX API yanıtını çeker ve veritabanına yazar
         )
 
         if execute_query(query, trx_params):
-            print(f"✅ TRX verisi başarıyla veritabanına eklendi (UTC: {bmctime.strftime('%H:%M:%S')})")
+            print(f"✅ TRX data successfully added to database (UTC: {bmctime.strftime('%H:%M:%S')})")
         else:
-            print("❌ TRX verisi veritabanına eklenemedi! Veritabanı bağlantısını kontrol edin")
+            print("❌ TRX data could not be added to database! Check database connection")
 
-def srcs_process_row(rows): #SRCS API yanıtını çeker ve veritabanına yazar
+def srcs_process_row(rows): # Fetches SRCS API response and writes to database
     if not isinstance(rows, list):
-        print("⚠️  SRCS API UYARISI: Beklenmedik veri formatı - satırlar liste formatında değil!")
+        print("⚠️  SRCS API WARNING: Unexpected data format - rows are not in list format!")
         return
 
     for row in rows:
         bmctime = datetime.now(timezone.utc)
         time_t = datetime.now().replace(tzinfo=None, microsecond=0)
 
-        # BIGINT alanları - ondalık kısmı kaldırılarak tamsayıya dönüştürülüyor
+        # BIGINT fields - converted to integer by removing decimal part
         splafcav_value = int(float(row.get("SPLAFCAV", 0)))
-        # INTEGER alanları
+        # INTEGER fields
         spluicav_value = int(float(row.get("SPLUICAV", 0)))
         splstfav_value = int(float(row.get("SPLSTFAV", 0)))
         spllpfav_value = int(float(row.get("SPLLPFAV", 0)))
@@ -289,7 +289,7 @@ def srcs_process_row(rows): #SRCS API yanıtını çeker ve veritabanına yazar
         splqpeav_value = int(float(row.get("SPLQPEAV", 0)))
         sclotrav_value = int(float(row.get("SCLOTRAV", 0)))
         sclotwav_value = int(float(row.get("SCLOTWAV", 0)))
-        # FLOAT alanları
+        # FLOAT fields
         sclinav_value = float(row.get("SCLINAV", 0))
         scllotav_value = float(row.get("SCLLOTAV", 0))
 
@@ -306,13 +306,13 @@ def srcs_process_row(rows): #SRCS API yanıtını çeker ve veritabanına yazar
         )
 
         if execute_query(insert_query, srcs_params):
-            print(f"✅ SRCS verisi başarıyla veritabanına eklendi (UTC: {bmctime.strftime('%H:%M:%S')})")
+            print(f"✅ SRCS data successfully added to database (UTC: {bmctime.strftime('%H:%M:%S')})")
         else:
-            print("❌ SRCS verisi veritabanına eklenemedi! Veritabanı bağlantısını kontrol edin")
+            print("❌ SRCS data could not be added to database! Check database connection")
 
-def asrm_process_row(rows): #ASRM API yanıtını çeker ve veritabanına yazar #MANY QUERY
+def asrm_process_row(rows): # Fetches ASRM API response and writes to database #MANY QUERY
     if not isinstance(rows, list):
-        logger.warning("Beklenmedik API formatı: Rows bir liste değil.")
+        logger.warning("Unexpected API format: Rows is not a list.")
         return False
 
     data_list = []
@@ -351,7 +351,7 @@ def asrm_process_row(rows): #ASRM API yanıtını çeker ve veritabanına yazar 
         ))
 
     if not data_list:
-        logger.warning("⚠️  ASRM: Eklenecek veri bulunamadı - API boş yanıt döndürdü")
+        logger.warning("⚠️  ASRM: No data to add - API returned empty response")
         return False
 
     query = """
@@ -363,28 +363,28 @@ def asrm_process_row(rows): #ASRM API yanıtını çeker ve veritabanına yazar 
     success = execute_many(query, data_list)
     if success:
         current_time = datetime.now(timezone.utc)
-        print(f"✅ ASRM verisi başarıyla veritabanına eklendi (UTC: {current_time.strftime('%H:%M:%S')}) - {len(data_list)} kayıt")
+        print(f"✅ ASRM data successfully added to database (UTC: {current_time.strftime('%H:%M:%S')}) - {len(data_list)} records")
     else:
-        print("❌ ASRM verisi veritabanına eklenemedi! Veritabanı bağlantısını kontrol edin")
+        print("❌ ASRM data could not be added to database! Check database connection")
     return success
 
 # -------------------
-# Veri Çekme Fonksiyonları
+# Data Fetching Functions
 # ------------------
 
-def trx_display(): #TRX API yanıtını çeker
+def trx_display(): # Fetches TRX API response
     global api_token
     check_and_refresh_token()
     headers,params = get_common_headers_and_params()
     response = requests.get(trx_url,params=params,headers=headers, verify=False)
     if response.status_code == 401:
-        logger.warning("TRX DB: 401 hatası. Token yenilenip tekrar deneniyor.")
+        logger.warning("TRX DB: 401 error. Token being refreshed and retrying.")
         api_token = get_token()
         if api_token:
             headers = {'Authorization': f'Bearer {api_token}'}
             response = requests.get(trx_url, params=params, headers=headers, verify=False)
         else:
-            logger.error("Token yenilenemedi. TRX DB kaydı atlanıyor.")
+            logger.error("Token could not be refreshed. TRX DB record being skipped.")
             return
     if response.status_code == 200:
         data = response.json()
@@ -392,23 +392,23 @@ def trx_display(): #TRX API yanıtını çeker
         if rows:
             trx_process_row(rows)
         else:
-            print("⚠️  TRX API'den veri gelmedi - API boş yanıt döndürdü")
+            print("⚠️  TRX API returned no data - API returned empty response")
     else:
-        print(f"❌ TRX API Hatası: HTTP {response.status_code} - API erişimi başarısız")
+        print(f"❌ TRX API Error: HTTP {response.status_code} - API access failed")
 
-def srcs_display(): #SRCS API yanıtını çeker
+def srcs_display(): # Fetches SRCS API response
     global api_token
     check_and_refresh_token()
     headers, params = get_common_headers_and_params()
     response = requests.get(srcs_url, params=params, headers=headers, verify=False)
     if response.status_code == 401:
-        logger.warning("SRCS DB: 401 hatası. Token yenilenip tekrar deneniyor.")
+        logger.warning("SRCS DB: 401 error. Token being refreshed and retrying.")
         api_token = get_token()
         if api_token:
             headers = {'Authorization': f'Bearer {api_token}'}
             response = requests.get(srcs_url, params=params, headers=headers, verify=False)
         else:
-            logger.error("Token yenilenemedi. SRCS DB kaydı atlanıyor.")
+            logger.error("Token could not be refreshed. SRCS DB record being skipped.")
             return
     if response.status_code == 200:
         data = response.json()
@@ -416,23 +416,23 @@ def srcs_display(): #SRCS API yanıtını çeker
         if rows:
             srcs_process_row(rows)
         else:
-            print("⚠️  SRCS API'den veri gelmedi - API boş yanıt döndürdü")
+            print("⚠️  SRCS API returned no data - API returned empty response")
     else:
-        print(f"❌ SRCS API Hatası: HTTP {response.status_code} - API erişimi başarısız")
+        print(f"❌ SRCS API Error: HTTP {response.status_code} - API access failed")
 
-def asrm_display(): #ASRM API yanıtını çeker
+def asrm_display(): # Fetches ASRM API response
     global api_token
     check_and_refresh_token()
     headers,params = get_common_headers_and_params()
     response = requests.get(asrm_url,params=params,headers=headers, verify=False)
     if response.status_code == 401:
-        logger.warning("ASMR DB: 401 hatası. Token yenilenip tekrar deneniyor.")
+        logger.warning("ASRM DB: 401 error. Token being refreshed and retrying.")
         api_token = get_token()
         if api_token:
             headers = {'Authorization': f'Bearer {api_token}'}
             response = requests.get(asrm_url, params=params, headers=headers, verify=False)
         else:
-            logger.error("Token yenilenemedi. ASMR DB kaydı atlanıyor.")
+            logger.error("Token could not be refreshed. ASRM DB record being skipped.")
             return
     if response.status_code == 200:
         data = response.json()
@@ -440,9 +440,9 @@ def asrm_display(): #ASRM API yanıtını çeker
         if rows:
             asrm_process_row(rows)
         else:
-            print("⚠️  ASRM API'den veri gelmedi - API boş yanıt döndürdü")
+            print("⚠️  ASRM API returned no data - API returned empty response")
     else:
-        print(f"❌ ASRM API Hatası: HTTP {response.status_code} - API erişimi başarısız")
+        print(f"❌ ASRM API Error: HTTP {response.status_code} - API access failed")
 
 
 def main():
@@ -451,13 +451,13 @@ def main():
     srcs_create_table()
     api_token = get_token()
     if not api_token:
-        logger.error("Token alınamadı. Program sonlandırılıyor.")
+        logger.error("Token could not be obtained. Terminating program.")
         return
     while True:
         trx_display()
         asrm_display()
         srcs_display()
-        print("📊 Tüm API'lerden veri toplandı. Sonraki veri toplama için 60 saniye bekleniyor...")
+        print("📊 Data collected from all APIs. Waiting 60 seconds for next data collection...")
         time.sleep(60)
 
 if __name__ == "__main__":
