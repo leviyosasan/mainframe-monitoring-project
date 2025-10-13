@@ -6,8 +6,9 @@ import urllib3
 import psycopg2
 from psycopg2 import sql
 import datetime
+from decimal import Decimal
 
-# SSL uyarılarını kapatır
+# Suppresses SSL warnings related to 'verify=False' in requests
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # === CONFIGURATION ===
@@ -32,10 +33,13 @@ CONFIG = {
 }
 
 TABLE_NAME = "mainview_mvs_jespool"
+MONITOR_INTERVAL_SECONDS = 60 
+
+# --- STATIC URLS ---
 LOGON_URL = "http://192.168.60.20:15565/cra/serviceGateway/services/MVERESTAPI_VBT1_3940/logon"
 JESPOOL_URL = "http://192.168.60.20:15565/cra/serviceGateway/services/MVERESTAPI_VBT1_3940/products/MVMVS/views/JESPOOL/data"
 
-# Global Değişkenler
+# Global Variables
 API_TOKEN = None
 MAX_ERRORS = 5
 ERROR_COUNT = 0
@@ -50,7 +54,7 @@ logging.basicConfig(
 # --- UTILITY FUNCTIONS ---
 
 def get_db_connection():
-    """Establishes a PostgreSQL connection"""
+    """Establishes a PostgreSQL connection."""
     try:
         return psycopg2.connect(**CONFIG['database'])
     except Exception as e:
@@ -60,13 +64,66 @@ def get_db_connection():
 def get_current_time():
     """Returns the current system time, adjusted by -3 hours, without microseconds."""
     current_dt = datetime.datetime.now()
+    # Note: Adjusting for potential time zone differences relative to the mainframe.
     adjusted_dt = current_dt.replace(microsecond=0) - datetime.timedelta(hours=3)
     return adjusted_dt
+
+def safe_numeric_convert(value):
+    """Cleans and converts the API string data to a Decimal for saving as NUMERIC."""
+    if value is None or str(value).strip() == '':
+        return None
+    try:
+        # Clean up common non-numeric characters (comma for decimal, percentage sign)
+        cleaned_value = str(value).replace(',', '.').replace('%', '').strip()
+        # Use Decimal for accurate storage in PostgreSQL NUMERIC types
+        return Decimal(cleaned_value)
+    except Exception:
+        return None
+        
+def create_table_if_not_exists():
+    """Checks for and creates the required JESPOOL table if it does not exist."""
+    conn = get_db_connection()
+    if not conn: return False
+    
+    try:
+        with conn.cursor() as cur:
+            # Table schema based on JESPOOL data types.
+            create_query = sql.SQL("""
+                CREATE TABLE IF NOT EXISTS {table_name} (
+                    id SERIAL PRIMARY KEY,
+                    bmctime TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+                    time TIME WITHOUT TIME ZONE,
+                    smf_id VARCHAR(8),
+                    total_volumes SMALLINT,
+                    spool_util NUMERIC(6, 2),
+                    total_tracks BIGINT,
+                    used_tracks BIGINT,
+                    active_spool_util NUMERIC(6, 2),
+                    total_active_tracks BIGINT,
+                    used_active_tracks BIGINT,
+                    active_volumes SMALLINT,
+                    volume VARCHAR(8),
+                    status VARCHAR(10),
+                    volume_util NUMERIC(6, 2),
+                    volume_tracks BIGINT,
+                    volume_used BIGINT,
+                    other_volumes SMALLINT
+                );
+            """).format(table_name=sql.Identifier(TABLE_NAME))
+            cur.execute(create_query)
+            conn.commit()
+        logging.info(f"✅ Table '{TABLE_NAME}' checked/created.")
+        return True
+    except Exception as e:
+        logging.error(f"❌ Table creation error: {e}")
+        return False
+    finally:
+        if conn: conn.close()
 
 # --- API FUNCTIONS ---
 
 def get_token():
-    """Fetches the API token and updates the global API_TOKEN"""
+    """Fetches the API token and updates the global API_TOKEN."""
     global API_TOKEN
     logging.info("Fetching token...")
     
@@ -90,11 +147,12 @@ def get_token():
         return False
 
 def fetch_data():
-    """Fetches JESPool data using the global API_TOKEN"""
+    """Fetches JESPool data using the global API_TOKEN."""
     global API_TOKEN
     
-    if not API_TOKEN and not get_token():
-        return None
+    if not API_TOKEN:
+        if not get_token():
+            return None
 
     headers = {'Authorization': f'Bearer {API_TOKEN}'}
 
@@ -107,7 +165,12 @@ def fetch_data():
         elif response.status_code == 401:
             logging.warning("🔑 Token expired, refreshing...")
             API_TOKEN = None
-            return fetch_data()  # Yeniden kimlik doğrulama sonrası tekrar dene
+            if get_token():
+                # Retry after successful token refresh
+                return fetch_data() 
+            else:
+                logging.error("❌ Token refresh failed.")
+                return None
         else:
             logging.error(f"❌ API error: HTTP {response.status_code}")
             return None
@@ -119,7 +182,7 @@ def fetch_data():
 # --- DATA PROCESSING & DB OPERATIONS ---
 
 def process_data(api_data):
-    """Processes API data for database insertion"""
+    """Processes API data for database insertion."""
     if not api_data or 'Rows' not in api_data:
         logging.warning("⚠️ 'Rows' not found in API data")
         return None
@@ -129,38 +192,38 @@ def process_data(api_data):
         logging.info("ℹ️ No new data found in API response")
         return None
 
-    # Düzeltilmiş zamanı al
+    # Get system time for DB timestamp (adjusted)
     bmctime = get_current_time()
     time_only = bmctime.time()
     
-    logging.info(f"🕐 BMC Time (ADJUSTED): {bmctime}, Time Only: {time_only}")
-
     processed_data = []
+    
+    # Extract, convert, and prepare data for bulk insertion
     for row in rows:
         processed_data.append({
             'utc_time': bmctime,
             'local_time': time_only,
             'smf_id': row.get('SCGID', ''),
-            'total_volumes': row.get('SCIJ2VOL', ''),
-            'spool_util': row.get('SCIUTI', ''),
-            'total_tracks': row.get('SCITKT', ''),
-            'used_tracks': row.get('SCITKTU', ''),
-            'active_spool_util': row.get('SCIAUTI', ''),
-            'total_active_tracks': row.get('SCIATKT', ''),
-            'used_active_tracks': row.get('SCIATKTU', ''),
-            'active_volumes': row.get('SCIJ2ACT', ''),
+            'total_volumes': safe_numeric_convert(row.get('SCIJ2VOL', '')),
+            'spool_util': safe_numeric_convert(row.get('SCIUTI', '')),
+            'total_tracks': safe_numeric_convert(row.get('SCITKT', '')),
+            'used_tracks': safe_numeric_convert(row.get('SCITKTU', '')),
+            'active_spool_util': safe_numeric_convert(row.get('SCIAUTI', '')),
+            'total_active_tracks': safe_numeric_convert(row.get('SCIATKT', '')),
+            'used_active_tracks': safe_numeric_convert(row.get('SCIATKTU', '')),
+            'active_volumes': safe_numeric_convert(row.get('SCIJ2ACT', '')),
             'volume': row.get('SCIVOL1', ''),
             'status': row.get('SCISTS1', ''),
-            'volume_util': row.get('SCIUTI1', ''),
-            'volume_tracks': row.get('SCITKT1', ''),
-            'volume_used': row.get('SCITKTU1', ''),
-            'other_volumes': row.get('SCIJ2OTH', '')
+            'volume_util': safe_numeric_convert(row.get('SCIUTI1', '')),
+            'volume_tracks': safe_numeric_convert(row.get('SCITKT1', '')),
+            'volume_used': safe_numeric_convert(row.get('SCITKTU1', '')),
+            'other_volumes': safe_numeric_convert(row.get('SCIJ2OTH', ''))
         })
 
     return processed_data
 
 def save_to_db(processed_data):
-    """Saves data to the database"""
+    """Saves data to the database using bulk insert."""
     global ERROR_COUNT
     if not processed_data:
         return False
@@ -174,14 +237,14 @@ def save_to_db(processed_data):
             records_added = 0
             
             for record in processed_data:
-                # Check if the record already exists (minute-based check)
+                # Duplication Check: Checks if a record already exists for this exact time and ID
                 cur.execute(sql.SQL("""
                     SELECT id FROM {table_name}
                     WHERE bmctime = %s AND smf_id = %s
                 """).format(table_name=sql.Identifier(TABLE_NAME)), (record['utc_time'], record['smf_id']))
                 
                 if cur.fetchone():
-                    continue
+                    continue 
                 
                 # Insert new record
                 cur.execute(sql.SQL("""
@@ -218,7 +281,7 @@ def save_to_db(processed_data):
             if records_added > 0:
                 logging.info(f"✅ {records_added} new record(s) added")
             else:
-                logging.info("ℹ️ No new records found")
+                logging.info("ℹ️ No new records added (Duplicate or empty)")
             
             return True
             
@@ -229,7 +292,7 @@ def save_to_db(processed_data):
         if conn: conn.close()
 
 def show_recent_records():
-    """Displays recent records from the database"""
+    """Displays recent records from the database for immediate verification."""
     conn = get_db_connection()
     if not conn:
         return
@@ -238,16 +301,16 @@ def show_recent_records():
         with conn.cursor() as cur:
             cur.execute(sql.SQL("""
                 SELECT id,
-                       TO_CHAR(bmctime, 'YYYY-MM-DD HH24:MI:SS') as bmc_time,
-                       time as time_only,
-                       spool_util, used_tracks, total_tracks, active_volumes
+                        TO_CHAR(bmctime, 'YYYY-MM-DD HH24:MI:SS') as bmc_time,
+                        time as time_only,
+                        spool_util, used_tracks, total_tracks, active_volumes
                 FROM {table_name}
                 ORDER BY bmctime DESC LIMIT 5
             """).format(table_name=sql.Identifier(TABLE_NAME)))
             
             logging.info("📊 LAST 5 RECORDS:")
             for record in cur.fetchall():
-                logging.info(f"  {record[0]:3} | {record[1]} | Time:{record[2]} | Util:%{record[3]:>5} | Used:{record[4]:>7} | Total:{record[5]:>8} | Active:{record[6]}")
+                logging.info(f"  {record[0]:3} | {record[1]} | Time:{record[2]} | Util:%{record[3]:>5} | Used:{record[4]:>7} | Total:{record[5]:>8} | Active:{record[6]}")
                 
     except Exception as e:
         logging.error(f"❌ Record read error: {e}")
@@ -257,11 +320,16 @@ def show_recent_records():
 # --- MAIN EXECUTION ---
 
 def run_monitor():
-    """Main execution loop"""
+    """Main execution loop for continuous monitoring."""
     global API_TOKEN, ERROR_COUNT
-    logging.info("🚀 JESPOOL monitoring started")
-    logging.info("💡 NOTE: Timestamp is taken from system time and ADJUSTED by -3 hours.")
+    logging.info("🚀 JESPOOL Monitoring Service Started")
 
+    # Critical Step 1: Ensure the database table exists
+    if not create_table_if_not_exists():
+        logging.error("❌ Fatal: Database table creation failed. Exiting.")
+        return
+
+    # Critical Step 2: Get the initial token
     if not get_token():
         logging.error("❌ Fatal: Initial token retrieval failed. Exiting.")
         return
@@ -281,28 +349,29 @@ def run_monitor():
                     else:
                         ERROR_COUNT += 1
                 else:
-                    # API'den veri geldi (200 OK) ama "Rows" boştu
+                    # API returned data (200 OK) but no rows were processed (e.g., duplicate data or empty payload)
                     ERROR_COUNT = 0
             else:
-                # API çağrısı başarısız oldu
+                # API call failed (logged in fetch_data)
                 ERROR_COUNT += 1
             
-            # 🛑 BU LOG SATIRI KALDIRILDI 🛑
-            # logging.warning(f"⚠️ Current error count: {ERROR_COUNT}/{MAX_ERRORS}")
+            if ERROR_COUNT >= MAX_ERRORS:
+                logging.error("🔴 Maximum error count reached. Monitoring stopped.")
+                break
 
-            logging.info("⏳ Waiting for 60 seconds...")
-            time.sleep(60)
+            logging.info(f"⏳ Waiting for {MONITOR_INTERVAL_SECONDS} seconds...")
+            time.sleep(MONITOR_INTERVAL_SECONDS)
             
         except KeyboardInterrupt:
-            logging.info("🛑 Stopped by user")
+            logging.info("🛑 Monitoring stopped by user.")
             break
         except Exception as e:
-            logging.error(f"❌ Unexpected error: {e}")
+            logging.error(f"❌ Unexpected error during cycle: {e}")
             ERROR_COUNT += 1
             time.sleep(30)
 
     if ERROR_COUNT >= MAX_ERRORS:
-        logging.error("🔴 Maximum error count reached. Monitoring stopped.")
+        logging.error("🔴 Monitoring terminated due to critical errors.")
 
 if __name__ == "__main__":
     run_monitor()
