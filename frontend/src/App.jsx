@@ -11,6 +11,8 @@ import StoragePage from './pages/Systems/StoragePage'
 import USSPage from './pages/Systems/USSPage'
 import RMFPage from './pages/Systems/RMFPage'
 import PostgreSQLPage from './pages/Systems/PostgreSQLPage'
+import AlertsPage from './pages/Alerts/AlertsPage'
+import SMTPPage from './pages/SMTP/SMTPPage'
 
 function App() {
   return (
@@ -28,6 +30,8 @@ function App() {
         <Route path="/uss" element={<USSPage />} />
         <Route path="/rmf" element={<RMFPage />} />
         <Route path="/postgresql" element={<PostgreSQLPage />} />
+        <Route path="/smtp" element={<SMTPPage />} />
+        <Route path="/alerts" element={<AlertsPage />} />
         <Route path="*" element={<DashboardPage />} />
       </Route>
     </Routes>

@@ -1,4 +1,4 @@
-import { Home, Activity, Settings, Monitor, Zap, Database, BarChart3, Mail, Globe, HardDrive, Terminal, FileText, Server } from 'lucide-react'
+import { Home, Activity, Settings, Monitor, Zap, Database, BarChart3, Mail, Globe, HardDrive, Terminal, FileText, Server, AlertTriangle, Mailbox } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 const Navbar = () => {
@@ -63,6 +63,40 @@ const Navbar = () => {
           >
             <Server className="w-5 h-5" />
           </NavLink>
+          
+          {/* SMTP */}
+          <NavLink
+            to="/smtp"
+            className={({ isActive }) =>
+              `w-full flex items-center justify-center p-2 rounded-lg transition-all duration-200 ${
+                isActive
+                  ? 'bg-purple-600 text-white'
+                  : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+              }`
+            }
+          >
+            <Mailbox className="w-5 h-5" />
+          </NavLink>
+          
+          {/* Uyarılar */}
+          <NavLink
+            to="/alerts"
+            className={({ isActive }) =>
+              `w-full flex items-center justify-center p-2 rounded-lg transition-all duration-200 relative ${
+                isActive
+                  ? 'bg-red-600 text-white'
+                  : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+              }`
+            }
+          >
+            <AlertTriangle className="w-5 h-5" />
+            {/* Uyarı Badge */}
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+              3
+            </span>
+          </NavLink>
+          
+          {/* Ayarlar */}
           <button className="w-full flex items-center justify-center p-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-all duration-200">
             <Settings className="w-5 h-5" />
           </button>
