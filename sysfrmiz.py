@@ -68,7 +68,7 @@ def create_table_if_not_exists():
             create_query = sql.SQL("""
                 CREATE TABLE IF NOT EXISTS {table_name} (
                     id SERIAL PRIMARY KEY,
-                    spgid VARCHAR(7) NOT NULL,
+                    spgid VARCHAR NOT NULL,
                     spluicav BIGINT,
                     spiuonlf BIGINT,
                     spifinav BIGINT,
