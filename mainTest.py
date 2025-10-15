@@ -164,7 +164,7 @@ def get_token():
     }
     data = {
         "username": "VOBA",
-        "password": "OZAN1238"
+        "password": "OZAN1239"
     }    
     try:
         response = requests.post(logon_url, headers=headers, data=data, verify=False)    
