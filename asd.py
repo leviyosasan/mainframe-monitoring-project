@@ -31,7 +31,7 @@ CONFIG = {
         'products': "MVMVS",
         'views': "ASD", 
         'username': "VOBA",
-        'password': "OZAN1238" 
+        'password': "OZAN1239" 
     }
 }
 
