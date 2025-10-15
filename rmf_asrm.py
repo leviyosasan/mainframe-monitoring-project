@@ -7,6 +7,8 @@ import urllib3
 import json
 import os
 
+#USING MANY QUERY
+
 # Disable SSL warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
