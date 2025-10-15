@@ -42,22 +42,22 @@ def create_asd_table(conn):
             create_query = sql.SQL("""
                 CREATE TABLE IF NOT EXISTS {table_name} (
                     id SERIAL PRIMARY KEY,
-                    jobname VARCHAR(50),
-                    service_class_name VARCHAR(50),
-                    service_class_index VARCHAR(20),
-                    current_location VARCHAR(20),
-                    swap_out_status VARCHAR(5),
-                    dispatching_priority VARCHAR(5),
+                    jobname VARCHAR,
+                    service_class_name VARCHAR,
+                    service_class_index VARCHAR,
+                    current_location VARCHAR,
+                    swap_out_status VARCHAR,
+                    dispatching_priority VARCHAR,
                     central_frame_count INT,
                     expanded_frame_count INT,
-                    srm_storage_target VARCHAR(20),
+                    srm_storage_target VARCHAR,
                     target_working_set INT,
-                    cross_memory_flag VARCHAR(5),
+                    cross_memory_flag VARCHAR,
                     page_in_rate REAL,
                     expanded_page_in_rate REAL,
                     swap_total INT,
-                    wlm_recommendation VARCHAR(20),
-                    recommended_wsm_value VARCHAR(20),
+                    wlm_recommendation VARCHAR,
+                    recommended_wsm_value VARCHAR,
                     record_timestamp TIMESTAMP
                 );
             """).format(table_name=sql.Identifier(TABLE_NAME))
@@ -113,21 +113,21 @@ def create_jespool_table(conn):
                     id SERIAL PRIMARY KEY,
                     bmctime TIMESTAMP,
                     time TIME,
-                    smf_id VARCHAR(10),
-                    total_volumes VARCHAR(10),
-                    spool_util VARCHAR(10),
-                    total_tracks VARCHAR(15),
-                    used_tracks VARCHAR(15),
-                    active_spool_util VARCHAR(10),
-                    total_active_tracks VARCHAR(15),
-                    used_active_tracks VARCHAR(15),
-                    active_volumes VARCHAR(10),
-                    volume VARCHAR(10),
-                    status VARCHAR(20),
-                    volume_util VARCHAR(10),
-                    volume_tracks VARCHAR(15),
-                    volume_used VARCHAR(15),
-                    other_volumes VARCHAR(10)
+                    smf_id VARCHAR,
+                    total_volumes VARCHAR,
+                    spool_util VARCHAR,
+                    total_tracks VARCHAR,
+                    used_tracks VARCHAR,
+                    active_spool_util VARCHAR,
+                    total_active_tracks VARCHAR,
+                    used_active_tracks VARCHAR,
+                    active_volumes VARCHAR,
+                    volume VARCHAR,
+                    status VARCHAR,
+                    volume_util VARCHAR,
+                    volume_tracks VARCHAR,
+                    volume_used VARCHAR,
+                    other_volumes VARCHAR
                 );
             """).format(table_name=sql.Identifier(TABLE_NAME))
             cur.execute(create_query)
@@ -148,12 +148,12 @@ def create_wmsplxz_table(conn):
             create_query = sql.SQL("""
                 CREATE TABLE IF NOT EXISTS {table_name} (
                     id SERIAL PRIMARY KEY,
-                    sysplex_name VARCHAR(50),
-                    system_name VARCHAR(50),
-                    wlm_velocity_flag VARCHAR(20),
+                    sysplex_name VARCHAR,
+                    system_name VARCHAR,
+                    wlm_velocity_flag VARCHAR,
                     performance_index REAL,
                     install_datetime TIMESTAMP,
-                    active_policy VARCHAR(50),
+                    active_policy VARCHAR,
                     activate_datetime TIMESTAMP,
                     record_timestamp TIMESTAMP
                 );

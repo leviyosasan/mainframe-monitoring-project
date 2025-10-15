@@ -93,7 +93,7 @@ def create_table_if_not_exists():
                     id SERIAL PRIMARY KEY,
                     bmctime TIMESTAMP WITHOUT TIME ZONE NOT NULL,
                     time TIME WITHOUT TIME ZONE,
-                    smf_id VARCHAR(8),
+                    smf_id VARCHAR,
                     total_volumes SMALLINT,
                     spool_util NUMERIC(6, 2),
                     total_tracks BIGINT,

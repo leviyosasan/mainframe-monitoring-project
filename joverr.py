@@ -67,12 +67,12 @@ def create_table_if_not_exists():
             create_query = sql.SQL("""
                 CREATE TABLE IF NOT EXISTS {table_name} (
                     id SERIAL PRIMARY KEY,
-                    asgname VARCHAR(50),
-                    asgjid VARCHAR(20),
-                    asgcnmc VARCHAR(50),
+                    asgname VARCHAR,
+                    asgjid VARCHAR,
+                    asgcnmc VARCHAR,
                     asgasid SMALLINT,
-                    asgfl1c VARCHAR(30),
-                    asrepgmn VARCHAR(30),
+                    asgfl1c VARCHAR,
+                    asrepgmn VARCHAR,
                     asgjelt BIGINT,
                     asgjznt TIMESTAMP,
                     asldlyp NUMERIC(7, 3),
