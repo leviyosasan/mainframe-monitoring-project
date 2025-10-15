@@ -27,7 +27,7 @@ CONFIG = {
         'system': "MVERESTAPI_VBT1_3940",
         'views': "JCSA",
         'username': "VOBA",
-        'password': "OZAN1238" 
+        'password': "OZAN1239" 
     }
 }
 
