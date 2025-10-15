@@ -101,12 +101,12 @@ def create_table_if_not_exists(conn):
             create_table_query = sql.SQL("""
                 CREATE TABLE IF NOT EXISTS {table_name} (
                     id SERIAL PRIMARY KEY,
-                    sysplex_name VARCHAR(20),
-                    system_name VARCHAR(20),
-                    wlm_velocity_flag VARCHAR(20),
+                    sysplex_name VARCHAR,
+                    system_name VARCHAR,
+                    wlm_velocity_flag VARCHAR,
                     performance_index NUMERIC,
                     install_datetime TIMESTAMP,
-                    active_policy VARCHAR(20),
+                    active_policy VARCHAR,
                     activate_datetime TIMESTAMP,
                     record_timestamp TIMESTAMP
                 );
