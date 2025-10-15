@@ -60,8 +60,8 @@ def create_table_if_not_exists(conn):
             create_query = sql.SQL("""
                 CREATE TABLE IF NOT EXISTS {table_name} (
                     id SERIAL PRIMARY KEY,
-                    jobname VARCHAR(8),
-                    jes_id VARCHAR(8),
+                    jobname VARCHAR,
+                    jes_id VARCHAR,
                     asid INTEGER,
                     csa_in_use_percent FLOAT,
                     ecsa_in_use_percent FLOAT,
