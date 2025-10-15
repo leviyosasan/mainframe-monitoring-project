@@ -10,10 +10,10 @@ from datetime import datetime, timedelta, timezone
 import pytz
 import urllib3
 
-# SSL uyarılarını kapat
+# Disable SSL warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# ==================== KONFİGÜRASYON ====================
+# ==================== CONFIGURATION ====================
 
 # API Configuration
 logon_url = "http://192.168.60.20:15565/cra/serviceGateway/services/MVERESTAPI_VBT1_3940/logon"
@@ -31,7 +31,7 @@ MAX_ERRORS = 5
 error_count_jespool = 0
 error_count_wmsplxz = 0
 
-# PostgreSQL bağlantı bilgileri
+# PostgreSQL connection information
 POSTGRES_CONFIG = {
     'host': '192.168.60.145',
     'port': 5432,
@@ -41,11 +41,11 @@ POSTGRES_CONFIG = {
     'connect_timeout': 5
 }
 
-# Veritabanı tablo adları
+# Database table names
 TABLE_WMSPLXZ = "mainview_mvs_wmsplxz"
 TABLE_JESPOOL = "mainview_mvs_jespool"
 
-# Logging konfigürasyonu
+# Logging configuration
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -56,7 +56,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ANSI Renk kodları
+# ANSI Color codes
 ANSI_GREEN = "\x1b[32m"
 ANSI_BLUE = "\x1b[34m"
 ANSI_YELLOW = "\x1b[33m"
@@ -64,19 +64,19 @@ ANSI_RED = "\x1b[31m"
 ANSI_WHITE = "\x1b[37m"
 ANSI_RESET = "\x1b[0m"
 
-# ==================== ORTAK FONKSİYONLAR ====================
+# ==================== COMMON FUNCTIONS ====================
 
 def get_postgres_connection():
-    """PostgreSQL bağlantısı oluşturur ve döndürür"""
+    """Creates and returns PostgreSQL connection"""
     try:
         connection = psycopg2.connect(**POSTGRES_CONFIG)
         return connection
     except Exception as e:
-        logger.error(f"PostgreSQL bağlantı hatası: {e}")
+        logger.error(f"PostgreSQL connection error: {e}")
         return None
 
 def execute_query(query, params=None):
-    """SQL query çalıştırır ve sonucu döndürür"""
+    """Executes SQL query and returns result"""
     connection = None
     try:
         connection = get_postgres_connection()
@@ -91,10 +91,10 @@ def execute_query(query, params=None):
         cursor.close()
         return True        
     except Exception as e:
-        logger.error(f"Query hatası: {e}")
+        logger.error(f"Query error: {e}")
         try:
-            logger.error(f"Sorgu: {query}")
-            logger.error(f"Parametreler: {params}")
+            logger.error(f"Query: {query}")
+            logger.error(f"Parameters: {params}")
         except Exception:
             pass
         return False
@@ -103,7 +103,7 @@ def execute_query(query, params=None):
             connection.close()
 
 def get_token_from_db():
-    """Veritabanından aktif token'ı alır"""
+    """Gets active token from database"""
     query = """
         SELECT token, expires_at
         FROM mv_api_tokens
@@ -125,18 +125,18 @@ def get_token_from_db():
         else:
             return None, None          
     except Exception as e:
-        logger.error(f"Token DB hatası: {e}")
+        logger.error(f"Token DB error: {e}")
         return None, None
     finally:
         if connection:
             connection.close()
 
 def save_token_to_db(token, expires_at):
-    """Yeni token'ı veritabanına kaydeder"""
-    # Önce eski token'ları pasif yap
+    """Saves new token to database"""
+    # First deactivate old tokens
     deactivate_query = "UPDATE mv_api_tokens SET is_active = FALSE"
     execute_query(deactivate_query)  
-    # Yeni token'ı ekle
+    # Add new token
     insert_query = """
         INSERT INTO mv_api_tokens (token, expires_at, is_active)
         VALUES (%s, %s, TRUE)
@@ -147,18 +147,18 @@ def save_token_to_db(token, expires_at):
         return False
 
 def get_token():
-    """API token alır - DB entegreli"""
+    """Gets API token - DB integrated"""
     global api_token, token_expiry_time
-    # Önce DB'den token almayı dene
+    # First try to get token from DB
     db_token, db_expires_at = get_token_from_db()    
     if db_token and db_expires_at:
-        # DB'deki token hala geçerli mi kontrol et
+        # Check if token in DB is still valid
         now_utc = datetime.now(pytz.UTC)
         if now_utc < db_expires_at:
             api_token = db_token
             token_expiry_time = db_expires_at
             return api_token    
-    # DB'de geçerli token yoksa yeni token al
+    # If no valid token in DB, get new token
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
     }
@@ -172,9 +172,9 @@ def get_token():
             response_json = response.json()
             new_token = response_json.get("userToken")          
             if new_token:
-                # Token süresini hesapla (15 dakika)
+                # Calculate token duration (15 minutes)
                 expires_at = datetime.now(pytz.UTC) + timedelta(minutes=15)                
-                # DB'ye kaydet
+                # Save to DB
                 if save_token_to_db(new_token, expires_at):
                     api_token = new_token
                     token_expiry_time = expires_at
@@ -191,7 +191,7 @@ def get_token():
         return None
 
 def get_common_headers_and_params():
-    """Ortak header ve parametreleri döndürür"""
+    """Returns common headers and parameters"""
     headers = {
         'Authorization': f'Bearer {api_token}'
     }
@@ -205,16 +205,16 @@ def get_common_headers_and_params():
     return headers, params
 
 def check_and_refresh_token():
-    """Token süresini kontrol eder ve gerekirse yeniler"""
+    """Checks token duration and refreshes if necessary"""
     global api_token, token_expiry_time
     if api_token is None or token_expiry_time is None or datetime.now(pytz.UTC) >= token_expiry_time:
         return get_token()
     return api_token
 
 def save_to_json(data, filename):
-    """Veriyi JSON dosyasına kaydeder (append mode)"""
+    """Saves data to JSON file (append mode)"""
     try:
-        # Mevcut dosyayı oku (varsa)
+        # Read existing file (if exists)
         existing_data = []
         try:
             with open(filename, 'r', encoding='utf-8') as f:
@@ -222,14 +222,14 @@ def save_to_json(data, filename):
         except (FileNotFoundError, json.JSONDecodeError):
             existing_data = []
         
-        # Yeni veriyi ekle
+        # Add new data
         new_entry = {
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "data": data
         }
         existing_data.append(new_entry)
         
-        # Dosyaya kaydet
+        # Save to file
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(existing_data, f, indent=2, ensure_ascii=False)
         
@@ -258,7 +258,7 @@ def extract_numeric_from_api_list(raw_list):
 
 
 def fetch_api_data(url, view_name):
-    """API'den veri çeker"""
+    """Fetches data from API"""
     if not api_token:
         return None
     headers = {'Authorization': f'Bearer {api_token}'}
@@ -274,10 +274,10 @@ def fetch_api_data(url, view_name):
     except requests.exceptions.RequestException as e:
         return None
 
-# ==================== TABLO OLUŞTURMA FONKSİYONLARI ====================
+# ==================== TABLE CREATION FUNCTIONS ====================
 
 def sysover_create_table():
-    """SYSOVER tablosunu oluşturur"""
+    """Creates SYSOVER table"""
     create_query = """
     CREATE TABLE IF NOT EXISTS mainview_mvs_sysover (
         id SERIAL PRIMARY KEY,
@@ -312,7 +312,8 @@ def sysover_create_table():
         syrelacm INTEGER,        
         symtprip NUMERIC,  
         screcpa NUMERIC,  
-        sysbstat TEXT,           
+        sysbstat TEXT,
+        syzbstat TEXT,         
         sybstcls TEXT,
         bmctime TIMESTAMP WITH TIME ZONE,
         "time" TIME WITHOUT TIME ZONE
@@ -321,7 +322,7 @@ def sysover_create_table():
     execute_query(create_query)
 
 def cpuhiper_create_table():
-    """CPUHIPER tablosunu oluşturur"""
+    """Creates CPUHIPER table"""
     cpuhiper_create_query = """
     CREATE TABLE IF NOT EXISTS mainview_mvs_cpuhiper (
         id SERIAL PRIMARY KEY,
@@ -339,7 +340,7 @@ def cpuhiper_create_table():
     execute_query(cpuhiper_create_query)
 
 def ensure_jcpu_table_schema():
-    """JCPU tablosunu oluşturur"""
+    """Creates JCPU table"""
     create_table_sql = """
         CREATE TABLE IF NOT EXISTS mainview_mvs_jcpu (
             Jobname VARCHAR(50),
@@ -367,7 +368,7 @@ def ensure_jcpu_table_schema():
         execute_query(stmt)
 
 def create_zfs_table():
-    """mainview_zfs_file_systems tablosunu oluşturur"""
+    """Creates mainview_zfs_file_systems table"""
     drop_table_query = "DROP TABLE IF EXISTS mainview_zfs_file_systems;"
     
     create_table_query = """
@@ -403,7 +404,7 @@ def create_zfs_table():
             connection.close()
 
 def create_wmsplxz_table():
-    """WMSPLXZ tablosunu oluşturur"""
+    """Creates WMSPLXZ table"""
     create_query = """
     CREATE TABLE IF NOT EXISTS mainview_mvs_wmsplxz (
         id SERIAL PRIMARY KEY,
@@ -420,7 +421,7 @@ def create_wmsplxz_table():
     execute_query(create_query)
 
 def create_jespool_table():
-    """JESPOOL tablosunu oluşturur"""
+    """Creates JESPOOL table"""
     create_query = """
     CREATE TABLE IF NOT EXISTS mainview_mvs_jespool (
         id SERIAL PRIMARY KEY,
@@ -445,64 +446,65 @@ def create_jespool_table():
     """
     execute_query(create_query)
 
-# ==================== SYSOVER FONKSİYONLARI ====================
+# ==================== SYSOVER FUNCTIONS ====================
 def sysover_process_rows(rows):
-    """SYSOVER verilerini işler ve veritabanına kaydeder"""
+    """Processes SYSOVER data and saves to database"""
     if not isinstance(rows, list):
         return
 
+    processed_count = 0
     for row in rows:
         bmctime = datetime.now(timezone.utc)
         time_t = datetime.now().replace(tzinfo=None, microsecond=0)
 
         syxsysn_value = str(row.get("SYXSYSN", ""))
         
-        succpub_value = float(row.get("SUCCPUB", [])) #correct
-        sucziib_value = (row.get("SUCZIIB", [])) #false T
-        scicpavg_value = float(row.get("SCICPAVG", [])) #correct
-        suciinrt_value = float(row.get("SUCIINRT", [])) #correct
-        suklqior_value = (row.get("SUKLQIOR", []))#false  T
-        sukadbpc_value = (row.get("SUKADBPC", [])) #false T
-        csrecspu_value = float(row.get("CSRECSPU", [])) #correct
-        csreecpu_value = float(row.get("CSREECPU", [])) #correct
-        csresqpu_value = float(row.get("CSRESQPU", [])) #correct
-        csreespu_value = float(row.get("CSREESPU", [])) #correct
-        sciairw_value = (row.get("SCIAIRW", [])) #false T 
-        sciiravg_value = float(row.get("SCIIRAVG", [])) #correct
+        succpub_value = float(row.get("SUCCPUB", [])) 
+        sucziib_value = (row.get("SUCZIIB", [])) 
+        scicpavg_value = float(row.get("SCICPAVG", [])) 
+        suciinrt_value = float(row.get("SUCIINRT", [])) 
+        suklqior_value = (row.get("SUKLQIOR", []))
+        sukadbpc_value = (row.get("SUKADBPC", [])) 
+        csrecspu_value = float(row.get("CSRECSPU", [])) 
+        csreecpu_value = float(row.get("CSREECPU", [])) 
+        csresqpu_value = float(row.get("CSRESQPU", [])) 
+        csreespu_value = float(row.get("CSREESPU", [])) 
+        sciairw_value = (row.get("SCIAIRW", [])) 
+        sciiravg_value = float(row.get("SCIIRAVG", [])) 
         suptoprt_value = float(row.get("SUPTOPRT", []))
-        sciitpip_value = float(row.get("SCIITPIP", [])) #correct
-        suwcsspi_value = float(row.get("SUWCSSPI", [])) #correct    
-        suwcbspi_value = float(row.get("SUWCBSPI", [])) #0000 
-        suweaspi_value = float(row.get("SUWEASPI", [])) #correct    
-        csrecscn_value = (row.get("CSRECSCN", [])) #false T
-        csreeccn_value = (row.get("CSREECCN", [])) #false T
-        succrat_value = (row.get("SUCCRAT", [])) #false T 
-        syrelacs_value = (row.get("SYRELACS", [])) #false ?
-        syrelacm_value = (row.get("SYRELACM", [])) #false T 
-        sypmtrip_value = (row.get("SYMTPRIP", [])) #false T 
-        screcpa_value = float(row.get("SCRECPA", [])) #correct  
+        sciitpip_value = float(row.get("SCIITPIP", [])) 
+        suwcsspi_value = float(row.get("SUWCSSPI", [])) 
+        suwcbspi_value = (row.get("SUWCBSPI", [])) 
+        suweaspi_value = float(row.get("SUWEASPI", []))  
+        csrecscn_value = (row.get("CSRECSCN", [])) 
+        csreeccn_value = (row.get("CSREECCN", [])) 
+        succrat_value = (row.get("SUCCRAT", [])) 
+        syrelacs_value = (row.get("SYRELACS", [])) 
+        syrelacm_value = (row.get("SYRELACM", [])) 
+        sypmtrip_value = (row.get("SYMTPRIP", [])) 
+        screcpa_value = float(row.get("SCRECPA", [])) 
 
-        # Metin (string) alanlar doğrudan alınabilir
-        sumecpii_value = str(row.get("SUMECPII", "")) #correct
-        suwcsspw_value = str(row.get("SUWCSSPW", "")) #correct
-        suwctspw_value = str(row.get("SUWCTSPW", "")) #correct
-        suweaspw_value = str(row.get("SUWEASPW", "")) #correct
-        syguicav_value = str(row.get("SYGUICAV", "")) #correct
-        sysbstat_value = str(row.get("SYSBSTAT", "")) #correct
-        sybstcls_value = str(row.get("SYBSTCLS", "")) #boş 
+        sumecpii_value = str(row.get("SUMECPII", "")) 
+        suwcsspw_value = str(row.get("SUWCSSPW", "")) 
+        suwctspw_value = str(row.get("SUWCTSPW", "")) 
+        suweaspw_value = str(row.get("SUWEASPW", "")) 
+        syguicav_value = str(row.get("SYGUICAV", "")) 
+        sysbstat_value = str(row.get("SYSBSTAT", "")) 
+        syzbstat_value = str(row.get("SYZBSTAT", "")) 
+        sybstcls_value = str(row.get("SYBSTCLS", "")) 
 
-        # Tarih alanı özel olarak işlenmelidir
+        # Date field needs special processing
         sugeitm_raw = row.get("SUGEITM", [])
         sugeitm_value = None
         if isinstance(sugeitm_raw, list) and len(sugeitm_raw) > 0 and isinstance(sugeitm_raw[0], dict) and '0' in sugeitm_raw[0]:
             try:
-                # Kesirli saniyeleri atıp datetime nesnesine çeviriyoruz
+                # Remove fractional seconds and convert to datetime object
                 dt_str = sugeitm_raw[0]['0'].split('.')[0] 
                 sugeitm_value = datetime.strptime(dt_str, '%Y/%m/%d %H:%M:%S')
             except (ValueError, TypeError):
-                sugeitm_value = None # Hata olursa None ata
+                sugeitm_value = None # Set to None if error occurs
 
-        # Önceki yanıtta düzeltilen INSERT sorgusu (36 tane %s ile)
+        # Fixed INSERT query from previous response (36 %s placeholders)
         insert_query = """
             INSERT INTO mainview_mvs_sysover
             (syxsysn, succpub, sucziib, scicpavg, suciinrt, suklqior,
@@ -510,11 +512,11 @@ def sysover_process_rows(rows):
              sciiravg, suptoprt, sumecpii, sciitpip, suwcsspw, suwcsspi, 
              suwctspw, suwcbspi, suweaspw, suweaspi, csrecscn, csreeccn, 
              sugeitm, syguicav, succrat, syrelacs, syrelacm, symtprip, 
-             screcpa, sysbstat,sybstcls, bmctime, "time")
+             screcpa, sysbstat,syzbstat,sybstcls, bmctime, "time")
             VALUES (
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
             )
         """
         
@@ -525,13 +527,20 @@ def sysover_process_rows(rows):
             sciitpip_value, suwcsspw_value, suwcsspi_value, suwctspw_value, suwcbspi_value, 
             suweaspw_value, suweaspi_value, csrecscn_value, csreeccn_value, sugeitm_value, 
             syguicav_value, succrat_value, syrelacs_value, syrelacm_value, sypmtrip_value, 
-            screcpa_value, sysbstat_value, sybstcls_value, bmctime, time_t
+            screcpa_value, sysbstat_value, syzbstat_value, sybstcls_value, bmctime, time_t
         )
 
-        execute_query(insert_query, sysover_params)
+        success = execute_query(insert_query, sysover_params)
+        if success:
+            processed_count += 1
+    
+    if processed_count > 0:
+        print(f"✅ SYSOVER: {processed_count} records processed successfully")
+    else:
+        print("⚠️ SYSOVER: No records were processed")
 
 def sysover_display():
-    """SYSOVER verilerini çeker ve işler"""
+    """Fetches and processes SYSOVER data"""
     global api_token
     check_and_refresh_token()
     headers, params = get_common_headers_and_params()
@@ -544,16 +553,22 @@ def sysover_display():
             headers = {'Authorization': f'Bearer {api_token}'}
             response_cpu = requests.get(sysover_url, params=params, headers=headers, verify=False)
         else:
+            print("❌ SYSOVER: Failed to get token")
             return
 
     if response_cpu.status_code == 200:
         data = response_cpu.json()
         rows = data.get("Rows", [])
         if rows:
+            print(f"📊 SYSOVER: Fetching {len(rows)} records...")
             sysover_process_rows(rows)
+        else:
+            print("⚠️ SYSOVER: No data found")
+    else:
+        print(f"❌ SYSOVER: API request failed with status {response_cpu.status_code}")
 
 def sysover_save_json():
-    """SYSOVER API yanıtını çekip tüm veriyi log dosyasına kaydeder"""
+    """Fetches SYSOVER API response and saves all data to log file"""
     global api_token
     check_and_refresh_token()
     headers, params = get_common_headers_and_params()
@@ -576,18 +591,19 @@ def sysover_save_json():
     except requests.exceptions.RequestException as e:
         pass
 
-# ==================== CPUHIPER FONKSİYONLARI ====================
+# ==================== CPUHIPER FUNCTIONS ====================
 
 def cpuhiper_process_rows(rows):
-    """CPUHIPER verilerini işler ve veritabanına kaydeder"""
+    """Processes CPUHIPER data and saves to database"""
     if not isinstance(rows, list):
         return
 
+    processed_count = 0
     for row in rows:
         bmctime = datetime.now(timezone.utc)
         time_t = datetime.now().replace(tzinfo=None, microsecond=0)
 
-        # İstenen Metin alanları
+        # Required Text fields
         cpreidh_value = str(row.get("CPREIDH", ""))
         cpgtype_value = str(row.get("CPGTYPE", ""))
         cpbprio_value = str(row.get("CPBPRIO", ""))
@@ -595,7 +611,7 @@ def cpuhiper_process_rows(rows):
         cprehids_value = str(row.get("CPREHIDS", ""))
         cpustats_value = str(row.get("CPUSTATS", ""))
         
-        # İstenen Sayısal alan
+        # Required Numeric field
         cpibsypc_value = extract_numeric_from_api_list(row.get("CPIBSYPC", []))
 
         insert_query = """
@@ -609,10 +625,17 @@ def cpuhiper_process_rows(rows):
             bmctime, time_t
         )
 
-        execute_query(insert_query, cpuhiper_params)
+        success = execute_query(insert_query, cpuhiper_params)
+        if success:
+            processed_count += 1
+    
+    if processed_count > 0:
+        print(f"✅ CPUHIPER: {processed_count} records processed successfully")
+    else:
+        print("⚠️ CPUHIPER: No records were processed")
 
 def cpuhiper_display():
-    """CPUHIPER verilerini çeker ve işler"""
+    """Fetches and processes CPUHIPER data"""
     global api_token
     check_and_refresh_token()
     headers, params = get_common_headers_and_params()
@@ -624,16 +647,22 @@ def cpuhiper_display():
             headers = {'Authorization': f'Bearer {api_token}'}
             response = requests.get(cpuhiper_url, params=params, headers=headers, verify=False)
         else:
+            print("❌ CPUHIPER: Failed to get token")
             return
 
     if response.status_code == 200:
         data = response.json()
         rows = data.get("Rows", [])
         if rows:
-            cpuhiper_process_rows(rows) 
+            print(f"📊 CPUHIPER: Fetching {len(rows)} records...")
+            cpuhiper_process_rows(rows)
+        else:
+            print("⚠️ CPUHIPER: No data found")
+    else:
+        print(f"❌ CPUHIPER: API request failed with status {response.status_code}") 
 
 def cpuhiper_save_json():
-    """CPUHIPER API yanıtını çekip tüm veriyi log dosyasına kaydeder"""
+    """Fetches CPUHIPER API response and saves all data to log file"""
     global api_token
     check_and_refresh_token()
     headers, params = get_common_headers_and_params()
@@ -656,11 +685,11 @@ def cpuhiper_save_json():
     except requests.exceptions.RequestException as e:
         pass
 
-# ==================== JCPU FONKSİYONLARI ====================
+# ==================== JCPU FUNCTIONS ====================
 
 def insert_jcpu_data(rows):
-    """JCPU verilerini veritabanına kaydeder"""
-    # Zaman bilgisini ilk satırdaki JACT$INT üzerinden türet
+    """Saves JCPU data to database"""
+    # Derive time information from JACT$INT in first row
     dt_utc = datetime.now(pytz.UTC)
     try:
         if rows:
@@ -746,11 +775,11 @@ def insert_jcpu_data(rows):
         execute_query(insert_query, params)
 
 def cpu_jcpu_display():
-    """JCPU verilerini çeker ve gösterir"""
+    """Fetches and displays JCPU data"""
     headers, params = get_common_headers_and_params()
     response_cpu = requests.get(cpu_url, params=params, headers=headers, verify=False)    
     
-    # 401 hatası alırsak token yenile
+    # If we get 401 error, refresh token
     if response_cpu.status_code == 401:
         global api_token
         api_token = get_token()
@@ -764,22 +793,22 @@ def cpu_jcpu_display():
         data = response_cpu.json()
         rows = data.get("Rows", [])
         
-        # JSON dosyasına kaydet
+        # Save to JSON file
         save_to_json(data, "jcpu_monitoring_data.json")
         
         if rows:
-            # Tabloyu ve kolonları garanti altına al
+            # Ensure table and columns exist
             ensure_jcpu_table_schema()
-            # DB kayıtları için
+            # For DB records
             insert_jcpu_data(rows)
-            print(f"✅ JCPU: {len(rows)} kayıt işlendi")
+            print(f"✅ JCPU: {len(rows)} records processed")
         else:
-            print("⚠️ JCPU: Veri bulunamadı")
+            print("⚠️ JCPU: No data found")
 
-# ==================== ZFS FONKSİYONLARI ====================
+# ==================== ZFS FUNCTIONS ====================
 
 def get_zfs_data_many_query():
-    """zFS verilerini many query ile çeker - sadece gerekli alanlar"""
+    """Fetches zFS data with many query - only required fields"""
     if not api_token:
         return None
     
@@ -787,7 +816,7 @@ def get_zfs_data_many_query():
         'Authorization': f'Bearer {api_token}'
     }
     
-    # Many query için fields parametresi kullan
+    # Use fields parameter for many query
     params = {
         'fields': 'ZFFNAME,ZSASYSN,ZFSOWNER,ZFCASIZE,ZFCAUPCT,ZFSMNTS',
         'manyQuery': 'true'
@@ -799,7 +828,7 @@ def get_zfs_data_many_query():
         if response.status_code == 200:
             data = response.json()
             
-            # Many query sonuçlarını işle
+            # Process many query results
             processed_data = process_many_query_results(data)
             return processed_data
         else:
@@ -811,10 +840,10 @@ def get_zfs_data_many_query():
         return None
 
 def process_many_query_results(data):
-    """Many query sonuçlarını işler"""
-    # Eğer data bir array ise (many query sonucu)
+    """Processes many query results"""
+    # If data is an array (many query result)
     if isinstance(data, list):
-        # Array formatını Rows formatına çevir
+        # Convert array format to Rows format
         processed_data = {
             "rc": 0,
             "system": "VBT1",
@@ -825,7 +854,7 @@ def process_many_query_results(data):
             "Rows": []
         }
         
-        # Her kayıt için sadece istediğimiz alanları al
+        # For each record, get only the fields we want
         for record in data:
             filtered_record = {}
             required_fields = ['ZFFNAME', 'ZSASYSN', 'ZFSOWNER', 'ZFCASIZE', 'ZFCAUPCT', 'ZFSMNTS']
@@ -838,7 +867,7 @@ def process_many_query_results(data):
         
         return processed_data
     
-    # Eğer normal format ise, filtrele
+    # If normal format, filter
     elif isinstance(data, dict) and 'Rows' in data:
         return filter_zfs_fields(data)
     
@@ -846,11 +875,11 @@ def process_many_query_results(data):
         return data
 
 def filter_zfs_fields(data):
-    """Sadece istediğimiz zFS alanlarını filtreler"""
+    """Filters only the zFS fields we want"""
     if 'Rows' not in data:
         return data
     
-    # İstediğimiz alanlar
+    # Fields we want
     required_fields = ['ZFFNAME', 'ZSASYSN', 'ZFSOWNER', 'ZFCASIZE', 'ZFCAUPCT', 'ZFSMNTS']
     
     filtered_rows = []
@@ -861,18 +890,18 @@ def filter_zfs_fields(data):
                 filtered_row[field] = row[field]
         filtered_rows.append(filtered_row)
     
-    # Orijinal yapıyı koru, sadece Rows'u filtrele
+    # Keep original structure, only filter Rows
     filtered_data = data.copy()
     filtered_data['Rows'] = filtered_rows
     
     return filtered_data
 
 def insert_zfs_data_to_db(zfs_data):
-    """zFS verilerini veritabanına kaydeder"""
+    """Saves zFS data to database"""
     if 'Rows' not in zfs_data or not zfs_data['Rows']:
         return False
     
-    # Önce tabloyu oluştur
+    # First create table
     if not create_zfs_table():
         return False
     
@@ -884,10 +913,10 @@ def insert_zfs_data_to_db(zfs_data):
         
         cursor = connection.cursor()
         
-        # Önce mevcut verileri temizle (isteğe bağlı)
+        # First clear existing data (optional)
         cursor.execute("DELETE FROM mainview_zfs_file_systems")
         
-        # Her kayıt için INSERT sorgusu
+        # INSERT query for each record
         insert_query = """
         INSERT INTO mainview_zfs_file_systems 
         (zfs_file_system_name, system_name, owning_system, total_aggregate_size, 
@@ -900,7 +929,7 @@ def insert_zfs_data_to_db(zfs_data):
         
         for row in zfs_data['Rows']:
             try:
-                # Veri tiplerini dönüştür
+                # Convert data types
                 zfs_name = row.get('ZFFNAME', '')
                 system_name = row.get('ZSASYSN', '')
                 owning_system = row.get('ZFSOWNER', '')
@@ -928,28 +957,28 @@ def insert_zfs_data_to_db(zfs_data):
             connection.close()
 
 def zfs_monitoring_cycle():
-    """Tek bir zFS monitoring döngüsü"""
-    # zFS verilerini many query ile çek
+    """Single zFS monitoring cycle"""
+    # Fetch zFS data with many query
     zfs_data = get_zfs_data_many_query()
     if zfs_data is None:
-        print("❌ zFS verileri alınamadı.")
+        print("❌ zFS: Could not fetch data.")
         return
     
-    # JSON'a kaydet
+    # Save to JSON
     save_to_json(zfs_data, "zfs_monitoring_data.json")
     
-    # Veritabanına kaydet
+    # Save to database
     insert_zfs_data_to_db(zfs_data)
     
     if 'Rows' in zfs_data and zfs_data['Rows']:
-        print(f"✅ zFS: {len(zfs_data['Rows'])} kayıt işlendi")
+        print(f"✅ zFS: {len(zfs_data['Rows'])} records processed")
     else:
-        print("⚠️ zFS: Veri bulunamadı")
+        print("⚠️ zFS: No data found")
 
-# ==================== WMSPLXZ FONKSİYONLARI ====================
+# ==================== WMSPLXZ FUNCTIONS ====================
 
 def save_wmsplxz_data(data):
-    """WMSPLXZ verilerini veritabanına kaydeder"""
+    """Saves WMSPLXZ data to database"""
     global error_count_wmsplxz
     if not data or not isinstance(data, dict) or 'Rows' not in data:
         error_count_wmsplxz += 1
@@ -1037,10 +1066,10 @@ def save_wmsplxz_data(data):
         if conn:
             conn.close()
 
-# ==================== JESPOOL FONKSİYONLARI ====================
+# ==================== JESPOOL FUNCTIONS ====================
 
 def save_jespool_data(data):
-    """JESPOOL verilerini veritabanına kaydeder"""
+    """Saves JESPOOL data to database"""
     global error_count_jespool
     if not data or 'Rows' not in data or not data['Rows']:
         error_count_jespool += 1
@@ -1113,105 +1142,105 @@ def save_jespool_data(data):
         if conn:
             conn.close()
 
-# ==================== MONITORING CYCLE FONKSİYONLARI ====================
+# ==================== MONITORING CYCLE FUNCTIONS ====================
 
 def jcpu_monitoring_cycle():
-    """Tek bir JCPU monitoring döngüsü"""
+    """Single JCPU monitoring cycle"""
     cpu_jcpu_display()
 
 def sysover_monitoring_cycle():
-    """Tek bir SYSOVER monitoring döngüsü"""
+    """Single SYSOVER monitoring cycle"""
     sysover_display()
     sysover_save_json()
 
 def cpuhiper_monitoring_cycle():
-    """Tek bir CPUHIPER monitoring döngüsü"""
+    """Single CPUHIPER monitoring cycle"""
     cpuhiper_display()
     cpuhiper_save_json()
 
-# ==================== MONITORING THREAD'LERİ ====================
+# ==================== MONITORING THREADS ====================
 
 def jcpu_monitoring_thread():
-    """15 dakikada bir çalışan JCPU monitoring thread'i"""
+    """JCPU monitoring thread that runs every 15 minutes"""
     while True:
         try:
             jcpu_monitoring_cycle()
-            time.sleep(15 * 60)  # 15 dakika bekle
+            time.sleep(15 * 60)  # Wait 15 minutes
         except KeyboardInterrupt:
             break
         except Exception as e:
-            time.sleep(5 * 60)  # Hata durumunda 5 dakika bekle
+            time.sleep(5 * 60)  # Wait 5 minutes in case of error
 
 def zfs_monitoring_thread():
-    """30 dakikada bir çalışan zFS monitoring thread'i"""
+    """zFS monitoring thread that runs every 30 minutes"""
     while True:
         try:
             zfs_monitoring_cycle()
-            time.sleep(30 * 60)  # 30 dakika bekle
+            time.sleep(30 * 60)  # Wait 30 minutes
         except KeyboardInterrupt:
             break
         except Exception as e:
-            time.sleep(5 * 60)  # Hata durumunda 5 dakika bekle
+            time.sleep(5 * 60)  # Wait 5 minutes in case of error
 
 def sysover_monitoring_thread():
-    """60 saniyede bir çalışan SYSOVER monitoring thread'i"""
+    """SYSOVER monitoring thread that runs every 60 seconds"""
     while True:
         try:
             sysover_monitoring_cycle()
-            time.sleep(60)  # 60 saniye bekle
+            time.sleep(60)  # Wait 60 seconds
         except KeyboardInterrupt:
             break
         except Exception as e:
-            time.sleep(30)  # Hata durumunda 30 saniye bekle
+            time.sleep(30)  # Wait 30 seconds in case of error
 
 def cpuhiper_monitoring_thread():
-    """60 saniyede bir çalışan CPUHIPER monitoring thread'i"""
+    """CPUHIPER monitoring thread that runs every 60 seconds"""
     while True:
         try:
             cpuhiper_monitoring_cycle()
-            time.sleep(60)  # 60 saniye bekle
+            time.sleep(60)  # Wait 60 seconds
         except KeyboardInterrupt:
             break
         except Exception as e:
-            time.sleep(30)  # Hata durumunda 30 saniye bekle
+            time.sleep(30)  # Wait 30 seconds in case of error
 
-# ==================== ANA FONKSİYON ====================
+# ==================== MAIN FUNCTION ====================
 
 def main():
-    """Ana fonksiyon - Tüm monitoring servislerini başlatır"""
+    """Main function - Starts all monitoring services"""
     global api_token, last_wmsplxz_run, error_count_jespool, error_count_wmsplxz
     
-    print("🚀 MVS Monitoring Servisi Başlatılıyor...")
-    print("📋 Özellikler:")
-    print("  • JCPU: 15 dakikada bir otomatik kontrol")
-    print("  • zFS: 30 dakikada bir otomatik kontrol")
-    print("  • SYSOVER: 60 saniyede bir otomatik kontrol")
-    print("  • CPUHIPER: 60 saniyede bir otomatik kontrol")
-    print("  • WMSPLXZ: 2 saatte bir otomatik kontrol")
-    print("  • JESPOOL: 60 saniyede bir otomatik kontrol")
-    print("  • PostgreSQL veritabanına kaydetme")
-    print("  • JSON dosyalarına yedekleme")
-    print("\n💡 Durdurmak için Ctrl+C tuşlayın")
+    print("🚀 MVS Monitoring Service Starting...")
+    print("📋 Features:")
+    print("  • JCPU: Automatic check every 15 minutes")
+    print("  • zFS: Automatic check every 30 minutes")
+    print("  • SYSOVER: Automatic check every 60 seconds")
+    print("  • CPUHIPER: Automatic check every 60 seconds")
+    print("  • WMSPLXZ: Automatic check every 2 hours")
+    print("  • JESPOOL: Automatic check every 60 seconds")
+    print("  • Save to PostgreSQL database")
+    print("  • Backup to JSON files")
+    print("\n💡 Press Ctrl+C to stop")
     
-    # Token al
+    # Get token
     if not get_token():
-        print("❌ Token alınamadı. Program sonlandırılıyor.")
+        print("❌ Could not get token. Program terminating.")
         return
     
-    # Tabloları oluştur
+    # Create tables
     sysover_create_table()
     cpuhiper_create_table()
     ensure_jcpu_table_schema()
     create_wmsplxz_table()
     create_jespool_table()
     
-    # İlk çalıştırmaları hemen yap
+    # Run initial executions immediately
     jcpu_monitoring_cycle()
     zfs_monitoring_cycle()
     sysover_monitoring_cycle()
     cpuhiper_monitoring_cycle()
     
-    # Threading ile sürekli monitoring başlat
+    # Start continuous monitoring with threading
     jcpu_thread = threading.Thread(target=jcpu_monitoring_thread, daemon=True)
     zfs_thread = threading.Thread(target=zfs_monitoring_thread, daemon=True)
     sysover_thread = threading.Thread(target=sysover_monitoring_thread, daemon=True)
@@ -1222,66 +1251,66 @@ def main():
     sysover_thread.start()
     cpuhiper_thread.start()
     
-    print("✅ Monitoring servisleri başlatıldı!")
+    print("\n✅ Monitoring services started!")
     
-    # WMSPLXZ ve JESPOOL için ana döngü
+    # Main loop for WMSPLXZ and JESPOOL
     JESPOOL_INTERVAL_SECONDS = 60
     WMSPLXZ_INTERVAL_SECONDS = 2 * 60 * 60
     
-    # JESPOOL ve WMSPLXZ'nin ilk çalıştırmada hemen başlamaları için zamanı geçmişe ayarla
+    # Set time to past so JESPOOL and WMSPLXZ start immediately on first run
     last_jespool_run = datetime.now() - timedelta(seconds=JESPOOL_INTERVAL_SECONDS)
     last_wmsplxz_run = datetime.now() - timedelta(seconds=WMSPLXZ_INTERVAL_SECONDS)
 
     try:
-        # Ana thread'i canlı tut
+        # Keep main thread alive
         while True:
             try:
-                # JESPOOL verilerini 60 saniyede bir işle
+                # Process JESPOOL data every 60 seconds
                 if (datetime.now() - last_jespool_run).total_seconds() >= JESPOOL_INTERVAL_SECONDS:
                     jespool_data = fetch_api_data(jespool_url, "JESPOOL")
                     if jespool_data == 'reauth':
                         if not get_token():
-                            print("❌ Token alınamadı. Program sonlandırılıyor.")
+                            print("❌ Could not get token. Program terminating.")
                             return
                         jespool_data = fetch_api_data(jespool_url, "JESPOOL")
                     
                     if jespool_data:
                         save_jespool_data(jespool_data)
-                        print(f"✅ JESPOOL: Veri işlendi")
+                        print(f"✅ JESPOOL: Data processed")
                     
                     last_jespool_run = datetime.now()
 
-                # WMSPLXZ verilerini 2 saatte bir işle
+                # Process WMSPLXZ data every 2 hours
                 if (datetime.now() - last_wmsplxz_run).total_seconds() >= WMSPLXZ_INTERVAL_SECONDS:
                     wmsplxz_data = fetch_api_data(wmsplxz_url, "WMSPLXZ")
                     if wmsplxz_data == 'reauth':
                         if not get_token():
-                            print("❌ Token alınamadı. Program sonlandırılıyor.")
+                            print("❌ Could not get token. Program terminating.")
                             return
                         wmsplxz_data = fetch_api_data(wmsplxz_url, "WMSPLXZ")
                     
                     if wmsplxz_data:
                         save_wmsplxz_data(wmsplxz_data)
-                        print(f"✅ WMSPLXZ: Veri işlendi")
+                        print(f"✅ WMSPLXZ: Data processed")
                     
                     last_wmsplxz_run = datetime.now()
                 
                 if error_count_jespool >= MAX_ERRORS or error_count_wmsplxz >= MAX_ERRORS:
-                    print(f"❌ Maksimum hata sayısına ulaşıldı. Program sonlandırılıyor.")
+                    print(f"❌ Maximum error count reached. Program terminating.")
                     return
 
-                # Kontrol döngüsü için bekleme süresi (60 saniye)
+                # Wait time for control loop (60 seconds)
                 time.sleep(60)
 
             except KeyboardInterrupt:
-                print("🛑 Kullanıcı tarafından durduruldu.")
+                print("🛑 Stopped by user.")
                 break
             except Exception as e:
                 time.sleep(30)
                 
     except KeyboardInterrupt:
-        print("⚠️ MVS Monitoring Servisi durduruluyor...")
-        print("✅ Servis başarıyla sonlandırıldı")
+        print("⚠️ MVS Monitoring Service stopping...")
+        print("✅ Service terminated successfully")
 
 if __name__ == "__main__":
     main()
