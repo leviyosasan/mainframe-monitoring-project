@@ -7,6 +7,8 @@ import urllib3
 import json
 import os
 
+#USING MANY QUERY
+
 # Disable SSL warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -82,7 +84,7 @@ def execute_query(query, params=None): # Executes the given query
 def get_token(): # Gets token
     global api_token, token_expiry_time
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    data = {"username": "VOBA", "password": "OZAN1238"}
+    data = {"username": "VOBA", "password": "OZAN1239"}
     try:
         response = requests.post(logon_url, headers=headers, data=data, verify=False)
         if response.status_code == 200:
@@ -339,7 +341,6 @@ def dspcz_save_json(): # Fetches FRMINFO_CENTRAL API response and saves all data
     except requests.exceptions.RequestException as e:
         logger.error(f"DSPCZ Request error: {e}")
         print(f"❌ Request error: {e}")    
-
 
 # -------------------
 # Main Function

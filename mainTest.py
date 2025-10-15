@@ -164,7 +164,7 @@ def get_token():
     }
     data = {
         "username": "VOBA",
-        "password": "OZAN1238"
+        "password": "OZAN1239"
     }    
     try:
         response = requests.post(logon_url, headers=headers, data=data, verify=False)    
@@ -237,23 +237,25 @@ def save_to_json(data, filename):
     except Exception as e:
         return None
 
+
 def extract_numeric_from_api_list(raw_list):
-    """API'den gelen liste formatındaki sayısal değerleri float'a dönüştürür"""
+    # This function converts the single numeric value in the list (which may be in string or dict format) to float.
     if not isinstance(raw_list, list) or not raw_list:
         return 0.0
     first_item = raw_list[0]
     if isinstance(first_item, dict):
         try:
-            # Sözlükten ilk değeri (value) almayı dener
+            # Tries to get the first value from the dictionary
             value_str = next(iter(first_item.values())) 
             return float(value_str)
         except (StopIteration, ValueError, TypeError):
             return 0.0
     try:
-        # Doğrudan dize veya sayı ise dönüştürür
+        # Converts if it's a direct string or number
         return float(first_item)
     except (ValueError, TypeError):
         return 0.0
+
 
 def fetch_api_data(url, view_name):
     """API'den veri çeker"""
@@ -290,6 +292,28 @@ def sysover_create_table():
         csreecpu NUMERIC,
         csresqpu NUMERIC,
         csreespu NUMERIC,
+        sciairw NUMERIC,
+        sciiravg NUMERIC,     
+        suptoprt NUMERIC,  
+        sumecpii TEXT,           
+        sciitpip NUMERIC,  
+        suwcsspw TEXT,           
+        suwcsspi NUMERIC,  
+        suwctspw TEXT,           
+        suwcbspi NUMERIC,  
+        suweaspw TEXT,           
+        suweaspi NUMERIC,  
+        csrecscn NUMERIC,  
+        csreeccn NUMERIC,  
+        sugeitm TIMESTAMP WITH TIME ZONE, 
+        syguicav TEXT,           
+        succrat NUMERIC,  
+        syrelacs INTEGER,        
+        syrelacm INTEGER,        
+        symtprip NUMERIC,  
+        screcpa NUMERIC,  
+        sysbstat TEXT,           
+        sybstcls TEXT,
         bmctime TIMESTAMP WITH TIME ZONE,
         "time" TIME WITHOUT TIME ZONE
     );
@@ -422,7 +446,6 @@ def create_jespool_table():
     execute_query(create_query)
 
 # ==================== SYSOVER FONKSİYONLARI ====================
-
 def sysover_process_rows(rows):
     """SYSOVER verilerini işler ve veritabanına kaydeder"""
     if not isinstance(rows, list):
@@ -434,30 +457,75 @@ def sysover_process_rows(rows):
 
         syxsysn_value = str(row.get("SYXSYSN", ""))
         
-        # Tüm sayısal alanlarda extract_numeric_from_api_list kullanılıyor
-        scicpavg_value = (row.get("SCICPAVG", []))
-        succpub_value = (row.get("SUCCPUB", []))
-        sucziib_value = (row.get("SUCZIIB", []))
-        suciinrt_value = (row.get("SUCIINRT", []))
-        suklqior_value = (row.get("SUKLQIOR", []))
-        sukadbpc_value = (row.get("SUKADBPC", []))
-        csrecspu_value = (row.get("CSRECSPU", []))
-        csreecpu_value = (row.get("CSREECPU", []))
-        csresqpu_value = (row.get("CSRESQPU", []))
-        csreespu_value = (row.get("CSREESPU", []))
+        succpub_value = float(row.get("SUCCPUB", [])) #correct
+        sucziib_value = (row.get("SUCZIIB", [])) #false T
+        scicpavg_value = float(row.get("SCICPAVG", [])) #correct
+        suciinrt_value = float(row.get("SUCIINRT", [])) #correct
+        suklqior_value = (row.get("SUKLQIOR", []))#false  T
+        sukadbpc_value = (row.get("SUKADBPC", [])) #false T
+        csrecspu_value = float(row.get("CSRECSPU", [])) #correct
+        csreecpu_value = float(row.get("CSREECPU", [])) #correct
+        csresqpu_value = float(row.get("CSRESQPU", [])) #correct
+        csreespu_value = float(row.get("CSREESPU", [])) #correct
+        sciairw_value = (row.get("SCIAIRW", [])) #false T 
+        sciiravg_value = float(row.get("SCIIRAVG", [])) #correct
+        suptoprt_value = float(row.get("SUPTOPRT", []))
+        sciitpip_value = float(row.get("SCIITPIP", [])) #correct
+        suwcsspi_value = float(row.get("SUWCSSPI", [])) #correct    
+        suwcbspi_value = float(row.get("SUWCBSPI", [])) #0000 
+        suweaspi_value = float(row.get("SUWEASPI", [])) #correct    
+        csrecscn_value = (row.get("CSRECSCN", [])) #false T
+        csreeccn_value = (row.get("CSREECCN", [])) #false T
+        succrat_value = (row.get("SUCCRAT", [])) #false T 
+        syrelacs_value = (row.get("SYRELACS", [])) #false ?
+        syrelacm_value = (row.get("SYRELACM", [])) #false T 
+        sypmtrip_value = (row.get("SYMTPRIP", [])) #false T 
+        screcpa_value = float(row.get("SCRECPA", [])) #correct  
 
+        # Metin (string) alanlar doğrudan alınabilir
+        sumecpii_value = str(row.get("SUMECPII", "")) #correct
+        suwcsspw_value = str(row.get("SUWCSSPW", "")) #correct
+        suwctspw_value = str(row.get("SUWCTSPW", "")) #correct
+        suweaspw_value = str(row.get("SUWEASPW", "")) #correct
+        syguicav_value = str(row.get("SYGUICAV", "")) #correct
+        sysbstat_value = str(row.get("SYSBSTAT", "")) #correct
+        sybstcls_value = str(row.get("SYBSTCLS", "")) #boş 
+
+        # Tarih alanı özel olarak işlenmelidir
+        sugeitm_raw = row.get("SUGEITM", [])
+        sugeitm_value = None
+        if isinstance(sugeitm_raw, list) and len(sugeitm_raw) > 0 and isinstance(sugeitm_raw[0], dict) and '0' in sugeitm_raw[0]:
+            try:
+                # Kesirli saniyeleri atıp datetime nesnesine çeviriyoruz
+                dt_str = sugeitm_raw[0]['0'].split('.')[0] 
+                sugeitm_value = datetime.strptime(dt_str, '%Y/%m/%d %H:%M:%S')
+            except (ValueError, TypeError):
+                sugeitm_value = None # Hata olursa None ata
+
+        # Önceki yanıtta düzeltilen INSERT sorgusu (36 tane %s ile)
         insert_query = """
             INSERT INTO mainview_mvs_sysover
             (syxsysn, succpub, sucziib, scicpavg, suciinrt, suklqior,
-             sukadbpc, csrecspu, csreecpu, csresqpu, csreespu, bmctime, "time")
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+             sukadbpc, csrecspu, csreecpu, csresqpu, csreespu, sciairw, 
+             sciiravg, suptoprt, sumecpii, sciitpip, suwcsspw, suwcsspi, 
+             suwctspw, suwcbspi, suweaspw, suweaspi, csrecscn, csreeccn, 
+             sugeitm, syguicav, succrat, syrelacs, syrelacm, symtprip, 
+             screcpa, sysbstat,sybstcls, bmctime, "time")
+            VALUES (
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+            )
         """
+        
         sysover_params = (
-            syxsysn_value, succpub_value, sucziib_value,
-            scicpavg_value, suciinrt_value, suklqior_value,
-            sukadbpc_value, csrecspu_value,
-            csreecpu_value, csresqpu_value, csreespu_value,
-            bmctime, time_t
+            syxsysn_value, succpub_value, sucziib_value, scicpavg_value, suciinrt_value, 
+            suklqior_value, sukadbpc_value, csrecspu_value, csreecpu_value, csresqpu_value, 
+            csreespu_value, sciairw_value, sciiravg_value, suptoprt_value, sumecpii_value, 
+            sciitpip_value, suwcsspw_value, suwcsspi_value, suwctspw_value, suwcbspi_value, 
+            suweaspw_value, suweaspi_value, csrecscn_value, csreeccn_value, sugeitm_value, 
+            syguicav_value, succrat_value, syrelacs_value, syrelacm_value, sypmtrip_value, 
+            screcpa_value, sysbstat_value, sybstcls_value, bmctime, time_t
         )
 
         execute_query(insert_query, sysover_params)
