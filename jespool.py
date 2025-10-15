@@ -21,7 +21,7 @@ CONFIG = {
         'product': "MVMVS",
         'view': "JESPOOL",
         'username': "VOBA",
-        'password': "OZAN1238"
+        'password': "OZAN1239"
     },
     'database': {
         'host': "192.168.60.145",
