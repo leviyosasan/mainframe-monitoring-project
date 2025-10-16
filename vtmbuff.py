@@ -70,7 +70,7 @@ def create_table_if_not_exists():
             create_query = sql.SQL("""
                 CREATE TABLE IF NOT EXISTS {table_name} (
                     id SERIAL PRIMARY KEY,
-                    system_name VARCHAR(50),
+                    system_name VARCHAR,
                     iobuf_size INT,
                     iobuf_times_expanded INT,
                     lpbuf_size INT,
