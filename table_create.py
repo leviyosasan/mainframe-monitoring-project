@@ -591,6 +591,734 @@ def create_wmsplxz_table():
         print("✅ mainview_mvs_wmsplxz tablosu başarıyla oluşturuldu/hazır")
     else:
         print("❌ mainview_mvs_wmsplxz tablosu oluşturulamadı! Veritabanı bağlantısını kontrol edin")
+def create_xcfmbr_table():
+    """Creates XCFMBR table in PostgreSQL"""
+    create_table_query = """
+        CREATE TABLE IF NOT EXISTS mainview_xcfmbr (
+            
+            system_name VARCHAR(50),
+            group_name VARCHAR(50),
+            member_name VARCHAR(50),
+            job_name VARCHAR(50),
+            percent_received_group_signals DECIMAL(10,2),
+            percent_received_system_signals DECIMAL(10,2),
+            percent_received_total_signals DECIMAL(10,2),
+            percent_sent_group_signals DECIMAL(10,2),
+            percent_sent_system_signals DECIMAL(10,2),
+            percent_sent_total_signals DECIMAL(10,2),
+            percent_group_signals DECIMAL(10,2),
+            percent_system_signals DECIMAL(10,2),
+            percent_total_signals DECIMAL(10,2),
+            signals_received_by_member BIGINT,
+            signals_sent_by_member BIGINT,
+            status VARCHAR(50),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """
+    
+    if execute_query(create_table_query):
+        logger.info("XCFMBR table created successfully")
+        return True
+    else:
+        logger.error("Failed to create XCFMBR table")
+        return False
+
+def create_udpconf_table():
+    """Creates the mainview_udpconf table for UDP configuration monitoring"""
+    create_table_query = """
+        CREATE TABLE IF NOT EXISTS mainview_network_udpconf (
+            job_name VARCHAR(50),                    -- CONFJOBN
+            stack_name VARCHAR(50),                  -- CONFSTCK
+            def_recv_bufsize BIGINT,                 -- UDPDEFRC (bytes)
+            def_send_bufsize BIGINT,                 -- UDPDEFSN (bytes)
+            check_summing VARCHAR(10),               -- CALUCSUM
+            restrict_low_port VARCHAR(10),           -- UDPRLWPR
+            udp_queue_limit INTEGER,                 -- UDPQUELM
+            system_name VARCHAR(50),                 -- System identifier
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(job_name, stack_name, system_name)
+        )
+    """
+    
+    if execute_query(create_table_query):
+        logger.info("✅ mainview_udpconf table created/ready")
+        return True
+    else:
+        logger.error("❌ Failed to create mainview_udpconf table")
+        return False       
+def create_tcpcons_table():
+    """Creates the mainview_network_tcpcons table for TCP Connections monitoring"""
+    create_table_query = """
+        CREATE TABLE IF NOT EXISTS mainview_network_tcpcons (
+            foreign_ip_address VARCHAR(45),          -- FIPADDSC (IPv4/IPv6)
+            remote_port INTEGER,                     -- FPORT
+            local_port INTEGER,                      -- LPORT
+            application_name VARCHAR(50),            -- JOBN
+            type_of_open VARCHAR(10),                -- CONNOPEN (Remote/Local)
+            interval_bytes_in BIGINT,                -- BYTEID
+            interval_bytes_out BIGINT,               -- BYTEOD
+            connection_status VARCHAR(20),           -- STATE
+            remote_host_name VARCHAR(255),           -- DNSNAME
+            system_name VARCHAR(50),                 -- System identifier
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(foreign_ip_address, remote_port, local_port, system_name)
+        )
+    """
+    
+    if execute_query(create_table_query):
+        logger.info("✅ mainview_network_tcpcons table created/ready")
+        return True
+    else:
+        logger.error("❌ Failed to create mainview_network_tcpcons table")
+        return False
+
+def create_tcpconf_table():
+    """Creates the mainview_tcpconf table for TCP configuration monitoring"""
+    create_table_query = """
+        CREATE TABLE IF NOT EXISTS mainview_network_tcpconf (
+            
+            job_name VARCHAR(50),                    -- CONFJOBN
+            stack_name VARCHAR(50),                  -- CONFSTCK
+            def_receive_bufsize BIGINT,              -- TCPDEFRC (bytes)
+            def_send_bufsize BIGINT,                 -- TCPDEFSN (bytes)
+            def_max_receive_bufsize BIGINT,          -- TCPDFMXR (bytes)
+            maximum_queue_depth INTEGER,             -- SOMAXCON
+            max_retran_time DECIMAL(10,3),           -- CALMAXRE (seconds)
+            min_retran_time DECIMAL(10,3),           -- CALMINRE (seconds)
+            roundtrip_gain DECIMAL(10,3),            -- CALROUND
+            variance_gain DECIMAL(10,3),             -- CALVARIG
+            variance_multiple DECIMAL(10,3),         -- CALVARIM
+            default_keepalive INTEGER,               -- TCPDEFKE (minutes)
+            delay_ack VARCHAR(10),                   -- TCPDLACK
+            restrict_low_port VARCHAR(10),           -- TCPRLWPR
+            send_garbage VARCHAR(10),                -- TCPSNDGB
+            tcp_timestamp VARCHAR(10),               -- TCPTMSTP
+            ttls VARCHAR(10),                        -- TCPTTLS
+            finwait2time INTEGER,                    -- TCPFINWT (seconds)
+            system_name VARCHAR(50),                 -- System identifier
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            
+            UNIQUE(job_name, stack_name, system_name)
+        )
+    """
+    
+    if execute_query(create_table_query):
+        logger.info("✅ mainview_tcpconf table created/ready")
+        return True
+    else:
+        logger.error("❌ Failed to create mainview_tcpconf table")
+        return False
+
+def create_actcons_table():
+    """Creates the mainview_network_actcons table for Active Connections monitoring"""
+    create_table_query = """
+        CREATE TABLE IF NOT EXISTS mainview_network_actcons (
+            foreign_ip_address VARCHAR(45),          -- FIPADDSC (IPv4/IPv6)
+            remote_port INTEGER,                     -- FPORT
+            local_ip_address VARCHAR(45),            -- LIPADDSC (IPv4/IPv6)
+            local_port INTEGER,                      -- LPORT
+            application_name VARCHAR(50),            -- JOBN
+            type_of_open VARCHAR(10),                -- CONNOPEN (Remote/Local)
+            interval_bytes_in BIGINT,                -- BYTEID
+            interval_bytes_out BIGINT,               -- BYTEOD
+            connection_status VARCHAR(20),           -- STATE
+            remote_host_name VARCHAR(255),           -- DNSNAME
+            system_name VARCHAR(50),                 -- System identifier
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(foreign_ip_address, remote_port, local_ip_address, local_port, system_name)
+        )
+    """
+    
+    if execute_query(create_table_query):
+        logger.info("✅ mainview_network_actcons table created/ready")
+        return True
+    else:
+        logger.error("❌ Failed to create mainview_network_actcons table")
+        return False
+
+def create_syscpc_table():
+    """Creates SYSCPC table if it doesn't exist"""
+    query = """
+        CREATE TABLE IF NOT EXISTS mainview_syscpc (
+            smf_id VARCHAR(50),
+            system_name VARCHAR(100),
+            hardware_name VARCHAR(100),
+            cpu_model VARCHAR(100),
+            cpc_capacity DECIMAL(15,2),
+            base_cpc_capacity DECIMAL(15,2),
+            capacity_on_demand VARCHAR(10),
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """
+    return execute_query(query)
+
+def ensure_pgspp_table_schema():
+    """Creates or updates the PGSPP table"""
+    create_table_query = """
+        CREATE TABLE IF NOT EXISTS mainview_rmf_pgspp (
+            
+            pdgnum VARCHAR(10),                    -- Page Data Set Number
+            pdgtypc VARCHAR(20),                   -- Page Data Set Type
+            pdgser VARCHAR(10),                    -- Volume Serial Number
+            pdredevc VARCHAR(10),                  -- Device Number
+            pdgstat VARCHAR(20),                   -- Page Data Set Status
+            pdislupc DECIMAL(5,2),                 -- Page Slot In Use Percentage
+            pdipxtav DECIMAL(10,3),                -- Average Page Transfer Time
+            pdipiort DECIMAL(10,3),                -- I/O Request Rate
+            pdippbav DECIMAL(10,3),                -- Average Pages per Burst
+            pdgvioc VARCHAR(10),                   -- VIO Eligibility
+            pdibsyPC DECIMAL(5,2),                 -- In Use Percentage
+            pdgdsn VARCHAR(100),                   -- Page Data Set Name
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """
+    execute_query(create_table_query)
+
+def create_jdelay_table():
+    """Creates job delay monitoring table"""
+    create_table_query = f"""
+    CREATE TABLE IF NOT EXISTS mainview_mvs_jdelay (
+        
+        jobname VARCHAR(255),
+        jes_job_number VARCHAR(50),
+        address_space_type VARCHAR(10),
+        service_class_name VARCHAR(255),
+        job_step_monitored VARCHAR(10),
+        total_delay_percentage DECIMAL(5,2),
+        main_delay_reason VARCHAR(255),
+        cpu_delay_percentage DECIMAL(5,2),
+        io_delay_percentage DECIMAL(5,2),
+        storage_delay_percentage DECIMAL(5,2),
+        enqueue_delay_percentage DECIMAL(5,2),
+        srm_delay_percentage DECIMAL(5,2),
+        subsystem_delay_percentage DECIMAL(5,2),
+        idle_percentage DECIMAL(5,2),
+        ecb_other_delay_percentage DECIMAL(5,2),
+        job_elapsed_time VARCHAR(50),
+        address_space_status VARCHAR(50),
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """
+    return execute_query(create_table_query)
+
+def create_fixed_table():
+    """Creates FRMINFO Fixed table - Organized Structure"""
+    # First drop table (if exists)
+    drop_table_query = "DROP TABLE IF EXISTS mainview_frminfo_fixed;"
+    execute_query(drop_table_query)
+    
+    create_table_query = """
+    CREATE TABLE mainview_frminfo_fixed (
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        system_name VARCHAR(100),
+        server_name VARCHAR(100),
+        
+        -- SQA Frames (Average, Minimum, Maximum)
+        sqa_avg FLOAT,
+        sqa_min FLOAT,
+        sqa_max FLOAT,
+        
+        -- LPA Frames (Average, Minimum, Maximum)
+        lpa_avg FLOAT,
+        lpa_min FLOAT,
+        lpa_max FLOAT,
+        
+        -- CSA Frames (Average, Minimum, Maximum)
+        csa_avg FLOAT,
+        csa_min FLOAT,
+        csa_max FLOAT,
+        
+        -- LSQA Frames (Average, Minimum, Maximum)
+        lsqa_avg FLOAT,
+        lsqa_min FLOAT,
+        lsqa_max FLOAT,
+        
+        -- Private Frames (Average, Minimum, Maximum)
+        private_avg FLOAT,
+        private_min FLOAT,
+        private_max FLOAT,
+        
+        -- Fixed <16M (Average, Minimum, Maximum)
+        fixed_16m_avg FLOAT,
+        fixed_16m_min FLOAT,
+        fixed_16m_max FLOAT,
+        
+        -- Fixed Total (Average, Minimum, Maximum)
+        fixed_total_avg FLOAT,
+        fixed_total_min FLOAT,
+        fixed_total_max FLOAT,
+        
+        -- Fixed Frames Percentage
+        fixed_percentage FLOAT
+    );
+    """
+    
+    if execute_query(create_table_query):
+        logger.info("FRMINFO Fixed table created (Organized Structure)")
+        return True
+    else:
+        logger.error("FRMINFO Fixed table could not be created")
+        return False
+
+def create_high_virtual_table():
+    """Creates FRMINFO High Virtual table - Organized Structure"""
+    # First drop table (if exists)
+    drop_table_query = "DROP TABLE IF EXISTS mainview_frminfo_high_virtual;"
+    execute_query(drop_table_query)
+    
+    create_table_query = """
+    CREATE TABLE mainview_frminfo_high_virtual (
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        system_name VARCHAR(100),
+        server_name VARCHAR(100),
+        
+        -- High Virtual Common (Average, Minimum, Maximum)
+        hv_common_avg FLOAT,
+        hv_common_min FLOAT,
+        hv_common_max FLOAT,
+        
+        -- High Virtual Shared (Average, Minimum, Maximum)
+        hv_shared_avg FLOAT,
+        hv_shared_min FLOAT,
+        hv_shared_max FLOAT
+    );
+    """
+    
+    if execute_query(create_table_query):
+        logger.info("FRMINFO High Virtual table created (Organized Structure)")
+        return True
+    else:
+        logger.error("FRMINFO High Virtual table could not be created")
+        return False
+
+# Metric definitions
+METRICS = {
+    # CSA Metrics
+    'csa_defined': ('CSRECSAD', 'CSA Defined'),
+    'csa_in_use': ('CSRECSAU', 'CSA In Use'),
+    'csa_in_use_percent': ('CSRECSUP', 'CSA In Use Percent'),
+    'csa_free_areas_count': ('CSRECSFC', 'Count of Free CSA Areas'),
+    'csa_converted': ('CSRECSAC', 'Converted CSA'),
+    'csa_converted_to_sqa_percent': ('CSRECSCP', 'Converted CSA to SQA Percent'),
+    'csa_smallest_free_area': ('CSRECSMN', 'Smallest Free CSA Area'),
+    'csa_largest_free_area': ('CSRECSMX', 'Largest Free CSA Area'),
+    'csa_largest_percent_of_total': ('CSRECSLP', 'Largest Percent of Total CSA'),
+    'csa_available': ('CSRECSAA', 'Available CSA'),
+    'csa_available_percent': ('CSRECSAP', 'Available CSA Percent'),
+    
+    # ECSA Metrics
+    'ecsa_defined': ('CSREECSD', 'Defined ECSA'),
+    'ecsa_in_use': ('CSREECSU', 'ECSA In Use'),
+    'ecsa_in_use_percent': ('CSREECUP', 'ECSA In Use Percent'),
+    'ecsa_converted': ('CSREECSC', 'Converted ECSA'),
+    'ecsa_converted_to_esqa_percent': ('CSREECCP', 'Converted ECSA to ESQA Percent'),
+    'ecsa_free_areas_count': ('CSREECFC', 'Count of Free ECSA Areas'),
+    'ecsa_available': ('CSREECSA', 'Available ECSA'),
+    'ecsa_available_percent': ('CSREECAP', 'Available ECSA Percent'),
+    'ecsa_smallest_free_area': ('CSREECMN', 'Smallest Free ECSA Area'),
+    'ecsa_largest_free_area': ('CSREECMX', 'Largest Free ECSA Area'),
+    'ecsa_largest_percent_of_total': ('CSREECLP', 'Largest Percent of Total ECSA'),
+    
+    # RUCSA Metrics
+    'rucsa_defined': ('CSRERCSD', 'Defined RUCSA'),
+    'rucsa_in_use': ('CSRERCSU', 'RUCSA In Use'),
+    'rucsa_in_use_percent': ('CSRERCUP', 'RUCSA In Use Percent'),
+    'rucsa_free_areas_count': ('CSRERCSF', 'Count of Free RUCSA Areas'),
+    'rucsa_smallest_free_area': ('CSRERCSM', 'Smallest Free RUCSA Area'),
+    'rucsa_largest_free_area': ('CSRERCSX', 'Largest Free RUCSA Area'),
+    'rucsa_largest_percent_of_total': ('CSRERCLP', 'Largest Percent of Total RUCSA'),
+    
+    # ERUCSA Metrics
+    'erucsa_defined': ('CSREERCSD', 'Defined ERUCSA'),
+    'erucsa_in_use': ('CSREERCSU', 'ERUCSA In Use'),
+    'erucsa_in_use_percent': ('CSREERCUP', 'ERUCSA In Use Percent'),
+    'erucsa_free_areas_count': ('CSREERCSF', 'Count of Free ERUCSA Areas'),
+    'erucsa_smallest_free_area': ('CSREERCSM', 'Smallest Free ERUCSA Area'),
+    'erucsa_largest_free_area': ('CSREERCSX', 'Largest Free ERUCSA Area'),
+    'erucsa_largest_percent_of_total': ('CSREERCLP', 'Largest Percent of Total ERUCSA'),
+    
+    # SQA Metrics
+    'sqa_defined': ('CSRESQAD', 'Defined SQA'),
+    'sqa_in_use': ('CSRESQAU', 'SQA In Use'),
+    'sqa_in_use_percent': ('CSRESQUP', 'SQA In Use Percent'),
+    'sqa_available': ('CSRESQAA', 'Available SQA'),
+    'sqa_available_percent': ('CSRESQAP', 'Available SQA Percent'),
+    
+    # ESQA Metrics
+    'esqa_available': ('CSREESQA', 'Available ESQA'),
+    'esqa_available_percent': ('CSREESAP', 'Available ESQA Percent'),
+    
+    # Total Common Storage Metrics
+    'total_cs_defined': ('CSRETD', 'Defined Common Storage'),
+    'total_cs_used': ('CSRETU', 'Used Common Storage'),
+    'total_cs_used_percent': ('CSRETUP', 'Total Used Common Storage Percent'),
+    'total_converted_csa_ecsa': ('CSRETC', 'Total Converted CSA and ECSA'),
+    'available_common_storage': ('CSRETA', 'Available Common Storage'),
+    'available_common_storage_percent': ('CSRETAP', 'Available Common Storage Percent'),
+    
+    # High Shared Storage Metrics
+    'defined_high_shared_storage': ('CSGSHSZ', 'Defined High Shared Storage'),
+    'used_high_shared_storage': ('CSGSHUS', 'Used High Shared Storage'),
+    'percent_used_high_shared_storage': ('CSGSHUP', 'Percent Used High Shared Storage'),
+    'number_of_shared_memory_objects': ('CSGSHMO', 'Number of Shared Memory Objects'),
+    'used_hwm_high_shared_storage': ('CSGSHHW', 'Used HWM High Shared Storage'),
+    'percent_hwm_high_shared_storage': ('CSGSHHP', 'Percent HWM High Shared Storage'),
+    
+    # High Common Storage Metrics
+    'defined_high_common_storage': ('CSGHCSZ', 'Defined High Common Storage'),
+    'used_high_common_storage': ('CSGHCUS', 'Used High Common Storage'),
+    'percent_used_high_common_storage': ('CSGHCUP', 'Percent Used High Common Storage'),
+    'number_of_common_memory_objects': ('CSGHCMO', 'Number of Common Memory Objects'),
+    'used_hwm_high_common_storage': ('CSGHCHW', 'Used HWM High Common Storage'),
+    'percent_hwm_high_common_storage': ('CSGHCHP', 'Percent HWM High Common Storage'),
+}
+
+def create_csa_monitoring_table():
+    """Creates comprehensive CSA monitoring table in PostgreSQL"""
+    columns = []
+    for metric_name, (metric_code, description) in METRICS.items():
+        columns.append(f"{metric_name} NUMERIC")
+    
+    create_table_query = f"""
+        CREATE TABLE IF NOT EXISTS mainview_csasum (
+            {', '.join(columns)},
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """
+    
+    return execute_query(create_table_query)
+
+def vtamcsa_create_table(): # Creates VTAMCSA table
+    create_query = """
+    CREATE TABLE IF NOT EXISTS mainview_network_vtamcsa (
+    id SERIAL PRIMARY KEY,
+    J_SYSTEM TEXT,
+    CSACUR BIGINT,
+    CSAMAX BIGINT,
+    CSALIM BIGINT,
+    CSAUSAGE DOUBLE PRECISION,
+    C24CUR BIGINT,
+    C24MAX BIGINT,
+    VTMCUR BIGINT,
+    VTMMAX BIGINT,
+    bmctime TIMESTAMP WITH TIME ZONE,
+    "time" TIME WITHOUT TIME ZONE
+);
+    """
+    execute_query(create_query)
+    print("✅ mainview_network_vtamcsa table ready")
+ 
+def stacks_create_table(): # Creates STACKS table
+    create_query = """
+    CREATE TABLE IF NOT EXISTS mainview_network_stacks (
+    id SERIAL PRIMARY KEY,
+    JOBNAM8 VARCHAR,
+    STEPNAM8 VARCHAR,
+    JTARGET TEXT,
+    ASID8 VARCHAR,
+    MVSLVLX8 VARCHAR,
+    VER_REL VARCHAR,
+    STARTC8 TIMESTAMP,
+    IPADDRC8 VARCHAR,
+    STATUS18 VARCHAR,
+    bmctime TIMESTAMP WITH TIME ZONE,
+    "time" TIME WITHOUT TIME ZONE
+);
+ 
+    """
+    if execute_query(create_query):
+        print("✅ mainview_network_stacks table ready")
+    else:
+        print("❌ Table could not be created")
+ 
+def stackcpu_create_table(): # Creates STACKCPU table
+    create_query = """
+    CREATE TABLE IF NOT EXISTS mainview_network_stackcpu (
+    id SERIAL PRIMARY KEY,
+    STATSTKS TEXT,
+    IPPKTRCD INTEGER,
+    IPPKTRTR DOUBLE PRECISION,
+    IPOUTRED INTEGER,
+    IPOUTRTR DOUBLE PRECISION,
+    bmctime TIMESTAMP WITH TIME ZONE,
+    "time" TIME WITHOUT TIME ZONE
+);"""
+    execute_query(create_query)
+    print("✅ mainview_network_stackcpu table ready")
+ 
+ 
+def dspcz_create_table(): # Creates ASRM table
+    create_query = """
+    CREATE TABLE IF NOT EXISTS mainview_cmf_dspcz (
+    id SERIAL PRIMARY KEY,
+    onam TEXT,
+    dspname INTEGER,
+    asid TEXT,
+    key TEXT,
+    typx TEXT,
+    scox TEXT,
+    refx TEXT,
+    prox TEXT,
+    csizavg NUMERIC,
+    csizsum NUMERIC,
+    msizavg NUMERIC,
+    msizsum NUMERIC,
+    bmctime TIMESTAMP WITH TIME ZONE,
+    "time" TIME WITHOUT TIME ZONE
+);
+ 
+    """
+    if execute_query(create_query):
+        print("✅ mainview_cmf_dspcz table ready")
+    else:
+        print("❌ Table could not be created")
+ 
+ 
+def frminfo_central_create_table(): # Creates FRMINFO_CENTRAL table
+    create_query = """
+    CREATE TABLE IF NOT EXISTS mainview_frminfo_central (
+        id SERIAL PRIMARY KEY,
+        spispcav NUMERIC,
+        spispcmn NUMERIC,
+        spispcmx NUMERIC,
+        spilpfav NUMERIC,
+        spilpfmn NUMERIC,
+        spilpfmx NUMERIC,
+        spicpfav NUMERIC,
+        spicpfmn NUMERIC,
+        spicpfmx NUMERIC,
+        spiqpcav NUMERIC,
+        spiqpcmn NUMERIC,
+        spiqpcmx NUMERIC,
+        spiapfav NUMERIC,
+        spiapfmn NUMERIC,
+        spiapfmx NUMERIC,
+        spiafcav NUMERIC,
+        spiafcmn NUMERIC,
+        spitfuav NUMERIC,
+        spiafumn NUMERIC,
+        spiafumx NUMERIC,
+        spitcpct NUMERIC,
+        bmctime TIMESTAMP WITH TIME ZONE,
+        "time" TIME WITHOUT TIME ZONE
+    );
+    """
+    if execute_query(create_query):
+        print("✅ mainview_frminfo_central table ready")
+    else:
+        print("❌ Table could not be created")
+
+def create_table_xcfsys():
+    """Creates the XCFSYS table."""
+    query = """
+        CREATE TABLE IF NOT EXISTS mainview_xcfsys (
+            id SERIAL PRIMARY KEY,
+            from_system VARCHAR,
+            to_system VARCHAR,
+            transport_class VARCHAR,
+            total_messages BIGINT,
+            percent_messages_big NUMERIC(7, 4),
+            percent_messages_fit NUMERIC(7, 4),
+            percent_messages_small NUMERIC(7, 4),
+            no_paths_count BIGINT,
+            no_buffers_count BIGINT,
+            percent_messages_degraded NUMERIC(7, 4),
+            transport_class_longest_message BIGINT,
+            avg_used_message_blocks NUMERIC(7, 4),
+            percent_transport_class_buffers_used NUMERIC(7, 4),
+            max_message BIGINT,
+            percent_system_buffers_used NUMERIC(7, 4),
+            max_message_blocks BIGINT,
+            path_direction VARCHAR,
+            record_timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+    """
+    if execute_query(query):
+        print("✅ mainview_xcfsys table ready")
+    else:
+        print("❌ Table could not be created")
+
+def create_table_joverr():
+    """Creates the JOVERR table."""
+    query = """
+        CREATE TABLE IF NOT EXISTS mainview_joverr (
+            id SERIAL PRIMARY KEY,
+            asgname VARCHAR,
+            asgjid VARCHAR,
+            asgcnmc VARCHAR,
+            asgasid SMALLINT,
+            asgfl1c VARCHAR,
+            asrepgmn VARCHAR,
+            asgjelt BIGINT,
+            asgjznt TIMESTAMP,
+            asldlyp NUMERIC(7, 3),
+            aslusep NUMERIC(7, 3),
+            aslidlp NUMERIC(7, 3),
+            aslunkp NUMERIC(7, 3),
+            aslcppcu NUMERIC(7, 3),
+            aslxcpr NUMERIC(7, 3),
+            asldpgr NUMERIC(7, 3),
+            aslswpr NUMERIC(7, 3),
+            aslavfu BIGINT,
+            aslwmrt NUMERIC(10, 3),
+            aslcpsc NUMERIC(7, 3),
+            asgzaat NUMERIC(12, 3),
+            asrdzapts NUMERIC(10, 3),
+            asgziitc NUMERIC(12, 3),
+            asrdzipd NUMERIC(10, 3),
+            asrdzapt NUMERIC(6, 3),
+            asrdzipt NUMERIC(6, 3),
+            bmc_time TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+    """
+    if execute_query(query):
+        print("✅ mainview_joverr table ready")
+    else:
+        print("❌ Table could not be created")
+    
+
+def create_table_jcsa():
+    """Creates the JCSA table."""
+    query = """
+        CREATE TABLE IF NOT EXISTS mainview_jcsa (
+            id SERIAL PRIMARY KEY,
+            jobname VARCHAR,
+            jes_id VARCHAR,
+            asid INTEGER,
+            csa_in_use_percent FLOAT,
+            ecsa_in_use_percent FLOAT,
+            sqa_in_use_percent FLOAT,
+            esqa_in_use_percent FLOAT,
+            csa_in_use BIGINT,
+            ecsa_in_use BIGINT,
+            sqa_in_use BIGINT,
+            esqa_in_use BIGINT,
+            total_used_common_storage BIGINT,
+            total_used_percent FLOAT,
+            last_update_time TIMESTAMP,
+            bmc_time TIMESTAMP
+        );
+    """
+    if execute_query(query):
+        print("✅ mainview_jcsa table ready")
+    else:
+        print("❌ Table could not be created")
+    
+
+def create_table_sysfrmiz():
+    """Creates the SYSFRMIZ table."""
+    query = """
+        CREATE TABLE IF NOT EXISTS mainview_sysfrmiz (
+            id SERIAL PRIMARY KEY,
+            spgid VARCHAR NOT NULL,
+            spluicav BIGINT,
+            spiuonlf BIGINT,
+            spifinav BIGINT,
+            sprefncp NUMERIC(7, 4),
+            spispcav BIGINT,
+            spreasrp NUMERIC(7, 4),
+            spilpfav BIGINT,
+            sprealpp NUMERIC(7, 4),
+            spicpfav BIGINT,
+            spreavpp NUMERIC(7, 4),
+            spiqpcav BIGINT,
+            sprelsqp NUMERIC(7, 4),
+            spiapfav BIGINT,
+            spreprvp NUMERIC(7, 4),
+            spiafcav BIGINT,
+            spreavlp NUMERIC(7, 4),
+            spihvcav BIGINT,
+            sprecmnp NUMERIC(7, 4),
+            spihvsav BIGINT,
+            spreshrp NUMERIC(7, 4),
+            bmc_time TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+    """
+    if execute_query(query):
+        print("✅ mainview_sysfrmiz table ready")
+    else:
+        print("❌ Table could not be created")
+    
+
+def create_table_connrspz():
+    """Creates the CONNRSPZ table."""
+    query = """
+        CREATE TABLE IF NOT EXISTS mainview_connrspz (
+            id SERIAL PRIMARY KEY,
+            foreign_ip_address VARCHAR,
+            active_conns INT,
+            average_rtt_ms INT,
+            max_rtt_ms INT,
+            interval_bytes_in_sum BIGINT,
+            interval_bytes_out_sum BIGINT,
+            stack_name VARCHAR,
+            remote_host_name VARCHAR,
+            interval_duplicate_acks_sum INT,
+            interval_retransmit_count_sum INT,
+            total_conns INT,
+            record_timestamp TIMESTAMP DEFAULT NOW()
+        );
+    """
+    if execute_query(query):
+        print("✅ mainview_connrspz table ready")
+    else:
+        print("❌ Table could not be created")
+    
+
+def create_table_tcpstor():
+    """Creates the TCPSTOR table."""
+    query = """
+        CREATE TABLE IF NOT EXISTS mainview_tcpstor (
+            id SERIAL PRIMARY KEY,
+            step_name VARCHAR,
+            system_name VARCHAR,
+            ecsa_current BIGINT,
+            ecsa_max BIGINT,
+            ecsa_limit BIGINT,
+            ecsa_free BIGINT,
+            ecsa_modules BIGINT,
+            private_current BIGINT,
+            private_max BIGINT,
+            private_limit BIGINT,
+            private_free BIGINT,
+            record_timestamp TIMESTAMP DEFAULT NOW()
+        );
+    """
+    if execute_query(query):
+        print("✅ mainview_tcpstor table ready")
+    else:
+        print("❌ Table could not be created")
+    
+
+def create_table_vtmbuff():
+    """Creates the VTMBUFF table."""
+    query = """
+        CREATE TABLE IF NOT EXISTS mainview_vtmbuff (
+            id SERIAL PRIMARY KEY,
+            system_name VARCHAR,
+            iobuf_size INT,
+            iobuf_times_expanded INT,
+            lpbuf_size INT,
+            lpbuf_times_expanded INT,
+            lfbuf_size INT,
+            lfbuf_times_expanded INT,
+            record_timestamp TIMESTAMP DEFAULT NOW()
+        );
+    """
+    if execute_query(query):
+        print("✅ mainview_vtmbuff table ready")
+    else:
+        print("❌ Table could not be created")
+    
+
+
 
 def create_all_tables():
     """Creates all monitoring tables"""
@@ -600,21 +1328,132 @@ def create_all_tables():
     print("📊 Creating JCPU table...")
     ensure_table_schema()
     print("✅ JCPU table created")
+
+    # Create XCFMBR table
+    print("📊 Creating XCFMBR table...")
+    create_xcfmbr_table()
+    print("✅ XCFMBR table created")
+    
+    # Create UDPCONF table
+    print("📊 Creating UDPCONF table...")
+    create_udpconf_table()
+    print("✅ UDPCONF table created")
+    
+    # Create TCPCONS table
+    print("📊 Creating TCPCONS table...")
+    create_tcpcons_table()
+    print("✅ TCPCONS table created")
+    
+    # Create TCPCONF table
+    print("📊 Creating TCPCONF table...")
+    create_tcpconf_table()
+    print("✅ TCPCONF table created")
+    
+    # Create ACTCONS table
+    print("📊 Creating ACTCONS table...")
+    create_actcons_table()
+    print("✅ ACTCONS table created")
     
     # Create zFS table
     print("📊 Creating zFS table...")
     create_zfs_table()
     print("✅ zFS table created")
-    
-    # Create ARD table
-    print("📊 Creating ARD table...")
-    create_ard_table()
-    print("✅ ARD table created")
+
+    # Create SYSCPC table
+    print("📊 Creating SYSCPC table...")
+    create_syscpc_table()
+    print("✅ SYSCPC table created")
     
     # Create PGSPP table
     print("📊 Creating PGSPP table...")
     ensure_pgspp_table_schema()
     print("✅ PGSPP table created")
+
+    # Create JDELAY table
+    print("📊 Creating JDELAY table...")
+    create_jdelay_table()
+    print("✅ JDELAY table created")
+
+    # Create FIXED table
+    print("📊 Creating FIXED table...")
+    create_fixed_table()
+    print("✅ FIXED table created")
+    
+    # Create HIGH VIRTUAL table
+    print("📊 Creating HIGH VIRTUAL table...")
+    create_high_virtual_table()
+    print("✅ HIGH VIRTUAL table created")
+
+    # Create CSA MONITORING table
+    print("📊 Creating CSA MONITORING table...")
+    create_csa_monitoring_table()
+    print("✅ CSA MONITORING table created")
+
+    # Create XCFSYS table
+    print("📊 Creating XCFSYS table...")
+    create_table_xcfsys()
+    print("✅ XCFSYS table created")
+    
+    # Create JOVERR table
+    print("📊 Creating JOVERR table...")
+    create_table_joverr()
+    print("✅ JOVERR table created")
+    
+
+    # Create JCSA table
+    print("📊 Creating JCSA table...")
+    create_table_jcsa()
+    print("✅ JCSA table created")
+    
+    # Create SYSFRMIZ table
+    print("📊 Creating SYSFRMIZ table...")
+    create_table_sysfrmiz()
+    print("✅ SYSFRMIZ table created")
+    
+    # Create CONNRSPZ table
+    print("📊 Creating CONNRSPZ table...")
+    create_table_connrspz()
+    print("✅ CONNRSPZ table created")
+    
+    # Create TCPSTOR table
+    print("📊 Creating TCPSTOR table...")
+    create_table_tcpstor()
+    print("✅ TCPSTOR table created")
+    
+    # Create VTMBUFF table
+    print("📊 Creating VTMBUFF table...")
+    create_table_vtmbuff()
+    print("✅ VTMBUFF table created")
+
+    # Create VTAMCSA table
+    print("📊 Creating VTAMCSA table...")
+    vtamcsa_create_table()
+    print("✅ VTAMCSA table created")
+    
+    # Create STACKS table
+    print("📊 Creating STACKS table...")
+    stacks_create_table()
+    print("✅ STACKS table created")
+
+    # Create STACKCPU table
+    print("📊 Creating STACKCPU table...")
+    stackcpu_create_table()
+    print("✅ STACKCPU table created")
+
+    # Create DSPCZ table
+    print("📊 Creating DSPCZ table...")
+    dspcz_create_table()
+    print("✅ DSPCZ table created")
+    
+    # Create FRMINFO_CENTRAL table
+    print("📊 Creating FRMINFO_CENTRAL table...")
+    frminfo_central_create_table()
+    print("✅ FRMINFO_CENTRAL table created")
+
+    # Create ARD table
+    print("📊 Creating ARD table...")
+    create_ard_table()
+    print("✅ ARD table created")
     
     # Create TRX table
     print("📊 Creating TRX table...")
@@ -680,6 +1519,27 @@ def main():
     print("  • mainview_rmf_spag - SPAG monitoring data")
     print("  • mainview_mvs_jespool - JESPOOL monitoring data")
     print("  • mainview_mvs_wmsplxz - WMSPLXZ monitoring data")
+    print("  • mainview_xcfmbr - XCFMBR monitoring data")
+    print("  • mainview_udpconf - UDPCONF monitoring data")
+    print("  • mainview_tcpcons - TCPCONS monitoring data")
+    print("  • mainview_tcpconf - TCPCONF monitoring data")
+    print("  • mainview_actcons - ACTCONS monitoring data")
+    print("  • mainview_syscpc - SYSCPC monitoring data")
+    print("  • mainview_rmf_pgspp - PGSPP monitoring data")
+    print("  • mainview_mvs_jdelay - JDELAY monitoring data")
+    print("  • mainview_frminfo_fixed - FIXED monitoring data")
+    print("  • mainview_frminfo_high_virtual - HIGH VIRTUAL monitoring data")
+    print("  • mainview_csasum - CSA MONITORING monitoring data")
+    print("  • mainview_xcfsys - XCFSYS monitoring data")
+    print("  • mainview_joverr - JOVERR monitoring data")
+    print("  • mainview_jcsa - JCSA monitoring data")
+    print("  • mainview_sysfrmiz - SYSFRMIZ monitoring data")
+    print("  • mainview_connrspz - CONNRSPZ monitoring data")
+    print("  • mainview_tcpstor - TCPSTOR monitoring data")
+    print("  • mainview_vtmbuff - VTMBUFF monitoring data")
+    
+
+
     print("\n💡 Press Ctrl+C to cancel")
     
     try:
