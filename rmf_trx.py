@@ -324,7 +324,7 @@ def main():
         return
     while True:
         trx_display() # Fetches TRX API response
-        trx_save_json() # Creates JSON file
+        #trx_save_json() # Creates JSON file
         logger.info("Waiting 60 seconds for new data...")
         time.sleep(60) # Waits 1 minute
 if __name__ == "__main__":
