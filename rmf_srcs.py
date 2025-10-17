@@ -82,7 +82,7 @@ def execute_query(query, params=None): #Verilen sorguyu çalıştırır
 def get_token(): #Token alınıyor
     global api_token, token_expiry_time
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-    data = {"username": "VOBA", "password": "OZAN1238"}
+    data = {"username": "VOBA", "password": "OZAN1239"}
     try:
         response = requests.post(logon_url, headers=headers, data=data, verify=False)
         if response.status_code == 200:
