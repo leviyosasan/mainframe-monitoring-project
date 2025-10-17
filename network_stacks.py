@@ -298,7 +298,7 @@ def main():
         return
     while True:
         stacks_display() # Fetches STACKS API response
-        stacks_save_json() # Creates JSON file
+        #stacks_save_json() # Creates JSON file
         logger.info("Waiting 60 seconds for new data...")
         time.sleep(60) # Waits 1 minute
 if __name__ == "__main__":
