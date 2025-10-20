@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { databaseAPI } from '../../services/api';
+import toast from 'react-hot-toast';
 
 const ZOSPage = () => {
   const [activeModal, setActiveModal] = useState(null);
@@ -7,15 +9,84 @@ const ZOSPage = () => {
   const [selectedChart, setSelectedChart] = useState(null);
   const [chartTab, setChartTab] = useState('chart');
   const [infoModal, setInfoModal] = useState(null);
+  const [mainviewData, setMainviewData] = useState([]);
+  const [dataLoading, setDataLoading] = useState(false);
+
+  // Sayı formatı yardımcı fonksiyonu
+  const formatNumber = (value) => {
+    if (value === null || value === undefined || value === '') return '-';
+    const num = Number(value);
+    return isNaN(num) ? '-' : num.toFixed(2);
+  };
+
+  // Tablo kontrolü fonksiyonu
+  const checkTableInfo = async () => {
+    try {
+      const response = await databaseAPI.checkTableExists();
+      
+      if (response.data.success) {
+        const tableInfo = response.data.tableInfo;
+        
+        if (!tableInfo.exists) {
+          toast.error('mainview_mvs_sysover tablosu bulunamadı!');
+          return false;
+        }
+        
+        if (tableInfo.rowCount === 0) {
+          return false; // Sadece false döndür, uyarı verme
+        }
+        
+        toast.success(`Tablo mevcut: ${tableInfo.rowCount} kayıt bulundu`);
+        return true;
+      }
+    } catch (error) {
+      console.error('Tablo kontrolü hatası:', error);
+      toast.error(`Tablo kontrolü başarısız: ${error.message}`);
+      return false;
+    }
+  };
+
+  // Veri çekme fonksiyonu
+  const fetchMainviewData = async () => {
+    setDataLoading(true);
+    try {
+      // Önce tablo kontrolü yap
+      const tableExists = await checkTableInfo();
+      if (!tableExists) {
+        setDataLoading(false);
+        return;
+      }
+      
+      const response = await databaseAPI.getMainviewMvsSysover();
+      
+      if (response.data.success) {
+        setMainviewData(response.data.data);
+        
+        if (response.data.data.length === 0) {
+          // Tablo boşsa sessizce devam et, uyarı verme
+        } else {
+          toast.success(`Veriler başarıyla yüklendi (${response.data.data.length} kayıt)`);
+        }
+      } else {
+        toast.error('Veri yüklenirken hata oluştu');
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error);
+      toast.error(`Veri yüklenirken hata oluştu: ${error.message}`);
+    } finally {
+      setDataLoading(false);
+    }
+  };
 
   const openModal = (modalType) => {
     setActiveModal(modalType);
     setActiveTab('table'); // Her modal açıldığında tablo sekmesine git
-    setIsLoading(true);
-    // Simüle edilmiş veri yükleme
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
+    setIsLoading(false); // Modal açıldığında loading'i false yap
+    
+    // CPU modalı açıldığında veri çek
+    if (modalType === 'cpu') {
+      fetchMainviewData();
+    }
   };
 
   const closeModal = () => {
@@ -182,26 +253,93 @@ const ZOSPage = () => {
                 </div>
 
                 {/* Sekme İçerikleri */}
-                {isLoading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Veriler yükleniyor...</p>
-                  </div>
-                ) : (
-                  <div className="min-h-[400px]">
+                <div className="min-h-[400px]">
                     {/* Tablo Sekmesi */}
                     {activeTab === 'table' && (
                       <div className="space-y-4">
-                        <h4 className="text-lg font-semibold text-gray-800 mb-4">Veri Tablosu</h4>
+                        <div className="flex justify-between items-center">
+                          <h4 className="text-lg font-semibold text-gray-800">Veri Tablosu</h4>
+                          {activeModal === 'cpu' && (
+                            <button
+                              onClick={fetchMainviewData}
+                              disabled={dataLoading}
+                              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {dataLoading ? 'Yükleniyor...' : 'Yenile'}
+                            </button>
+                          )}
+                        </div>
+                        
+                        {activeModal === 'cpu' ? (
+                          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            {dataLoading ? (
+                              <div className="p-8 text-center">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                                <p className="mt-4 text-gray-600">Veriler yükleniyor...</p>
+                              </div>
+                            ) : mainviewData.length > 0 ? (
+                              <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                  <thead className="bg-gray-50">
+                                    <tr>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SYS</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU Busy%</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">zIIP Busy%</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU Avg</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">I/O Rate</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Queue I/O</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DASD Busy%</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU SPU</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU EPU</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SQ PU</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ES PU</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BMC Time</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="bg-white divide-y divide-gray-200">
+                                    {mainviewData.map((row, index) => (
+                                      <tr key={row.id || index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.id}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.syxsysn || '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.succpub)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.sucziib)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.scicpavg)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.suciinrt)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.suklqior)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.sukadbpc)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.csrecspu)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.csreecpu)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.csresqpu)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.csreespu)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                          {row.bmctime ? new Date(row.bmctime).toLocaleString('tr-TR') : '-'}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.time || '-'}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            ) : (
+                              <div className="p-8 text-center">
+                                <div className="text-4xl mb-4">📊</div>
+                                <p className="text-gray-600 text-lg">Henüz veri bulunmuyor</p>
+                                <p className="text-gray-500 text-sm mt-2">Yenile butonuna tıklayarak veri yükleyebilirsiniz</p>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
                         <div className="bg-gray-50 rounded-lg p-8 text-center">
                           <div className="text-4xl mb-4">📊</div>
                           <p className="text-gray-600 text-lg">Tablo verileri buraya eklenecek</p>
                           <p className="text-gray-500 text-sm mt-2">
-                            {activeModal === 'cpu' && 'CPU performans verileri'}
                             {activeModal === 'addressSpace' && 'Address Space verileri'}
                             {activeModal === 'spool' && 'Spool işlem verileri'}
                           </p>
                         </div>
+                        )}
                       </div>
                     )}
 
@@ -358,20 +496,181 @@ const ZOSPage = () => {
                                 </div>
                                 <h5 className="font-bold text-gray-500 text-lg">Last Update%</h5>
                               </div>
-                            </div>
+                        </div>
                           </div>
                         )}
 
-                        {/* Diğer modaller için varsayılan içerik */}
-                        {activeModal !== 'cpu' && (
-                          <div className="bg-gray-50 rounded-lg p-8 text-center">
-                            <div className="text-6xl mb-4">📈</div>
-                            <p className="text-gray-600 text-lg">Grafik bileşeni buraya eklenecek</p>
-                            <p className="text-gray-500 text-sm mt-2">
-                              {activeModal === 'addressSpace' && 'Address Space kullanım grafikleri'}
-                              {activeModal === 'spool' && 'Spool işlem grafikleri'}
-                            </p>
+                        {/* Address Space Grafik Kartları */}
+                        {activeModal === 'addressSpace' && (
+                        <div className="bg-gray-50 rounded-lg p-8 text-center">
+                          <div className="text-6xl mb-4">📈</div>
+                            <p className="text-gray-600 text-lg">Address Space grafikleri buraya eklenecek</p>
                           </div>
+                        )}
+
+                        {/* Spool Grafik Kartları */}
+                        {activeModal === 'spool' && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* SMF ID */}
+                            <div className="relative bg-white rounded-2xl border border-gray-200 p-6">
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 text-lg">SMF ID</h5>
+                              </div>
+                            </div>
+
+                            {/* TOTAL VOLS */}
+                            <div className="relative bg-white rounded-2xl border border-gray-200 p-6">
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 text-lg">TOTAL VOLS</h5>
+                              </div>
+                            </div>
+
+                            {/* SPOOL %UTİL - Grafik */}
+                            <div 
+                              onClick={() => openChart('spoolUtil')}
+                              className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            >
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg">SPOOL %UTİL</h5>
+                              </div>
+                            </div>
+
+                            {/* TOTAL TRACKS - Grafik */}
+                            <div 
+                              onClick={() => openChart('totalTracks')}
+                              className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            >
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg">TOTAL TRACKS</h5>
+                              </div>
+                            </div>
+
+                            {/* USED TRACKS - Grafik */}
+                            <div 
+                              onClick={() => openChart('usedTracks')}
+                              className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            >
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg">USED TRACKS</h5>
+                              </div>
+                            </div>
+
+                            {/* ACTİVE %UTİL - Grafik */}
+                            <div 
+                              onClick={() => openChart('activeUtil')}
+                              className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            >
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg">ACTİVE %UTİL</h5>
+                              </div>
+                            </div>
+
+                            {/* ACTİVE TRACKS - Grafik */}
+                            <div 
+                              onClick={() => openChart('activeTracks')}
+                              className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            >
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg">ACTİVE TRACKS</h5>
+                              </div>
+                            </div>
+
+                            {/* ACTİVE USED */}
+                            <div className="relative bg-white rounded-2xl border border-gray-200 p-6">
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 text-lg">ACTİVE USED</h5>
+                              </div>
+                            </div>
+
+                            {/* ACTİVE VOLS */}
+                            <div className="relative bg-white rounded-2xl border border-gray-200 p-6">
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 text-lg">ACTİVE VOLS</h5>
+                              </div>
+                            </div>
+
+                            {/* VOLUME */}
+                            <div className="relative bg-white rounded-2xl border border-gray-200 p-6">
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 text-lg">VOLUME</h5>
+                              </div>
+                            </div>
+
+                            {/* STATUS */}
+                            <div className="relative bg-white rounded-2xl border border-gray-200 p-6">
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 text-lg">STATUS</h5>
+                              </div>
+                            </div>
+
+                            {/* LAST UPDATE - Tıklanamaz */}
+                            <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                  <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
+                                <p className="text-gray-400 text-sm mt-1">Grafik yok</p>
+                              </div>
+                            </div>
+                        </div>
                         )}
                       </div>
                     )}
@@ -430,8 +729,7 @@ const ZOSPage = () => {
                         </div>
                       </div>
                     )}
-                  </div>
-                )}
+                </div>
               </div>
             </div>
           </div>
@@ -451,6 +749,11 @@ const ZOSPage = () => {
                     {selectedChart === 'ioRate' && 'I/O Rate% Grafiği'}
                     {selectedChart === 'dasdBusy' && 'DASD Busy% Grafiği'}
                     {selectedChart === 'lastUpdate' && 'Last Update% Grafiği'}
+                    {selectedChart === 'spoolUtil' && 'SPOOL %UTİL Grafiği'}
+                    {selectedChart === 'totalTracks' && 'TOTAL TRACKS Grafiği'}
+                    {selectedChart === 'usedTracks' && 'USED TRACKS Grafiği'}
+                    {selectedChart === 'activeUtil' && 'ACTİVE %UTİL Grafiği'}
+                    {selectedChart === 'activeTracks' && 'ACTİVE TRACKS Grafiği'}
                   </h3>
                   <button 
                     onClick={closeChart}
@@ -501,6 +804,11 @@ const ZOSPage = () => {
                         {selectedChart === 'ioRate' && 'I/O Rate% detaylı grafiği buraya eklenecek'}
                         {selectedChart === 'dasdBusy' && 'DASD Busy% detaylı grafiği buraya eklenecek'}
                         {selectedChart === 'lastUpdate' && 'Last Update% detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'spoolUtil' && 'SPOOL %UTİL detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'totalTracks' && 'TOTAL TRACKS detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'usedTracks' && 'USED TRACKS detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'activeUtil' && 'ACTİVE %UTİL detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'activeTracks' && 'ACTİVE TRACKS detaylı grafiği buraya eklenecek'}
                       </p>
                       <p className="text-gray-500 text-sm">
                         Gerçek zamanlı veri görselleştirme bileşeni buraya entegre edilecek
@@ -534,7 +842,12 @@ const ZOSPage = () => {
                                   selectedChart === 'cpuUtilization' ? "95" :
                                   selectedChart === 'ioRate' ? "1000" :
                                   selectedChart === 'dasdBusy' ? "80" :
-                                  selectedChart === 'lastUpdate' ? "5" : "90"
+                                  selectedChart === 'lastUpdate' ? "5" :
+                                  selectedChart === 'spoolUtil' ? "85" :
+                                  selectedChart === 'totalTracks' ? "10000" :
+                                  selectedChart === 'usedTracks' ? "8000" :
+                                  selectedChart === 'activeUtil' ? "90" :
+                                  selectedChart === 'activeTracks' ? "5000" : "90"
                                 }
                               />
                             </div>
@@ -549,7 +862,12 @@ const ZOSPage = () => {
                                   selectedChart === 'cpuUtilization' ? "85" :
                                   selectedChart === 'ioRate' ? "800" :
                                   selectedChart === 'dasdBusy' ? "65" :
-                                  selectedChart === 'lastUpdate' ? "3" : "75"
+                                  selectedChart === 'lastUpdate' ? "3" :
+                                  selectedChart === 'spoolUtil' ? "70" :
+                                  selectedChart === 'totalTracks' ? "8000" :
+                                  selectedChart === 'usedTracks' ? "6000" :
+                                  selectedChart === 'activeUtil' ? "75" :
+                                  selectedChart === 'activeTracks' ? "4000" : "75"
                                 }
                               />
                             </div>
@@ -564,7 +882,12 @@ const ZOSPage = () => {
                                   selectedChart === 'cpuUtilization' ? "70" :
                                   selectedChart === 'ioRate' ? "600" :
                                   selectedChart === 'dasdBusy' ? "50" :
-                                  selectedChart === 'lastUpdate' ? "2" : "60"
+                                  selectedChart === 'lastUpdate' ? "2" :
+                                  selectedChart === 'spoolUtil' ? "55" :
+                                  selectedChart === 'totalTracks' ? "6000" :
+                                  selectedChart === 'usedTracks' ? "4000" :
+                                  selectedChart === 'activeUtil' ? "60" :
+                                  selectedChart === 'activeTracks' ? "3000" : "60"
                                 }
                               />
                             </div>

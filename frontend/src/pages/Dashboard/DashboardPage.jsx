@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, X } from 'lucide-react';
+import { Search, X, ArrowRight, Cpu, Database, Zap, BarChart3, Mail, Globe, HardDrive, Terminal, FileText, Server, AlertTriangle, Mailbox } from 'lucide-react';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
   
   const mainviewCards = [
     {
@@ -109,6 +110,94 @@ const DashboardPage = () => {
     }
   ];
 
+  // Sayfa içindeki kartlar
+  const pageCards = {
+    'zos': [
+      { id: 'cpu', title: 'CPU', icon: Cpu, description: 'CPU performans ve kullanım', keywords: ['cpu', 'işlemci', 'performans', 'busy', 'utilization'] },
+      { id: 'addressSpace', title: 'Address Space', icon: Database, description: 'Adres Alanı Yönetimi', keywords: ['address', 'space', 'adres', 'alan'] },
+      { id: 'spool', title: 'Spool', icon: FileText, description: 'İş Kuyruğu Yönetimi', keywords: ['spool', 'kuyruk', 'iş', 'job'] }
+    ],
+    'cics': [
+      { id: 'transactions', title: 'Transactions', icon: Zap, description: 'CICS İşlem Yönetimi', keywords: ['transaction', 'işlem', 'cics'] },
+      { id: 'programs', title: 'Programs', icon: FileText, description: 'Program Yönetimi', keywords: ['program', 'programlar'] },
+      { id: 'resources', title: 'Resources', icon: Database, description: 'Kaynak Yönetimi', keywords: ['resource', 'kaynak'] }
+    ],
+    'db2': [
+      { id: 'databases', title: 'Databases', icon: Database, description: 'Veritabanı Yönetimi', keywords: ['database', 'veritabanı', 'db2'] },
+      { id: 'tables', title: 'Tables', icon: BarChart3, description: 'Tablo Yönetimi', keywords: ['table', 'tablo'] },
+      { id: 'connections', title: 'Connections', icon: Globe, description: 'Bağlantı Yönetimi', keywords: ['connection', 'bağlantı'] }
+    ],
+    'ims': [
+      { id: 'databases', title: 'Databases', icon: Database, description: 'IMS Veritabanı Yönetimi', keywords: ['database', 'veritabanı', 'ims'] },
+      { id: 'transactions', title: 'Transactions', icon: Zap, description: 'IMS İşlem Yönetimi', keywords: ['transaction', 'işlem'] },
+      { id: 'regions', title: 'Regions', icon: Server, description: 'Bölge Yönetimi', keywords: ['region', 'bölge'] }
+    ],
+    'mq': [
+      { id: 'queues', title: 'Queues', icon: Mail, description: 'Kuyruk Yönetimi', keywords: ['queue', 'kuyruk', 'mq'] },
+      { id: 'channels', title: 'Channels', icon: Globe, description: 'Kanal Yönetimi', keywords: ['channel', 'kanal'] },
+      { id: 'messages', title: 'Messages', icon: FileText, description: 'Mesaj Yönetimi', keywords: ['message', 'mesaj'] }
+    ],
+    'network': [
+      { id: 'connections', title: 'Connections', icon: Globe, description: 'Ağ Bağlantıları', keywords: ['connection', 'bağlantı', 'network'] },
+      { id: 'protocols', title: 'Protocols', icon: Zap, description: 'Protokol Yönetimi', keywords: ['protocol', 'protokol'] },
+      { id: 'security', title: 'Security', icon: AlertTriangle, description: 'Ağ Güvenliği', keywords: ['security', 'güvenlik'] }
+    ],
+    'storage': [
+      { id: 'volumes', title: 'Volumes', icon: HardDrive, description: 'Depolama Birimleri', keywords: ['volume', 'depolama', 'storage'] },
+      { id: 'datasets', title: 'Datasets', icon: Database, description: 'Veri Setleri', keywords: ['dataset', 'veri', 'set'] },
+      { id: 'backup', title: 'Backup', icon: FileText, description: 'Yedekleme Yönetimi', keywords: ['backup', 'yedek'] }
+    ],
+    'uss': [
+      { id: 'files', title: 'Files', icon: FileText, description: 'Dosya Yönetimi', keywords: ['file', 'dosya', 'uss'] },
+      { id: 'processes', title: 'Processes', icon: Terminal, description: 'İşlem Yönetimi', keywords: ['process', 'işlem'] },
+      { id: 'users', title: 'Users', icon: Server, description: 'Kullanıcı Yönetimi', keywords: ['user', 'kullanıcı'] }
+    ],
+    'rmf': [
+      { id: 'reports', title: 'Reports', icon: FileText, description: 'RMF Raporları', keywords: ['report', 'rapor', 'rmf'] },
+      { id: 'performance', title: 'Performance', icon: BarChart3, description: 'Performans Analizi', keywords: ['performance', 'performans'] },
+      { id: 'monitoring', title: 'Monitoring', icon: AlertTriangle, description: 'İzleme Yönetimi', keywords: ['monitoring', 'izleme'] }
+    ]
+  };
+
+  // Arama fonksiyonu
+  const searchResults = () => {
+    if (!searchTerm.trim()) return { pages: [], cards: [] };
+
+    const term = searchTerm.toLowerCase();
+    const results = { pages: [], cards: [] };
+
+    // Sayfaları ara
+    mainviewCards.forEach(page => {
+      if (page.title.toLowerCase().includes(term)) {
+        results.pages.push(page);
+      }
+    });
+
+    // Sayfa içindeki kartları ara
+    Object.entries(pageCards).forEach(([pageId, cards]) => {
+      cards.forEach(card => {
+        const matchesTitle = card.title.toLowerCase().includes(term);
+        const matchesDescription = card.description.toLowerCase().includes(term);
+        const matchesKeywords = card.keywords.some(keyword => keyword.includes(term));
+        
+        if (matchesTitle || matchesDescription || matchesKeywords) {
+          const pageInfo = mainviewCards.find(p => p.id === pageId);
+          results.cards.push({
+            ...card,
+            pageId,
+            pageTitle: pageInfo?.title || pageId,
+            pagePath: pageInfo?.path || `/${pageId}`
+          });
+        }
+      });
+    });
+
+    return results;
+  };
+
+  const results = searchResults();
+  const hasResults = results.pages.length > 0 || results.cards.length > 0;
+
   // Filter cards based on search term
   const filteredCards = mainviewCards.filter(card =>
     card.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -124,16 +213,20 @@ const DashboardPage = () => {
               <Search className="w-4 h-4 text-gray-400 ml-2" />
               <input
                 type="text"
-                placeholder="Sistem ara..."
+                placeholder="Sistem ara... (örn: cpu, database, network)"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="px-3 py-1.5 w-48 focus:outline-none rounded-lg text-sm"
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setShowSearchResults(e.target.value.length > 0);
+                }}
+                className="px-3 py-1.5 w-64 focus:outline-none rounded-lg text-sm"
                 autoFocus
               />
               <button
                 onClick={() => {
                   setIsSearchOpen(false);
                   setSearchTerm('');
+                  setShowSearchResults(false);
                 }}
                 className="p-1.5 hover:bg-gray-100 rounded-r-lg transition-colors"
               >
@@ -148,6 +241,84 @@ const DashboardPage = () => {
               <Search className="w-4 h-4 text-gray-400" />
               <span className="text-gray-600 text-sm">Ara</span>
             </button>
+          )}
+          
+          {/* Arama Sonuçları Dropdown */}
+          {showSearchResults && searchTerm && (
+            <div className="absolute top-full right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 max-h-96 overflow-y-auto z-50">
+              {hasResults ? (
+                <div className="p-4">
+                  {/* Sayfalar */}
+                  {results.pages.length > 0 && (
+                    <div className="mb-4">
+                      <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                        <Server className="w-4 h-4 mr-2" />
+                        Sayfalar ({results.pages.length})
+                      </h3>
+                      <div className="space-y-1">
+                        {results.pages.map((page) => (
+                          <button
+                            key={page.id}
+                            onClick={() => {
+                              navigate(page.path);
+                              setShowSearchResults(false);
+                              setIsSearchOpen(false);
+                              setSearchTerm('');
+                            }}
+                            className="w-full text-left p-2 hover:bg-gray-50 rounded-lg transition-colors flex items-center"
+                          >
+                            <span className="text-lg mr-3">{page.icon}</span>
+                            <div>
+                              <div className="font-medium text-gray-900">{page.title}</div>
+                              <div className="text-sm text-gray-500">Sistem sayfası</div>
+                            </div>
+                            <ArrowRight className="w-4 h-4 text-gray-400 ml-auto" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Sayfa İçindeki Kartlar */}
+                  {results.cards.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                        <Cpu className="w-4 h-4 mr-2" />
+                        Kartlar ({results.cards.length})
+                      </h3>
+                      <div className="space-y-1">
+                        {results.cards.map((card, index) => (
+                          <button
+                            key={`${card.pageId}-${card.id}-${index}`}
+                            onClick={() => {
+                              navigate(card.pagePath);
+                              setShowSearchResults(false);
+                              setIsSearchOpen(false);
+                              setSearchTerm('');
+                            }}
+                            className="w-full text-left p-2 hover:bg-gray-50 rounded-lg transition-colors flex items-center"
+                          >
+                            <card.icon className="w-4 h-4 text-gray-600 mr-3" />
+                            <div className="flex-1">
+                              <div className="font-medium text-gray-900">{card.title}</div>
+                              <div className="text-sm text-gray-500">{card.description}</div>
+                              <div className="text-xs text-blue-600 mt-1">→ {card.pageTitle}</div>
+                            </div>
+                            <ArrowRight className="w-4 h-4 text-gray-400" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="p-4 text-center text-gray-500">
+                  <Search className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                  <p className="text-sm">"{searchTerm}" için sonuç bulunamadı</p>
+                  <p className="text-xs mt-1">Farklı anahtar kelimeler deneyin</p>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>

@@ -74,5 +74,17 @@ api.interceptors.response.use(
   }
 )
 
+// Database API functions
+export const databaseAPI = {
+  // Test database connection
+  testConnection: (config) => api.post('/database/test-connection', config),
+  
+  // Get mainview_mvs_sysover data
+  getMainviewMvsSysover: (config) => api.post('/database/mainview-mvs-sysover', config),
+  
+  // Check table exists and get info
+  checkTableExists: (config) => api.post('/database/check-table', config)
+}
+
 export default api
 
