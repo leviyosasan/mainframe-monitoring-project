@@ -29,7 +29,7 @@ CONFIG = {
     }
 }
 
-TABLE_NAME = "mainview_mvmqs_qm" 
+TABLE_NAME = "mainview_mq_qm" 
 
 # --- API ENDPOINTS ---
 LOGON_URL = "http://192.168.60.20:15565/cra/serviceGateway/services/MVERESTAPI_VBT1_3940/logon"
