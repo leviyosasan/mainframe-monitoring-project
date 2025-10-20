@@ -673,7 +673,21 @@ const ZOSPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                   </svg>
                                 </div>
-                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg">CPU Busy%</h5>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CPU Busy%</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewData.length > 0 ? (
+                                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                      parseFloat(mainviewData[0]?.succpub || 0) < 60 ? 'bg-green-100 text-green-800' :
+                                      parseFloat(mainviewData[0]?.succpub || 0) < 75 ? 'bg-yellow-100 text-yellow-800' :
+                                      parseFloat(mainviewData[0]?.succpub || 0) < 90 ? 'bg-orange-100 text-orange-800' :
+                                      'bg-red-100 text-red-800'
+                                    }`}>
+                                      {formatNumber(mainviewData[0]?.succpub)}%
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -700,7 +714,21 @@ const ZOSPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                   </svg>
                                 </div>
-                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg">zIIP Busy%</h5>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">zIIP Busy%</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewData.length > 0 ? (
+                                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                      parseFloat(mainviewData[0]?.sucziib || 0) < 60 ? 'bg-green-100 text-green-800' :
+                                      parseFloat(mainviewData[0]?.sucziib || 0) < 75 ? 'bg-yellow-100 text-yellow-800' :
+                                      parseFloat(mainviewData[0]?.sucziib || 0) < 90 ? 'bg-orange-100 text-orange-800' :
+                                      'bg-red-100 text-red-800'
+                                    }`}>
+                                      {formatNumber(mainviewData[0]?.sucziib)}%
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -727,7 +755,21 @@ const ZOSPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                                   </svg>
                                 </div>
-                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg">CPU Utilization%</h5>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CPU Utilization%</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewData.length > 0 ? (
+                                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                      parseFloat(mainviewData[0]?.scicpavg || 0) < 60 ? 'bg-green-100 text-green-800' :
+                                      parseFloat(mainviewData[0]?.scicpavg || 0) < 75 ? 'bg-yellow-100 text-yellow-800' :
+                                      parseFloat(mainviewData[0]?.scicpavg || 0) < 90 ? 'bg-orange-100 text-orange-800' :
+                                      'bg-red-100 text-red-800'
+                                    }`}>
+                                      {formatNumber(mainviewData[0]?.scicpavg)}%
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -754,7 +796,21 @@ const ZOSPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                                   </svg>
                                 </div>
-                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg">I/O Rate%</h5>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">I/O Rate%</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewData.length > 0 ? (
+                                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                      parseFloat(mainviewData[0]?.suciinrt || 0) < 60 ? 'bg-green-100 text-green-800' :
+                                      parseFloat(mainviewData[0]?.suciinrt || 0) < 75 ? 'bg-yellow-100 text-yellow-800' :
+                                      parseFloat(mainviewData[0]?.suciinrt || 0) < 90 ? 'bg-orange-100 text-orange-800' :
+                                      'bg-red-100 text-red-800'
+                                    }`}>
+                                      {formatNumber(mainviewData[0]?.suciinrt)}%
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -781,7 +837,21 @@ const ZOSPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
                                   </svg>
                                 </div>
-                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg">DASD Busy%</h5>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">DASD Busy%</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewData.length > 0 ? (
+                                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                      parseFloat(mainviewData[0]?.sukadbpc || 0) < 60 ? 'bg-green-100 text-green-800' :
+                                      parseFloat(mainviewData[0]?.sukadbpc || 0) < 75 ? 'bg-yellow-100 text-yellow-800' :
+                                      parseFloat(mainviewData[0]?.sukadbpc || 0) < 90 ? 'bg-orange-100 text-orange-800' :
+                                      'bg-red-100 text-red-800'
+                                    }`}>
+                                      {formatNumber(mainviewData[0]?.sukadbpc)}%
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -818,7 +888,16 @@ const ZOSPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                   </svg>
                                 </div>
-                                <h5 className="font-bold text-gray-800 text-lg">SMF ID</h5>
+                                <h5 className="font-bold text-gray-800 text-lg mb-2">SMF ID</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJespool.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
+                                      {mainviewDataJespool[0]?.smf_id || '-'}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -830,7 +909,16 @@ const ZOSPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                   </svg>
                                 </div>
-                                <h5 className="font-bold text-gray-800 text-lg">TOTAL VOLS</h5>
+                                <h5 className="font-bold text-gray-800 text-lg mb-2">TOTAL VOLS</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJespool.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                      {formatNumber(mainviewDataJespool[0]?.total_volumes)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -845,7 +933,21 @@ const ZOSPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                   </svg>
                                 </div>
-                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg">SPOOL %UTİL</h5>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPOOL %UTİL</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJespool.length > 0 ? (
+                                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                      parseFloat(mainviewDataJespool[0]?.spool_util || 0) < 60 ? 'bg-green-100 text-green-800' :
+                                      parseFloat(mainviewDataJespool[0]?.spool_util || 0) < 75 ? 'bg-yellow-100 text-yellow-800' :
+                                      parseFloat(mainviewDataJespool[0]?.spool_util || 0) < 90 ? 'bg-orange-100 text-orange-800' :
+                                      'bg-red-100 text-red-800'
+                                    }`}>
+                                      {formatNumber(mainviewDataJespool[0]?.spool_util)}%
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -860,7 +962,16 @@ const ZOSPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                   </svg>
                                 </div>
-                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg">TOTAL TRACKS</h5>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">TOTAL TRACKS</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJespool.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                      {formatNumber(mainviewDataJespool[0]?.total_tracks)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -875,7 +986,16 @@ const ZOSPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                   </svg>
                                 </div>
-                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg">USED TRACKS</h5>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">USED TRACKS</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJespool.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                      {formatNumber(mainviewDataJespool[0]?.used_tracks)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -890,7 +1010,21 @@ const ZOSPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                   </svg>
                                 </div>
-                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg">ACTİVE %UTİL</h5>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">ACTİVE %UTİL</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJespool.length > 0 ? (
+                                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                      parseFloat(mainviewDataJespool[0]?.active_spool_util || 0) < 60 ? 'bg-green-100 text-green-800' :
+                                      parseFloat(mainviewDataJespool[0]?.active_spool_util || 0) < 75 ? 'bg-yellow-100 text-yellow-800' :
+                                      parseFloat(mainviewDataJespool[0]?.active_spool_util || 0) < 90 ? 'bg-orange-100 text-orange-800' :
+                                      'bg-red-100 text-red-800'
+                                    }`}>
+                                      {formatNumber(mainviewDataJespool[0]?.active_spool_util)}%
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -905,7 +1039,16 @@ const ZOSPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                   </svg>
                                 </div>
-                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg">ACTİVE TRACKS</h5>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">ACTİVE TRACKS</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJespool.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                      {formatNumber(mainviewDataJespool[0]?.total_active_tracks)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -917,7 +1060,16 @@ const ZOSPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                   </svg>
                                 </div>
-                                <h5 className="font-bold text-gray-800 text-lg">ACTİVE USED</h5>
+                                <h5 className="font-bold text-gray-800 text-lg mb-2">ACTİVE USED</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJespool.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                      {formatNumber(mainviewDataJespool[0]?.used_active_tracks)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -929,7 +1081,16 @@ const ZOSPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                   </svg>
                                 </div>
-                                <h5 className="font-bold text-gray-800 text-lg">ACTİVE VOLS</h5>
+                                <h5 className="font-bold text-gray-800 text-lg mb-2">ACTİVE VOLS</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJespool.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                      {formatNumber(mainviewDataJespool[0]?.active_volumes)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -941,7 +1102,16 @@ const ZOSPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
                                   </svg>
                                 </div>
-                                <h5 className="font-bold text-gray-800 text-lg">VOLUME</h5>
+                                <h5 className="font-bold text-gray-800 text-lg mb-2">VOLUME</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJespool.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
+                                      {mainviewDataJespool[0]?.volume || '-'}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -953,7 +1123,21 @@ const ZOSPage = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                   </svg>
                                 </div>
-                                <h5 className="font-bold text-gray-800 text-lg">STATUS</h5>
+                                <h5 className="font-bold text-gray-800 text-lg mb-2">STATUS</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJespool.length > 0 ? (
+                                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                      mainviewDataJespool[0]?.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
+                                      mainviewDataJespool[0]?.status === 'INACTIVE' ? 'bg-red-100 text-red-800' :
+                                      mainviewDataJespool[0]?.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                      'bg-gray-100 text-gray-800'
+                                    }`}>
+                                      {mainviewDataJespool[0]?.status || '-'}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -966,7 +1150,6 @@ const ZOSPage = () => {
                                   </svg>
                                 </div>
                                 <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
-                                <p className="text-gray-400 text-sm mt-1">Grafik yok</p>
                               </div>
                             </div>
                         </div>
