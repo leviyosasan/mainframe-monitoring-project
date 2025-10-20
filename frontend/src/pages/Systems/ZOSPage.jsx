@@ -11,6 +11,8 @@ const ZOSPage = () => {
   const [infoModal, setInfoModal] = useState(null);
   const [mainviewData, setMainviewData] = useState([]);
   const [dataLoading, setDataLoading] = useState(false);
+  const [mainviewDataJespool, setMainviewDataJespool] = useState([]);
+  const [mainviewDataJCPU,setMainviewDataJCPU ] = useState([]);
 
   // Sayı formatı yardımcı fonksiyonu
   const formatNumber = (value) => {
@@ -78,6 +80,126 @@ const ZOSPage = () => {
     }
   };
 
+
+  const checkTableInfoJespool = async () => {
+    try {
+      const responseJespool = await databaseAPI.checkTableExistsJespool();
+      
+      if (responseJespool.data.success) {
+        const tableInfoJespool = responseJespool.data.tableInfo;
+        
+        if (!tableInfoJespool.exists) {
+          toast.error('mainview_mvs_jespool tablosu bulunamadı!');
+          return false;
+        }
+        
+        if (tableInfoJespool.rowCount === 0) {
+          return false; // Sadece false döndür, uyarı verme
+        }
+        
+        toast.success(`Tablo mevcut: ${tableInfoJespool.rowCount} kayıt bulundu`);
+        return true;
+      }
+    } catch (error) {
+      console.error('Tablo kontrolü hatası:', error);
+      toast.error(`Tablo kontrolü başarısız: ${error.message}`);
+      return false;
+    }
+  };
+
+  // Veri çekme fonksiyonu
+  const fetchMainviewDataJespool = async () => {
+    setDataLoading(true);
+    try {
+      // Önce tablo kontrolü yap
+      const tableExists = await checkTableInfoJespool();
+      if (!tableExists) {
+        setDataLoading(false);
+        return;
+      }
+      
+      const responseJespool = await databaseAPI.getMainviewMvsJespool();
+
+      
+      if (responseJespool.data.success) {
+        setMainviewDataJespool(responseJespool.data.data);
+        
+        if (responseJespool.data.data.length === 0) {
+          // Tablo boşsa sessizce devam et, uyarı verme
+        } else {
+          toast.success(`Veriler başarıyla yüklendi (${responseJespool.data.data.length} kayıt)`);
+        }
+      } else {
+        toast.error('Veri yüklenirken hata oluştu');
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error);
+      toast.error(`Veri yüklenirken hata oluştu: ${error.message}`);
+    } finally {
+      setDataLoading(false);
+    }
+  };
+
+
+  const fetchMainviewDataJCPU = async () => {
+    setDataLoading(true);
+    try {
+      // Önce tablo kontrolü yap
+      const tableExists = await checkTableInfoJCPU();
+      if (!tableExists) {
+        setDataLoading(false);
+        return;
+      }
+      
+      const responseJCPU = await databaseAPI.getMainviewMvsJCPU();
+
+      
+      if (responseJCPU.data.success) {
+        setMainviewDataJCPU(responseJCPU.data.data);
+        
+        if (responseJCPU.data.data.length === 0) {
+          // Tablo boşsa sessizce devam et, uyarı verme
+        } else {
+          toast.success(`Veriler başarıyla yüklendi (${responseJCPU.data.data.length} kayıt)`);
+        }
+      } else {
+        toast.error('Veri yüklenirken hata oluştu');
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error);
+      toast.error(`Veri yüklenirken hata oluştu: ${error.message}`);
+    } finally {
+      setDataLoading(false);
+    }
+  };
+
+
+  const checkTableInfoJCPU = async () => {
+    try {
+      const responseJCPU = await databaseAPI.checkTableExistsJCPU();
+      
+      if (responseJCPU.data.success) {
+        const tableInfoJCPU = responseJCPU.data.tableInfo;
+        
+        if (!tableInfoJCPU.exists) {
+          toast.error('mainview_mvs_jcpu tablosu bulunamadı!');
+          return false;
+        }
+        
+        if (tableInfoJCPU.rowCount === 0) {
+          return false; // Sadece false döndür, uyarı verme
+        }
+        
+        toast.success(`Tablo mevcut: ${tableInfoJCPU.rowCount} kayıt bulundu`);
+        return true;
+      }
+    } catch (error) {
+      console.error('Tablo kontrolü hatası:', error);
+      toast.error(`Tablo kontrolü başarısız: ${error.message}`);
+      return false;
+    }
+  };
+
   const openModal = (modalType) => {
     setActiveModal(modalType);
     setActiveTab('table'); // Her modal açıldığında tablo sekmesine git
@@ -86,6 +208,13 @@ const ZOSPage = () => {
     // CPU modalı açıldığında veri çek
     if (modalType === 'cpu') {
       fetchMainviewData();
+    }
+    // Spool modalı açıldığında veri çek
+    if (modalType === 'spool') {
+      fetchMainviewDataJespool();
+    }
+    if (modalType === 'addressSpace') {
+      fetchMainviewDataJCPU();
     }
   };
 
@@ -268,6 +397,24 @@ const ZOSPage = () => {
                               {dataLoading ? 'Yükleniyor...' : 'Yenile'}
                             </button>
                           )}
+                          {activeModal === 'addressSpace' && (
+                            <button
+                              onClick={fetchMainviewDataJCPU}
+                              disabled={dataLoading}
+                              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {dataLoading ? 'Yükleniyor...' : 'Yenile'}
+                            </button>
+                          )}
+                          {activeModal === 'spool' && (
+                            <button
+                              onClick={fetchMainviewDataJespool}
+                              disabled={dataLoading}
+                              className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {dataLoading ? 'Yükleniyor...' : 'Yenile'}
+                            </button>
+                          )}
                         </div>
                         
                         {activeModal === 'cpu' ? (
@@ -330,15 +477,167 @@ const ZOSPage = () => {
                               </div>
                             )}
                           </div>
+                        ) : activeModal === 'addressSpace' ? (
+                          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            {dataLoading ? (
+                              <div className="p-8 text-center">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto"></div>
+                                <p className="mt-4 text-gray-600">Veriler yükleniyor...</p>
+                              </div>
+                            ) : mainviewDataJCPU.length > 0 ? (
+                              <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                  <thead className="bg-gray-50">
+                                    <tr>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jobname</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">JES Job Number</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address Space Type</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Class Name</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ASGRNMC</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Step Being Monitored</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ALL CPU seconds</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unadj CPU Util (All Enclaves)</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Using CPU %</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU Delay %</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Average Priority</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TCB Time</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">% SRB Time</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Interval Unadj Remote Enclave CPU use</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Total CPU Time</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Other Addr Space Enclave CPU Time</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">zIIP Total CPU Time</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">zIIP Interval CPU Time</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dep Enclave zIIP Total Time</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dep Enclave zIIP Interval Time</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dep Enclave zIIP On CP Total</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Interval CP time</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resource Group Name</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resource Group Type</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recovery Process Boost</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Implicit CPU Critical Flag</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BMC Time</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="bg-white divide-y divide-gray-200">
+                                    {mainviewDataJCPU.map((row, index) => (
+                                      <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.jobname || '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.jes_job_number || '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.address_space_type || '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.service_class_name || '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.asgrnmc || '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.job_step_being_monitored || '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.all_cpu_seconds)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.unadj_cpu_util_with_all_enclaves)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.using_cpu_percentage)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.cpu_delay_percentage)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.average_priority)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.tcb_time)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.percentage_srb_time)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.interval_unadj_remote_enclave_cpu_use)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.job_total_cpu_time)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.other_address_space_enclave_cpu_time)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.ziip_total_cpu_time)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.ziip_interval_cpu_time)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.dependent_enclave_ziip_total_time)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.dependent_enclave_ziip_interval_time)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.dependent_enclave_ziip_on_cp_total)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.interval_cp_time)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.resource_group_name || '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.resource_group_type || '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.recovery_process_boost || '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.implicit_cpu_critical_flag || '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.bmctime ? new Date(row.bmctime).toLocaleString('tr-TR') : '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.time || '-'}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            ) : (
+                              <div className="p-8 text-center">
+                                <div className="text-4xl mb-4">📊</div>
+                                <p className="text-gray-600 text-lg">Henüz veri bulunmuyor</p>
+                                <p className="text-gray-500 text-sm mt-2">Yenile butonuna tıklayarak veri yükleyebilirsiniz</p>
+                              </div>
+                            )}
+                          </div>
+                        ) : activeModal === 'spool' ? (
+                          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            {dataLoading ? (
+                              <div className="p-8 text-center">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto"></div>
+                                <p className="mt-4 text-gray-600">Veriler yükleniyor...</p>
+                              </div>
+                            ) : mainviewDataJespool.length > 0 ? (
+                              <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                  <thead className="bg-gray-50">
+                                    <tr>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BMC Time</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SMF ID</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL VOLS</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SPOOL %UTIL</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL TRACKS</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">USED TRACKS</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIVE %UTIL</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL ACTIVE TRACKS</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">USED ACTIVE TRACKS</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIVE VOLS</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">VOLUME</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">VOLUME %UTIL</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">VOLUME TRACKS</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">VOLUME USED</th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">OTHER VOLS</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="bg-white divide-y divide-gray-200">
+                                    {mainviewDataJespool.map((row, index) => (
+                                      <tr key={row.id || index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.id}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.bmctime ? new Date(row.bmctime).toLocaleString('tr-TR') : '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.time || '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.smf_id || '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.total_volumes)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.spool_util)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.total_tracks)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.used_tracks)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.active_spool_util)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.total_active_tracks)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.used_active_tracks)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.active_volumes)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.volume || '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.status || '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.volume_util)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.volume_tracks)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.volume_used)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.other_volumes)}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            ) : (
+                              <div className="p-8 text-center">
+                                <div className="text-4xl mb-4">📊</div>
+                                <p className="text-gray-600 text-lg">Henüz veri bulunmuyor</p>
+                                <p className="text-gray-500 text-sm mt-2">Yenile butonuna tıklayarak veri yükleyebilirsiniz</p>
+                              </div>
+                            )}
+                          </div>
                         ) : (
-                        <div className="bg-gray-50 rounded-lg p-8 text-center">
-                          <div className="text-4xl mb-4">📊</div>
-                          <p className="text-gray-600 text-lg">Tablo verileri buraya eklenecek</p>
-                          <p className="text-gray-500 text-sm mt-2">
-                            {activeModal === 'addressSpace' && 'Address Space verileri'}
-                            {activeModal === 'spool' && 'Spool işlem verileri'}
-                          </p>
-                        </div>
+                          <div className="bg-gray-50 rounded-lg p-8 text-center">
+                            <div className="text-4xl mb-4">📊</div>
+                            <p className="text-gray-600 text-lg">Tablo verileri buraya eklenecek</p>
+                            <p className="text-gray-500 text-sm mt-2">
+                              {activeModal === 'addressSpace' && 'Address Space verileri'}
+                              {activeModal === 'spool' && 'Spool işlem verileri'}
+                            </p>
+                          </div>
                         )}
                       </div>
                     )}

@@ -81,9 +81,19 @@ export const databaseAPI = {
   
   // Get mainview_mvs_sysover data
   getMainviewMvsSysover: (config) => api.post('/database/mainview-mvs-sysover', config),
+
+  //Get mainview_mvs_jespool data
+  getMainviewMvsJespool: (config) => api.post('/database/mainview-mvs-jespool', config),
   
   // Check table exists and get info
-  checkTableExists: (config) => api.post('/database/check-table', config)
+  checkTableExists: (config) => api.post('/database/check-table', config),
+
+  // Check table exists and get info
+  checkTableExistsJespool: (config) => api.post('/database/check-table-jespool', config),
+
+  checkTableExistsJCPU: (config) => api.post('/database/check-table-jcpu', config),
+  
+  getMainviewMvsJCPU: (config) => api.post('/database/mainview-mvs-jcpu', config)
 }
 
 export default api
