@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-// import toast from 'react-hot-toast'; // Kaldırıldı - Basit yapıda kullanılmıyor
-// import { databaseAPI } from '../../services/api'; // Kaldırıldı - Basit yapıda kullanılmıyor
 
 const NetworkPage = () => {
   const [activeModal, setActiveModal] = useState(null);
@@ -8,13 +6,6 @@ const NetworkPage = () => {
   const [selectedChart, setSelectedChart] = useState(null);
   const [chartTab, setChartTab] = useState('chart');
   const [infoModal, setInfoModal] = useState(null);
-  // Veri state'leri kaldırıldı:
-  // const [mainviewDataStacks, setMainviewDataStacks] = useState([]);
-  // const [mainviewDataStackcpu, setMainviewDataStackcpu] = useState([]);
-  // const [mainviewDataVtamcsa, setMainviewDataVtamcsa] = useState([]);
-  // const [dataLoading, setDataLoading] = useState(false); // Kaldırıldı
-
-  // Veri çekme fonksiyonları kaldırıldı
 
   const openModal = (modalType) => {
     setActiveModal(modalType);
@@ -60,6 +51,10 @@ const NetworkPage = () => {
             case 'tcpconf': return 'indigo';
             case 'tcpcons': return 'teal';
             case 'udfconf': return 'amber';
+            case 'actcons': return 'rose';
+            case 'VTMBUFF': return 'red';
+            case 'connsrpz': return 'pink';
+            case 'tcpstor': return 'sky';
             case 'stacks':
             default: return 'blue';
         }
@@ -72,7 +67,7 @@ const NetworkPage = () => {
         <h1 className="text-4xl font-bold text-gray-900 mb-8">
           Network Management
         </h1>
-
+        
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Stacks Kartı (Eklendi) */}
@@ -122,6 +117,38 @@ const NetworkPage = () => {
               <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">UDFCONF</h2><p className="text-gray-500 text-sm font-medium">UDP Yapılandırma</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
             </div>
           </div>
+
+          {/* ACTCONS Kartı */}
+          <div onClick={() => openModal('actcons')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
+            <div className="p-8">
+              <div className="flex items-center justify-center w-14 h-14 bg-rose-100 rounded-xl mb-6 mx-auto group-hover:bg-rose-200"><svg className="w-7 h-7 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">ACTCONS</h2><p className="text-gray-500 text-sm font-medium">Aktif Bağlantı Durumu</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+            </div>
+          </div>
+
+          {/* VTMBUFF Kartı */}
+          <div onClick={() => openModal('VTMBUFF')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
+            <div className="p-8">
+              <div className="flex items-center justify-center w-14 h-14 bg-red-100 rounded-xl mb-6 mx-auto group-hover:bg-red-200"><svg className="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h-4m-2 0H7" /></svg></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">VTMBUFF</h2><p className="text-gray-500 text-sm font-medium">VTAM Buffer İstatistikleri</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+            </div>
+          </div>
+
+          {/* CONNSRPZ Kartı */}
+          <div onClick={() => openModal('connsrpz')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
+            <div className="p-8">
+              <div className="flex items-center justify-center w-14 h-14 bg-pink-100 rounded-xl mb-6 mx-auto group-hover:bg-pink-200"><svg className="w-7 h-7 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M12 20.005v-5.292a4 4 0 00-4-4h-2M18 15.713a4 4 0 00-4-4h-2" /></svg></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">CONNSRPZ</h2><p className="text-gray-500 text-sm font-medium">Connection Hızı ve Durumu</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+            </div>
+          </div>
+
+          {/* TCPSTOR Kartı */}
+          <div onClick={() => openModal('tcpstor')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
+            <div className="p-8">
+              <div className="flex items-center justify-center w-14 h-14 bg-sky-100 rounded-xl mb-6 mx-auto group-hover:bg-sky-200"><svg className="w-7 h-7 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 012-2h10a2 2 0 012 2M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">TCPSTOR</h2><p className="text-gray-500 text-sm font-medium">TCP Storage Yönetimi</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+            </div>
+          </div>
         </div>
 
         {/* --- MODALLAR --- */}
@@ -140,6 +167,10 @@ const NetworkPage = () => {
                     {activeModal === 'tcpconf' && 'TCPCONF Yönetimi'}
                     {activeModal === 'tcpcons' && 'TCPCONS Yönetimi'}
                     {activeModal === 'udfconf' && 'UDFCONF Yönetimi'}
+                    {activeModal === 'actcons' && 'ACTCONS Yönetimi'}
+                    {activeModal === 'VTMBUFF' && 'VTAM Buffer Yönetimi'}
+                    {activeModal === 'connsrpz' && 'Connection RPZ Yönetimi'}
+                    {activeModal === 'tcpstor' && 'TCP Storage Yönetimi'}
                   </h3>
                   <button onClick={closeModal} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
                 </div>
@@ -219,8 +250,44 @@ const NetworkPage = () => {
                           <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6"> <div className="text-center"> <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4"> <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /> </svg> </div> <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5> </div> </div>
                         </div>
                       )}
+
+                      {/* ACTCONS için Örnek Kartlar */}
+                      {activeModal === 'actcons' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {/* Session Count */}
+                          <div onClick={() => openChart('sessionCount')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                             <button onClick={(e) => { e.stopPropagation(); openInfo('sessionCount'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg></button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200"><svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg></div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Session Count</h5>
+                              <div className="text-2xl font-bold text-gray-900"><span className="text-gray-400">-</span></div>
+                            </div>
+                          </div>
+                          {/* Active Sessions */}
+                          <div onClick={() => openChart('activeSessions')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('activeSessions'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg></button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200"><svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg></div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Active Sessions</h5>
+                              <div className="text-2xl font-bold text-gray-900"><span className="text-gray-400">-</span></div>
+                            </div>
+                          </div>
+                          {/* Session Utilization */}
+                          <div onClick={() => openChart('sessionUtilization')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                             <button onClick={(e) => { e.stopPropagation(); openInfo('sessionUtilization'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg></button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200"><svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Session Utilization</h5>
+                              <div className="text-2xl font-bold text-gray-900"><span className="text-gray-400">-</span></div>
+                            </div>
+                          </div>
+                           {/* Last Update */}
+                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6"> <div className="text-center"> <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4"> <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /> </svg> </div> <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5> </div> </div>
+                        </div>
+                      )}
+
                       {/* Diğer modal tipleri için placeholder */}
-                      {activeModal !== 'tcpconf' && (
+                      {activeModal !== 'tcpconf' && activeModal !== 'actcons' && (
                            <div className="bg-gray-50 rounded-lg p-8 text-center">
                             <div className="text-4xl mb-4">📈</div>
                             <p className="text-gray-600 text-lg">Grafik kartları buraya eklenecek</p>
@@ -274,8 +341,12 @@ const NetworkPage = () => {
                     {selectedChart === 'connectionCount' && 'Connection Count Grafiği'}
                     {selectedChart === 'activeConnections' && 'Active Connections Grafiği'}
                     {selectedChart === 'networkThroughput' && 'Network Throughput Grafiği'}
+                    {/* ACTCONS Örnekleri */}
+                    {selectedChart === 'sessionCount' && 'Session Count Grafiği'}
+                    {selectedChart === 'activeSessions' && 'Active Sessions Grafiği'}
+                    {selectedChart === 'sessionUtilization' && 'Session Utilization Grafiği'}
                     {/* Diğer chart tipleri için başlıklar eklenebilir */}
-                    {!['connectionCount', 'activeConnections', 'networkThroughput'].includes(selectedChart) && `${selectedChart} Grafiği`}
+                    {!['connectionCount', 'activeConnections', 'networkThroughput', 'sessionCount', 'activeSessions', 'sessionUtilization'].includes(selectedChart) && `${selectedChart} Grafiği`}
                   </h3>
                   <button onClick={closeChart} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
                 </div>
@@ -304,7 +375,10 @@ const NetworkPage = () => {
                      {infoModal === 'connectionCount' && 'Connection Count Hakkında'}
                      {infoModal === 'activeConnections' && 'Active Connections Hakkında'}
                      {infoModal === 'networkThroughput' && 'Network Throughput Hakkında'}
-                     {!['connectionCount', 'activeConnections', 'networkThroughput'].includes(infoModal) && `${infoModal} Hakkında`}
+                     {infoModal === 'sessionCount' && 'Session Count Hakkında'}
+                     {infoModal === 'activeSessions' && 'Active Sessions Hakkında'}
+                     {infoModal === 'sessionUtilization' && 'Session Utilization Hakkında'}
+                     {!['connectionCount', 'activeConnections', 'networkThroughput', 'sessionCount', 'activeSessions', 'sessionUtilization'].includes(infoModal) && `${infoModal} Hakkında`}
                   </h3>
                   <button onClick={closeInfo} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
                 </div>
@@ -315,7 +389,7 @@ const NetworkPage = () => {
                       <p className={`text-${modalColor}-800 text-sm`}>
                          {infoModal} metriği ile ilgili detaylı açıklama buraya eklenecektir.
                       </p>
-                    </div>
+                  </div>
                      {/* Gerekirse Normal Değerler vb. eklenebilir */}
                 </div>
               </div>
