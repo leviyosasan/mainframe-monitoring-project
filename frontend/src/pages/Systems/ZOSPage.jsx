@@ -871,9 +871,312 @@ const ZOSPage = () => {
 
                         {/* Address Space Grafik Kartları */}
                         {activeModal === 'addressSpace' && (
-                        <div className="bg-gray-50 rounded-lg p-8 text-center">
-                          <div className="text-6xl mb-4">📈</div>
-                            <p className="text-gray-600 text-lg">Address Space grafikleri buraya eklenecek</p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* Jobname */}
+                            <div className="relative bg-white rounded-2xl border border-gray-200 p-6">
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 text-lg mb-2">Jobname</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJCPU.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                                      {mainviewDataJCPU[0]?.jobname || '-'}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* JES Job Number */}
+                            <div className="relative bg-white rounded-2xl border border-gray-200 p-6">
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 text-lg mb-2">JES Job Number</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJCPU.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                                      {mainviewDataJCPU[0]?.jes_job_number || '-'}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* ALL CPU seconds - Grafik */}
+                            <div 
+                              onClick={() => openChart('allCpuSeconds')}
+                              className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            >
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">ALL CPU seconds</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJCPU.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                      {formatNumber(mainviewDataJCPU[0]?.all_cpu_seconds)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Unadj CPU Util - Grafik */}
+                            <div 
+                              onClick={() => openChart('unadjCpuUtil')}
+                              className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            >
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Unadj CPU Util</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJCPU.length > 0 ? (
+                                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                      parseFloat(mainviewDataJCPU[0]?.unadj_cpu_util_with_all_enclaves || 0) < 60 ? 'bg-green-100 text-green-800' :
+                                      parseFloat(mainviewDataJCPU[0]?.unadj_cpu_util_with_all_enclaves || 0) < 75 ? 'bg-yellow-100 text-yellow-800' :
+                                      parseFloat(mainviewDataJCPU[0]?.unadj_cpu_util_with_all_enclaves || 0) < 90 ? 'bg-orange-100 text-orange-800' :
+                                      'bg-red-100 text-red-800'
+                                    }`}>
+                                      {formatNumber(mainviewDataJCPU[0]?.unadj_cpu_util_with_all_enclaves)}%
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Using CPU % - Grafik */}
+                            <div 
+                              onClick={() => openChart('usingCpuPercentage')}
+                              className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            >
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Using CPU %</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJCPU.length > 0 ? (
+                                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                      parseFloat(mainviewDataJCPU[0]?.using_cpu_percentage || 0) < 60 ? 'bg-green-100 text-green-800' :
+                                      parseFloat(mainviewDataJCPU[0]?.using_cpu_percentage || 0) < 75 ? 'bg-yellow-100 text-yellow-800' :
+                                      parseFloat(mainviewDataJCPU[0]?.using_cpu_percentage || 0) < 90 ? 'bg-orange-100 text-orange-800' :
+                                      'bg-red-100 text-red-800'
+                                    }`}>
+                                      {formatNumber(mainviewDataJCPU[0]?.using_cpu_percentage)}%
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* CPU Delay % - Grafik */}
+                            <div 
+                              onClick={() => openChart('cpuDelayPercentage')}
+                              className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            >
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CPU Delay %</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJCPU.length > 0 ? (
+                                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                      parseFloat(mainviewDataJCPU[0]?.cpu_delay_percentage || 0) < 10 ? 'bg-green-100 text-green-800' :
+                                      parseFloat(mainviewDataJCPU[0]?.cpu_delay_percentage || 0) < 25 ? 'bg-yellow-100 text-yellow-800' :
+                                      parseFloat(mainviewDataJCPU[0]?.cpu_delay_percentage || 0) < 40 ? 'bg-orange-100 text-orange-800' :
+                                      'bg-red-100 text-red-800'
+                                    }`}>
+                                      {formatNumber(mainviewDataJCPU[0]?.cpu_delay_percentage)}%
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Average Priority */}
+                            <div className="relative bg-white rounded-2xl border border-gray-200 p-6">
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 text-lg mb-2">Average Priority</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJCPU.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                      {formatNumber(mainviewDataJCPU[0]?.average_priority)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* TCB Time - Grafik */}
+                            <div 
+                              onClick={() => openChart('tcbTime')}
+                              className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            >
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">TCB Time</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJCPU.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                      {formatNumber(mainviewDataJCPU[0]?.tcb_time)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* % SRB Time - Grafik */}
+                            <div 
+                              onClick={() => openChart('srbTime')}
+                              className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            >
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">% SRB Time</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJCPU.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                      {formatNumber(mainviewDataJCPU[0]?.percentage_srb_time)}%
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Job Total CPU Time - Grafik */}
+                            <div 
+                              onClick={() => openChart('jobTotalCpuTime')}
+                              className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            >
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Job Total CPU Time</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJCPU.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                      {formatNumber(mainviewDataJCPU[0]?.job_total_cpu_time)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* zIIP Total CPU Time - Grafik */}
+                            <div 
+                              onClick={() => openChart('ziipTotalCpuTime')}
+                              className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            >
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">zIIP Total CPU Time</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJCPU.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                      {formatNumber(mainviewDataJCPU[0]?.ziip_total_cpu_time)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* zIIP Interval CPU Time - Grafik */}
+                            <div 
+                              onClick={() => openChart('ziipIntervalCpuTime')}
+                              className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            >
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
+                                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">zIIP Interval CPU Time</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {mainviewDataJCPU.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                      {formatNumber(mainviewDataJCPU[0]?.ziip_interval_cpu_time)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* LAST UPDATE - Tıklanamaz */}
+                            <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                  <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
+                              </div>
+                            </div>
                           </div>
                         )}
 
@@ -1236,6 +1539,15 @@ const ZOSPage = () => {
                     {selectedChart === 'usedTracks' && 'USED TRACKS Grafiği'}
                     {selectedChart === 'activeUtil' && 'ACTİVE %UTİL Grafiği'}
                     {selectedChart === 'activeTracks' && 'ACTİVE TRACKS Grafiği'}
+                    {selectedChart === 'allCpuSeconds' && 'ALL CPU seconds Grafiği'}
+                    {selectedChart === 'unadjCpuUtil' && 'Unadj CPU Util Grafiği'}
+                    {selectedChart === 'usingCpuPercentage' && 'Using CPU % Grafiği'}
+                    {selectedChart === 'cpuDelayPercentage' && 'CPU Delay % Grafiği'}
+                    {selectedChart === 'tcbTime' && 'TCB Time Grafiği'}
+                    {selectedChart === 'srbTime' && '% SRB Time Grafiği'}
+                    {selectedChart === 'jobTotalCpuTime' && 'Job Total CPU Time Grafiği'}
+                    {selectedChart === 'ziipTotalCpuTime' && 'zIIP Total CPU Time Grafiği'}
+                    {selectedChart === 'ziipIntervalCpuTime' && 'zIIP Interval CPU Time Grafiği'}
                   </h3>
                   <button 
                     onClick={closeChart}
@@ -1291,6 +1603,15 @@ const ZOSPage = () => {
                         {selectedChart === 'usedTracks' && 'USED TRACKS detaylı grafiği buraya eklenecek'}
                         {selectedChart === 'activeUtil' && 'ACTİVE %UTİL detaylı grafiği buraya eklenecek'}
                         {selectedChart === 'activeTracks' && 'ACTİVE TRACKS detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'allCpuSeconds' && 'ALL CPU seconds detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'unadjCpuUtil' && 'Unadj CPU Util detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'usingCpuPercentage' && 'Using CPU % detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'cpuDelayPercentage' && 'CPU Delay % detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'tcbTime' && 'TCB Time detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'srbTime' && '% SRB Time detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'jobTotalCpuTime' && 'Job Total CPU Time detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'ziipTotalCpuTime' && 'zIIP Total CPU Time detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'ziipIntervalCpuTime' && 'zIIP Interval CPU Time detaylı grafiği buraya eklenecek'}
                       </p>
                       <p className="text-gray-500 text-sm">
                         Gerçek zamanlı veri görselleştirme bileşeni buraya entegre edilecek
@@ -1308,6 +1629,15 @@ const ZOSPage = () => {
                         {selectedChart === 'ioRate' && 'I/O Rate% Threshold Ayarları'}
                         {selectedChart === 'dasdBusy' && 'DASD Busy% Threshold Ayarları'}
                         {selectedChart === 'lastUpdate' && 'Last Update% Threshold Ayarları'}
+                        {selectedChart === 'allCpuSeconds' && 'ALL CPU seconds Threshold Ayarları'}
+                        {selectedChart === 'unadjCpuUtil' && 'Unadj CPU Util Threshold Ayarları'}
+                        {selectedChart === 'usingCpuPercentage' && 'Using CPU % Threshold Ayarları'}
+                        {selectedChart === 'cpuDelayPercentage' && 'CPU Delay % Threshold Ayarları'}
+                        {selectedChart === 'tcbTime' && 'TCB Time Threshold Ayarları'}
+                        {selectedChart === 'srbTime' && '% SRB Time Threshold Ayarları'}
+                        {selectedChart === 'jobTotalCpuTime' && 'Job Total CPU Time Threshold Ayarları'}
+                        {selectedChart === 'ziipTotalCpuTime' && 'zIIP Total CPU Time Threshold Ayarları'}
+                        {selectedChart === 'ziipIntervalCpuTime' && 'zIIP Interval CPU Time Threshold Ayarları'}
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-gray-50 rounded-lg p-6">
@@ -1329,7 +1659,16 @@ const ZOSPage = () => {
                                   selectedChart === 'totalTracks' ? "10000" :
                                   selectedChart === 'usedTracks' ? "8000" :
                                   selectedChart === 'activeUtil' ? "90" :
-                                  selectedChart === 'activeTracks' ? "5000" : "90"
+                                  selectedChart === 'activeTracks' ? "5000" :
+                                  selectedChart === 'allCpuSeconds' ? "1000" :
+                                  selectedChart === 'unadjCpuUtil' ? "90" :
+                                  selectedChart === 'usingCpuPercentage' ? "90" :
+                                  selectedChart === 'cpuDelayPercentage' ? "40" :
+                                  selectedChart === 'tcbTime' ? "500" :
+                                  selectedChart === 'srbTime' ? "50" :
+                                  selectedChart === 'jobTotalCpuTime' ? "1000" :
+                                  selectedChart === 'ziipTotalCpuTime' ? "800" :
+                                  selectedChart === 'ziipIntervalCpuTime' ? "500" : "90"
                                 }
                               />
                             </div>
@@ -1349,7 +1688,16 @@ const ZOSPage = () => {
                                   selectedChart === 'totalTracks' ? "8000" :
                                   selectedChart === 'usedTracks' ? "6000" :
                                   selectedChart === 'activeUtil' ? "75" :
-                                  selectedChart === 'activeTracks' ? "4000" : "75"
+                                  selectedChart === 'activeTracks' ? "4000" :
+                                  selectedChart === 'allCpuSeconds' ? "800" :
+                                  selectedChart === 'unadjCpuUtil' ? "75" :
+                                  selectedChart === 'usingCpuPercentage' ? "75" :
+                                  selectedChart === 'cpuDelayPercentage' ? "25" :
+                                  selectedChart === 'tcbTime' ? "350" :
+                                  selectedChart === 'srbTime' ? "35" :
+                                  selectedChart === 'jobTotalCpuTime' ? "800" :
+                                  selectedChart === 'ziipTotalCpuTime' ? "600" :
+                                  selectedChart === 'ziipIntervalCpuTime' ? "350" : "75"
                                 }
                               />
                             </div>
@@ -1369,7 +1717,16 @@ const ZOSPage = () => {
                                   selectedChart === 'totalTracks' ? "6000" :
                                   selectedChart === 'usedTracks' ? "4000" :
                                   selectedChart === 'activeUtil' ? "60" :
-                                  selectedChart === 'activeTracks' ? "3000" : "60"
+                                  selectedChart === 'activeTracks' ? "3000" :
+                                  selectedChart === 'allCpuSeconds' ? "600" :
+                                  selectedChart === 'unadjCpuUtil' ? "60" :
+                                  selectedChart === 'usingCpuPercentage' ? "60" :
+                                  selectedChart === 'cpuDelayPercentage' ? "10" :
+                                  selectedChart === 'tcbTime' ? "200" :
+                                  selectedChart === 'srbTime' ? "20" :
+                                  selectedChart === 'jobTotalCpuTime' ? "600" :
+                                  selectedChart === 'ziipTotalCpuTime' ? "400" :
+                                  selectedChart === 'ziipIntervalCpuTime' ? "200" : "60"
                                 }
                               />
                             </div>
