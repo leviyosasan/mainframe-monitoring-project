@@ -1250,7 +1250,7 @@ def create_table_sysfrmiz():
 def create_table_connrspz():
     """Creates the CONNRSPZ table."""
     query = """
-        CREATE TABLE IF NOT EXISTS mainview_connrspz (
+        CREATE TABLE IF NOT EXISTS mainview_network_connrspz (
             id SERIAL PRIMARY KEY,
             foreign_ip_address VARCHAR,
             active_conns INT,
@@ -1267,7 +1267,7 @@ def create_table_connrspz():
         );
     """
     if execute_query(query):
-        print("✅ mainview_connrspz table ready")
+        print("✅ mainview_network_connrspz table ready")
     else:
         print("❌ Table could not be created")
     
@@ -1275,7 +1275,7 @@ def create_table_connrspz():
 def create_table_tcpstor():
     """Creates the TCPSTOR table."""
     query = """
-        CREATE TABLE IF NOT EXISTS mainview_tcpstor (
+        CREATE TABLE IF NOT EXISTS mainview_network_tcpstor (
             id SERIAL PRIMARY KEY,
             step_name VARCHAR,
             system_name VARCHAR,
@@ -1292,7 +1292,7 @@ def create_table_tcpstor():
         );
     """
     if execute_query(query):
-        print("✅ mainview_tcpstor table ready")
+        print("✅ mainview_network_tcpstor table ready")
     else:
         print("❌ Table could not be created")
     
@@ -1300,7 +1300,7 @@ def create_table_tcpstor():
 def create_table_vtmbuff():
     """Creates the VTMBUFF table."""
     query = """
-        CREATE TABLE IF NOT EXISTS mainview_vtmbuff (
+        CREATE TABLE IF NOT EXISTS mainview_network_vtmbuff (
             id SERIAL PRIMARY KEY,
             system_name VARCHAR,
             iobuf_size INT,
@@ -1313,7 +1313,7 @@ def create_table_vtmbuff():
         );
     """
     if execute_query(query):
-        print("✅ mainview_vtmbuff table ready")
+        print("✅ mainview_network_vtmbuff table ready")
     else:
         print("❌ Table could not be created")
     
@@ -1534,9 +1534,9 @@ def main():
     print("  • mainview_joverr - JOVERR monitoring data")
     print("  • mainview_jcsa - JCSA monitoring data")
     print("  • mainview_sysfrmiz - SYSFRMIZ monitoring data")
-    print("  • mainview_connrspz - CONNRSPZ monitoring data")
-    print("  • mainview_tcpstor - TCPSTOR monitoring data")
-    print("  • mainview_vtmbuff - VTMBUFF monitoring data")
+    print("  • mainview_network_connrspz - CONNRSPZ monitoring data")
+    print("  • mainview_network_tcpstor - TCPSTOR monitoring data")
+    print("  • mainview_network_vtmbuff - VTMBUFF monitoring data")
     
 
 
