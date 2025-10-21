@@ -13,6 +13,11 @@ const ZOSPage = () => {
   const [dataLoading, setDataLoading] = useState(false);
   const [mainviewDataJespool, setMainviewDataJespool] = useState([]);
   const [mainviewDataJCPU,setMainviewDataJCPU ] = useState([]);
+  const [timeFilterModal, setTimeFilterModal] = useState(false);
+  const [selectedTimeRange, setSelectedTimeRange] = useState('last6h');
+  const [customFromDate, setCustomFromDate] = useState('');
+  const [customToDate, setCustomToDate] = useState('');
+  const [chartData, setChartData] = useState([]);
 
   // Sayı formatı yardımcı fonksiyonu
   const formatNumber = (value) => {
@@ -227,6 +232,42 @@ const ZOSPage = () => {
   const openChart = (chartType) => {
     setSelectedChart(chartType);
     setChartTab('chart'); // Her grafik açıldığında grafik sekmesine git
+    
+    // Grafik türüne göre veri oluştur
+    switch (chartType) {
+      case 'cpuBusy':
+        setChartData(generateCpuBusyChartData());
+        break;
+      case 'ziipBusy':
+        setChartData(generateZiipBusyChartData());
+        break;
+      case 'cpuAvg':
+        setChartData(generateCpuAvgChartData());
+        break;
+      case 'ioRate':
+        setChartData(generateIoRateChartData());
+        break;
+      case 'queueIo':
+        setChartData(generateQueueIoChartData());
+        break;
+      case 'dasdBusy':
+        setChartData(generateDasdBusyChartData());
+        break;
+      case 'cpuSpu':
+        setChartData(generateCpuSpuChartData());
+        break;
+      case 'cpuEpu':
+        setChartData(generateCpuEpuChartData());
+        break;
+      case 'sqPu':
+        setChartData(generateSqPuChartData());
+        break;
+      case 'esPu':
+        setChartData(generateEsPuChartData());
+        break;
+      default:
+        setChartData([]);
+    }
   };
 
   const closeChart = () => {
@@ -241,6 +282,88 @@ const ZOSPage = () => {
   const closeInfo = () => {
     setInfoModal(null);
   };
+
+  const openTimeFilter = () => {
+    setTimeFilterModal(true);
+  };
+
+  const closeTimeFilter = () => {
+    setTimeFilterModal(false);
+  };
+
+  const applyTimeFilter = () => {
+    // Zaman filtresi uygulama mantığı buraya eklenecek
+    console.log('Zaman filtresi uygulandı:', selectedTimeRange, customFromDate, customToDate);
+    closeTimeFilter();
+  };
+
+  // Genel grafik verisi oluşturma fonksiyonu
+  const generateChartData = (dataField, title) => {
+    if (!mainviewData || mainviewData.length === 0) {
+      return [];
+    }
+    
+    const data = [];
+    
+    // Mevcut verilerden belirtilen alanın değerlerini al ve gerçek zamanları kullan
+    mainviewData.forEach((item, index) => {
+      // Gerçek bmctime alanını kullan, yoksa created_at kullan
+      const timeField = item.bmctime || item.created_at;
+      let time;
+      
+      if (timeField) {
+        time = new Date(timeField);
+      } else {
+        // Eğer zaman bilgisi yoksa, index'e göre hesapla
+        const now = new Date();
+        time = new Date(now.getTime() - (mainviewData.length - index - 1) * 5 * 60 * 1000);
+      }
+      
+      const value = parseFloat(item[dataField]) || 0;
+      
+      data.push({
+        time: time.toISOString(),
+        value: value,
+        label: time.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+        originalData: item
+      });
+    });
+    
+    // Zaman sırasına göre sırala (en eski en başta)
+    data.sort((a, b) => new Date(a.time) - new Date(b.time));
+    
+    return data;
+  };
+
+  // CPU Busy% için gerçek veri ile grafik verisi oluştur
+  const generateCpuBusyChartData = () => generateChartData('succpub', 'CPU Busy%');
+  
+  // zIIP Busy% için grafik verisi
+  const generateZiipBusyChartData = () => generateChartData('sucziib', 'zIIP Busy%');
+  
+  // CPU Avg için grafik verisi
+  const generateCpuAvgChartData = () => generateChartData('scicpavg', 'CPU Avg');
+  
+  // I/O Rate için grafik verisi
+  const generateIoRateChartData = () => generateChartData('suciinrt', 'I/O Rate');
+  
+  // Queue I/O için grafik verisi
+  const generateQueueIoChartData = () => generateChartData('suklqior', 'Queue I/O');
+  
+  // DASD Busy% için grafik verisi
+  const generateDasdBusyChartData = () => generateChartData('sukadbpc', 'DASD Busy%');
+  
+  // CPU SPU için grafik verisi
+  const generateCpuSpuChartData = () => generateChartData('csrecspu', 'CPU SPU');
+  
+  // CPU EPU için grafik verisi
+  const generateCpuEpuChartData = () => generateChartData('csreecpu', 'CPU EPU');
+  
+  // SQ PU için grafik verisi
+  const generateSqPuChartData = () => generateChartData('csresqpu', 'SQ PU');
+  
+  // ES PU için grafik verisi
+  const generateEsPuChartData = () => generateChartData('csreespu', 'ES PU');
 
   const tabs = [
     { id: 'table', name: 'Tablo', icon: '📊' },
@@ -344,7 +467,7 @@ const ZOSPage = () => {
         {/* Modallar */}
         {activeModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-xl shadow-2xl max-w-8xl w-full mx-4 max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 {/* Modal Header */}
                 <div className="flex justify-between items-center mb-6">
@@ -389,13 +512,24 @@ const ZOSPage = () => {
                         <div className="flex justify-between items-center">
                           <h4 className="text-lg font-semibold text-gray-800">Veri Tablosu</h4>
                           {activeModal === 'cpu' && (
-                            <button
-                              onClick={fetchMainviewData}
-                              disabled={dataLoading}
-                              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              {dataLoading ? 'Yükleniyor...' : 'Yenile'}
-                            </button>
+                            <div className="flex space-x-3">
+                              <button
+                                onClick={openTimeFilter}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors duration-200 flex items-center"
+                              >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Zaman Filtresi
+                              </button>
+                              <button
+                                onClick={fetchMainviewData}
+                                disabled={dataLoading}
+                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {dataLoading ? 'Yükleniyor...' : 'Yenile'}
+                              </button>
+                            </div>
                           )}
                           {activeModal === 'addressSpace' && (
                             <button
@@ -426,44 +560,44 @@ const ZOSPage = () => {
                               </div>
                             ) : mainviewData.length > 0 ? (
                               <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
+                                <table className="w-full divide-y divide-gray-200" style={{ minWidth: '1400px' }}>
                                   <thead className="bg-gray-50">
                                     <tr>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SYS</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU Busy%</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">zIIP Busy%</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU Avg</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">I/O Rate</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Queue I/O</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DASD Busy%</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU SPU</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU EPU</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SQ PU</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ES PU</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BMC Time</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SYS</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU Busy%</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">zIIP Busy%</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU Avg</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">I/O Rate</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Queue I/O</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DASD Busy%</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU SPU</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU EPU</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SQ PU</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ES PU</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BMC Time</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
                                     </tr>
                                   </thead>
                                   <tbody className="bg-white divide-y divide-gray-200">
                                     {mainviewData.map((row, index) => (
                                       <tr key={row.id || index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.id}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.syxsysn || '-'}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.succpub)}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.sucziib)}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.scicpavg)}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.suciinrt)}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.suklqior)}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.sukadbpc)}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.csrecspu)}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.csreecpu)}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.csresqpu)}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.csreespu)}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{row.id}</td>
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{row.syxsysn || '-'}</td>
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.succpub)}</td>
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.sucziib)}</td>
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.scicpavg)}</td>
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.suciinrt)}</td>
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.suklqior)}</td>
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.sukadbpc)}</td>
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.csrecspu)}</td>
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.csreecpu)}</td>
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.csresqpu)}</td>
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.csreespu)}</td>
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                                           {row.bmctime ? new Date(row.bmctime).toLocaleString('tr-TR') : '-'}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.time || '-'}</td>
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{row.time || '-'}</td>
                                       </tr>
                                     ))}
                                   </tbody>
@@ -667,6 +801,18 @@ const ZOSPage = () => {
                                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                                 </svg>
                               </button>
+                              {/* Grafik Butonu */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openChart('cpuBusy');
+                                }}
+                                className="absolute top-3 left-3 w-6 h-6 bg-green-100 hover:bg-green-200 text-green-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                              </button>
                               <div className="text-center">
                                 <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
                                   <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -708,6 +854,18 @@ const ZOSPage = () => {
                                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                                 </svg>
                               </button>
+                              {/* Grafik Butonu */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openChart('ziipBusy');
+                                }}
+                                className="absolute top-3 left-3 w-6 h-6 bg-green-100 hover:bg-green-200 text-green-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                              </button>
                               <div className="text-center">
                                 <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
                                   <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -734,7 +892,7 @@ const ZOSPage = () => {
 
                             {/* CPU Utilization */}
                             <div 
-                              onClick={() => openChart('cpuUtilization')}
+                              onClick={() => openChart('cpuAvg')}
                               className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
                             >
                               {/* Info Icon */}
@@ -747,6 +905,18 @@ const ZOSPage = () => {
                               >
                                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                </svg>
+                              </button>
+                              {/* Grafik Butonu */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openChart('cpuAvg');
+                                }}
+                                className="absolute top-3 left-3 w-6 h-6 bg-green-100 hover:bg-green-200 text-green-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </button>
                               <div className="text-center">
@@ -790,6 +960,18 @@ const ZOSPage = () => {
                                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                                 </svg>
                               </button>
+                              {/* Grafik Butonu */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openChart('ioRate');
+                                }}
+                                className="absolute top-3 left-3 w-6 h-6 bg-green-100 hover:bg-green-200 text-green-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                              </button>
                               <div className="text-center">
                                 <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
                                   <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -831,6 +1013,18 @@ const ZOSPage = () => {
                                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                                 </svg>
                               </button>
+                              {/* Grafik Butonu */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openChart('dasdBusy');
+                                }}
+                                className="absolute top-3 left-3 w-6 h-6 bg-green-100 hover:bg-green-200 text-green-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                              </button>
                               <div className="text-center">
                                 <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
                                   <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -856,14 +1050,36 @@ const ZOSPage = () => {
                             </div>
 
                             {/* Last Update - Tıklanamaz */}
-                            <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                            <div className="relative bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200 p-6">
                               <div className="text-center">
-                                <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
-                                  <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                   </svg>
                                 </div>
-                                <h5 className="font-bold text-gray-500 text-lg">Last Update%</h5>
+                                <h5 className="font-bold text-blue-800 text-lg mb-2">Last Update</h5>
+                                <div className="text-sm font-semibold text-blue-700">
+                                  {mainviewData.length > 0 ? (
+                                    <div className="space-y-1">
+                                      <div className="text-lg font-bold text-blue-900">
+                                        {new Date(mainviewData[0]?.bmctime || mainviewData[0]?.created_at || new Date()).toLocaleDateString('tr-TR', {
+                                          day: '2-digit',
+                                          month: '2-digit',
+                                          year: 'numeric'
+                                        })}
+                                      </div>
+                                      <div className="text-sm text-blue-600">
+                                        {new Date(mainviewData[0]?.bmctime || mainviewData[0]?.created_at || new Date()).toLocaleTimeString('tr-TR', {
+                                          hour: '2-digit',
+                                          minute: '2-digit',
+                                          second: '2-digit'
+                                        })}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <span className="text-blue-400">Veri yok</span>
+                                  )}
+                                </div>
                               </div>
                         </div>
                           </div>
@@ -1523,7 +1739,7 @@ const ZOSPage = () => {
         {/* Grafik Modalı */}
         {selectedChart && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
-            <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-xl shadow-2xl max-w-7xl w-full mx-4 max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 {/* Grafik Modal Header */}
                 <div className="flex justify-between items-center mb-6">
@@ -1589,33 +1805,792 @@ const ZOSPage = () => {
                 <div className="min-h-[400px]">
                   {/* Grafik Sekmesi */}
                   {chartTab === 'chart' && (
-                    <div className="bg-gray-50 rounded-lg p-8 text-center">
-                      <div className="text-6xl mb-4">📊</div>
-                      <p className="text-gray-600 text-lg mb-2">
-                        {selectedChart === 'cpuBusy' && 'CPU Busy% detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'ziipBusy' && 'zIIP Busy% detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'cpuUtilization' && 'CPU Utilization% detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'ioRate' && 'I/O Rate% detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'dasdBusy' && 'DASD Busy% detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'lastUpdate' && 'Last Update% detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'spoolUtil' && 'SPOOL %UTİL detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'totalTracks' && 'TOTAL TRACKS detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'usedTracks' && 'USED TRACKS detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'activeUtil' && 'ACTİVE %UTİL detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'activeTracks' && 'ACTİVE TRACKS detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'allCpuSeconds' && 'ALL CPU seconds detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'unadjCpuUtil' && 'Unadj CPU Util detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'usingCpuPercentage' && 'Using CPU % detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'cpuDelayPercentage' && 'CPU Delay % detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'tcbTime' && 'TCB Time detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'srbTime' && '% SRB Time detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'jobTotalCpuTime' && 'Job Total CPU Time detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'ziipTotalCpuTime' && 'zIIP Total CPU Time detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'ziipIntervalCpuTime' && 'zIIP Interval CPU Time detaylı grafiği buraya eklenecek'}
-                      </p>
-                      <p className="text-gray-500 text-sm">
-                        Gerçek zamanlı veri görselleştirme bileşeni buraya entegre edilecek
-                      </p>
+                    <div>
+                      {selectedChart === 'cpuBusy' ? (
+                        <div className="bg-white rounded-lg border border-gray-200 p-6">
+                          <div className="flex justify-between items-center mb-6">
+                            <h4 className="text-lg font-semibold text-gray-800">CPU Busy% - Zaman Serisi Grafiği</h4>
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => setChartData(generateCpuBusyChartData())}
+                                className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                              >
+                                Yenile
+                              </button>
+                            </div>
+                          </div>
+                          
+                          {chartData.length === 0 ? (
+                            <div className="h-96 flex items-center justify-center bg-gray-50 rounded-lg">
+                              <div className="text-center">
+                                <div className="text-4xl mb-4">📊</div>
+                                <p className="text-gray-600 text-lg mb-2">Veri bulunamadı</p>
+                                <p className="text-gray-500 text-sm">Önce tablo sekmesinden veri yükleyin</p>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                          {/* Line Chart */}
+                          <div className="h-96 w-full">
+                            <svg width="100%" height="100%" viewBox="0 0 1200 300" className="overflow-visible">
+                              {/* Grid Lines */}
+                              <defs>
+                                <pattern id="grid" width="40" height="30" patternUnits="userSpaceOnUse">
+                                  <path d="M 40 0 L 0 0 0 30" fill="none" stroke="#f3f4f6" strokeWidth="1"/>
+                                </pattern>
+                              </defs>
+                              <rect width="100%" height="100%" fill="url(#grid)" />
+                              
+                              {/* Y-axis labels */}
+                              {[0, 20, 40, 60, 80, 100].map((value, index) => (
+                                <text
+                                  key={value}
+                                  x="20"
+                                  y={280 - (index * 50)}
+                                  className="text-xs fill-gray-500"
+                                  textAnchor="end"
+                                >
+                                  {value}%
+                                </text>
+                              ))}
+                              
+                              {/* X-axis labels (her 4 saatte bir) */}
+                              {chartData.filter((_, index) => index % Math.max(1, Math.floor(chartData.length / 8)) === 0).map((point, index) => (
+                                <text
+                                  key={index}
+                                  x={80 + (index * 140)}
+                                  y="295"
+                                  className="text-xs fill-gray-500"
+                                  textAnchor="middle"
+                                >
+                                  {point.label}
+                                </text>
+                              ))}
+                              
+                              {/* Chart Area */}
+                              <defs>
+                                <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3"/>
+                                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.05"/>
+                                </linearGradient>
+                              </defs>
+                              
+                              {/* Area under the curve */}
+                              <path
+                                d={`M 80,${280 - (chartData[0]?.value || 0) * 2.5} ${chartData.map((point, index) => 
+                                  `L ${80 + (index * (1100 / Math.max(1, chartData.length - 1)))},${280 - point.value * 2.5}`
+                                ).join(' ')} L ${80 + (chartData.length - 1) * (1100 / Math.max(1, chartData.length - 1))},280 L 80,280 Z`}
+                                fill="url(#areaGradient)"
+                              />
+                              
+                              {/* Line */}
+                              <path
+                                d={`M 80,${280 - (chartData[0]?.value || 0) * 2.5} ${chartData.map((point, index) => 
+                                  `L ${80 + (index * (1100 / Math.max(1, chartData.length - 1)))},${280 - point.value * 2.5}`
+                                ).join(' ')}`}
+                                fill="none"
+                                stroke="#3b82f6"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              
+                              {/* Data points */}
+                              {chartData.map((point, index) => (
+                                <circle
+                                  key={index}
+                                  cx={80 + (index * (1100 / Math.max(1, chartData.length - 1)))}
+                                  cy={280 - point.value * 2.5}
+                                  r="3"
+                                  fill="#3b82f6"
+                                  className="hover:r-4 transition-all duration-200"
+                                >
+                                  <title>{`${point.label}: ${point.value}%`}</title>
+                                </circle>
+                              ))}
+                              
+                              {/* Threshold lines */}
+                              <line x1="80" y1={280 - 75 * 2.5} x2={80 + (chartData.length - 1) * (1100 / Math.max(1, chartData.length - 1))} y2={280 - 75 * 2.5} stroke="#ef4444" strokeWidth="1" strokeDasharray="5,5" opacity="0.7"/>
+                              <text x="90" y={280 - 75 * 2.5 - 5} className="text-xs fill-red-500 font-medium">Uyarı: 75%</text>
+                              
+                              <line x1="80" y1={280 - 90 * 2.5} x2={80 + (chartData.length - 1) * (1100 / Math.max(1, chartData.length - 1))} y2={280 - 90 * 2.5} stroke="#dc2626" strokeWidth="1" strokeDasharray="5,5" opacity="0.7"/>
+                              <text x="90" y={280 - 90 * 2.5 - 5} className="text-xs fill-red-600 font-medium">Kritik: 90%</text>
+                            </svg>
+                          </div>
+                          
+                          {/* Chart Stats */}
+                          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="bg-gray-50 rounded-lg p-4 text-center">
+                              <div className="text-2xl font-bold text-gray-900">
+                                {chartData.length > 0 ? Math.max(...chartData.map(d => d.value)).toFixed(1) : '0'}%
+                              </div>
+                              <div className="text-sm text-gray-500">Maksimum</div>
+                              {chartData.length > 0 && (
+                                <div className="text-xs text-gray-400 mt-1">
+                                  {chartData.find(d => d.value === Math.max(...chartData.map(d => d.value)))?.label || '-'}
+                                </div>
+                              )}
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-4 text-center">
+                              <div className="text-2xl font-bold text-gray-900">
+                                {chartData.length > 0 ? Math.min(...chartData.map(d => d.value)).toFixed(1) : '0'}%
+                              </div>
+                              <div className="text-sm text-gray-500">Minimum</div>
+                              {chartData.length > 0 && (
+                                <div className="text-xs text-gray-400 mt-1">
+                                  {chartData.find(d => d.value === Math.min(...chartData.map(d => d.value)))?.label || '-'}
+                                </div>
+                              )}
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-4 text-center">
+                              <div className="text-2xl font-bold text-gray-900">
+                                {chartData.length > 0 ? (chartData.reduce((sum, d) => sum + d.value, 0) / chartData.length).toFixed(1) : '0'}%
+                              </div>
+                              <div className="text-sm text-gray-500">Ortalama</div>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-4 text-center">
+                              <div className="text-2xl font-bold text-gray-900">
+                                {chartData.length}
+                              </div>
+                              <div className="text-sm text-gray-500">Veri Noktası</div>
+                            </div>
+                          </div>
+                            </>
+                          )}
+                        </div>
+                      ) : selectedChart === 'ziipBusy' ? (
+                        <div className="bg-white rounded-lg border border-gray-200 p-6">
+                          <div className="flex justify-between items-center mb-6">
+                            <h4 className="text-lg font-semibold text-gray-800">zIIP Busy% - Zaman Serisi Grafiği</h4>
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => setChartData(generateZiipBusyChartData())}
+                                className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                              >
+                                Yenile
+                              </button>
+                            </div>
+                          </div>
+                          
+                          {chartData.length === 0 ? (
+                            <div className="h-96 flex items-center justify-center bg-gray-50 rounded-lg">
+                              <div className="text-center">
+                                <div className="text-4xl mb-4">📊</div>
+                                <p className="text-gray-600 text-lg mb-2">Veri bulunamadı</p>
+                                <p className="text-gray-500 text-sm">Önce tablo sekmesinden veri yükleyin</p>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              {/* Line Chart */}
+                              <div className="h-96 w-full">
+                                <svg width="100%" height="100%" viewBox="0 0 1200 300" className="overflow-visible">
+                                  {/* Grid Lines */}
+                                  <defs>
+                                    <pattern id="grid" width="40" height="30" patternUnits="userSpaceOnUse">
+                                      <path d="M 40 0 L 0 0 0 30" fill="none" stroke="#f3f4f6" strokeWidth="1"/>
+                                    </pattern>
+                                  </defs>
+                                  <rect width="100%" height="100%" fill="url(#grid)" />
+                                  
+                                  {/* Y-axis labels */}
+                                  {[0, 20, 40, 60, 80, 100].map((value, index) => (
+                                    <text
+                                      key={value}
+                                      x="20"
+                                      y={280 - (index * 50)}
+                                      className="text-xs fill-gray-500"
+                                      textAnchor="end"
+                                    >
+                                      {value}%
+                                    </text>
+                                  ))}
+                                  
+                                  {/* X-axis labels */}
+                                  {chartData.filter((_, index) => index % Math.max(1, Math.floor(chartData.length / 8)) === 0).map((point, index) => (
+                                    <text
+                                      key={index}
+                                      x={80 + (index * 140)}
+                                      y="295"
+                                      className="text-xs fill-gray-500"
+                                      textAnchor="middle"
+                                    >
+                                      {point.label}
+                                    </text>
+                                  ))}
+                                  
+                                  {/* Chart Area */}
+                                  <defs>
+                                    <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                      <stop offset="0%" stopColor="#10b981" stopOpacity="0.3"/>
+                                      <stop offset="100%" stopColor="#10b981" stopOpacity="0.05"/>
+                                    </linearGradient>
+                                  </defs>
+                                  
+                                  {/* Area under the curve */}
+                                  <path
+                                    d={`M 80,${280 - (chartData[0]?.value || 0) * 2.5} ${chartData.map((point, index) => 
+                                      `L ${80 + (index * (1100 / Math.max(1, chartData.length - 1)))},${280 - point.value * 2.5}`
+                                    ).join(' ')} L ${80 + (chartData.length - 1) * (1100 / Math.max(1, chartData.length - 1))},280 L 80,280 Z`}
+                                    fill="url(#areaGradient)"
+                                  />
+                                  
+                                  {/* Line */}
+                                  <path
+                                    d={`M 80,${280 - (chartData[0]?.value || 0) * 2.5} ${chartData.map((point, index) => 
+                                      `L ${80 + (index * (1100 / Math.max(1, chartData.length - 1)))},${280 - point.value * 2.5}`
+                                    ).join(' ')}`}
+                                    fill="none"
+                                    stroke="#10b981"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                  
+                                  {/* Data points */}
+                                  {chartData.map((point, index) => (
+                                    <circle
+                                      key={index}
+                                      cx={80 + (index * (1100 / Math.max(1, chartData.length - 1)))}
+                                      cy={280 - point.value * 2.5}
+                                      r="3"
+                                      fill="#10b981"
+                                      className="hover:r-4 transition-all duration-200"
+                                    >
+                                      <title>{`${point.label}: ${point.value}%`}</title>
+                                    </circle>
+                                  ))}
+                                  
+                                  {/* Threshold lines */}
+                                  <line x1="80" y1={280 - 70 * 2.5} x2={80 + (chartData.length - 1) * (1100 / Math.max(1, chartData.length - 1))} y2={280 - 70 * 2.5} stroke="#ef4444" strokeWidth="1" strokeDasharray="5,5" opacity="0.7"/>
+                                  <text x="90" y={280 - 70 * 2.5 - 5} className="text-xs fill-red-500 font-medium">Uyarı: 70%</text>
+                                  
+                                  <line x1="80" y1={280 - 85 * 2.5} x2={80 + (chartData.length - 1) * (1100 / Math.max(1, chartData.length - 1))} y2={280 - 85 * 2.5} stroke="#dc2626" strokeWidth="1" strokeDasharray="5,5" opacity="0.7"/>
+                                  <text x="90" y={280 - 85 * 2.5 - 5} className="text-xs fill-red-600 font-medium">Kritik: 85%</text>
+                                </svg>
+                              </div>
+                              
+                              {/* Chart Stats */}
+                              <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {chartData.length > 0 ? Math.max(...chartData.map(d => d.value)).toFixed(1) : '0'}%
+                                  </div>
+                                  <div className="text-sm text-gray-500">Maksimum</div>
+                                  {chartData.length > 0 && (
+                                    <div className="text-xs text-gray-400 mt-1">
+                                      {chartData.find(d => d.value === Math.max(...chartData.map(d => d.value)))?.label || '-'}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {chartData.length > 0 ? Math.min(...chartData.map(d => d.value)).toFixed(1) : '0'}%
+                                  </div>
+                                  <div className="text-sm text-gray-500">Minimum</div>
+                                  {chartData.length > 0 && (
+                                    <div className="text-xs text-gray-400 mt-1">
+                                      {chartData.find(d => d.value === Math.min(...chartData.map(d => d.value)))?.label || '-'}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {chartData.length > 0 ? (chartData.reduce((sum, d) => sum + d.value, 0) / chartData.length).toFixed(1) : '0'}%
+                                  </div>
+                                  <div className="text-sm text-gray-500">Ortalama</div>
+                                </div>
+                                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {chartData.length}
+                                  </div>
+                                  <div className="text-sm text-gray-500">Veri Noktası</div>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      ) : selectedChart === 'cpuAvg' ? (
+                        <div className="bg-white rounded-lg border border-gray-200 p-6">
+                          <div className="flex justify-between items-center mb-6">
+                            <h4 className="text-lg font-semibold text-gray-800">CPU Avg - Zaman Serisi Grafiği</h4>
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => setChartData(generateCpuAvgChartData())}
+                                className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                              >
+                                Yenile
+                              </button>
+                            </div>
+                          </div>
+                          
+                          {chartData.length === 0 ? (
+                            <div className="h-96 flex items-center justify-center bg-gray-50 rounded-lg">
+                              <div className="text-center">
+                                <div className="text-4xl mb-4">📊</div>
+                                <p className="text-gray-600 text-lg mb-2">Veri bulunamadı</p>
+                                <p className="text-gray-500 text-sm">Önce tablo sekmesinden veri yükleyin</p>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              {/* Line Chart */}
+                              <div className="h-96 w-full">
+                                <svg width="100%" height="100%" viewBox="0 0 1200 300" className="overflow-visible">
+                                  {/* Grid Lines */}
+                                  <defs>
+                                    <pattern id="grid" width="40" height="30" patternUnits="userSpaceOnUse">
+                                      <path d="M 40 0 L 0 0 0 30" fill="none" stroke="#f3f4f6" strokeWidth="1"/>
+                                    </pattern>
+                                  </defs>
+                                  <rect width="100%" height="100%" fill="url(#grid)" />
+                                  
+                                  {/* Y-axis labels */}
+                                  {[0, 1, 2, 3, 4, 5].map((value, index) => (
+                                    <text
+                                      key={value}
+                                      x="20"
+                                      y={280 - (index * 50)}
+                                      className="text-xs fill-gray-500"
+                                      textAnchor="end"
+                                    >
+                                      {value}
+                                    </text>
+                                  ))}
+                                  
+                                  {/* X-axis labels */}
+                                  {chartData.filter((_, index) => index % Math.max(1, Math.floor(chartData.length / 8)) === 0).map((point, index) => (
+                                    <text
+                                      key={index}
+                                      x={80 + (index * 140)}
+                                      y="295"
+                                      className="text-xs fill-gray-500"
+                                      textAnchor="middle"
+                                    >
+                                      {point.label}
+                                    </text>
+                                  ))}
+                                  
+                                  {/* Chart Area */}
+                                  <defs>
+                                    <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                      <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.3"/>
+                                      <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.05"/>
+                                    </linearGradient>
+                                  </defs>
+                                  
+                                  {/* Area under the curve */}
+                                  <path
+                                    d={`M 80,${280 - (chartData[0]?.value || 0) * 50} ${chartData.map((point, index) => 
+                                      `L ${80 + (index * (1100 / Math.max(1, chartData.length - 1)))},${280 - point.value * 50}`
+                                    ).join(' ')} L ${80 + (chartData.length - 1) * (1100 / Math.max(1, chartData.length - 1))},280 L 80,280 Z`}
+                                    fill="url(#areaGradient)"
+                                  />
+                                  
+                                  {/* Line */}
+                                  <path
+                                    d={`M 80,${280 - (chartData[0]?.value || 0) * 50} ${chartData.map((point, index) => 
+                                      `L ${80 + (index * (1100 / Math.max(1, chartData.length - 1)))},${280 - point.value * 50}`
+                                    ).join(' ')}`}
+                                    fill="none"
+                                    stroke="#8b5cf6"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                  
+                                  {/* Data points */}
+                                  {chartData.map((point, index) => (
+                                    <circle
+                                      key={index}
+                                      cx={80 + (index * (1100 / Math.max(1, chartData.length - 1)))}
+                                      cy={280 - point.value * 50}
+                                      r="3"
+                                      fill="#8b5cf6"
+                                      className="hover:r-4 transition-all duration-200"
+                                    >
+                                      <title>{`${point.label}: ${point.value}`}</title>
+                                    </circle>
+                                  ))}
+                                  
+                                  {/* Threshold lines */}
+                                  <line x1="80" y1={280 - 3 * 50} x2={80 + (chartData.length - 1) * (1100 / Math.max(1, chartData.length - 1))} y2={280 - 3 * 50} stroke="#ef4444" strokeWidth="1" strokeDasharray="5,5" opacity="0.7"/>
+                                  <text x="90" y={280 - 3 * 50 - 5} className="text-xs fill-red-500 font-medium">Uyarı: 3.0</text>
+                                  
+                                  <line x1="80" y1={280 - 4 * 50} x2={80 + (chartData.length - 1) * (1100 / Math.max(1, chartData.length - 1))} y2={280 - 4 * 50} stroke="#dc2626" strokeWidth="1" strokeDasharray="5,5" opacity="0.7"/>
+                                  <text x="90" y={280 - 4 * 50 - 5} className="text-xs fill-red-600 font-medium">Kritik: 4.0</text>
+                                </svg>
+                              </div>
+                              
+                              {/* Chart Stats */}
+                              <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {chartData.length > 0 ? Math.max(...chartData.map(d => d.value)).toFixed(2) : '0'}
+                                  </div>
+                                  <div className="text-sm text-gray-500">Maksimum</div>
+                                  {chartData.length > 0 && (
+                                    <div className="text-xs text-gray-400 mt-1">
+                                      {chartData.find(d => d.value === Math.max(...chartData.map(d => d.value)))?.label || '-'}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {chartData.length > 0 ? Math.min(...chartData.map(d => d.value)).toFixed(2) : '0'}
+                                  </div>
+                                  <div className="text-sm text-gray-500">Minimum</div>
+                                  {chartData.length > 0 && (
+                                    <div className="text-xs text-gray-400 mt-1">
+                                      {chartData.find(d => d.value === Math.min(...chartData.map(d => d.value)))?.label || '-'}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {chartData.length > 0 ? (chartData.reduce((sum, d) => sum + d.value, 0) / chartData.length).toFixed(2) : '0'}
+                                  </div>
+                                  <div className="text-sm text-gray-500">Ortalama</div>
+                                </div>
+                                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {chartData.length}
+                                  </div>
+                                  <div className="text-sm text-gray-500">Veri Noktası</div>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      ) : selectedChart === 'ioRate' ? (
+                        <div className="bg-white rounded-lg border border-gray-200 p-6">
+                          <div className="flex justify-between items-center mb-6">
+                            <h4 className="text-lg font-semibold text-gray-800">I/O Rate - Zaman Serisi Grafiği</h4>
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => setChartData(generateIoRateChartData())}
+                                className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                              >
+                                Yenile
+                              </button>
+                            </div>
+                          </div>
+                          
+                          {chartData.length === 0 ? (
+                            <div className="h-96 flex items-center justify-center bg-gray-50 rounded-lg">
+                              <div className="text-center">
+                                <div className="text-4xl mb-4">📊</div>
+                                <p className="text-gray-600 text-lg mb-2">Veri bulunamadı</p>
+                                <p className="text-gray-500 text-sm">Önce tablo sekmesinden veri yükleyin</p>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              {/* Line Chart */}
+                              <div className="h-96 w-full">
+                                <svg width="100%" height="100%" viewBox="0 0 1200 300" className="overflow-visible">
+                                  {/* Grid Lines */}
+                                  <defs>
+                                    <pattern id="grid" width="40" height="30" patternUnits="userSpaceOnUse">
+                                      <path d="M 40 0 L 0 0 0 30" fill="none" stroke="#f3f4f6" strokeWidth="1"/>
+                                    </pattern>
+                                  </defs>
+                                  <rect width="100%" height="100%" fill="url(#grid)" />
+                                  
+                                  {/* Y-axis labels */}
+                                  {[0, 50, 100, 150, 200, 250].map((value, index) => (
+                                    <text
+                                      key={value}
+                                      x="20"
+                                      y={280 - (index * 50)}
+                                      className="text-xs fill-gray-500"
+                                      textAnchor="end"
+                                    >
+                                      {value}
+                                    </text>
+                                  ))}
+                                  
+                                  {/* X-axis labels */}
+                                  {chartData.filter((_, index) => index % Math.max(1, Math.floor(chartData.length / 8)) === 0).map((point, index) => (
+                                    <text
+                                      key={index}
+                                      x={80 + (index * 140)}
+                                      y="295"
+                                      className="text-xs fill-gray-500"
+                                      textAnchor="middle"
+                                    >
+                                      {point.label}
+                                    </text>
+                                  ))}
+                                  
+                                  {/* Chart Area */}
+                                  <defs>
+                                    <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                      <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.3"/>
+                                      <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.05"/>
+                                    </linearGradient>
+                                  </defs>
+                                  
+                                  {/* Area under the curve */}
+                                  <path
+                                    d={`M 80,${280 - (chartData[0]?.value || 0) * 1.1} ${chartData.map((point, index) => 
+                                      `L ${80 + (index * (1100 / Math.max(1, chartData.length - 1)))},${280 - point.value * 1.1}`
+                                    ).join(' ')} L ${80 + (chartData.length - 1) * (1100 / Math.max(1, chartData.length - 1))},280 L 80,280 Z`}
+                                    fill="url(#areaGradient)"
+                                  />
+                                  
+                                  {/* Line */}
+                                  <path
+                                    d={`M 80,${280 - (chartData[0]?.value || 0) * 1.1} ${chartData.map((point, index) => 
+                                      `L ${80 + (index * (1100 / Math.max(1, chartData.length - 1)))},${280 - point.value * 1.1}`
+                                    ).join(' ')}`}
+                                    fill="none"
+                                    stroke="#f59e0b"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                  
+                                  {/* Data points */}
+                                  {chartData.map((point, index) => (
+                                    <circle
+                                      key={index}
+                                      cx={80 + (index * (1100 / Math.max(1, chartData.length - 1)))}
+                                      cy={280 - point.value * 1.1}
+                                      r="3"
+                                      fill="#f59e0b"
+                                      className="hover:r-4 transition-all duration-200"
+                                    >
+                                      <title>{`${point.label}: ${point.value}`}</title>
+                                    </circle>
+                                  ))}
+                                  
+                                  {/* Threshold lines */}
+                                  <line x1="80" y1={280 - 200 * 1.1} x2={80 + (chartData.length - 1) * (1100 / Math.max(1, chartData.length - 1))} y2={280 - 200 * 1.1} stroke="#ef4444" strokeWidth="1" strokeDasharray="5,5" opacity="0.7"/>
+                                  <text x="90" y={280 - 200 * 1.1 - 5} className="text-xs fill-red-500 font-medium">Uyarı: 200</text>
+                                  
+                                  <line x1="80" y1={280 - 250 * 1.1} x2={80 + (chartData.length - 1) * (1100 / Math.max(1, chartData.length - 1))} y2={280 - 250 * 1.1} stroke="#dc2626" strokeWidth="1" strokeDasharray="5,5" opacity="0.7"/>
+                                  <text x="90" y={280 - 250 * 1.1 - 5} className="text-xs fill-red-600 font-medium">Kritik: 250</text>
+                                </svg>
+                              </div>
+                              
+                              {/* Chart Stats */}
+                              <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {chartData.length > 0 ? Math.max(...chartData.map(d => d.value)).toFixed(1) : '0'}
+                                  </div>
+                                  <div className="text-sm text-gray-500">Maksimum</div>
+                                  {chartData.length > 0 && (
+                                    <div className="text-xs text-gray-400 mt-1">
+                                      {chartData.find(d => d.value === Math.max(...chartData.map(d => d.value)))?.label || '-'}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {chartData.length > 0 ? Math.min(...chartData.map(d => d.value)).toFixed(1) : '0'}
+                                  </div>
+                                  <div className="text-sm text-gray-500">Minimum</div>
+                                  {chartData.length > 0 && (
+                                    <div className="text-xs text-gray-400 mt-1">
+                                      {chartData.find(d => d.value === Math.min(...chartData.map(d => d.value)))?.label || '-'}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {chartData.length > 0 ? (chartData.reduce((sum, d) => sum + d.value, 0) / chartData.length).toFixed(1) : '0'}
+                                  </div>
+                                  <div className="text-sm text-gray-500">Ortalama</div>
+                                </div>
+                                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {chartData.length}
+                                  </div>
+                                  <div className="text-sm text-gray-500">Veri Noktası</div>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      ) : selectedChart === 'dasdBusy' ? (
+                        <div className="bg-white rounded-lg border border-gray-200 p-6">
+                          <div className="flex justify-between items-center mb-6">
+                            <h4 className="text-lg font-semibold text-gray-800">DASD Busy% - Zaman Serisi Grafiği</h4>
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => setChartData(generateDasdBusyChartData())}
+                                className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                              >
+                                Yenile
+                              </button>
+                            </div>
+                          </div>
+                          
+                          {chartData.length === 0 ? (
+                            <div className="h-96 flex items-center justify-center bg-gray-50 rounded-lg">
+                              <div className="text-center">
+                                <div className="text-4xl mb-4">📊</div>
+                                <p className="text-gray-600 text-lg mb-2">Veri bulunamadı</p>
+                                <p className="text-gray-500 text-sm">Önce tablo sekmesinden veri yükleyin</p>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              {/* Line Chart */}
+                              <div className="h-96 w-full">
+                                <svg width="100%" height="100%" viewBox="0 0 1200 300" className="overflow-visible">
+                                  {/* Grid Lines */}
+                                  <defs>
+                                    <pattern id="grid" width="40" height="30" patternUnits="userSpaceOnUse">
+                                      <path d="M 40 0 L 0 0 0 30" fill="none" stroke="#f3f4f6" strokeWidth="1"/>
+                                    </pattern>
+                                  </defs>
+                                  <rect width="100%" height="100%" fill="url(#grid)" />
+                                  
+                                  {/* Y-axis labels */}
+                                  {[0, 20, 40, 60, 80, 100].map((value, index) => (
+                                    <text
+                                      key={value}
+                                      x="20"
+                                      y={280 - (index * 50)}
+                                      className="text-xs fill-gray-500"
+                                      textAnchor="end"
+                                    >
+                                      {value}%
+                                    </text>
+                                  ))}
+                                  
+                                  {/* X-axis labels */}
+                                  {chartData.filter((_, index) => index % Math.max(1, Math.floor(chartData.length / 8)) === 0).map((point, index) => (
+                                    <text
+                                      key={index}
+                                      x={80 + (index * 140)}
+                                      y="295"
+                                      className="text-xs fill-gray-500"
+                                      textAnchor="middle"
+                                    >
+                                      {point.label}
+                                    </text>
+                                  ))}
+                                  
+                                  {/* Chart Area */}
+                                  <defs>
+                                    <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                      <stop offset="0%" stopColor="#ef4444" stopOpacity="0.3"/>
+                                      <stop offset="100%" stopColor="#ef4444" stopOpacity="0.05"/>
+                                    </linearGradient>
+                                  </defs>
+                                  
+                                  {/* Area under the curve */}
+                                  <path
+                                    d={`M 80,${280 - (chartData[0]?.value || 0) * 2.5} ${chartData.map((point, index) => 
+                                      `L ${80 + (index * (1100 / Math.max(1, chartData.length - 1)))},${280 - point.value * 2.5}`
+                                    ).join(' ')} L ${80 + (chartData.length - 1) * (1100 / Math.max(1, chartData.length - 1))},280 L 80,280 Z`}
+                                    fill="url(#areaGradient)"
+                                  />
+                                  
+                                  {/* Line */}
+                                  <path
+                                    d={`M 80,${280 - (chartData[0]?.value || 0) * 2.5} ${chartData.map((point, index) => 
+                                      `L ${80 + (index * (1100 / Math.max(1, chartData.length - 1)))},${280 - point.value * 2.5}`
+                                    ).join(' ')}`}
+                                    fill="none"
+                                    stroke="#ef4444"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                  
+                                  {/* Data points */}
+                                  {chartData.map((point, index) => (
+                                    <circle
+                                      key={index}
+                                      cx={80 + (index * (1100 / Math.max(1, chartData.length - 1)))}
+                                      cy={280 - point.value * 2.5}
+                                      r="3"
+                                      fill="#ef4444"
+                                      className="hover:r-4 transition-all duration-200"
+                                    >
+                                      <title>{`${point.label}: ${point.value}%`}</title>
+                                    </circle>
+                                  ))}
+                                  
+                                  {/* Threshold lines */}
+                                  <line x1="80" y1={280 - 65 * 2.5} x2={80 + (chartData.length - 1) * (1100 / Math.max(1, chartData.length - 1))} y2={280 - 65 * 2.5} stroke="#ef4444" strokeWidth="1" strokeDasharray="5,5" opacity="0.7"/>
+                                  <text x="90" y={280 - 65 * 2.5 - 5} className="text-xs fill-red-500 font-medium">Uyarı: 65%</text>
+                                  
+                                  <line x1="80" y1={280 - 80 * 2.5} x2={80 + (chartData.length - 1) * (1100 / Math.max(1, chartData.length - 1))} y2={280 - 80 * 2.5} stroke="#dc2626" strokeWidth="1" strokeDasharray="5,5" opacity="0.7"/>
+                                  <text x="90" y={280 - 80 * 2.5 - 5} className="text-xs fill-red-600 font-medium">Kritik: 80%</text>
+                                </svg>
+                              </div>
+                              
+                              {/* Chart Stats */}
+                              <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {chartData.length > 0 ? Math.max(...chartData.map(d => d.value)).toFixed(1) : '0'}%
+                                  </div>
+                                  <div className="text-sm text-gray-500">Maksimum</div>
+                                  {chartData.length > 0 && (
+                                    <div className="text-xs text-gray-400 mt-1">
+                                      {chartData.find(d => d.value === Math.max(...chartData.map(d => d.value)))?.label || '-'}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {chartData.length > 0 ? Math.min(...chartData.map(d => d.value)).toFixed(1) : '0'}%
+                                  </div>
+                                  <div className="text-sm text-gray-500">Minimum</div>
+                                  {chartData.length > 0 && (
+                                    <div className="text-xs text-gray-400 mt-1">
+                                      {chartData.find(d => d.value === Math.min(...chartData.map(d => d.value)))?.label || '-'}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {chartData.length > 0 ? (chartData.reduce((sum, d) => sum + d.value, 0) / chartData.length).toFixed(1) : '0'}%
+                                  </div>
+                                  <div className="text-sm text-gray-500">Ortalama</div>
+                                </div>
+                                <div className="bg-gray-50 rounded-lg p-4 text-center">
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {chartData.length}
+                                  </div>
+                                  <div className="text-sm text-gray-500">Veri Noktası</div>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="bg-gray-50 rounded-lg p-8 text-center">
+                          <div className="text-6xl mb-4">📊</div>
+                          <p className="text-gray-600 text-lg mb-2">
+                            {selectedChart === 'lastUpdate' && 'Last Update% detaylı grafiği buraya eklenecek'}
+                            {selectedChart === 'spoolUtil' && 'SPOOL %UTİL detaylı grafiği buraya eklenecek'}
+                            {selectedChart === 'totalTracks' && 'TOTAL TRACKS detaylı grafiği buraya eklenecek'}
+                            {selectedChart === 'usedTracks' && 'USED TRACKS detaylı grafiği buraya eklenecek'}
+                            {selectedChart === 'activeUtil' && 'ACTİVE %UTİL detaylı grafiği buraya eklenecek'}
+                            {selectedChart === 'activeTracks' && 'ACTİVE TRACKS detaylı grafiği buraya eklenecek'}
+                            {selectedChart === 'allCpuSeconds' && 'ALL CPU seconds detaylı grafiği buraya eklenecek'}
+                            {selectedChart === 'unadjCpuUtil' && 'Unadj CPU Util detaylı grafiği buraya eklenecek'}
+                            {selectedChart === 'usingCpuPercentage' && 'Using CPU % detaylı grafiği buraya eklenecek'}
+                            {selectedChart === 'cpuDelayPercentage' && 'CPU Delay % detaylı grafiği buraya eklenecek'}
+                            {selectedChart === 'tcbTime' && 'TCB Time detaylı grafiği buraya eklenecek'}
+                            {selectedChart === 'srbTime' && '% SRB Time detaylı grafiği buraya eklenecek'}
+                            {selectedChart === 'jobTotalCpuTime' && 'Job Total CPU Time detaylı grafiği buraya eklenecek'}
+                            {selectedChart === 'ziipTotalCpuTime' && 'zIIP Total CPU Time detaylı grafiği buraya eklenecek'}
+                            {selectedChart === 'ziipIntervalCpuTime' && 'zIIP Interval CPU Time detaylı grafiği buraya eklenecek'}
+                          </p>
+                          <p className="text-gray-500 text-sm">
+                            Gerçek zamanlı veri görselleştirme bileşeni buraya entegre edilecek
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -1974,6 +2949,118 @@ const ZOSPage = () => {
                       </div>
                     </div>
                   )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Zaman Filtrele Modalı */}
+        {timeFilterModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[120]">
+            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-2xl font-bold text-gray-800">Zaman ve Tarih Filtresi</h3>
+                  <button 
+                    onClick={closeTimeFilter}
+                    className="text-gray-500 hover:text-gray-700 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Hızlı Zaman Aralıkları */}
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4">Hızlı Zaman Aralıkları</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {[
+                        { id: 'last5m', label: 'Son 5 dakika' },
+                        { id: 'last15m', label: 'Son 15 dakika' },
+                        { id: 'last30m', label: 'Son 30 dakika' },
+                        { id: 'last1h', label: 'Son 1 saat' },
+                        { id: 'last3h', label: 'Son 3 saat' },
+                        { id: 'last6h', label: 'Son 6 saat' },
+                        { id: 'last12h', label: 'Son 12 saat' },
+                        { id: 'last24h', label: 'Son 24 saat' },
+                        { id: 'last2d', label: 'Son 2 gün' }
+                      ].map((range) => (
+                        <button
+                          key={range.id}
+                          onClick={() => setSelectedTimeRange(range.id)}
+                          className={`p-3 text-sm font-medium rounded-lg border transition-colors duration-200 ${
+                            selectedTimeRange === range.id
+                              ? 'bg-blue-50 border-blue-500 text-blue-700'
+                              : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                          }`}
+                        >
+                          {range.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Özel Zaman Aralığı */}
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4">Özel Zaman Aralığı</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Başlangıç Tarihi ve Saati
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={customFromDate}
+                          onChange={(e) => setCustomFromDate(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Bitiş Tarihi ve Saati
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={customToDate}
+                          onChange={(e) => setCustomToDate(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Zaman Dilimi */}
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4">Zaman Dilimi</h4>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-700">Tarayıcı Zamanı</p>
+                          <p className="text-sm text-gray-500">Türkiye (UTC+03:00)</p>
+                        </div>
+                        <button className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium">
+                          Zaman Ayarlarını Değiştir
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Butonlar */}
+                  <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={closeTimeFilter}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors duration-200"
+                    >
+                      İptal
+                    </button>
+                    <button
+                      onClick={applyTimeFilter}
+                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors duration-200"
+                    >
+                      Zaman Aralığını Uygula
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
