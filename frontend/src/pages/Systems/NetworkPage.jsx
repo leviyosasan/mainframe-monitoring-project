@@ -46,7 +46,7 @@ const NetworkPage = () => {
     // Aktif moda göre renk belirleme (Örnek)
     const getModalColor = (modal = activeModal) => {
         switch(modal) {
-            case 'stackcpu': return 'green';
+            case 'STACKCPU': return 'green';
             case 'vtamcsa': return 'purple';
             case 'tcpconf': return 'indigo';
             case 'tcpcons': return 'teal';
@@ -55,7 +55,7 @@ const NetworkPage = () => {
             case 'VTMBUFF': return 'red';
             case 'connsrpz': return 'pink';
             case 'tcpstor': return 'sky';
-            case 'stacks':
+            case 'STACKS':
             default: return 'blue';
         }
     }
@@ -70,19 +70,19 @@ const NetworkPage = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          {/* Stacks Kartı (Eklendi) */}
-          <div onClick={() => openModal('stacks')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
+          {/* STACKS Kartı (Eklendi) */}
+          <div onClick={() => openModal('STACKS')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-blue-100 rounded-xl mb-6 mx-auto group-hover:bg-blue-200"><svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h4M8 7a2 2 0 012-2h4a2 2 0 012 2v8a2 2 0 01-2 2h-4a2 2 0 01-2-2V7z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a2 2 0 00-2-2h-4a2 2 0 00-2 2v8a2 2 0 002 2h4a2 2 0 002-2V7z"></path></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">Stacks</h2><p className="text-gray-500 text-sm font-medium">Genel Stack Bilgileri</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">STACKS</h2><p className="text-gray-500 text-sm font-medium">Genel STACK Bilgileri</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
             </div>
           </div>
 
-          {/* Stackcpu Kartı (Eklendi) */}
-          <div onClick={() => openModal('stackcpu')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
+          {/* STACKCPU Kartı (Eklendi) */}
+          <div onClick={() => openModal('STACKCPU')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-green-100 rounded-xl mb-6 mx-auto group-hover:bg-green-200"><svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">Stackcpu</h2><p className="text-gray-500 text-sm font-medium">CPU ve Paket İstatistikleri</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">STACKCPU</h2><p className="text-gray-500 text-sm font-medium">CPU ve Paket İstatistikleri</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
             </div>
           </div>
 
@@ -161,8 +161,8 @@ const NetworkPage = () => {
                 {/* Modal Header (Dinamik) */}
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-2xl font-bold text-gray-800">
-                    {activeModal === 'stacks' && 'Stacks Yönetimi'}
-                    {activeModal === 'stackcpu' && 'Stackcpu Yönetimi'}
+                    {activeModal === 'STACKS' && 'STACKS Yönetimi'}
+                    {activeModal === 'STACKCPU' && 'STACKCPU Yönetimi'}
                     {activeModal === 'vtamcsa' && 'VTAMCSA Yönetimi'}
                     {activeModal === 'tcpconf' && 'TCPCONF Yönetimi'}
                     {activeModal === 'tcpcons' && 'TCPCONS Yönetimi'}
