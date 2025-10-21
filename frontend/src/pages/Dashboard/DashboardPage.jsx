@@ -138,9 +138,16 @@ const DashboardPage = () => {
       { id: 'messages', title: 'Messages', icon: FileText, description: 'Mesaj Yönetimi', keywords: ['message', 'mesaj'] }
     ],
     'network': [
-      { id: 'connections', title: 'Connections', icon: Globe, description: 'Ağ Bağlantıları', keywords: ['connection', 'bağlantı', 'network'] },
-      { id: 'protocols', title: 'Protocols', icon: Zap, description: 'Protokol Yönetimi', keywords: ['protocol', 'protokol'] },
-      { id: 'security', title: 'Security', icon: AlertTriangle, description: 'Ağ Güvenliği', keywords: ['security', 'güvenlik'] }
+      { id: 'stacks', title: 'STACKS', icon: Server, description: 'Genel STACK Bilgileri', keywords: ['stacks', 'stack', 'genel', 'bilgi'] },
+      { id: 'stackcpu', title: 'STACKCPU', icon: Cpu, description: 'CPU ve Paket İstatistikleri', keywords: ['stackcpu', 'cpu', 'paket', 'istatistik'] },
+      { id: 'vtamcsa', title: 'VTAMCSA', icon: Database, description: 'VTAM ve CSA Yönetimi', keywords: ['vtamcsa', 'vtam', 'csa', 'yönetim'] },
+      { id: 'tcpconf', title: 'TCPCONF', icon: Globe, description: 'TCP/IP Yapılandırma', keywords: ['tcpconf', 'tcp', 'ip', 'yapılandırma', 'config'] },
+      { id: 'tcpcons', title: 'TCPCONS', icon: Zap, description: 'TCP/IP Bağlantı Durumu', keywords: ['tcpcons', 'tcp', 'bağlantı', 'durum', 'connection'] },
+      { id: 'udfconf', title: 'UDFCONF', icon: AlertTriangle, description: 'UDP Yapılandırma', keywords: ['udfconf', 'udp', 'yapılandırma', 'config'] },
+      { id: 'actcons', title: 'ACTCONS', icon: Server, description: 'Aktif Bağlantı Durumu', keywords: ['actcons', 'aktif', 'bağlantı', 'durum'] },
+      { id: 'vtmbuff', title: 'VTMBUFF', icon: BarChart3, description: 'VTAM Buffer İstatistikleri', keywords: ['vtmbuff', 'vtam', 'buffer', 'istatistik'] },
+      { id: 'connsrpz', title: 'CONNSRPZ', icon: Globe, description: 'Connection Hızı ve Durumu', keywords: ['connsrpz', 'connection', 'hız', 'durum', 'speed'] },
+      { id: 'tcpstor', title: 'TCPSTOR', icon: HardDrive, description: 'TCP Storage Yönetimi', keywords: ['tcpstor', 'tcp', 'storage', 'depolama', 'yönetim'] }
     ],
     'storage': [
       { id: 'volumes', title: 'Volumes', icon: HardDrive, description: 'Depolama Birimleri', keywords: ['volume', 'depolama', 'storage'] },
@@ -213,7 +220,7 @@ const DashboardPage = () => {
               <Search className="w-4 h-4 text-gray-400 ml-2" />
               <input
                 type="text"
-                placeholder="Sistem ara... (örn: cpu, database, network)"
+                placeholder="Sistem ara... (örn: cpu, database, network, ağ)"
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
