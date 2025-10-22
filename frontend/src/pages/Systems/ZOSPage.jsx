@@ -17,6 +17,8 @@ const ZOSPage = () => {
   const [selectedTimeRange, setSelectedTimeRange] = useState('last6h');
   const [customFromDate, setCustomFromDate] = useState('');
   const [customToDate, setCustomToDate] = useState('');
+  const [filteredMainviewData, setFilteredMainviewData] = useState([]);
+  const [isFiltered, setIsFiltered] = useState(false);
   const [chartData, setChartData] = useState([]);
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState('asc');
@@ -39,8 +41,9 @@ const ZOSPage = () => {
     setSortDirection(newDirection);
   };
 
-  // Sıralanmış veri
-  const sortedData = [...mainviewData].sort((a, b) => {
+  // Sıralanmış veri - filtrelenmiş veri varsa onu kullan
+  const dataToUse = isFiltered ? filteredMainviewData : mainviewData;
+  const sortedData = [...dataToUse].sort((a, b) => {
     if (!sortColumn) return 0;
     
     const aValue = parseFloat(a[sortColumn]) || 0;
@@ -321,6 +324,9 @@ const ZOSPage = () => {
       
       if (response.data.success) {
         setMainviewData(response.data.data);
+        // Yeni veri yüklendiğinde filtreleme durumunu sıfırla
+        setFilteredMainviewData([]);
+        setIsFiltered(false);
         
         if (response.data.data.length === 0) {
           // Tablo boşsa sessizce devam et, uyarı verme
@@ -328,10 +334,16 @@ const ZOSPage = () => {
           toast.success(`Veriler başarıyla yüklendi (${response.data.data.length} kayıt)`, { autoClose: 2000 });
         }
       } else {
+        setMainviewData([]);
+        setFilteredMainviewData([]);
+        setIsFiltered(false);
         toast.error('Veri yüklenirken hata oluştu');
       }
     } catch (error) {
       console.error('Veri yükleme hatası:', error);
+      setMainviewData([]);
+      setFilteredMainviewData([]);
+      setIsFiltered(false);
       toast.error(`Veri yüklenirken hata oluştu: ${error.message}`);
     } finally {
       setDataLoading(false);
@@ -544,22 +556,99 @@ const ZOSPage = () => {
     setTimeFilterModal(false);
   };
 
+  const clearTimeFilter = () => {
+    setFilteredMainviewData([]);
+    setIsFiltered(false);
+    setSelectedTimeRange('last6h');
+    setCustomFromDate('');
+    setCustomToDate('');
+    toast.success('Zaman filtresi temizlendi');
+  };
+
   const applyTimeFilter = () => {
-    // Zaman filtresi uygulama mantığı buraya eklenecek
-    console.log('Zaman filtresi uygulandı:', selectedTimeRange, customFromDate, customToDate);
-    closeTimeFilter();
+    try {
+      let filteredData = [...mainviewData];
+      
+      // Özel tarih aralığı seçilmişse
+      if (selectedTimeRange === 'custom') {
+        if (!customFromDate || !customToDate) {
+          toast.error('Lütfen başlangıç ve bitiş tarihlerini seçin');
+          return;
+        }
+        
+        const fromDate = new Date(customFromDate);
+        const toDate = new Date(customToDate);
+        
+        filteredData = mainviewData.filter(item => {
+          const itemTime = new Date(item.bmctime || item.created_at);
+          return itemTime >= fromDate && itemTime <= toDate;
+        });
+      } else {
+        // Hızlı zaman aralıkları
+        const now = new Date();
+        let fromDate;
+        
+        switch (selectedTimeRange) {
+          case 'last5m':
+            fromDate = new Date(now.getTime() - 5 * 60 * 1000);
+            break;
+          case 'last15m':
+            fromDate = new Date(now.getTime() - 15 * 60 * 1000);
+            break;
+          case 'last30m':
+            fromDate = new Date(now.getTime() - 30 * 60 * 1000);
+            break;
+          case 'last1h':
+            fromDate = new Date(now.getTime() - 60 * 60 * 1000);
+            break;
+          case 'last3h':
+            fromDate = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+            break;
+          case 'last6h':
+            fromDate = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+            break;
+          case 'last12h':
+            fromDate = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+            break;
+          case 'last24h':
+            fromDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            break;
+          case 'last2d':
+            fromDate = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+            break;
+          default:
+            fromDate = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+        }
+        
+        filteredData = mainviewData.filter(item => {
+          const itemTime = new Date(item.bmctime || item.created_at);
+          return itemTime >= fromDate;
+        });
+      }
+      
+      setFilteredMainviewData(filteredData);
+      setIsFiltered(true);
+      
+      toast.success(`Filtreleme uygulandı. ${filteredData.length} kayıt bulundu.`);
+      closeTimeFilter();
+      
+    } catch (error) {
+      console.error('Filtreleme hatası:', error);
+      toast.error('Filtreleme sırasında hata oluştu');
+    }
   };
 
   // Genel grafik verisi oluşturma fonksiyonu
   const generateChartData = (dataField, title) => {
-    if (!mainviewData || mainviewData.length === 0) {
+    const dataToUse = isFiltered ? filteredMainviewData : mainviewData;
+    if (!dataToUse || dataToUse.length === 0) {
       return [];
     }
     
     const data = [];
     
     // Mevcut verilerden belirtilen alanın değerlerini al ve gerçek zamanları kullan
-    mainviewData.forEach((item, index) => {
+    dataToUse.forEach((item, index) => {
       // Gerçek bmctime alanını kullan, yoksa created_at kullan
       const timeField = item.bmctime || item.created_at;
       let time;
@@ -569,7 +658,7 @@ const ZOSPage = () => {
       } else {
         // Eğer zaman bilgisi yoksa, index'e göre hesapla
         const now = new Date();
-        time = new Date(now.getTime() - (mainviewData.length - index - 1) * 5 * 60 * 1000);
+        time = new Date(now.getTime() - (dataToUse.length - index - 1) * 5 * 60 * 1000);
       }
       
       const value = parseFloat(item[dataField]) || 0;
@@ -763,7 +852,22 @@ const ZOSPage = () => {
                     {activeTab === 'table' && (
                       <div className="space-y-4">
                         <div className="flex justify-between items-center">
-                          <h4 className="text-lg font-semibold text-gray-800">Veri Tablosu</h4>
+                          <div className="flex items-center space-x-4">
+                            <h4 className="text-lg font-semibold text-gray-800">Veri Tablosu</h4>
+                            {isFiltered && (
+                              <div className="flex items-center space-x-2">
+                                <span className="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">
+                                  Filtrelenmiş ({filteredMainviewData.length} kayıt)
+                                </span>
+                                <button
+                                  onClick={clearTimeFilter}
+                                  className="px-2 py-1 text-xs font-medium text-red-700 bg-red-100 border border-red-300 rounded hover:bg-red-200 transition-colors duration-200"
+                                >
+                                  Filtreyi Temizle
+                                </button>
+                              </div>
+                            )}
+                          </div>
                           {activeModal === 'cpu' && (
                             <div className="flex space-x-3">
                               <button
@@ -786,7 +890,11 @@ const ZOSPage = () => {
                               </button>
                               <button
                                 onClick={openTimeFilter}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors duration-200 flex items-center"
+                                className={`px-4 py-2 text-sm font-medium border rounded-md transition-colors duration-200 flex items-center ${
+                                  isFiltered 
+                                    ? 'text-blue-700 bg-blue-100 border-blue-300 hover:bg-blue-200' 
+                                    : 'text-gray-700 bg-gray-100 border-gray-300 hover:bg-gray-200'
+                                }`}
                               >
                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -3443,7 +3551,8 @@ const ZOSPage = () => {
                         { id: 'last6h', label: 'Son 6 saat' },
                         { id: 'last12h', label: 'Son 12 saat' },
                         { id: 'last24h', label: 'Son 24 saat' },
-                        { id: 'last2d', label: 'Son 2 gün' }
+                        { id: 'last2d', label: 'Son 2 gün' },
+                        { id: 'custom', label: 'Özel Aralık' }
                       ].map((range) => (
                         <button
                           key={range.id}
@@ -3461,33 +3570,35 @@ const ZOSPage = () => {
                   </div>
 
                   {/* Özel Zaman Aralığı */}
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-800 mb-4">Özel Zaman Aralığı</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Başlangıç Tarihi ve Saati
-                        </label>
-                        <input
-                          type="datetime-local"
-                          value={customFromDate}
-                          onChange={(e) => setCustomFromDate(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Bitiş Tarihi ve Saati
-                        </label>
-                        <input
-                          type="datetime-local"
-                          value={customToDate}
-                          onChange={(e) => setCustomToDate(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
+                  {selectedTimeRange === 'custom' && (
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-800 mb-4">Özel Zaman Aralığı</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Başlangıç Tarihi ve Saati
+                          </label>
+                          <input
+                            type="datetime-local"
+                            value={customFromDate}
+                            onChange={(e) => setCustomFromDate(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Bitiş Tarihi ve Saati
+                          </label>
+                          <input
+                            type="datetime-local"
+                            value={customToDate}
+                            onChange={(e) => setCustomToDate(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Zaman Dilimi */}
                   <div>
