@@ -142,6 +142,10 @@ export const databaseAPI = {
    
     // Check table exists for actcons
     checkTableExistsactcons: (config) => api.post('/database/check-table-actcons', config),
+
+    // ZFS
+    getMainviewUSSZFS: (config) => api.post('/database/mainview-uss-zfs', config),
+    checkTableExistsZFS: (config) => api.post('/database/check-table-zfs', config),
 }
 
 export default api

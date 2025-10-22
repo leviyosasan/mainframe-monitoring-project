@@ -1461,6 +1461,114 @@ const getMainviewNetworkConnsrpz = async (req, res) => {
   }
 };
 
+const getMainviewUSSZFS = async (req, res) => {
+  let pool = null;
+ 
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+ 
+    const client = await pool.connect();
+ 
+    // Önce sadece tüm kolonları çekelim ve görelim
+    const query = `
+      SELECT
+        zfs_file_system_name, system_name, owning_system, total_aggregate_size, 
+        aggregate_used_percent, mount_mode, created_at, updated_at
+      FROM mainview_zfs_file_systems
+      ORDER BY created_at DESC
+      LIMIT 100
+    `;
+ 
+    const result = await client.query(query);
+    client.release();
+ 
+    res.status(200).json({
+      success: true,
+      message: 'mainview_zfs_file_systems verileri başarıyla getirildi',
+      count: result.rowCount,
+      data: result.rows
+    });
+  } catch (error) {
+    console.error('mainview_zfs_file_systems query error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'mainview_zfs_file_systems verileri getirilemedi',
+      error: error.message
+    });
+  } finally {
+    // Close the pool if it was created
+    if (pool) {
+      await pool.end();
+    }
+  }
+};
+ 
+const checkTableExistsZFS = async (req, res) => {
+  let pool = null;
+ 
+  try {
+    // Get configuration from request body or use default
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+   
+    // Create new pool with provided configuration
+    pool = new Pool(config);
+   
+    // Test the connection
+    const client = await pool.connect();
+   
+    // Check if table exists and get table info
+    const tableCheckQuery = `
+      SELECT
+        table_name,
+        column_name,
+        data_type,
+        is_nullable
+      FROM information_schema.columns
+      WHERE table_name = 'mainview_zfs_file_systems'
+      ORDER BY ordinal_position;
+    `;
+   
+    const tableResult = await client.query(tableCheckQuery);
+   
+    // Get row count
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_zfs_file_systems`;
+    const countResult = await client.query(countQuery);
+   
+    // Get sample data if exists
+    const sampleQuery = `SELECT * FROM mainview_zfs_file_systems LIMIT 5`;
+    const sampleResult = await client.query(sampleQuery);
+   
+    client.release();
+   
+    res.status(200).json({
+      success: true,
+      message: 'Tablo bilgileri başarıyla getirildi',
+      tableInfo: {
+        exists: tableResult.rows.length > 0,
+        columns: tableResult.rows,
+        rowCount: parseInt(countResult.rows[0].count),
+        sampleData: sampleResult.rows
+      }
+    });
+   
+  } catch (error) {
+    console.error('Table check error:', error);
+   
+    res.status(500).json({
+      success: false,
+      message: 'Tablo kontrolü başarısız',
+      error: error.message
+    });
+  } finally {
+    // Close the pool if it was created
+    if (pool) {
+      await pool.end();
+    }
+  }
+};
+
+
 module.exports = {
   testConnection,
   getMainviewMvsSysover,
@@ -1483,6 +1591,8 @@ module.exports = {
   checkTableExiststudpconf,
   getMainviewNetworkactcons,
   checkTableExistsactcons,
+  getMainviewUSSZFS,
+  checkTableExistsZFS,
   // NEW: Network tables (VTMBUFF, TCPSTOR, CONNSRPZ)
   checkTableExistsVtmbuff,
   getMainviewNetworkVtmbuff,

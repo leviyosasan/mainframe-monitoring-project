@@ -4,7 +4,7 @@ const { testConnection, getMainviewMvsSysover, getMainviewMvsJespool,
   getMainviewNetworkStacks, checkTableExistsStackCPU, getMainviewNetworkStackCPU, checkTableExistsVtamcsa, 
   getMainviewNetworkVtamcsa, getMainviewNetworkTcpconf, checkTableExiststcpconf,
   getMainviewNetworktcpcons, checkTableExiststcpcons, getMainviewNetworkudpconf, checkTableExiststudpconf,
-  getMainviewNetworkactcons, checkTableExistsactcons} = require('../controllers/database.controller');
+  getMainviewNetworkactcons, checkTableExistsactcons, getMainviewUSSZFS, checkTableExistsZFS,} = require('../controllers/database.controller');
 
 // New network tables
 const {
@@ -92,5 +92,9 @@ router.post('/check-table-tcpstor', checkTableExistsTcpstor);
 // CONNSRPZ
 router.post('/mainview-network-connsrpz', getMainviewNetworkConnsrpz);
 router.post('/check-table-connsrpz', checkTableExistsConnsrpz);
+
+// ZFS
+router.post('/mainview-uss-zfs', getMainviewUSSZFS);
+router.post('/check-table-zfs', checkTableExistsZFS);
 
 module.exports = router;
