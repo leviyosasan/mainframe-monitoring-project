@@ -19,9 +19,25 @@ const ZOSPage = () => {
   const [customToDate, setCustomToDate] = useState('');
   const [filteredMainviewData, setFilteredMainviewData] = useState([]);
   const [isFiltered, setIsFiltered] = useState(false);
+  
+  // Address Space filtreleme state'leri
+  const [filteredAddressSpaceData, setFilteredAddressSpaceData] = useState([]);
+  const [isAddressSpaceFiltered, setIsAddressSpaceFiltered] = useState(false);
+  
+  // Spool filtreleme state'leri
+  const [filteredSpoolData, setFilteredSpoolData] = useState([]);
+  const [isSpoolFiltered, setIsSpoolFiltered] = useState(false);
   const [chartData, setChartData] = useState([]);
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState('asc');
+
+  // Address Space sıralama state'leri
+  const [addressSpaceSortColumn, setAddressSpaceSortColumn] = useState(null);
+  const [addressSpaceSortDirection, setAddressSpaceSortDirection] = useState('asc');
+  
+  // Spool sıralama state'leri
+  const [spoolSortColumn, setSpoolSortColumn] = useState(null);
+  const [spoolSortDirection, setSpoolSortDirection] = useState('asc');
 
   // Sayı formatı yardımcı fonksiyonu
   const formatNumber = (value) => {
@@ -41,6 +57,32 @@ const ZOSPage = () => {
     setSortDirection(newDirection);
   };
 
+  // Address Space sıralama fonksiyonu
+  const handleAddressSpaceSort = (column) => {
+    if (column === 'id' || column === 'jobname' || column === 'jes_job_number' || column === 'address_space_type' || 
+        column === 'service_class_name' || column === 'asgrnmc' || column === 'job_step_being_monitored' ||
+        column === 'resource_group_name' || column === 'resource_group_type' || column === 'recovery_process_boost' ||
+        column === 'implicit_cpu_critical_flag' || column === 'bmctime' || column === 'time') {
+      return; // String ve zaman sütunları için sıralama yapma
+    }
+
+    const newDirection = addressSpaceSortColumn === column && addressSpaceSortDirection === 'asc' ? 'desc' : 'asc';
+    setAddressSpaceSortColumn(column);
+    setAddressSpaceSortDirection(newDirection);
+  };
+
+  // Spool sıralama fonksiyonu
+  const handleSpoolSort = (column) => {
+    if (column === 'id' || column === 'bmctime' || column === 'time' || column === 'smf_id' || 
+        column === 'volume' || column === 'status') {
+      return; // String ve zaman sütunları için sıralama yapma
+    }
+
+    const newDirection = spoolSortColumn === column && spoolSortDirection === 'asc' ? 'desc' : 'asc';
+    setSpoolSortColumn(column);
+    setSpoolSortDirection(newDirection);
+  };
+
   // Sıralanmış veri - filtrelenmiş veri varsa onu kullan
   const dataToUse = isFiltered ? filteredMainviewData : mainviewData;
   const sortedData = [...dataToUse].sort((a, b) => {
@@ -56,11 +98,75 @@ const ZOSPage = () => {
     }
   });
 
+  // Address Space sıralanmış veri - filtrelenmiş veri varsa onu kullan
+  const addressSpaceDataToUse = isAddressSpaceFiltered ? filteredAddressSpaceData : mainviewDataJCPU;
+  const sortedAddressSpaceData = [...addressSpaceDataToUse].sort((a, b) => {
+    if (!addressSpaceSortColumn) return 0;
+    
+    const aValue = parseFloat(a[addressSpaceSortColumn]) || 0;
+    const bValue = parseFloat(b[addressSpaceSortColumn]) || 0;
+    
+    if (addressSpaceSortDirection === 'asc') {
+      return aValue - bValue;
+    } else {
+      return bValue - aValue;
+    }
+  });
+
+  // Spool sıralanmış veri - filtrelenmiş veri varsa onu kullan
+  const spoolDataToUse = isSpoolFiltered ? filteredSpoolData : mainviewDataJespool;
+  const sortedSpoolData = [...spoolDataToUse].sort((a, b) => {
+    if (!spoolSortColumn) return 0;
+    
+    const aValue = parseFloat(a[spoolSortColumn]) || 0;
+    const bValue = parseFloat(b[spoolSortColumn]) || 0;
+    
+    if (spoolSortDirection === 'asc') {
+      return aValue - bValue;
+    } else {
+      return bValue - aValue;
+    }
+  });
+
   // Sütun istatistikleri hesaplama
   const getColumnStats = (column) => {
     if (!mainviewData || mainviewData.length === 0) return { min: 0, max: 0 };
     
     const values = mainviewData
+      .map(row => parseFloat(row[column]) || 0)
+      .filter(val => !isNaN(val));
+    
+    if (values.length === 0) return { min: 0, max: 0 };
+    
+    return {
+      min: Math.min(...values),
+      max: Math.max(...values)
+    };
+  };
+
+  // Address Space sütun istatistikleri hesaplama
+  const getAddressSpaceColumnStats = (column) => {
+    const dataToUse = isAddressSpaceFiltered ? filteredAddressSpaceData : mainviewDataJCPU;
+    if (!dataToUse || dataToUse.length === 0) return { min: 0, max: 0 };
+    
+    const values = dataToUse
+      .map(row => parseFloat(row[column]) || 0)
+      .filter(val => !isNaN(val));
+    
+    if (values.length === 0) return { min: 0, max: 0 };
+    
+    return {
+      min: Math.min(...values),
+      max: Math.max(...values)
+    };
+  };
+
+  // Spool sütun istatistikleri hesaplama
+  const getSpoolColumnStats = (column) => {
+    const dataToUse = isSpoolFiltered ? filteredSpoolData : mainviewDataJespool;
+    if (!dataToUse || dataToUse.length === 0) return { min: 0, max: 0 };
+    
+    const values = dataToUse
       .map(row => parseFloat(row[column]) || 0)
       .filter(val => !isNaN(val));
     
@@ -115,6 +221,116 @@ const ZOSPage = () => {
     document.body.removeChild(link);
     
     toast.success('Veriler Excel formatında indirildi');
+  };
+
+  // Address Space Excel'e aktarma fonksiyonu
+  const exportAddressSpaceToExcel = () => {
+    if (!mainviewDataJCPU || mainviewDataJCPU.length === 0) {
+      toast.error('Aktarılacak veri bulunamadı');
+      return;
+    }
+
+    // CSV formatında veri hazırla
+    const headers = ['Jobname', 'JES Job Number', 'Address Space Type', 'Service Class Name', 'ASGRNMC', 'Job Step Being Monitored', 'ALL CPU seconds', 'Unadj CPU Util (All Enclaves)', 'Using CPU %', 'CPU Delay %', 'Average Priority', 'TCB Time', '% SRB Time', 'Interval Unadj Remote Enclave CPU use', 'Job Total CPU Time', 'Other Addr Space Enclave CPU Time', 'zIIP Total CPU Time', 'zIIP Interval CPU Time', 'Dep Enclave zIIP Total Time', 'Dep Enclave zIIP Interval Time', 'Dep Enclave zIIP On CP Total', 'Interval CP time', 'Resource Group Name', 'Resource Group Type', 'Recovery Process Boost', 'Implicit CPU Critical Flag', 'BMC Time', 'Time'];
+    const csvData = [
+      headers.join(','),
+      ...sortedAddressSpaceData.map(row => [
+        row.jobname || '',
+        row.jes_job_number || '',
+        row.address_space_type || '',
+        row.service_class_name || '',
+        row.asgrnmc || '',
+        row.job_step_being_monitored || '',
+        formatNumber(row.all_cpu_seconds),
+        formatNumber(row.unadj_cpu_util_with_all_enclaves),
+        formatNumber(row.using_cpu_percentage),
+        formatNumber(row.cpu_delay_percentage),
+        formatNumber(row.average_priority),
+        formatNumber(row.tcb_time),
+        formatNumber(row.percentage_srb_time),
+        formatNumber(row.interval_unadj_remote_enclave_cpu_use),
+        formatNumber(row.job_total_cpu_time),
+        formatNumber(row.other_address_space_enclave_cpu_time),
+        formatNumber(row.ziip_total_cpu_time),
+        formatNumber(row.ziip_interval_cpu_time),
+        formatNumber(row.dependent_enclave_ziip_total_time),
+        formatNumber(row.dependent_enclave_ziip_interval_time),
+        formatNumber(row.dependent_enclave_ziip_on_cp_total),
+        formatNumber(row.interval_cp_time),
+        row.resource_group_name || '',
+        row.resource_group_type || '',
+        row.recovery_process_boost || '',
+        row.implicit_cpu_critical_flag || '',
+        row.bmctime || '',
+        row.time || ''
+      ].join(','))
+    ].join('\n');
+
+    // BOM ekle (Türkçe karakterler için)
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvData], { type: 'text/csv;charset=utf-8;' });
+    
+    // Dosyayı indir
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `address_space_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success('Address Space verileri Excel formatında indirildi');
+  };
+
+  // Spool Excel'e aktarma fonksiyonu
+  const exportSpoolToExcel = () => {
+    if (!mainviewDataJespool || mainviewDataJespool.length === 0) {
+      toast.error('Aktarılacak veri bulunamadı');
+      return;
+    }
+
+    // CSV formatında veri hazırla
+    const headers = ['ID', 'BMC Time', 'Time', 'SMF ID', 'TOTAL VOLS', 'SPOOL %UTIL', 'TOTAL TRACKS', 'USED TRACKS', 'ACTIVE %UTIL', 'TOTAL ACTIVE TRACKS', 'USED ACTIVE TRACKS', 'ACTIVE VOLS', 'VOLUME', 'STATUS', 'VOLUME %UTIL', 'VOLUME TRACKS', 'VOLUME USED', 'OTHER VOLS'];
+    const csvData = [
+      headers.join(','),
+      ...sortedSpoolData.map(row => [
+        row.id || '',
+        row.bmctime || '',
+        row.time || '',
+        row.smf_id || '',
+        formatNumber(row.total_volumes),
+        formatNumber(row.spool_util),
+        formatNumber(row.total_tracks),
+        formatNumber(row.used_tracks),
+        formatNumber(row.active_spool_util),
+        formatNumber(row.total_active_tracks),
+        formatNumber(row.used_active_tracks),
+        formatNumber(row.active_volumes),
+        row.volume || '',
+        row.status || '',
+        formatNumber(row.volume_util),
+        formatNumber(row.volume_tracks),
+        formatNumber(row.volume_used),
+        formatNumber(row.other_volumes)
+      ].join(','))
+    ].join('\n');
+
+    // BOM ekle (Türkçe karakterler için)
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvData], { type: 'text/csv;charset=utf-8;' });
+    
+    // Dosyayı indir
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `spool_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success('Spool verileri Excel formatında indirildi');
   };
 
   // PDF'e aktarma fonksiyonu
@@ -282,10 +498,282 @@ const ZOSPage = () => {
     }
   };
 
+  // Address Space PDF'e aktarma fonksiyonu
+  const exportAddressSpaceToPDF = () => {
+    if (!mainviewDataJCPU || mainviewDataJCPU.length === 0) {
+      toast.error('Aktarılacak veri bulunamadı');
+      return;
+    }
+
+    try {
+      // jsPDF ve autoTable eklentisini dinamik olarak yükle
+      const loadScripts = () => {
+        return new Promise((resolve, reject) => {
+          let loadedCount = 0;
+          const totalScripts = 2;
+
+          const onScriptLoad = () => {
+            loadedCount++;
+            if (loadedCount === totalScripts) {
+              resolve();
+            }
+          };
+
+          const onScriptError = () => {
+            reject(new Error('Script yükleme hatası'));
+          };
+
+          // jsPDF yükle
+          const jsPDFScript = document.createElement('script');
+          jsPDFScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+          jsPDFScript.onload = onScriptLoad;
+          jsPDFScript.onerror = onScriptError;
+          document.head.appendChild(jsPDFScript);
+
+          // autoTable eklentisini yükle
+          const autoTableScript = document.createElement('script');
+          autoTableScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js';
+          autoTableScript.onload = onScriptLoad;
+          autoTableScript.onerror = onScriptError;
+          document.head.appendChild(autoTableScript);
+        });
+      };
+
+      loadScripts().then(() => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape', 'mm', 'a4');
+        
+        // Başlık ekle
+        doc.setFontSize(16);
+        doc.text('Address Space Raporu', 20, 20);
+        
+        // Tarih ekle
+        doc.setFontSize(10);
+        doc.text(`Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 20, 30);
+        
+        // Tablo verilerini hazırla
+        const tableData = sortedAddressSpaceData.map(row => {
+          return [
+            row.jobname || '-',
+            row.jes_job_number || '-',
+            row.address_space_type || '-',
+            row.service_class_name || '-',
+            row.asgrnmc || '-',
+            row.job_step_being_monitored || '-',
+            formatNumber(row.all_cpu_seconds),
+            formatNumber(row.unadj_cpu_util_with_all_enclaves),
+            formatNumber(row.using_cpu_percentage),
+            formatNumber(row.cpu_delay_percentage),
+            formatNumber(row.average_priority),
+            formatNumber(row.tcb_time),
+            formatNumber(row.percentage_srb_time),
+            formatNumber(row.interval_unadj_remote_enclave_cpu_use),
+            formatNumber(row.job_total_cpu_time),
+            formatNumber(row.other_address_space_enclave_cpu_time),
+            formatNumber(row.ziip_total_cpu_time),
+            formatNumber(row.ziip_interval_cpu_time),
+            formatNumber(row.dependent_enclave_ziip_total_time),
+            formatNumber(row.dependent_enclave_ziip_interval_time),
+            formatNumber(row.dependent_enclave_ziip_on_cp_total),
+            formatNumber(row.interval_cp_time),
+            row.resource_group_name || '-',
+            row.resource_group_type || '-',
+            row.recovery_process_boost || '-',
+            row.implicit_cpu_critical_flag || '-',
+            row.bmctime ? new Date(row.bmctime).toLocaleString('tr-TR') : '-',
+            row.time || '-'
+          ];
+        });
+
+        // Sütun başlıkları
+        const headers = ['Jobname', 'JES Job Number', 'Address Space Type', 'Service Class Name', 'ASGRNMC', 'Job Step Being Monitored', 'ALL CPU seconds', 'Unadj CPU Util (All Enclaves)', 'Using CPU %', 'CPU Delay %', 'Average Priority', 'TCB Time', '% SRB Time', 'Interval Unadj Remote Enclave CPU use', 'Job Total CPU Time', 'Other Addr Space Enclave CPU Time', 'zIIP Total CPU Time', 'zIIP Interval CPU Time', 'Dep Enclave zIIP Total Time', 'Dep Enclave zIIP Interval Time', 'Dep Enclave zIIP On CP Total', 'Interval CP time', 'Resource Group Name', 'Resource Group Type', 'Recovery Process Boost', 'Implicit CPU Critical Flag', 'BMC Time', 'Time'];
+        
+        // Tablo oluştur
+        doc.autoTable({
+          head: [headers],
+          body: tableData,
+          startY: 40,
+          styles: {
+            fontSize: 6,
+            cellPadding: 1,
+            overflow: 'linebreak',
+            halign: 'left'
+          },
+          headStyles: {
+            fillColor: [242, 242, 242],
+            textColor: [0, 0, 0],
+            fontStyle: 'bold'
+          },
+          alternateRowStyles: {
+            fillColor: [249, 249, 249]
+          }
+        });
+
+        // PDF'i indir
+        const fileName = `address_space_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
+        
+        toast.success('Address Space PDF başarıyla indirildi');
+      }).catch((error) => {
+        console.error('Script yükleme hatası:', error);
+        toast.error('PDF oluşturma hatası. Lütfen sayfayı yenileyin ve tekrar deneyin.');
+      });
+      
+    } catch (error) {
+      console.error('PDF oluşturma hatası:', error);
+      toast.error('PDF oluşturulurken hata oluştu');
+    }
+  };
+
+  // Spool PDF'e aktarma fonksiyonu
+  const exportSpoolToPDF = () => {
+    if (!mainviewDataJespool || mainviewDataJespool.length === 0) {
+      toast.error('Aktarılacak veri bulunamadı');
+      return;
+    }
+
+    try {
+      // jsPDF ve autoTable eklentisini dinamik olarak yükle
+      const loadScripts = () => {
+        return new Promise((resolve, reject) => {
+          let loadedCount = 0;
+          const totalScripts = 2;
+
+          const onScriptLoad = () => {
+            loadedCount++;
+            if (loadedCount === totalScripts) {
+              resolve();
+            }
+          };
+
+          const onScriptError = () => {
+            reject(new Error('Script yükleme hatası'));
+          };
+
+          // jsPDF yükle
+          const jsPDFScript = document.createElement('script');
+          jsPDFScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+          jsPDFScript.onload = onScriptLoad;
+          jsPDFScript.onerror = onScriptError;
+          document.head.appendChild(jsPDFScript);
+
+          // autoTable eklentisini yükle
+          const autoTableScript = document.createElement('script');
+          autoTableScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js';
+          autoTableScript.onload = onScriptLoad;
+          autoTableScript.onerror = onScriptError;
+          document.head.appendChild(autoTableScript);
+        });
+      };
+
+      loadScripts().then(() => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape', 'mm', 'a4');
+        
+        // Başlık ekle
+        doc.setFontSize(16);
+        doc.text('Spool Raporu', 20, 20);
+        
+        // Tarih ekle
+        doc.setFontSize(10);
+        doc.text(`Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 20, 30);
+        
+        // Tablo verilerini hazırla
+        const tableData = sortedSpoolData.map(row => {
+          return [
+            row.id || '-',
+            row.bmctime ? new Date(row.bmctime).toLocaleString('tr-TR') : '-',
+            row.time || '-',
+            row.smf_id || '-',
+            formatNumber(row.total_volumes),
+            formatNumber(row.spool_util),
+            formatNumber(row.total_tracks),
+            formatNumber(row.used_tracks),
+            formatNumber(row.active_spool_util),
+            formatNumber(row.total_active_tracks),
+            formatNumber(row.used_active_tracks),
+            formatNumber(row.active_volumes),
+            row.volume || '-',
+            row.status || '-',
+            formatNumber(row.volume_util),
+            formatNumber(row.volume_tracks),
+            formatNumber(row.volume_used),
+            formatNumber(row.other_volumes)
+          ];
+        });
+
+        // Sütun başlıkları
+        const headers = ['ID', 'BMC Time', 'Time', 'SMF ID', 'TOTAL VOLS', 'SPOOL %UTIL', 'TOTAL TRACKS', 'USED TRACKS', 'ACTIVE %UTIL', 'TOTAL ACTIVE TRACKS', 'USED ACTIVE TRACKS', 'ACTIVE VOLS', 'VOLUME', 'STATUS', 'VOLUME %UTIL', 'VOLUME TRACKS', 'VOLUME USED', 'OTHER VOLS'];
+        
+        // Tablo oluştur
+        doc.autoTable({
+          head: [headers],
+          body: tableData,
+          startY: 40,
+          styles: {
+            fontSize: 7,
+            cellPadding: 2,
+            overflow: 'linebreak',
+            halign: 'left'
+          },
+          headStyles: {
+            fillColor: [242, 242, 242],
+            textColor: [0, 0, 0],
+            fontStyle: 'bold'
+          },
+          alternateRowStyles: {
+            fillColor: [249, 249, 249]
+          }
+        });
+
+        // PDF'i indir
+        const fileName = `spool_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
+        
+        toast.success('Spool PDF başarıyla indirildi');
+      }).catch((error) => {
+        console.error('Script yükleme hatası:', error);
+        toast.error('PDF oluşturma hatası. Lütfen sayfayı yenileyin ve tekrar deneyin.');
+      });
+      
+    } catch (error) {
+      console.error('PDF oluşturma hatası:', error);
+      toast.error('PDF oluşturulurken hata oluştu');
+    }
+  };
+
+  // Retry mekanizması ile API çağrısı
+  const apiCallWithRetry = async (apiCall, maxRetries = 3, delay = 1000) => {
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const response = await apiCall();
+        return response;
+      } catch (error) {
+        if (error.response?.status === 429) {
+          // Rate limiting - bekle ve tekrar dene
+          const waitTime = delay * Math.pow(2, i); // Exponential backoff
+          console.log(`Rate limit hit, waiting ${waitTime}ms before retry ${i + 1}/${maxRetries}`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          continue;
+        } else if (error.response?.status >= 500) {
+          // Sunucu hatası - bekle ve tekrar dene
+          const waitTime = delay * (i + 1);
+          console.log(`Server error, waiting ${waitTime}ms before retry ${i + 1}/${maxRetries}`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          continue;
+        } else {
+          // Diğer hatalar - hemen fırlat
+          throw error;
+        }
+      }
+    }
+    throw new Error('Maksimum deneme sayısına ulaşıldı');
+  };
+
   // Tablo kontrolü fonksiyonu
   const checkTableInfo = async () => {
     try {
-      const response = await databaseAPI.checkTableExists();
+      const response = await apiCallWithRetry(() => databaseAPI.checkTableExists());
       
       if (response.data.success) {
         const tableInfo = response.data.tableInfo;
@@ -299,12 +787,16 @@ const ZOSPage = () => {
           return false; // Sadece false döndür, uyarı verme
         }
         
-        toast.success(`Tablo mevcut: ${tableInfo.rowCount} kayıt bulundu`, { autoClose: 2000 });
+        // Tablo mevcut, sessizce devam et
         return true;
       }
     } catch (error) {
       console.error('Tablo kontrolü hatası:', error);
+      if (error.message.includes('Maksimum deneme sayısına ulaşıldı')) {
+        toast.error('Sunucu yoğun, lütfen daha sonra tekrar deneyin');
+      } else {
       toast.error(`Tablo kontrolü başarısız: ${error.message}`);
+      }
       return false;
     }
   };
@@ -320,7 +812,7 @@ const ZOSPage = () => {
         return;
       }
       
-      const response = await databaseAPI.getMainviewMvsSysover();
+      const response = await apiCallWithRetry(() => databaseAPI.getMainviewMvsSysover());
       
       if (response.data.success) {
         setMainviewData(response.data.data);
@@ -331,7 +823,7 @@ const ZOSPage = () => {
         if (response.data.data.length === 0) {
           // Tablo boşsa sessizce devam et, uyarı verme
         } else {
-          toast.success(`Veriler başarıyla yüklendi (${response.data.data.length} kayıt)`, { autoClose: 2000 });
+          // Veriler başarıyla yüklendi, sessizce devam et
         }
       } else {
         setMainviewData([]);
@@ -353,7 +845,7 @@ const ZOSPage = () => {
 
   const checkTableInfoJespool = async () => {
     try {
-      const responseJespool = await databaseAPI.checkTableExistsJespool();
+      const responseJespool = await apiCallWithRetry(() => databaseAPI.checkTableExistsJespool());
       
       if (responseJespool.data.success) {
         const tableInfoJespool = responseJespool.data.tableInfo;
@@ -367,12 +859,16 @@ const ZOSPage = () => {
           return false; // Sadece false döndür, uyarı verme
         }
         
-        toast.success(`Tablo mevcut: ${tableInfoJespool.rowCount} kayıt bulundu`, { autoClose: 2000 });
+        // Tablo mevcut, sessizce devam et
         return true;
       }
     } catch (error) {
       console.error('Tablo kontrolü hatası:', error);
+      if (error.message.includes('Maksimum deneme sayısına ulaşıldı')) {
+        toast.error('Sunucu yoğun, lütfen daha sonra tekrar deneyin');
+      } else {
       toast.error(`Tablo kontrolü başarısız: ${error.message}`);
+      }
       return false;
     }
   };
@@ -388,7 +884,7 @@ const ZOSPage = () => {
         return;
       }
       
-      const responseJespool = await databaseAPI.getMainviewMvsJespool();
+      const responseJespool = await apiCallWithRetry(() => databaseAPI.getMainviewMvsJespool());
 
       
       if (responseJespool.data.success) {
@@ -397,7 +893,7 @@ const ZOSPage = () => {
         if (responseJespool.data.data.length === 0) {
           // Tablo boşsa sessizce devam et, uyarı verme
         } else {
-          toast.success(`Veriler başarıyla yüklendi (${responseJespool.data.data.length} kayıt)`, { autoClose: 2000 });
+          // Veriler başarıyla yüklendi, sessizce devam et
         }
       } else {
         toast.error('Veri yüklenirken hata oluştu');
@@ -421,7 +917,7 @@ const ZOSPage = () => {
         return;
       }
       
-      const responseJCPU = await databaseAPI.getMainviewMvsJCPU();
+      const responseJCPU = await apiCallWithRetry(() => databaseAPI.getMainviewMvsJCPU());
 
       
       if (responseJCPU.data.success) {
@@ -430,7 +926,7 @@ const ZOSPage = () => {
         if (responseJCPU.data.data.length === 0) {
           // Tablo boşsa sessizce devam et, uyarı verme
         } else {
-          toast.success(`Veriler başarıyla yüklendi (${responseJCPU.data.data.length} kayıt)`, { autoClose: 2000 });
+          // Veriler başarıyla yüklendi, sessizce devam et
         }
       } else {
         toast.error('Veri yüklenirken hata oluştu');
@@ -446,7 +942,7 @@ const ZOSPage = () => {
 
   const checkTableInfoJCPU = async () => {
     try {
-      const responseJCPU = await databaseAPI.checkTableExistsJCPU();
+      const responseJCPU = await apiCallWithRetry(() => databaseAPI.checkTableExistsJCPU());
       
       if (responseJCPU.data.success) {
         const tableInfoJCPU = responseJCPU.data.tableInfo;
@@ -460,17 +956,27 @@ const ZOSPage = () => {
           return false; // Sadece false döndür, uyarı verme
         }
         
-        toast.success(`Tablo mevcut: ${tableInfoJCPU.rowCount} kayıt bulundu`, { autoClose: 2000 });
+        // Tablo mevcut, sessizce devam et
         return true;
       }
     } catch (error) {
       console.error('Tablo kontrolü hatası:', error);
+      if (error.message.includes('Maksimum deneme sayısına ulaşıldı')) {
+        toast.error('Sunucu yoğun, lütfen daha sonra tekrar deneyin');
+      } else {
       toast.error(`Tablo kontrolü başarısız: ${error.message}`);
+      }
       return false;
     }
   };
 
   const openModal = (modalType) => {
+    // Eğer zaten loading durumundaysa, yeni modal açmayı engelle
+    if (dataLoading) {
+      toast.error('Lütfen mevcut işlemin tamamlanmasını bekleyin');
+      return;
+    }
+
     setActiveModal(modalType);
     setActiveTab('table'); // Her modal açıldığında tablo sekmesine git
     setIsLoading(false); // Modal açıldığında loading'i false yap
@@ -559,6 +1065,10 @@ const ZOSPage = () => {
   const clearTimeFilter = () => {
     setFilteredMainviewData([]);
     setIsFiltered(false);
+    setFilteredAddressSpaceData([]);
+    setIsAddressSpaceFiltered(false);
+    setFilteredSpoolData([]);
+    setIsSpoolFiltered(false);
     setSelectedTimeRange('last6h');
     setCustomFromDate('');
     setCustomToDate('');
@@ -567,7 +1077,14 @@ const ZOSPage = () => {
 
   const applyTimeFilter = () => {
     try {
-      let filteredData = [...mainviewData];
+      // CPU verisi için filtreleme
+      let filteredCpuData = [...mainviewData];
+      
+      // Address Space verisi için filtreleme
+      let filteredAddressSpaceData = [...mainviewDataJCPU];
+      
+      // Spool verisi için filtreleme
+      let filteredSpoolData = [...mainviewDataJespool];
       
       // Özel tarih aralığı seçilmişse
       if (selectedTimeRange === 'custom') {
@@ -579,7 +1096,17 @@ const ZOSPage = () => {
         const fromDate = new Date(customFromDate);
         const toDate = new Date(customToDate);
         
-        filteredData = mainviewData.filter(item => {
+        filteredCpuData = mainviewData.filter(item => {
+          const itemTime = new Date(item.bmctime || item.created_at);
+          return itemTime >= fromDate && itemTime <= toDate;
+        });
+        
+        filteredAddressSpaceData = mainviewDataJCPU.filter(item => {
+          const itemTime = new Date(item.bmctime || item.created_at);
+          return itemTime >= fromDate && itemTime <= toDate;
+        });
+        
+        filteredSpoolData = mainviewDataJespool.filter(item => {
           const itemTime = new Date(item.bmctime || item.created_at);
           return itemTime >= fromDate && itemTime <= toDate;
         });
@@ -620,16 +1147,34 @@ const ZOSPage = () => {
             fromDate = new Date(now.getTime() - 6 * 60 * 60 * 1000);
         }
         
-        filteredData = mainviewData.filter(item => {
+        filteredCpuData = mainviewData.filter(item => {
+          const itemTime = new Date(item.bmctime || item.created_at);
+          return itemTime >= fromDate;
+        });
+        
+        filteredAddressSpaceData = mainviewDataJCPU.filter(item => {
+          const itemTime = new Date(item.bmctime || item.created_at);
+          return itemTime >= fromDate;
+        });
+        
+        filteredSpoolData = mainviewDataJespool.filter(item => {
           const itemTime = new Date(item.bmctime || item.created_at);
           return itemTime >= fromDate;
         });
       }
       
-      setFilteredMainviewData(filteredData);
+      // Filtrelenmiş verileri set et
+      setFilteredMainviewData(filteredCpuData);
       setIsFiltered(true);
       
-      toast.success(`Filtreleme uygulandı. ${filteredData.length} kayıt bulundu.`);
+      setFilteredAddressSpaceData(filteredAddressSpaceData);
+      setIsAddressSpaceFiltered(true);
+      
+      setFilteredSpoolData(filteredSpoolData);
+      setIsSpoolFiltered(true);
+      
+      const totalRecords = filteredCpuData.length + filteredAddressSpaceData.length + filteredSpoolData.length;
+      toast.success(`Filtreleme uygulandı. Toplam ${totalRecords} kayıt bulundu.`);
       closeTimeFilter();
       
     } catch (error) {
@@ -867,6 +1412,32 @@ const ZOSPage = () => {
                                 </button>
                               </div>
                             )}
+                            {isAddressSpaceFiltered && (
+                              <div className="flex items-center space-x-2">
+                                <span className="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">
+                                  Filtrelenmiş ({filteredAddressSpaceData.length} kayıt)
+                                </span>
+                                <button
+                                  onClick={clearTimeFilter}
+                                  className="px-2 py-1 text-xs font-medium text-red-700 bg-red-100 border border-red-300 rounded hover:bg-red-200 transition-colors duration-200"
+                                >
+                                  Filtreyi Temizle
+                                </button>
+                              </div>
+                            )}
+                            {isSpoolFiltered && (
+                              <div className="flex items-center space-x-2">
+                                <span className="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">
+                                  Filtrelenmiş ({filteredSpoolData.length} kayıt)
+                                </span>
+                                <button
+                                  onClick={clearTimeFilter}
+                                  className="px-2 py-1 text-xs font-medium text-red-700 bg-red-100 border border-red-300 rounded hover:bg-red-200 transition-colors duration-200"
+                                >
+                                  Filtreyi Temizle
+                                </button>
+                              </div>
+                            )}
                           </div>
                           {activeModal === 'cpu' && (
                             <div className="flex space-x-3">
@@ -911,22 +1482,88 @@ const ZOSPage = () => {
                             </div>
                           )}
                           {activeModal === 'addressSpace' && (
+                            <div className="flex space-x-3">
+                              <button
+                                onClick={exportAddressSpaceToExcel}
+                                className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md hover:bg-green-200 transition-colors duration-200 flex items-center"
+                              >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Excel'e Aktar
+                              </button>
+                              <button
+                                onClick={exportAddressSpaceToPDF}
+                                className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-200 transition-colors duration-200 flex items-center"
+                              >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                PDF'e Aktar
+                              </button>
+                              <button
+                                onClick={openTimeFilter}
+                                className={`px-4 py-2 text-sm font-medium border rounded-md transition-colors duration-200 flex items-center ${
+                                  isAddressSpaceFiltered 
+                                    ? 'text-blue-700 bg-blue-100 border-blue-300 hover:bg-blue-200' 
+                                    : 'text-gray-700 bg-gray-100 border-gray-300 hover:bg-gray-200'
+                                }`}
+                              >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Zaman Filtresi
+                              </button>
                             <button
                               onClick={fetchMainviewDataJCPU}
                               disabled={dataLoading}
-                              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {dataLoading ? 'Yükleniyor...' : 'Yenile'}
                             </button>
+                            </div>
                           )}
                           {activeModal === 'spool' && (
+                            <div className="flex space-x-3">
+                            <button
+                                onClick={exportSpoolToExcel}
+                                className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md hover:bg-green-200 transition-colors duration-200 flex items-center"
+                              >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Excel'e Aktar
+                              </button>
+                              <button
+                                onClick={exportSpoolToPDF}
+                                className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-200 transition-colors duration-200 flex items-center"
+                              >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                PDF'e Aktar
+                              </button>
+                              <button
+                                onClick={openTimeFilter}
+                                className={`px-4 py-2 text-sm font-medium border rounded-md transition-colors duration-200 flex items-center ${
+                                  isSpoolFiltered 
+                                    ? 'text-blue-700 bg-blue-100 border-blue-300 hover:bg-blue-200' 
+                                    : 'text-gray-700 bg-gray-100 border-gray-300 hover:bg-gray-200'
+                                }`}
+                              >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Zaman Filtresi
+                              </button>
                             <button
                               onClick={fetchMainviewDataJespool}
                               disabled={dataLoading}
-                              className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {dataLoading ? 'Yükleniyor...' : 'Yenile'}
                             </button>
+                            </div>
                           )}
                         </div>
                         
@@ -1196,22 +1833,299 @@ const ZOSPage = () => {
                                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Class Name</th>
                                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ASGRNMC</th>
                                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Step Being Monitored</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ALL CPU seconds</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unadj CPU Util (All Enclaves)</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Using CPU %</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU Delay %</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Average Priority</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TCB Time</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">% SRB Time</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Interval Unadj Remote Enclave CPU use</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Total CPU Time</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Other Addr Space Enclave CPU Time</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">zIIP Total CPU Time</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">zIIP Interval CPU Time</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dep Enclave zIIP Total Time</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dep Enclave zIIP Interval Time</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dep Enclave zIIP On CP Total</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Interval CP time</th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleAddressSpaceSort('all_cpu_seconds')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>ALL CPU seconds</span>
+                                            {addressSpaceSortColumn === 'all_cpu_seconds' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {addressSpaceSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getAddressSpaceColumnStats('all_cpu_seconds').min.toFixed(2)} | Max: {getAddressSpaceColumnStats('all_cpu_seconds').max.toFixed(2)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleAddressSpaceSort('unadj_cpu_util_with_all_enclaves')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>Unadj CPU Util (All Enclaves)</span>
+                                            {addressSpaceSortColumn === 'unadj_cpu_util_with_all_enclaves' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {addressSpaceSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getAddressSpaceColumnStats('unadj_cpu_util_with_all_enclaves').min.toFixed(2)} | Max: {getAddressSpaceColumnStats('unadj_cpu_util_with_all_enclaves').max.toFixed(2)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleAddressSpaceSort('using_cpu_percentage')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>Using CPU %</span>
+                                            {addressSpaceSortColumn === 'using_cpu_percentage' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {addressSpaceSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getAddressSpaceColumnStats('using_cpu_percentage').min.toFixed(2)} | Max: {getAddressSpaceColumnStats('using_cpu_percentage').max.toFixed(2)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleAddressSpaceSort('cpu_delay_percentage')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>CPU Delay %</span>
+                                            {addressSpaceSortColumn === 'cpu_delay_percentage' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {addressSpaceSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getAddressSpaceColumnStats('cpu_delay_percentage').min.toFixed(2)} | Max: {getAddressSpaceColumnStats('cpu_delay_percentage').max.toFixed(2)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleAddressSpaceSort('average_priority')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>Average Priority</span>
+                                            {addressSpaceSortColumn === 'average_priority' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {addressSpaceSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getAddressSpaceColumnStats('average_priority').min.toFixed(2)} | Max: {getAddressSpaceColumnStats('average_priority').max.toFixed(2)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleAddressSpaceSort('tcb_time')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>TCB Time</span>
+                                            {addressSpaceSortColumn === 'tcb_time' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {addressSpaceSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getAddressSpaceColumnStats('tcb_time').min.toFixed(2)} | Max: {getAddressSpaceColumnStats('tcb_time').max.toFixed(2)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleAddressSpaceSort('percentage_srb_time')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>% SRB Time</span>
+                                            {addressSpaceSortColumn === 'percentage_srb_time' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {addressSpaceSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getAddressSpaceColumnStats('percentage_srb_time').min.toFixed(2)} | Max: {getAddressSpaceColumnStats('percentage_srb_time').max.toFixed(2)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleAddressSpaceSort('interval_unadj_remote_enclave_cpu_use')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>Interval Unadj Remote Enclave CPU use</span>
+                                            {addressSpaceSortColumn === 'interval_unadj_remote_enclave_cpu_use' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {addressSpaceSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleAddressSpaceSort('job_total_cpu_time')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>Job Total CPU Time</span>
+                                            {addressSpaceSortColumn === 'job_total_cpu_time' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {addressSpaceSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleAddressSpaceSort('other_address_space_enclave_cpu_time')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>Other Addr Space Enclave CPU Time</span>
+                                            {addressSpaceSortColumn === 'other_address_space_enclave_cpu_time' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {addressSpaceSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleAddressSpaceSort('ziip_total_cpu_time')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>zIIP Total CPU Time</span>
+                                            {addressSpaceSortColumn === 'ziip_total_cpu_time' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {addressSpaceSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleAddressSpaceSort('ziip_interval_cpu_time')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>zIIP Interval CPU Time</span>
+                                            {addressSpaceSortColumn === 'ziip_interval_cpu_time' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {addressSpaceSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleAddressSpaceSort('dependent_enclave_ziip_total_time')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>Dep Enclave zIIP Total Time</span>
+                                            {addressSpaceSortColumn === 'dependent_enclave_ziip_total_time' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {addressSpaceSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleAddressSpaceSort('dependent_enclave_ziip_interval_time')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>Dep Enclave zIIP Interval Time</span>
+                                            {addressSpaceSortColumn === 'dependent_enclave_ziip_interval_time' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {addressSpaceSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleAddressSpaceSort('dependent_enclave_ziip_on_cp_total')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>Dep Enclave zIIP On CP Total</span>
+                                            {addressSpaceSortColumn === 'dependent_enclave_ziip_on_cp_total' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {addressSpaceSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleAddressSpaceSort('interval_cp_time')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>Interval CP time</span>
+                                            {addressSpaceSortColumn === 'interval_cp_time' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {addressSpaceSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </th>
                                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resource Group Name</th>
                                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resource Group Type</th>
                                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recovery Process Boost</th>
@@ -1221,7 +2135,7 @@ const ZOSPage = () => {
                                     </tr>
                                   </thead>
                                   <tbody className="bg-white divide-y divide-gray-200">
-                                    {mainviewDataJCPU.map((row, index) => (
+                                    {sortedAddressSpaceData.map((row, index) => (
                                       <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.jobname || '-'}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.jes_job_number || '-'}</td>
@@ -1280,24 +2194,234 @@ const ZOSPage = () => {
                                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BMC Time</th>
                                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
                                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SMF ID</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL VOLS</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SPOOL %UTIL</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL TRACKS</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">USED TRACKS</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIVE %UTIL</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TOTAL ACTIVE TRACKS</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">USED ACTIVE TRACKS</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIVE VOLS</th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSpoolSort('total_volumes')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>TOTAL VOLS</span>
+                                            {spoolSortColumn === 'total_volumes' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {spoolSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSpoolSort('spool_util')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>SPOOL %UTIL</span>
+                                            {spoolSortColumn === 'spool_util' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {spoolSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getSpoolColumnStats('spool_util').min.toFixed(2)} | Max: {getSpoolColumnStats('spool_util').max.toFixed(2)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSpoolSort('total_tracks')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>TOTAL TRACKS</span>
+                                            {spoolSortColumn === 'total_tracks' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {spoolSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getSpoolColumnStats('total_tracks').min.toFixed(0)} | Max: {getSpoolColumnStats('total_tracks').max.toFixed(0)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSpoolSort('used_tracks')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>USED TRACKS</span>
+                                            {spoolSortColumn === 'used_tracks' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {spoolSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getSpoolColumnStats('used_tracks').min.toFixed(0)} | Max: {getSpoolColumnStats('used_tracks').max.toFixed(0)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSpoolSort('active_spool_util')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>ACTIVE %UTIL</span>
+                                            {spoolSortColumn === 'active_spool_util' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {spoolSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getSpoolColumnStats('active_spool_util').min.toFixed(2)} | Max: {getSpoolColumnStats('active_spool_util').max.toFixed(2)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSpoolSort('total_active_tracks')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>TOTAL ACTIVE TRACKS</span>
+                                            {spoolSortColumn === 'total_active_tracks' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {spoolSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getSpoolColumnStats('total_active_tracks').min.toFixed(0)} | Max: {getSpoolColumnStats('total_active_tracks').max.toFixed(0)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSpoolSort('used_active_tracks')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>USED ACTIVE TRACKS</span>
+                                            {spoolSortColumn === 'used_active_tracks' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {spoolSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getSpoolColumnStats('used_active_tracks').min.toFixed(0)} | Max: {getSpoolColumnStats('used_active_tracks').max.toFixed(0)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSpoolSort('active_volumes')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>ACTIVE VOLS</span>
+                                            {spoolSortColumn === 'active_volumes' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {spoolSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </th>
                                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">VOLUME</th>
                                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">VOLUME %UTIL</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">VOLUME TRACKS</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">VOLUME USED</th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">OTHER VOLS</th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSpoolSort('volume_util')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>VOLUME %UTIL</span>
+                                            {spoolSortColumn === 'volume_util' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {spoolSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSpoolSort('volume_tracks')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>VOLUME TRACKS</span>
+                                            {spoolSortColumn === 'volume_tracks' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {spoolSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSpoolSort('volume_used')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>VOLUME USED</span>
+                                            {spoolSortColumn === 'volume_used' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {spoolSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSpoolSort('other_volumes')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>OTHER VOLS</span>
+                                            {spoolSortColumn === 'other_volumes' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {spoolSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </th>
                                     </tr>
                                   </thead>
                                   <tbody className="bg-white divide-y divide-gray-200">
-                                    {mainviewDataJespool.map((row, index) => (
+                                    {sortedSpoolData.map((row, index) => (
                                       <tr key={row.id || index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.id}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.bmctime ? new Date(row.bmctime).toLocaleString('tr-TR') : '-'}</td>
