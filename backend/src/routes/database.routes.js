@@ -6,6 +6,16 @@ const { testConnection, getMainviewMvsSysover, getMainviewMvsJespool,
   getMainviewNetworktcpcons, checkTableExiststcpcons, getMainviewNetworkudpconf, checkTableExiststudpconf,
   getMainviewNetworkactcons, checkTableExistsactcons} = require('../controllers/database.controller');
 
+// New network tables
+const {
+  checkTableExistsVtmbuff,
+  getMainviewNetworkVtmbuff,
+  checkTableExistsTcpstor,
+  getMainviewNetworkTcpstor,
+  checkTableExistsConnsrpz,
+  getMainviewNetworkConnsrpz
+} = require('../controllers/database.controller');
+
 const router = express.Router();
 
 // Test database connection
@@ -70,5 +80,17 @@ router.post('/mainview-network-actcons', getMainviewNetworkactcons);
  
 // Check table exists for actcons
 router.post('/check-table-actcons', checkTableExistsactcons);
+
+// VTMBUFF
+router.post('/mainview-network-vtmbuff', getMainviewNetworkVtmbuff);
+router.post('/check-table-vtmbuff', checkTableExistsVtmbuff);
+
+// TCPSTOR
+router.post('/mainview-network-tcpstor', getMainviewNetworkTcpstor);
+router.post('/check-table-tcpstor', checkTableExistsTcpstor);
+
+// CONNSRPZ
+router.post('/mainview-network-connsrpz', getMainviewNetworkConnsrpz);
+router.post('/check-table-connsrpz', checkTableExistsConnsrpz);
 
 module.exports = router;

@@ -1190,6 +1190,277 @@ const getMainviewNetworkVtamcsa = async (req, res) => {
   }
 };
 
+// Check table exists for vtmbuff
+const checkTableExistsVtmbuff = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+
+    const tableQuery = `
+      SELECT column_name, data_type, is_nullable
+      FROM information_schema.columns
+      WHERE table_name = 'mainview_network_vtmbuff'
+      ORDER BY ordinal_position
+    `;
+    const tableResult = await client.query(tableQuery);
+    const exists = tableResult.rows.length > 0;
+
+    if (!exists) {
+      client.release();
+      return res.status(200).json({
+        success: true,
+        message: 'Tablo bilgileri başarıyla getirildi',
+        tableInfo: { exists: false, columns: [], rowCount: 0, sampleData: [] }
+      });
+    }
+
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_network_vtmbuff`;
+    const countResult = await client.query(countQuery);
+
+    const sampleQuery = `SELECT * FROM mainview_network_vtmbuff LIMIT 5`;
+    const sampleResult = await client.query(sampleQuery);
+
+    client.release();
+
+    res.status(200).json({
+      success: true,
+      message: 'Tablo bilgileri başarıyla getirildi',
+      tableInfo: {
+        exists: true,
+        columns: tableResult.rows,
+        rowCount: parseInt(countResult.rows[0].count),
+        sampleData: sampleResult.rows
+      }
+    });
+  } catch (error) {
+    console.error('Table check error:', error);
+    res.status(500).json({ success: false, message: 'Tablo kontrolü başarısız', error: error.message });
+  } finally {
+    if (pool) await pool.end();
+  }
+};
+
+// Get mainview_network_vtmbuff data
+const getMainviewNetworkVtmbuff = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+
+  // Use SELECT * to be resilient to schema differences; avoid ORDER BY on unknown column
+  const query = `SELECT * FROM mainview_network_vtmbuff LIMIT 100`;
+    const result = await client.query(query);
+    client.release();
+
+    res.status(200).json({ success: true, message: 'VTMBUFF verileri başarıyla getirildi', count: result.rowCount, data: result.rows });
+  } catch (error) {
+    console.error('VTMBUFF query error:', error);
+    res.status(500).json({ success: false, message: 'VTMBUFF verileri getirilemedi', error: error.message });
+  } finally {
+    if (pool) await pool.end();
+  }
+};
+
+// Check table exists for tcpstor
+const checkTableExistsTcpstor = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+
+    const tableQuery = `
+      SELECT column_name, data_type, is_nullable
+      FROM information_schema.columns
+      WHERE table_name = 'mainview_network_tcpstor'
+      ORDER BY ordinal_position
+    `;
+    const tableResult = await client.query(tableQuery);
+    const exists = tableResult.rows.length > 0;
+
+    if (!exists) {
+      client.release();
+      return res.status(200).json({
+        success: true,
+        message: 'Tablo bilgileri başarıyla getirildi',
+        tableInfo: { exists: false, columns: [], rowCount: 0, sampleData: [] }
+      });
+    }
+
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_network_tcpstor`;
+    const countResult = await client.query(countQuery);
+
+    const sampleQuery = `SELECT * FROM mainview_network_tcpstor LIMIT 5`;
+    const sampleResult = await client.query(sampleQuery);
+
+    client.release();
+
+    res.status(200).json({
+      success: true,
+      message: 'Tablo bilgileri başarıyla getirildi',
+      tableInfo: {
+        exists: true,
+        columns: tableResult.rows,
+        rowCount: parseInt(countResult.rows[0].count),
+        sampleData: sampleResult.rows
+      }
+    });
+  } catch (error) {
+    console.error('Table check error:', error);
+    res.status(500).json({ success: false, message: 'Tablo kontrolü başarısız', error: error.message });
+  } finally {
+    if (pool) await pool.end();
+  }
+};
+
+// Get mainview_network_tcpstor data
+const getMainviewNetworkTcpstor = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+
+    const query = `SELECT * FROM mainview_network_tcpstor ORDER BY record_timestamp DESC LIMIT 100`;
+    const result = await client.query(query);
+    client.release();
+
+    res.status(200).json({ success: true, message: 'TCPSTOR verileri başarıyla getirildi', count: result.rowCount, data: result.rows });
+  } catch (error) {
+    console.error('TCPSTOR query error:', error);
+    res.status(500).json({ success: false, message: 'TCPSTOR verileri getirilemedi', error: error.message });
+  } finally {
+    if (pool) await pool.end();
+  }
+};
+
+// Check table exists for connsrpz
+const checkTableExistsConnsrpz = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+
+    // Resolve table name robustly
+    const tableName = await resolveConnsrpzTableName(client);
+    if (!tableName) {
+      client.release();
+      return res.status(200).json({ success: true, message: 'Tablo bilgileri başarıyla getirildi', tableInfo: { exists: false, columns: [], rowCount: 0, sampleData: [] } });
+    }
+
+    const columnsQuery = `
+      SELECT column_name, data_type, is_nullable
+      FROM information_schema.columns
+      WHERE table_name = $1
+      ORDER BY ordinal_position
+    `;
+    const tableResult = await client.query(columnsQuery, [tableName]);
+    const exists = tableResult.rows.length > 0;
+
+    if (!exists) {
+      client.release();
+      return res.status(200).json({
+        success: true,
+        message: 'Tablo bilgileri başarıyla getirildi',
+        tableInfo: { exists: false, columns: [], rowCount: 0, sampleData: [] }
+      });
+    }
+
+    const countQuery = `SELECT COUNT(*) as count FROM ${tableName}`;
+    const countResult = await client.query(countQuery);
+
+    const sampleQuery = `SELECT * FROM ${tableName} LIMIT 5`;
+    const sampleResult = await client.query(sampleQuery);
+
+    client.release();
+
+    res.status(200).json({
+      success: true,
+      message: 'Tablo bilgileri başarıyla getirildi',
+      tableInfo: {
+        exists: true,
+        columns: tableResult.rows,
+        rowCount: parseInt(countResult.rows[0].count),
+        sampleData: sampleResult.rows
+      }
+    });
+  } catch (error) {
+    console.error('Table check error:', error);
+    res.status(500).json({ success: false, message: 'Tablo kontrolü başarısız', error: error.message });
+  } finally {
+    if (pool) await pool.end();
+  }
+};
+
+// Helper: resolve actual CONNSRPZ table name in DB
+async function resolveConnsrpzTableName(client) {
+  // Exact match first (case-insensitive)
+  const exact = await client.query(`
+    SELECT table_name
+    FROM information_schema.tables
+    WHERE LOWER(table_name) = LOWER('mainview_network_connsrpz')
+      AND table_schema NOT IN ('information_schema','pg_catalog')
+    LIMIT 1
+  `);
+  if (exact.rows.length > 0) return exact.rows[0].table_name;
+
+  // Alternate spelling used by some loaders
+  const alt = await client.query(`
+    SELECT table_name
+    FROM information_schema.tables
+    WHERE LOWER(table_name) = LOWER('mainview_network_connrspz')
+      AND table_schema NOT IN ('information_schema','pg_catalog')
+    LIMIT 1
+  `);
+  if (alt.rows.length > 0) return alt.rows[0].table_name;
+
+  // Try to find a close variant (typo-safe): mainview_network_conn%rpz%
+  const like = await client.query(`
+    SELECT table_name
+    FROM information_schema.tables
+    WHERE table_schema NOT IN ('information_schema','pg_catalog')
+      AND table_name ILIKE 'mainview\\_network\\_%'
+      AND table_name ILIKE '%conn%'
+      AND table_name ILIKE '%rpz%'
+    ORDER BY table_name
+    LIMIT 1
+  `);
+  if (like.rows.length > 0) return like.rows[0].table_name;
+
+  return null;
+}
+
+// Get mainview_network_connsrpz data
+const getMainviewNetworkConnsrpz = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+
+    const tableName = await resolveConnsrpzTableName(client);
+    if (!tableName) {
+      client.release();
+      return res.status(200).json({ success: true, message: 'Tablo bulunamadı', count: 0, data: [] });
+    }
+
+    const query = `SELECT * FROM ${tableName} LIMIT 100`;
+    const result = await client.query(query);
+    client.release();
+
+    res.status(200).json({ success: true, message: 'CONNSRPZ verileri başarıyla getirildi', count: result.rowCount, data: result.rows });
+  } catch (error) {
+    console.error('CONNSRPZ query error:', error);
+    res.status(500).json({ success: false, message: 'CONNSRPZ verileri getirilemedi', error: error.message });
+  } finally {
+    if (pool) await pool.end();
+  }
+};
+
 module.exports = {
   testConnection,
   getMainviewMvsSysover,
@@ -1211,5 +1482,12 @@ module.exports = {
   getMainviewNetworkudpconf,
   checkTableExiststudpconf,
   getMainviewNetworkactcons,
-  checkTableExistsactcons
+  checkTableExistsactcons,
+  // NEW: Network tables (VTMBUFF, TCPSTOR, CONNSRPZ)
+  checkTableExistsVtmbuff,
+  getMainviewNetworkVtmbuff,
+  checkTableExistsTcpstor,
+  getMainviewNetworkTcpstor,
+  checkTableExistsConnsrpz,
+  getMainviewNetworkConnsrpz
 };

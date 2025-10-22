@@ -15,6 +15,9 @@ const NetworkPage = () => {
   const [tcpconsData, setTcpconsData] = useState([]);
   const [udpconfData, setUdpconfData] = useState([]);
   const [actconsData, setActconsData] = useState([]);
+  const [vtmbuffData, setVtmbuffData] = useState([]);
+  const [tcpstorData, setTcpstorData] = useState([]);
+  const [connsrpzData, setConnsrpzData] = useState([]);
   const [dataLoading, setDataLoading] = useState(false);
   const [timeFilterModal, setTimeFilterModal] = useState(false);
   const [selectedTimeRange, setSelectedTimeRange] = useState('last6h');
@@ -824,6 +827,147 @@ const NetworkPage = () => {
     }
   };
 
+  // VTMBUFF Tablo kontrolü fonksiyonu
+  const checkTableInfoVtmbuff = async () => {
+    try {
+      if (typeof databaseAPI.checkTableExistsVtmbuff !== 'function') {
+        console.error('checkTableExistsVtmbuff fonksiyonu bulunamadı!');
+        toast.error('API fonksiyonu bulunamadı! Lütfen sayfayı yenileyin.');
+        return false;
+      }
+
+      const response = await databaseAPI.checkTableExistsVtmbuff();
+      if (response.data.success) {
+        const tableInfo = response.data.tableInfo;
+        if (!tableInfo.exists) {
+          toast.error('mainview_network_vtmbuff tablosu bulunamadı!');
+          return false;
+        }
+        if (tableInfo.rowCount === 0) return false;
+        toast.success(`Tablo mevcut: ${tableInfo.rowCount} kayıt bulundu`);
+        return true;
+      }
+    } catch (error) {
+      console.error('Tablo kontrolü hatası:', error);
+      toast.error(`Tablo kontrolü başarısız: ${error.message}`);
+      return false;
+    }
+  };
+
+  // VTMBUFF veri çekme fonksiyonu
+  const fetchVtmbuffData = async () => {
+    setDataLoading(true);
+    try {
+      const tableExists = await checkTableInfoVtmbuff();
+      if (!tableExists) { setDataLoading(false); return; }
+
+      const response = await databaseAPI.getMainviewNetworkVtmbuff();
+      if (response.data.success) {
+        setVtmbuffData(response.data.data);
+        if (response.data.data.length > 0) toast.success(`Veriler başarıyla yüklendi (${response.data.data.length} kayıt)`);
+      } else {
+        toast.error('Veri yüklenirken hata oluştu');
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error);
+      toast.error(`Veri yüklenirken hata oluştu: ${error.message}`);
+    } finally { setDataLoading(false); }
+  };
+
+  // TCPSTOR Tablo kontrolü fonksiyonu
+  const checkTableInfoTcpstor = async () => {
+    try {
+      if (typeof databaseAPI.checkTableExistsTcpstor !== 'function') {
+        console.error('checkTableExistsTcpstor fonksiyonu bulunamadı!');
+        toast.error('API fonksiyonu bulunamadı! Lütfen sayfayı yenileyin.');
+        return false;
+      }
+
+      const response = await databaseAPI.checkTableExistsTcpstor();
+      if (response.data.success) {
+        const tableInfo = response.data.tableInfo;
+        if (!tableInfo.exists) {
+          toast.error('mainview_network_tcpstor tablosu bulunamadı!');
+          return false;
+        }
+        if (tableInfo.rowCount === 0) return false;
+        toast.success(`Tablo mevcut: ${tableInfo.rowCount} kayıt bulundu`);
+        return true;
+      }
+    } catch (error) {
+      console.error('Tablo kontrolü hatası:', error);
+      toast.error(`Tablo kontrolü başarısız: ${error.message}`);
+      return false;
+    }
+  };
+
+  // TCPSTOR veri çekme fonksiyonu
+  const fetchTcpstorData = async () => {
+    setDataLoading(true);
+    try {
+      const tableExists = await checkTableInfoTcpstor();
+      if (!tableExists) { setDataLoading(false); return; }
+
+      const response = await databaseAPI.getMainviewNetworkTcpstor();
+      if (response.data.success) {
+        setTcpstorData(response.data.data);
+        if (response.data.data.length > 0) toast.success(`Veriler başarıyla yüklendi (${response.data.data.length} kayıt)`);
+      } else {
+        toast.error('Veri yüklenirken hata oluştu');
+      }
+    } catch (error) {
+      console.error('Veri yüklenirken hata:', error);
+      toast.error(`Veri yüklenirken hata oluştu: ${error.message}`);
+    } finally { setDataLoading(false); }
+  };
+
+  // CONNSRPZ Tablo kontrolü fonksiyonu
+  const checkTableInfoConnsrpz = async () => {
+    try {
+      if (typeof databaseAPI.checkTableExistsConnsrpz !== 'function') {
+        console.error('checkTableExistsConnsrpz fonksiyonu bulunamadı!');
+        toast.error('API fonksiyonu bulunamadı! Lütfen sayfayı yenileyin.');
+        return false;
+      }
+
+      const response = await databaseAPI.checkTableExistsConnsrpz();
+      if (response.data.success) {
+        const tableInfo = response.data.tableInfo;
+        if (!tableInfo.exists) {
+          toast.error('mainview_network_connsrpz tablosu bulunamadı!');
+          return false;
+        }
+        if (tableInfo.rowCount === 0) return false;
+        toast.success(`Tablo mevcut: ${tableInfo.rowCount} kayıt bulundu`);
+        return true;
+      }
+    } catch (error) {
+      console.error('Tablo kontrolü hatası:', error);
+      toast.error(`Tablo kontrolü başarısız: ${error.message}`);
+      return false;
+    }
+  };
+
+  // CONNSRPZ veri çekme fonksiyonu
+  const fetchConnsrpzData = async () => {
+    setDataLoading(true);
+    try {
+      const tableExists = await checkTableInfoConnsrpz();
+      if (!tableExists) { setDataLoading(false); return; }
+
+      const response = await databaseAPI.getMainviewNetworkConnsrpz();
+      if (response.data.success) {
+        setConnsrpzData(response.data.data);
+        if (response.data.data.length > 0) toast.success(`Veriler başarıyla yüklendi (${response.data.data.length} kayıt)`);
+      } else {
+        toast.error('Veri yüklenirken hata oluştu');
+      }
+    } catch (error) {
+      console.error('Veri yüklenirken hata:', error);
+      toast.error(`Veri yüklenirken hata oluştu: ${error.message}`);
+    } finally { setDataLoading(false); }
+  };
+
   const openModal = (modalType) => {
     setActiveModal(modalType);
     setActiveTab('table');
@@ -862,6 +1006,20 @@ const NetworkPage = () => {
     // ACTCONS modalı açıldığında veri çek
     if (modalType === 'actcons') {
       fetchActconsData();
+    }
+    // VTMBUFF modalı açıldığında veri çek
+    if (modalType === 'VTMBUFF') {
+      fetchVtmbuffData();
+    }
+
+    // CONNSRPZ modalı açıldığında veri çek
+    if (modalType === 'connsrpz') {
+      fetchConnsrpzData();
+    }
+
+    // TCPSTOR modalı açıldığında veri çek
+    if (modalType === 'tcpstor') {
+      fetchTcpstorData();
     }
   };
 
@@ -1478,6 +1636,37 @@ const NetworkPage = () => {
                             </button>
                           </div>
                         )}
+                        {activeModal === 'VTMBUFF' && (
+                          <div className="flex space-x-3">
+                            <button
+                              onClick={() => exportToExcel(vtmbuffData, 'VTMBUFF')}
+                              className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md hover:bg-green-200 transition-colors duration-200 flex items-center"
+                              disabled={dataLoading || vtmbuffData.length === 0}
+                            >Excel'e Aktar</button>
+                            <button
+                              onClick={() => exportToPDF(vtmbuffData, 'VTMBUFF')}
+                              className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-200 transition-colors duration-200 flex items-center"
+                              disabled={dataLoading || vtmbuffData.length === 0}
+                            >PDF'e Aktar</button>
+                            <button onClick={fetchVtmbuffData} disabled={dataLoading} className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md">{dataLoading ? 'Yükleniyor...' : 'Yenile'}</button>
+                          </div>
+                        )}
+
+                        {activeModal === 'connsrpz' && (
+                          <div className="flex space-x-3">
+                            <button onClick={() => exportToExcel(connsrpzData, 'CONNSRPZ')} className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md">Excel'e Aktar</button>
+                            <button onClick={() => exportToPDF(connsrpzData, 'CONNSRPZ')} className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md">PDF'e Aktar</button>
+                            <button onClick={fetchConnsrpzData} disabled={dataLoading} className="px-4 py-2 text-sm font-medium text-white bg-pink-600 rounded-md">{dataLoading ? 'Yükleniyor...' : 'Yenile'}</button>
+                          </div>
+                        )}
+
+                        {activeModal === 'tcpstor' && (
+                          <div className="flex space-x-3">
+                            <button onClick={() => exportToExcel(tcpstorData, 'TCPSTOR')} className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md">Excel'e Aktar</button>
+                            <button onClick={() => exportToPDF(tcpstorData, 'TCPSTOR')} className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md">PDF'e Aktar</button>
+                            <button onClick={fetchTcpstorData} disabled={dataLoading} className="px-4 py-2 text-sm font-medium text-white bg-sky-600 rounded-md">{dataLoading ? 'Yükleniyor...' : 'Yenile'}</button>
+                          </div>
+                        )}
                       </div>
                       
                       {activeModal === 'STACKS' ? (
@@ -1911,6 +2100,148 @@ const NetworkPage = () => {
                             </div>
                           )}
                         </div>
+                          ) : activeModal === 'VTMBUFF' ? (
+                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                          {dataLoading ? (
+                            <div className="p-8 text-center">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto"></div>
+                              <p className="mt-4 text-gray-600">Veriler yükleniyor...</p>
+                            </div>
+                          ) : vtmbuffData.length > 0 ? (
+                            <div className="overflow-x-auto">
+                              <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                  <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">System</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IOBuf Size</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IOBuf Times Expanded</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LPBuf Size</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LPBuf Times Expanded</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LFBuf Size</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LFBuf Times Expanded</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                  {vtmbuffData.map((row, index) => (
+                                    <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.system_name || '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.iobuf_size ?? '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.iobuf_times_expanded ?? '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.lpbuf_size ?? '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.lpbuf_times_expanded ?? '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.lfbuf_size ?? '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.lfbuf_times_expanded ?? '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.record_timestamp ? new Date(row.record_timestamp).toLocaleString('tr-TR') : '-'}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          ) : (
+                            <div className="p-8 text-center">
+                              <div className="text-4xl mb-4">📊</div>
+                              <p className="text-gray-600 text-lg">Henüz veri bulunmuyor</p>
+                              <p className="text-gray-500 text-sm mt-2">Yenile butonuna tıklayarak veri yükleyebilirsiniz</p>
+                            </div>
+                          )}
+                        </div>
+                      ) : activeModal === 'connsrpz' ? (
+                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                          {dataLoading ? (
+                            <div className="p-8 text-center">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500 mx-auto"></div>
+                              <p className="mt-4 text-gray-600">Veriler yükleniyor...</p>
+                            </div>
+                          ) : connsrpzData.length > 0 ? (
+                            <div className="overflow-x-auto">
+                              <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                  <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foreign IP</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Active Conns</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg RTT (ms)</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Max RTT (ms)</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bytes In</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bytes Out</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stack</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remote Host</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                  {connsrpzData.map((row, index) => (
+                                    <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.foreign_ip_address || '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.active_conns ?? '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.average_rtt_ms ?? '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.max_rtt_ms ?? '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.interval_bytes_in_sum ?? '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.interval_bytes_out_sum ?? '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.stack_name || '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.remote_host_name || '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.record_timestamp ? new Date(row.record_timestamp).toLocaleString('tr-TR') : '-'}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          ) : (
+                            <div className="p-8 text-center">
+                              <div className="text-4xl mb-4">📊</div>
+                              <p className="text-gray-600 text-lg">Henüz veri bulunmuyor</p>
+                              <p className="text-gray-500 text-sm mt-2">Yenile butonuna tıklayarak veri yükleyebilirsiniz</p>
+                            </div>
+                          )}
+                        </div>
+                      ) : activeModal === 'tcpstor' ? (
+                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                          {dataLoading ? (
+                            <div className="p-8 text-center">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500 mx-auto"></div>
+                              <p className="mt-4 text-gray-600">Veriler yükleniyor...</p>
+                            </div>
+                          ) : tcpstorData.length > 0 ? (
+                            <div className="overflow-x-auto">
+                              <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                  <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Step</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">System</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ECSA Current</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ECSA Max</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ECSA Limit</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ECSA Free</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Private Current</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Private Max</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                  {tcpstorData.map((row, index) => (
+                                    <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.step_name || '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.system_name || '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.ecsa_current ?? '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.ecsa_max ?? '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.ecsa_limit ?? '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.ecsa_free ?? '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.private_current ?? '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.private_max ?? '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.record_timestamp ? new Date(row.record_timestamp).toLocaleString('tr-TR') : '-'}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          ) : (
+                            <div className="p-8 text-center">
+                              <div className="text-4xl mb-4">📊</div>
+                              <p className="text-gray-600 text-lg">Henüz veri bulunmuyor</p>
+                              <p className="text-gray-500 text-sm mt-2">Yenile butonuna tıklayarak veri yükleyebilirsiniz</p>
+                            </div>
+                          )}
+                        </div>
                       ) : (
                       <div className="bg-gray-50 rounded-lg p-8 text-center">
                         <div className="text-4xl mb-4">📊</div>
@@ -1925,6 +2256,120 @@ const NetworkPage = () => {
                   {activeTab === 'chart' && (
                     <div className="space-y-4">
                       <h4 className="text-lg font-semibold text-gray-800 mb-4">Performans Grafikleri</h4>
+
+                      {/* VTMBUFF için Grafik Kartları (iobuf_size, lpbuf_size, lfbuf_size, *_times_expanded, record_timestamp) */}
+                      {activeModal === 'VTMBUFF' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                          {/* IOBuf Size */}
+                          <div onClick={() => openChart('vtmbuffIOBufSize')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-red-200"><svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7" /></svg></div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">IOBuf Size</h5>
+                              <div className="text-2xl font-bold text-gray-900">{vtmbuffData?.[0]?.iobuf_size ?? <span className="text-gray-400">-</span>}</div>
+                            </div>
+                          </div>
+                          {/* LPBuf Size */}
+                          <div onClick={() => openChart('vtmbuffLPBufSize')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-amber-200"><svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10M20 7v10M4 12h16" /></svg></div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">LPBuf Size</h5>
+                              <div className="text-2xl font-bold text-gray-900">{vtmbuffData?.[0]?.lpbuf_size ?? <span className="text-gray-400">-</span>}</div>
+                            </div>
+                          </div>
+                          {/* LFBuf Size */}
+                          <div onClick={() => openChart('vtmbuffLFBufSize')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-lime-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-lime-200"><svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M6 12h12M8 17h8" /></svg></div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">LFBuf Size</h5>
+                              <div className="text-2xl font-bold text-gray-900">{vtmbuffData?.[0]?.lfbuf_size ?? <span className="text-gray-400">-</span>}</div>
+                            </div>
+                          </div>
+                          {/* Times Expanded */}
+                          <div onClick={() => openChart('vtmbuffExpands')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-rose-200"><svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Times Expanded</h5>
+                              <div className="text-2xl font-bold text-gray-900">{(vtmbuffData?.[0]?.iobuf_times_expanded ?? 0) + (vtmbuffData?.[0]?.lpbuf_times_expanded ?? 0) + (vtmbuffData?.[0]?.lfbuf_times_expanded ?? 0)}</div>
+                            </div>
+                          </div>
+                          {/* Last Update */}
+                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3" /></svg></div>
+                              <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
+                              <div className="text-sm text-gray-700 mt-1">{vtmbuffData?.[0]?.record_timestamp ? new Date(vtmbuffData[0].record_timestamp).toLocaleString('tr-TR') : '-'}</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* TCPSTOR için Grafik Kartları (ecsa_current/max/limit/free, private_*) */}
+                      {activeModal === 'tcpstor' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                          <div onClick={() => openChart('tcpstorTotals')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-sky-200"><svg className="w-6 h-6 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h18v6H3zM3 15h18v6H3z" /></svg></div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">ECSA Current / Max</h5>
+                              <div className="text-2xl font-bold text-gray-900">{tcpstorData?.[0]?.ecsa_current ?? '-'} / {tcpstorData?.[0]?.ecsa_max ?? '-'}</div>
+                            </div>
+                          </div>
+                          <div onClick={() => openChart('tcpstorBuffers')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-emerald-200"><svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7" /></svg></div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Private Current / Max</h5>
+                              <div className="text-2xl font-bold text-gray-900">{tcpstorData?.[0]?.private_current ?? '-'} / {tcpstorData?.[0]?.private_max ?? '-'}</div>
+                            </div>
+                          </div>
+                          <div onClick={() => openChart('tcpstorFailures')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-red-200"><svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M5.07 19h13.86L12 5 5.07 19z" /></svg></div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">ECSA Limit / Free</h5>
+                              <div className="text-2xl font-bold text-gray-900">{tcpstorData?.[0]?.ecsa_limit ?? '-'} / {tcpstorData?.[0]?.ecsa_free ?? '-'}</div>
+                            </div>
+                          </div>
+                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3" /></svg></div>
+                              <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
+                              <div className="text-sm text-gray-700 mt-1">{tcpstorData?.[0]?.record_timestamp ? new Date(tcpstorData[0].record_timestamp).toLocaleString('tr-TR') : '-'}</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* CONNSRPZ için Grafik Kartları (foreign_ip_address, active_conns, average_rtt_ms, interval_bytes_in_sum/out_sum, record_timestamp) */}
+                      {activeModal === 'connsrpz' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                          <div onClick={() => openChart('connsrpzByPort')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200"><svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h10M9 20h6" /></svg></div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Active Conns</h5>
+                              <div className="text-2xl font-bold text-gray-900">{connsrpzData?.[0]?.active_conns ?? <span className="text-gray-400">-</span>}</div>
+                            </div>
+                          </div>
+                          <div onClick={() => openChart('connsrpzByApp')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-pink-200"><svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-6a2 2 0 00-2-2H5" /></svg></div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Avg/Max RTT (ms)</h5>
+                              <div className="text-2xl font-bold text-gray-900">{connsrpzData?.[0]?.average_rtt_ms ?? '-'} / {connsrpzData?.[0]?.max_rtt_ms ?? '-'}</div>
+                            </div>
+                          </div>
+                          <div onClick={() => openChart('connsrpzBytes')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-teal-200"><svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8M3 12h8" /></svg></div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Bytes In/Out</h5>
+                              <div className="text-2xl font-bold text-gray-900">{connsrpzData?.[0]?.interval_bytes_in_sum ?? '-'} / {connsrpzData?.[0]?.interval_bytes_out_sum ?? '-'}</div>
+                            </div>
+                          </div>
+                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3" /></svg></div>
+                              <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
+                              <div className="text-sm text-gray-700 mt-1">{connsrpzData?.[0]?.record_timestamp ? new Date(connsrpzData[0].record_timestamp).toLocaleString('tr-TR') : '-'}</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       {/* TCPCONF için Grafik Kartları */}
                       {activeModal === 'tcpconf' && (
@@ -3072,8 +3517,8 @@ const NetworkPage = () => {
                         </div>
                       )}
 
-                      {/* Diğer modal tipleri için placeholder */}
-                      {activeModal !== 'tcpconf' && activeModal !== 'actcons' && activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && activeModal !== 'tcpcons' && activeModal !== 'udpconf' && (
+                      {/* Diğer modal tipleri için placeholder - artık VTMBUFF, tcpstor ve connsrpz eklendi */}
+                      {activeModal !== 'tcpconf' && activeModal !== 'actcons' && activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && activeModal !== 'tcpcons' && activeModal !== 'udpconf' && activeModal !== 'VTMBUFF' && activeModal !== 'tcpstor' && activeModal !== 'connsrpz' && (
                            <div className="bg-gray-50 rounded-lg p-8 text-center">
                             <div className="text-4xl mb-4">📈</div>
                             <p className="text-gray-600 text-lg">Grafik kartları buraya eklenecek</p>

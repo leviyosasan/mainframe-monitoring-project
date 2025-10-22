@@ -107,6 +107,18 @@ export const databaseAPI = {
   
   checkTableExistsVtamcsa: (config) => api.post('/database/check-table-vtamcsa', config),
 
+  // VTMBUFF
+  getMainviewNetworkVtmbuff: (config) => api.post('/database/mainview-network-vtmbuff', config),
+  checkTableExistsVtmbuff: (config) => api.post('/database/check-table-vtmbuff', config),
+
+  // TCPSTOR
+  getMainviewNetworkTcpstor: (config) => api.post('/database/mainview-network-tcpstor', config),
+  checkTableExistsTcpstor: (config) => api.post('/database/check-table-tcpstor', config),
+
+  // CONNSRPZ
+  getMainviewNetworkConnsrpz: (config) => api.post('/database/mainview-network-connsrpz', config),
+  checkTableExistsConnsrpz: (config) => api.post('/database/check-table-connsrpz', config),
+
     // Get mainview_network_tcpconf data
     getMainviewNetworkTcpconf: (config) => api.post('/database/mainview-network-tcpconf', config),
  
