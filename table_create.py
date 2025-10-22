@@ -1157,7 +1157,7 @@ def frminfo_central_create_table(): # Creates FRMINFO_CENTRAL table
 def create_table_xcfsys():
     """Creates the XCFSYS table."""
     query = """
-        CREATE TABLE IF NOT EXISTS mainview_xcfsys (
+        CREATE TABLE IF NOT EXISTS mainview_cmf_xcfsys (
             id SERIAL PRIMARY KEY,
             from_system VARCHAR,
             to_system VARCHAR,
@@ -1180,14 +1180,14 @@ def create_table_xcfsys():
         );
     """
     if execute_query(query):
-        print("✅ mainview_xcfsys table ready")
+        print("✅ mainview_cmf_xcfsys table ready")
     else:
         print("❌ Table could not be created")
 
 def create_table_joverr():
     """Creates the JOVERR table."""
     query = """
-        CREATE TABLE IF NOT EXISTS mainview_joverr (
+        CREATE TABLE IF NOT EXISTS mainview_mvs_joverr (
             id SERIAL PRIMARY KEY,
             asgname VARCHAR,
             asgjid VARCHAR,
@@ -1218,7 +1218,7 @@ def create_table_joverr():
         );
     """
     if execute_query(query):
-        print("✅ mainview_joverr table ready")
+        print("✅ mainview_mvs_joverr table ready")
     else:
         print("❌ Table could not be created")
     
@@ -1226,7 +1226,7 @@ def create_table_joverr():
 def create_table_jcsa():
     """Creates the JCSA table."""
     query = """
-        CREATE TABLE IF NOT EXISTS mainview_jcsa (
+        CREATE TABLE IF NOT EXISTS mainview_cmf_jcsa (
             id SERIAL PRIMARY KEY,
             jobname VARCHAR,
             jes_id VARCHAR,
@@ -1246,7 +1246,7 @@ def create_table_jcsa():
         );
     """
     if execute_query(query):
-        print("✅ mainview_jcsa table ready")
+        print("✅ mainview_cmf_jcsa table ready")
     else:
         print("❌ Table could not be created")
     
@@ -1254,7 +1254,7 @@ def create_table_jcsa():
 def create_table_sysfrmiz():
     """Creates the SYSFRMIZ table."""
     query = """
-        CREATE TABLE IF NOT EXISTS mainview_sysfrmiz (
+        CREATE TABLE IF NOT EXISTS mainview_storage_sysfrmiz (
             id SERIAL PRIMARY KEY,
             spgid VARCHAR NOT NULL,
             spluicav BIGINT,
@@ -1281,7 +1281,7 @@ def create_table_sysfrmiz():
         );
     """
     if execute_query(query):
-        print("✅ mainview_sysfrmiz table ready")
+        print("✅ mainview_storage_sysfrmiz table ready")
     else:
         print("❌ Table could not be created")
     
@@ -1289,7 +1289,7 @@ def create_table_sysfrmiz():
 def create_table_connrspz():
     """Creates the CONNRSPZ table."""
     query = """
-        CREATE TABLE IF NOT EXISTS mainview_connrspz (
+        CREATE TABLE IF NOT EXISTS mainview_network_connrspz (
             id SERIAL PRIMARY KEY,
             foreign_ip_address VARCHAR,
             active_conns INT,
@@ -1306,7 +1306,7 @@ def create_table_connrspz():
         );
     """
     if execute_query(query):
-        print("✅ mainview_connrspz table ready")
+        print("✅ mainview_network_connrspz table ready")
     else:
         print("❌ Table could not be created")
     
@@ -1314,7 +1314,7 @@ def create_table_connrspz():
 def create_table_tcpstor():
     """Creates the TCPSTOR table."""
     query = """
-        CREATE TABLE IF NOT EXISTS mainview_tcpstor (
+        CREATE TABLE IF NOT EXISTS mainview_network_tcpstor (
             id SERIAL PRIMARY KEY,
             step_name VARCHAR,
             system_name VARCHAR,
@@ -1331,7 +1331,7 @@ def create_table_tcpstor():
         );
     """
     if execute_query(query):
-        print("✅ mainview_tcpstor table ready")
+        print("✅ mainview_network_tcpstor table ready")
     else:
         print("❌ Table could not be created")
     
@@ -1339,7 +1339,7 @@ def create_table_tcpstor():
 def create_table_vtmbuff():
     """Creates the VTMBUFF table."""
     query = """
-        CREATE TABLE IF NOT EXISTS mainview_vtmbuff (
+        CREATE TABLE IF NOT EXISTS mainview_network_vtmbuff (
             id SERIAL PRIMARY KEY,
             system_name VARCHAR,
             iobuf_size INT,
@@ -1352,7 +1352,7 @@ def create_table_vtmbuff():
         );
     """
     if execute_query(query):
-        print("✅ mainview_vtmbuff table ready")
+        print("✅ mainview_network_vtmbuff table ready")
     else:
         print("❌ Table could not be created")
     
@@ -1569,13 +1569,13 @@ def main():
     print("  • mainview_frminfo_fixed - FIXED monitoring data")
     print("  • mainview_frminfo_high_virtual - HIGH VIRTUAL monitoring data")
     print("  • mainview_csasum - CSA MONITORING monitoring data")
-    print("  • mainview_xcfsys - XCFSYS monitoring data")
-    print("  • mainview_joverr - JOVERR monitoring data")
-    print("  • mainview_jcsa - JCSA monitoring data")
-    print("  • mainview_sysfrmiz - SYSFRMIZ monitoring data")
-    print("  • mainview_connrspz - CONNRSPZ monitoring data")
-    print("  • mainview_tcpstor - TCPSTOR monitoring data")
-    print("  • mainview_vtmbuff - VTMBUFF monitoring data")
+    print("  • mainview_cmf_xcfsys - XCFSYS monitoring data")
+    print("  • mainview_mvs_joverr - JOVERR monitoring data")
+    print("  • mainview_cmf_jcsa - JCSA monitoring data")
+    print("  • mainview_storage_sysfrmiz - SYSFRMIZ monitoring data")
+    print("  • mainview_network_connrspz - CONNRSPZ monitoring data")
+    print("  • mainview_network_tcpstor - TCPSTOR monitoring data")
+    print("  • mainview_network_vtmbuff - VTMBUFF monitoring data")
     
 
 
