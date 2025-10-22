@@ -93,8 +93,43 @@ export const databaseAPI = {
 
   checkTableExistsJCPU: (config) => api.post('/database/check-table-jcpu', config),
   
-  getMainviewMvsJCPU: (config) => api.post('/database/mainview-mvs-jcpu', config)
+  getMainviewMvsJCPU: (config) => api.post('/database/mainview-mvs-jcpu', config),
+
+  getMainviewNetworkStacks: (config) => api.post('/database/mainview-network-stacks', config),
+  
+  checkTableExistsStacks: (config) => api.post('/database/check-table-stacks', config),
+
+  getMainviewNetworkStackCPU: (config) => api.post('/database/mainview-network-stackcpu', config),
+  
+  checkTableExistsStackCPU: (config) => api.post('/database/check-table-stackcpu', config),
+
+  getMainviewNetworkVtamcsa: (config) => api.post('/database/mainview-network-vtamcsa', config),
+  
+  checkTableExistsVtamcsa: (config) => api.post('/database/check-table-vtamcsa', config),
+
+    // Get mainview_network_tcpconf data
+    getMainviewNetworkTcpconf: (config) => api.post('/database/mainview-network-tcpconf', config),
+ 
+    // Check table exists for tcpconf
+    checkTableExiststcpconf: (config) => api.post('/database/check-table-tcpconf', config),
+   
+    // Get mainview_network_tcpcons data
+    getMainviewNetworktcpcons: (config) => api.post('/database/mainview-network-tcpcons', config),
+   
+    // Check table exists for tcpcons
+    checkTableExiststcpcons: (config) => api.post('/database/check-table-tcpcons', config),
+   
+    // Get mainview_network_udpconf data
+    getMainviewNetworkUdpconf: (config) => api.post('/database/mainview-network-udpconf', config),
+   
+    // Check table exists for udpconf
+    checkTableExistsudpconf: (config) => api.post('/database/check-table-udpconf', config),
+   
+    // Get mainview_network_actcons data
+    getMainviewNetworkactcons: (config) => api.post('/database/mainview-network-actcons', config),
+   
+    // Check table exists for actcons
+    checkTableExistsactcons: (config) => api.post('/database/check-table-actcons', config),
 }
 
 export default api
-

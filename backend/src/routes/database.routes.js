@@ -1,5 +1,10 @@
 const express = require('express');
-const { testConnection, getMainviewMvsSysover, getMainviewMvsJespool,checkTableExists,checkTableExistsJespool, getMainviewMvsJCPU, checkTableExistsJCPU } = require('../controllers/database.controller');
+const { testConnection, getMainviewMvsSysover, getMainviewMvsJespool,
+  checkTableExists,checkTableExistsJespool, getMainviewMvsJCPU, checkTableExistsJCPU, checkTableExistsStacks, 
+  getMainviewNetworkStacks, checkTableExistsStackCPU, getMainviewNetworkStackCPU, checkTableExistsVtamcsa, 
+  getMainviewNetworkVtamcsa, getMainviewNetworkTcpconf, checkTableExiststcpconf,
+  getMainviewNetworktcpcons, checkTableExiststcpcons, getMainviewNetworkudpconf, checkTableExiststudpconf,
+  getMainviewNetworkactcons, checkTableExistsactcons} = require('../controllers/database.controller');
 
 const router = express.Router();
 
@@ -20,9 +25,50 @@ router.post('/check-table', checkTableExists);
 router.post('/check-table-jespool', checkTableExistsJespool);
 
 // Get mainview_mvs_jcpu data
-router.post('/mainview-mvs-jcpu', getMainviewMvsJCPU)
+router.post('/mainview-mvs-jcpu', getMainviewMvsJCPU);
 
 // Check table exists for jcpu
-router.post('/check-table-jcpu', checkTableExistsJCPU)
+router.post('/check-table-jcpu', checkTableExistsJCPU);
+
+// Check table exists for stacks
+router.post('/check-table-stacks', checkTableExistsStacks);
+
+// Get mainview_network_stacks data
+router.post('/mainview-network-stacks', getMainviewNetworkStacks);
+
+// Check table exists for stackcpu
+router.post('/check-table-stackcpu', checkTableExistsStackCPU);
+
+// Get mainview_network_stackcpu data
+router.post('/mainview-network-stackcpu', getMainviewNetworkStackCPU);
+
+// Check table exists for vtamcsa
+router.post('/check-table-vtamcsa', checkTableExistsVtamcsa);
+
+// Get mainview_network_vtamcsa data
+router.post('/mainview-network-vtamcsa', getMainviewNetworkVtamcsa);
+
+router.post('/mainview-network-tcpconf', getMainviewNetworkTcpconf);
+ 
+// Check table exists for tcpconf
+router.post('/check-table-tcpconf', checkTableExiststcpconf);
+ 
+// Get mainview_network_tcpcons data
+router.post('/mainview-network-tcpcons', getMainviewNetworktcpcons);
+ 
+// Check table exists for tcpcons
+router.post('/check-table-tcpcons', checkTableExiststcpcons);
+ 
+// Get mainview_network_udpconf data
+router.post('/mainview-network-udpconf', getMainviewNetworkudpconf);
+ 
+// Check table exists for udpconf
+router.post('/check-table-udpconf', checkTableExiststudpconf);
+ 
+// Get mainview_network_actcons data
+router.post('/mainview-network-actcons', getMainviewNetworkactcons);
+ 
+// Check table exists for actcons
+router.post('/check-table-actcons', checkTableExistsactcons);
 
 module.exports = router;
