@@ -16,12 +16,236 @@ const NetworkPage = () => {
   const [udpconfData, setUdpconfData] = useState([]);
   const [actconsData, setActconsData] = useState([]);
   const [dataLoading, setDataLoading] = useState(false);
+  const [timeFilterModal, setTimeFilterModal] = useState(false);
+  const [selectedTimeRange, setSelectedTimeRange] = useState('last6h');
+  const [customFromDate, setCustomFromDate] = useState('');
+  const [customToDate, setCustomToDate] = useState('');
+  const [filteredStacksData, setFilteredStacksData] = useState([]);
+  const [filteredStackCpuData, setFilteredStackCpuData] = useState([]);
+  const [filteredVtamcsaData, setFilteredVtamcsaData] = useState([]);
+  const [isFiltered, setIsFiltered] = useState(false);
 
-  // Sayı formatı yardımcı fonksiyonu 
+  // Sayı formatı yardımcı fonksiyonu
   const formatNumber = (value) => {
     if (value === null || value === undefined || value === '') return '-';
     const num = Number(value);
     return isNaN(num) ? '-' : num.toFixed(2);
+  };
+
+  // Excel'e aktarma fonksiyonu
+  const exportToExcel = (data, filename) => {
+    if (!data || data.length === 0) {
+      toast.error('Aktarılacak veri bulunamadı');
+      return;
+    }
+
+    // Veri türüne göre sütun başlıklarını belirle
+    let headers = [];
+    let csvData = [];
+    
+    if (activeModal === 'STACKS') {
+      headers = ['Job Name', 'Step Name', 'Target Field', 'Stack Name', 'Stack IPaddr', 'Status', 'Start time of Stack', 'System Name', 'Created At', 'Updated At'];
+      csvData = [
+        headers.join(','),
+        ...data.map(row => [
+          row.job_name || '',
+          row.step_name || '',
+          row.target_field || '',
+          row.stack_name || '',
+          row.stack_ipaddr || '',
+          row.status || '',
+          row.start_time_of_stack || '',
+          row.system_name || '',
+          row.created_at || '',
+          row.updated_at || ''
+        ].join(','))
+      ].join('\n');
+    } else if (activeModal === 'STACKCPU') {
+      headers = ['TCPIP Stack Name', 'CPU Time', 'Packets In', 'Packets Out', 'Bytes In', 'Bytes Out', 'System Name', 'Created At', 'Updated At'];
+      csvData = [
+        headers.join(','),
+        ...data.map(row => [
+          row.tcpip_stack_name || '',
+          formatNumber(row.cpu_time),
+          formatNumber(row.packets_in),
+          formatNumber(row.packets_out),
+          formatNumber(row.bytes_in),
+          formatNumber(row.bytes_out),
+          row.system_name || '',
+          row.created_at || '',
+          row.updated_at || ''
+        ].join(','))
+      ].join('\n');
+    } else if (activeModal === 'vtamcsa') {
+      headers = ['CSA Cur', 'CSA Max', 'CSA High', 'CSA Low', 'CSA Avg', 'System Name', 'Created At', 'Updated At'];
+      csvData = [
+        headers.join(','),
+        ...data.map(row => [
+          formatNumber(row.csa_cur),
+          formatNumber(row.csa_max),
+          formatNumber(row.csa_high),
+          formatNumber(row.csa_low),
+          formatNumber(row.csa_avg),
+          row.system_name || '',
+          row.created_at || '',
+          row.updated_at || ''
+        ].join(','))
+      ].join('\n');
+    }
+
+    // BOM ekle (Türkçe karakterler için)
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvData], { type: 'text/csv;charset=utf-8;' });
+    
+    // Dosyayı indir
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${filename}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success('Veriler Excel formatında indirildi');
+  };
+
+  // PDF'e aktarma fonksiyonu
+  const exportToPDF = (data, filename) => {
+    if (!data || data.length === 0) {
+      toast.error('Aktarılacak veri bulunamadı');
+      return;
+    }
+
+    try {
+      // jsPDF ve autoTable eklentisini dinamik olarak yükle
+      const loadScripts = () => {
+        return new Promise((resolve, reject) => {
+          let loadedCount = 0;
+          const totalScripts = 2;
+
+          const onScriptLoad = () => {
+            loadedCount++;
+            if (loadedCount === totalScripts) {
+              resolve();
+            }
+          };
+
+          const onScriptError = () => {
+            reject(new Error('Script yükleme hatası'));
+          };
+
+          // jsPDF yükle
+          const jsPDFScript = document.createElement('script');
+          jsPDFScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+          jsPDFScript.onload = onScriptLoad;
+          jsPDFScript.onerror = onScriptError;
+          document.head.appendChild(jsPDFScript);
+
+          // autoTable eklentisini yükle
+          const autoTableScript = document.createElement('script');
+          autoTableScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js';
+          autoTableScript.onload = onScriptLoad;
+          autoTableScript.onerror = onScriptError;
+          document.head.appendChild(autoTableScript);
+        });
+      };
+
+      loadScripts().then(() => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Başlık ekle
+        doc.setFontSize(16);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${filename} Raporu`, 14, 22);
+        
+        // Tarih ekle
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        const currentDate = new Date().toLocaleString('tr-TR');
+        doc.text(`Oluşturulma Tarihi: ${currentDate}`, 14, 30);
+
+        // Veri türüne göre tablo verilerini hazırla
+        let tableData = [];
+        let headers = [];
+        
+        if (activeModal === 'STACKS') {
+          headers = ['Job Name', 'Step Name', 'Target Field', 'Stack Name', 'Stack IPaddr', 'Status', 'Start time of Stack', 'System Name', 'Created At', 'Updated At'];
+          tableData = data.map(row => [
+            row.job_name || '-',
+            row.step_name || '-',
+            row.target_field || '-',
+            row.stack_name || '-',
+            row.stack_ipaddr || '-',
+            row.status || '-',
+            row.start_time_of_stack || '-',
+            row.system_name || '-',
+            row.created_at || '-',
+            row.updated_at || '-'
+          ]);
+        } else if (activeModal === 'STACKCPU') {
+          headers = ['TCPIP Stack Name', 'CPU Time', 'Packets In', 'Packets Out', 'Bytes In', 'Bytes Out', 'System Name', 'Created At', 'Updated At'];
+          tableData = data.map(row => [
+            row.tcpip_stack_name || '-',
+            formatNumber(row.cpu_time),
+            formatNumber(row.packets_in),
+            formatNumber(row.packets_out),
+            formatNumber(row.bytes_in),
+            formatNumber(row.bytes_out),
+            row.system_name || '-',
+            row.created_at || '-',
+            row.updated_at || '-'
+          ]);
+        } else if (activeModal === 'vtamcsa') {
+          headers = ['CSA Cur', 'CSA Max', 'CSA High', 'CSA Low', 'CSA Avg', 'System Name', 'Created At', 'Updated At'];
+          tableData = data.map(row => [
+            formatNumber(row.csa_cur),
+            formatNumber(row.csa_max),
+            formatNumber(row.csa_high),
+            formatNumber(row.csa_low),
+            formatNumber(row.csa_avg),
+            row.system_name || '-',
+            row.created_at || '-',
+            row.updated_at || '-'
+          ]);
+        }
+        
+        // Tablo oluştur
+        doc.autoTable({
+          head: [headers],
+          body: tableData,
+          startY: 40,
+          styles: {
+            fontSize: 8,
+            cellPadding: 2,
+            overflow: 'linebreak',
+            halign: 'left'
+          },
+          headStyles: {
+            fillColor: [242, 242, 242],
+            textColor: [0, 0, 0],
+            fontStyle: 'bold'
+          },
+          alternateRowStyles: {
+            fillColor: [249, 249, 249]
+          }
+        });
+
+        // PDF'i indir
+        const fileName = `${filename}_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
+        
+        toast.success('PDF başarıyla indirildi');
+      }).catch((error) => {
+        console.error('Script yükleme hatası:', error);
+        toast.error('PDF oluşturma hatası. Lütfen sayfayı yenileyin ve tekrar deneyin.');
+      });
+      
+    } catch (error) {
+      console.error('PDF oluşturma hatası:', error);
+      toast.error('PDF oluşturulurken hata oluştu');
+    }
   };
 
   // Tablo kontrolü fonksiyonu
@@ -565,6 +789,123 @@ const NetworkPage = () => {
     setInfoModal(null);
   };
 
+  const openTimeFilter = () => {
+    setTimeFilterModal(true);
+  };
+
+  const closeTimeFilter = () => {
+    setTimeFilterModal(false);
+  };
+
+  const clearTimeFilter = () => {
+    setFilteredStacksData([]);
+    setFilteredStackCpuData([]);
+    setFilteredVtamcsaData([]);
+    setIsFiltered(false);
+    setSelectedTimeRange('last6h');
+    setCustomFromDate('');
+    setCustomToDate('');
+    toast.success('Zaman filtresi temizlendi');
+  };
+
+  const applyTimeFilter = () => {
+    try {
+      let filteredStacks = [...stacksData];
+      let filteredStackCpu = [...stackCpuData];
+      let filteredVtamcsa = [...vtamcsaData];
+      
+      // Özel tarih aralığı seçilmişse
+      if (selectedTimeRange === 'custom') {
+        if (!customFromDate || !customToDate) {
+          toast.error('Lütfen başlangıç ve bitiş tarihlerini seçin');
+          return;
+        }
+        
+        const fromDate = new Date(customFromDate);
+        const toDate = new Date(customToDate);
+        
+        filteredStacks = stacksData.filter(item => {
+          const itemTime = new Date(item.created_at || item.updated_at);
+          return itemTime >= fromDate && itemTime <= toDate;
+        });
+        
+        filteredStackCpu = stackCpuData.filter(item => {
+          const itemTime = new Date(item.created_at || item.updated_at);
+          return itemTime >= fromDate && itemTime <= toDate;
+        });
+        
+        filteredVtamcsa = vtamcsaData.filter(item => {
+          const itemTime = new Date(item.created_at || item.updated_at);
+          return itemTime >= fromDate && itemTime <= toDate;
+        });
+      } else {
+        // Hızlı zaman aralıkları
+        const now = new Date();
+        let fromDate;
+        
+        switch (selectedTimeRange) {
+          case 'last5m':
+            fromDate = new Date(now.getTime() - 5 * 60 * 1000);
+            break;
+          case 'last15m':
+            fromDate = new Date(now.getTime() - 15 * 60 * 1000);
+            break;
+          case 'last30m':
+            fromDate = new Date(now.getTime() - 30 * 60 * 1000);
+            break;
+          case 'last1h':
+            fromDate = new Date(now.getTime() - 60 * 60 * 1000);
+            break;
+          case 'last3h':
+            fromDate = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+            break;
+          case 'last6h':
+            fromDate = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+            break;
+          case 'last12h':
+            fromDate = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+            break;
+          case 'last24h':
+            fromDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            break;
+          case 'last2d':
+            fromDate = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+            break;
+          default:
+            fromDate = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+        }
+        
+        filteredStacks = stacksData.filter(item => {
+          const itemTime = new Date(item.created_at || item.updated_at);
+          return itemTime >= fromDate;
+        });
+        
+        filteredStackCpu = stackCpuData.filter(item => {
+          const itemTime = new Date(item.created_at || item.updated_at);
+          return itemTime >= fromDate;
+        });
+        
+        filteredVtamcsa = vtamcsaData.filter(item => {
+          const itemTime = new Date(item.created_at || item.updated_at);
+          return itemTime >= fromDate;
+        });
+      }
+      
+      setFilteredStacksData(filteredStacks);
+      setFilteredStackCpuData(filteredStackCpu);
+      setFilteredVtamcsaData(filteredVtamcsa);
+      setIsFiltered(true);
+      
+      const totalFiltered = filteredStacks.length + filteredStackCpu.length + filteredVtamcsa.length;
+      toast.success(`Filtreleme uygulandı. ${totalFiltered} kayıt bulundu.`);
+      closeTimeFilter();
+      
+    } catch (error) {
+      console.error('Filtreleme hatası:', error);
+      toast.error('Filtreleme sırasında hata oluştu');
+    }
+  };
+
   const tabs = [
     { id: 'table', name: 'Tablo', icon: '📊' },
     { id: 'chart', name: 'Grafik', icon: '📈' },
@@ -684,7 +1025,7 @@ const NetworkPage = () => {
         {/* Ana Modal (Tüm tipler için, basit yapı) */}
         {activeModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-xl shadow-2xl max-w-8xl w-full mx-4 max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 {/* Modal Header (Dinamik) */}
                 <div className="flex justify-between items-center mb-6">
@@ -730,31 +1071,136 @@ const NetworkPage = () => {
                       <div className="flex justify-between items-center">
                         <h4 className="text-lg font-semibold text-gray-800">Veri Tablosu</h4>
                         {activeModal === 'STACKS' && (
-                          <button
-                            onClick={fetchStacksData}
-                            disabled={dataLoading}
-                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {dataLoading ? 'Yükleniyor...' : 'Yenile'}
-                          </button>
+                          <div className="flex space-x-3">
+                            <button
+                              onClick={() => exportToExcel(isFiltered ? filteredStacksData : stacksData, 'STACKS')}
+                              className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md hover:bg-green-200 transition-colors duration-200 flex items-center"
+                              disabled={dataLoading || (isFiltered ? filteredStacksData : stacksData).length === 0}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              Excel'e Aktar
+                            </button>
+                            <button
+                              onClick={() => exportToPDF(isFiltered ? filteredStacksData : stacksData, 'STACKS')}
+                              className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-200 transition-colors duration-200 flex items-center"
+                              disabled={dataLoading || (isFiltered ? filteredStacksData : stacksData).length === 0}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>
+                              PDF'e Aktar
+                            </button>
+                            <button
+                              onClick={openTimeFilter}
+                              className={`px-4 py-2 text-sm font-medium border rounded-md transition-colors duration-200 flex items-center ${
+                                isFiltered 
+                                  ? 'text-blue-700 bg-blue-100 border-blue-300 hover:bg-blue-200' 
+                                  : 'text-gray-700 bg-gray-100 border-gray-300 hover:bg-gray-200'
+                              }`}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              Zaman Filtresi
+                            </button>
+                            <button
+                              onClick={fetchStacksData}
+                              disabled={dataLoading}
+                              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {dataLoading ? 'Yükleniyor...' : 'Yenile'}
+                            </button>
+                          </div>
                         )}
                         {activeModal === 'STACKCPU' && (
-                          <button
-                            onClick={fetchStackCpuData}
-                            disabled={dataLoading}
-                            className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {dataLoading ? 'Yükleniyor...' : 'Yenile'}
-                          </button>
+                          <div className="flex space-x-3">
+                            <button
+                              onClick={() => exportToExcel(isFiltered ? filteredStackCpuData : stackCpuData, 'STACKCPU')}
+                              className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md hover:bg-green-200 transition-colors duration-200 flex items-center"
+                              disabled={dataLoading || (isFiltered ? filteredStackCpuData : stackCpuData).length === 0}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              Excel'e Aktar
+                            </button>
+                            <button
+                              onClick={() => exportToPDF(isFiltered ? filteredStackCpuData : stackCpuData, 'STACKCPU')}
+                              className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-200 transition-colors duration-200 flex items-center"
+                              disabled={dataLoading || (isFiltered ? filteredStackCpuData : stackCpuData).length === 0}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>
+                              PDF'e Aktar
+                            </button>
+                            <button
+                              onClick={openTimeFilter}
+                              className={`px-4 py-2 text-sm font-medium border rounded-md transition-colors duration-200 flex items-center ${
+                                isFiltered 
+                                  ? 'text-blue-700 bg-blue-100 border-blue-300 hover:bg-blue-200' 
+                                  : 'text-gray-700 bg-gray-100 border-gray-300 hover:bg-gray-200'
+                              }`}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              Zaman Filtresi
+                            </button>
+                            <button
+                              onClick={fetchStackCpuData}
+                              disabled={dataLoading}
+                              className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {dataLoading ? 'Yükleniyor...' : 'Yenile'}
+                            </button>
+                          </div>
                         )}
                         {activeModal === 'vtamcsa' && (
-                          <button
-                            onClick={fetchVtamcsaData}
-                            disabled={dataLoading}
-                            className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {dataLoading ? 'Yükleniyor...' : 'Yenile'}
-                          </button>
+                          <div className="flex space-x-3">
+                            <button
+                              onClick={() => exportToExcel(isFiltered ? filteredVtamcsaData : vtamcsaData, 'VTAMCSA')}
+                              className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md hover:bg-green-200 transition-colors duration-200 flex items-center"
+                              disabled={dataLoading || (isFiltered ? filteredVtamcsaData : vtamcsaData).length === 0}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              Excel'e Aktar
+                            </button>
+                            <button
+                              onClick={() => exportToPDF(isFiltered ? filteredVtamcsaData : vtamcsaData, 'VTAMCSA')}
+                              className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-200 transition-colors duration-200 flex items-center"
+                              disabled={dataLoading || (isFiltered ? filteredVtamcsaData : vtamcsaData).length === 0}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>
+                              PDF'e Aktar
+                            </button>
+                            <button
+                              onClick={openTimeFilter}
+                              className={`px-4 py-2 text-sm font-medium border rounded-md transition-colors duration-200 flex items-center ${
+                                isFiltered 
+                                  ? 'text-blue-700 bg-blue-100 border-blue-300 hover:bg-blue-200' 
+                                  : 'text-gray-700 bg-gray-100 border-gray-300 hover:bg-gray-200'
+                              }`}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              Zaman Filtresi
+                            </button>
+                            <button
+                              onClick={fetchVtamcsaData}
+                              disabled={dataLoading}
+                              className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {dataLoading ? 'Yükleniyor...' : 'Yenile'}
+                            </button>
+                          </div>
                         )}
                         {activeModal === 'tcpconf' && (
                           <button
@@ -801,7 +1247,7 @@ const NetworkPage = () => {
                               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
                               <p className="mt-4 text-gray-600">Veriler yükleniyor...</p>
                             </div>
-                          ) : stacksData.length > 0 ? (
+                          ) : (isFiltered ? filteredStacksData : stacksData).length > 0 ? (
                             <div className="overflow-x-auto">
                               <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
@@ -820,7 +1266,7 @@ const NetworkPage = () => {
                                   </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                  {stacksData.map((row, index) => (
+                                  {(isFiltered ? filteredStacksData : stacksData).map((row, index) => (
                                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.jobnam8 || '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.stepnam8 || '-'}</td>
@@ -864,7 +1310,7 @@ const NetworkPage = () => {
                               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto"></div>
                               <p className="mt-4 text-gray-600">Veriler yükleniyor...</p>
                             </div>
-                          ) : stackCpuData.length > 0 ? (
+                          ) : (isFiltered ? filteredStackCpuData : stackCpuData).length > 0 ? (
                             <div className="overflow-x-auto">
                               <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
@@ -879,7 +1325,7 @@ const NetworkPage = () => {
                                   </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                  {stackCpuData.map((row, index) => (
+                                  {(isFiltered ? filteredStackCpuData : stackCpuData).map((row, index) => (
                                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.statstks)}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.ippktrcd)}</td>
@@ -910,7 +1356,7 @@ const NetworkPage = () => {
                               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto"></div>
                               <p className="mt-4 text-gray-600">Veriler yükleniyor...</p>
                             </div>
-                          ) : vtamcsaData.length > 0 ? (
+                          ) : (isFiltered ? filteredVtamcsaData : vtamcsaData).length > 0 ? (
                             <div className="overflow-x-auto">
                               <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
@@ -930,7 +1376,7 @@ const NetworkPage = () => {
                                   </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                  {vtamcsaData.map((row, index) => (
+                                  {(isFiltered ? filteredVtamcsaData : vtamcsaData).map((row, index) => (
                                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.id || '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.j_system || '-'}</td>
@@ -2878,6 +3324,121 @@ const NetworkPage = () => {
                       </p>
                   </div>
                     )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Zaman Filtrele Modalı */}
+        {timeFilterModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[120]">
+            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-2xl font-bold text-gray-800">Zaman ve Tarih Filtresi</h3>
+                  <button 
+                    onClick={closeTimeFilter}
+                    className="text-gray-500 hover:text-gray-700 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Hızlı Zaman Aralıkları */}
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4">Hızlı Zaman Aralıkları</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {[
+                        { id: 'last5m', label: 'Son 5 Dakika' },
+                        { id: 'last15m', label: 'Son 15 Dakika' },
+                        { id: 'last30m', label: 'Son 30 Dakika' },
+                        { id: 'last1h', label: 'Son 1 Saat' },
+                        { id: 'last3h', label: 'Son 3 Saat' },
+                        { id: 'last6h', label: 'Son 6 Saat' },
+                        { id: 'last12h', label: 'Son 12 Saat' },
+                        { id: 'last24h', label: 'Son 24 Saat' },
+                        { id: 'last2d', label: 'Son 2 Gün' },
+                        { id: 'custom', label: 'Özel Aralık' }
+                      ].map((range) => (
+                        <button
+                          key={range.id}
+                          onClick={() => setSelectedTimeRange(range.id)}
+                          className={`p-3 text-sm font-medium rounded-lg border transition-colors duration-200 ${
+                            selectedTimeRange === range.id
+                              ? 'bg-blue-50 border-blue-500 text-blue-700'
+                              : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                          }`}
+                        >
+                          {range.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Özel Tarih Aralığı */}
+                  {selectedTimeRange === 'custom' && (
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-800 mb-4">Özel Tarih Aralığı</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Başlangıç Tarihi
+                          </label>
+                          <input
+                            type="datetime-local"
+                            value={customFromDate}
+                            onChange={(e) => setCustomFromDate(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Bitiş Tarihi
+                          </label>
+                          <input
+                            type="datetime-local"
+                            value={customToDate}
+                            onChange={(e) => setCustomToDate(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Zaman Dilimi */}
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4">Zaman Dilimi</h4>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-700">Tarayıcı Zamanı</p>
+                          <p className="text-sm text-gray-500">Türkiye (UTC+03:00)</p>
+                        </div>
+                        <button className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium">
+                          Zaman Ayarlarını Değiştir
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Butonlar */}
+                  <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={closeTimeFilter}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors duration-200"
+                    >
+                      İptal
+                    </button>
+                    <button
+                      onClick={applyTimeFilter}
+                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors duration-200"
+                    >
+                      Zaman Aralığını Uygula
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
