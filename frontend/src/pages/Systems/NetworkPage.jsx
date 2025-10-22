@@ -91,6 +91,62 @@ const NetworkPage = () => {
           row.updated_at || ''
         ].join(','))
       ].join('\n');
+    } else if (activeModal === 'tcpconf') {
+      headers = ['Job Name', 'Step Name', 'Target Field', 'System Name', 'Created At', 'Updated At'];
+      csvData = [
+        headers.join(','),
+        ...data.map(row => [
+          row.job_name || '',
+          row.step_name || '',
+          row.target_field || '',
+          row.system_name || '',
+          row.created_at || '',
+          row.updated_at || ''
+        ].join(','))
+      ].join('\n');
+    } else if (activeModal === 'tcpcons') {
+      headers = ['Foreign IP Address', 'Foreign Port', 'Local IP Address', 'Local Port', 'State', 'System Name', 'Created At', 'Updated At'];
+      csvData = [
+        headers.join(','),
+        ...data.map(row => [
+          row.foreign_ip_address || '',
+          row.foreign_port || '',
+          row.local_ip_address || '',
+          row.local_port || '',
+          row.state || '',
+          row.system_name || '',
+          row.created_at || '',
+          row.updated_at || ''
+        ].join(','))
+      ].join('\n');
+    } else if (activeModal === 'udpconf') {
+      headers = ['Job Name', 'Step Name', 'Target Field', 'System Name', 'Created At', 'Updated At'];
+      csvData = [
+        headers.join(','),
+        ...data.map(row => [
+          row.job_name || '',
+          row.step_name || '',
+          row.target_field || '',
+          row.system_name || '',
+          row.created_at || '',
+          row.updated_at || ''
+        ].join(','))
+      ].join('\n');
+    } else if (activeModal === 'actcons') {
+      headers = ['Foreign IP Address', 'Foreign Port', 'Local IP Address', 'Local Port', 'State', 'System Name', 'Created At', 'Updated At'];
+      csvData = [
+        headers.join(','),
+        ...data.map(row => [
+          row.foreign_ip_address || '',
+          row.foreign_port || '',
+          row.local_ip_address || '',
+          row.local_port || '',
+          row.state || '',
+          row.system_name || '',
+          row.created_at || '',
+          row.updated_at || ''
+        ].join(','))
+      ].join('\n');
     }
 
     // BOM ekle (Türkçe karakterler için)
@@ -205,6 +261,50 @@ const NetworkPage = () => {
             formatNumber(row.csa_high),
             formatNumber(row.csa_low),
             formatNumber(row.csa_avg),
+            row.system_name || '-',
+            row.created_at || '-',
+            row.updated_at || '-'
+          ]);
+        } else if (activeModal === 'tcpconf') {
+          headers = ['Job Name', 'Step Name', 'Target Field', 'System Name', 'Created At', 'Updated At'];
+          tableData = data.map(row => [
+            row.job_name || '-',
+            row.step_name || '-',
+            row.target_field || '-',
+            row.system_name || '-',
+            row.created_at || '-',
+            row.updated_at || '-'
+          ]);
+        } else if (activeModal === 'tcpcons') {
+          headers = ['Foreign IP Address', 'Foreign Port', 'Local IP Address', 'Local Port', 'State', 'System Name', 'Created At', 'Updated At'];
+          tableData = data.map(row => [
+            row.foreign_ip_address || '-',
+            row.foreign_port || '-',
+            row.local_ip_address || '-',
+            row.local_port || '-',
+            row.state || '-',
+            row.system_name || '-',
+            row.created_at || '-',
+            row.updated_at || '-'
+          ]);
+        } else if (activeModal === 'udpconf') {
+          headers = ['Job Name', 'Step Name', 'Target Field', 'System Name', 'Created At', 'Updated At'];
+          tableData = data.map(row => [
+            row.job_name || '-',
+            row.step_name || '-',
+            row.target_field || '-',
+            row.system_name || '-',
+            row.created_at || '-',
+            row.updated_at || '-'
+          ]);
+        } else if (activeModal === 'actcons') {
+          headers = ['Foreign IP Address', 'Foreign Port', 'Local IP Address', 'Local Port', 'State', 'System Name', 'Created At', 'Updated At'];
+          tableData = data.map(row => [
+            row.foreign_ip_address || '-',
+            row.foreign_port || '-',
+            row.local_ip_address || '-',
+            row.local_port || '-',
+            row.state || '-',
             row.system_name || '-',
             row.created_at || '-',
             row.updated_at || '-'
@@ -1203,40 +1303,180 @@ const NetworkPage = () => {
                           </div>
                         )}
                         {activeModal === 'tcpconf' && (
-                          <button
-                            onClick={fetchTcpconfData}
-                            disabled={dataLoading}
-                            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {dataLoading ? 'Yükleniyor...' : 'Yenile'}
-                          </button>
+                          <div className="flex space-x-3">
+                            <button
+                              onClick={() => exportToExcel(isFiltered ? filteredTcpconfData : tcpconfData, 'TCPCONF')}
+                              className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md hover:bg-green-200 transition-colors duration-200 flex items-center"
+                              disabled={dataLoading || (isFiltered ? filteredTcpconfData : tcpconfData).length === 0}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              Excel'e Aktar
+                            </button>
+                            <button
+                              onClick={() => exportToPDF(isFiltered ? filteredTcpconfData : tcpconfData, 'TCPCONF')}
+                              className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-200 transition-colors duration-200 flex items-center"
+                              disabled={dataLoading || (isFiltered ? filteredTcpconfData : tcpconfData).length === 0}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>
+                              PDF'e Aktar
+                            </button>
+                            <button
+                              onClick={openTimeFilter}
+                              className={`px-4 py-2 text-sm font-medium border rounded-md transition-colors duration-200 flex items-center ${
+                                isFiltered 
+                                  ? 'text-blue-700 bg-blue-100 border-blue-300 hover:bg-blue-200' 
+                                  : 'text-gray-700 bg-gray-100 border-gray-300 hover:bg-gray-200'
+                              }`}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              Zaman Filtresi
+                            </button>
+                            <button
+                              onClick={fetchTcpconfData}
+                              disabled={dataLoading}
+                              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {dataLoading ? 'Yükleniyor...' : 'Yenile'}
+                            </button>
+                          </div>
                         )}
                         {activeModal === 'tcpcons' && (
-                          <button
-                            onClick={fetchTcpconsData}
-                            disabled={dataLoading}
-                            className="px-4 py-2 text-sm font-medium text-white bg-teal-600 border border-transparent rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {dataLoading ? 'Yükleniyor...' : 'Yenile'}
-                          </button>
+                          <div className="flex space-x-3">
+                            <button
+                              onClick={() => exportToExcel(isFiltered ? filteredTcpconsData : tcpconsData, 'TCPCONS')}
+                              className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md hover:bg-green-200 transition-colors duration-200 flex items-center"
+                              disabled={dataLoading || (isFiltered ? filteredTcpconsData : tcpconsData).length === 0}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              Excel'e Aktar
+                            </button>
+                            <button
+                              onClick={() => exportToPDF(isFiltered ? filteredTcpconsData : tcpconsData, 'TCPCONS')}
+                              className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-200 transition-colors duration-200 flex items-center"
+                              disabled={dataLoading || (isFiltered ? filteredTcpconsData : tcpconsData).length === 0}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>
+                              PDF'e Aktar
+                            </button>
+                            <button
+                              onClick={openTimeFilter}
+                              className={`px-4 py-2 text-sm font-medium border rounded-md transition-colors duration-200 flex items-center ${
+                                isFiltered 
+                                  ? 'text-blue-700 bg-blue-100 border-blue-300 hover:bg-blue-200' 
+                                  : 'text-gray-700 bg-gray-100 border-gray-300 hover:bg-gray-200'
+                              }`}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              Zaman Filtresi
+                            </button>
+                            <button
+                              onClick={fetchTcpconsData}
+                              disabled={dataLoading}
+                              className="px-4 py-2 text-sm font-medium text-white bg-teal-600 border border-transparent rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {dataLoading ? 'Yükleniyor...' : 'Yenile'}
+                            </button>
+                          </div>
                         )}
                         {activeModal === 'udpconf' && (
-                          <button
-                            onClick={fetchUdpconfData}
-                            disabled={dataLoading}
-                            className="px-4 py-2 text-sm font-medium text-white bg-amber-600 border border-transparent rounded-md hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {dataLoading ? 'Yükleniyor...' : 'Yenile'}
-                          </button>
+                          <div className="flex space-x-3">
+                            <button
+                              onClick={() => exportToExcel(isFiltered ? filteredUdpconfData : udpconfData, 'UDPCONF')}
+                              className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md hover:bg-green-200 transition-colors duration-200 flex items-center"
+                              disabled={dataLoading || (isFiltered ? filteredUdpconfData : udpconfData).length === 0}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              Excel'e Aktar
+                            </button>
+                            <button
+                              onClick={() => exportToPDF(isFiltered ? filteredUdpconfData : udpconfData, 'UDPCONF')}
+                              className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-200 transition-colors duration-200 flex items-center"
+                              disabled={dataLoading || (isFiltered ? filteredUdpconfData : udpconfData).length === 0}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>
+                              PDF'e Aktar
+                            </button>
+                            <button
+                              onClick={openTimeFilter}
+                              className={`px-4 py-2 text-sm font-medium border rounded-md transition-colors duration-200 flex items-center ${
+                                isFiltered 
+                                  ? 'text-blue-700 bg-blue-100 border-blue-300 hover:bg-blue-200' 
+                                  : 'text-gray-700 bg-gray-100 border-gray-300 hover:bg-gray-200'
+                              }`}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              Zaman Filtresi
+                            </button>
+                            <button
+                              onClick={fetchUdpconfData}
+                              disabled={dataLoading}
+                              className="px-4 py-2 text-sm font-medium text-white bg-amber-600 border border-transparent rounded-md hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {dataLoading ? 'Yükleniyor...' : 'Yenile'}
+                            </button>
+                          </div>
                         )}
                         {activeModal === 'actcons' && (
-                          <button
-                            onClick={fetchActconsData}
-                            disabled={dataLoading}
-                            className="px-4 py-2 text-sm font-medium text-white bg-rose-600 border border-transparent rounded-md hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {dataLoading ? 'Yükleniyor...' : 'Yenile'}
-                          </button>
+                          <div className="flex space-x-3">
+                            <button
+                              onClick={() => exportToExcel(isFiltered ? filteredActconsData : actconsData, 'ACTCONS')}
+                              className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md hover:bg-green-200 transition-colors duration-200 flex items-center"
+                              disabled={dataLoading || (isFiltered ? filteredActconsData : actconsData).length === 0}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              Excel'e Aktar
+                            </button>
+                            <button
+                              onClick={() => exportToPDF(isFiltered ? filteredActconsData : actconsData, 'ACTCONS')}
+                              className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-200 transition-colors duration-200 flex items-center"
+                              disabled={dataLoading || (isFiltered ? filteredActconsData : actconsData).length === 0}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>
+                              PDF'e Aktar
+                            </button>
+                            <button
+                              onClick={openTimeFilter}
+                              className={`px-4 py-2 text-sm font-medium border rounded-md transition-colors duration-200 flex items-center ${
+                                isFiltered 
+                                  ? 'text-blue-700 bg-blue-100 border-blue-300 hover:bg-blue-200' 
+                                  : 'text-gray-700 bg-gray-100 border-gray-300 hover:bg-gray-200'
+                              }`}
+                            >
+                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              Zaman Filtresi
+                            </button>
+                            <button
+                              onClick={fetchActconsData}
+                              disabled={dataLoading}
+                              className="px-4 py-2 text-sm font-medium text-white bg-rose-600 border border-transparent rounded-md hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {dataLoading ? 'Yükleniyor...' : 'Yenile'}
+                            </button>
+                          </div>
                         )}
                       </div>
                       
