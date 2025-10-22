@@ -18,12 +18,265 @@ const ZOSPage = () => {
   const [customFromDate, setCustomFromDate] = useState('');
   const [customToDate, setCustomToDate] = useState('');
   const [chartData, setChartData] = useState([]);
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortDirection, setSortDirection] = useState('asc');
 
   // Sayı formatı yardımcı fonksiyonu
   const formatNumber = (value) => {
     if (value === null || value === undefined || value === '') return '-';
     const num = Number(value);
     return isNaN(num) ? '-' : num.toFixed(2);
+  };
+
+  // Sıralama fonksiyonu
+  const handleSort = (column) => {
+    if (column === 'id' || column === 'syxsysn' || column === 'bmctime' || column === 'time') {
+      return; // String ve zaman sütunları için sıralama yapma
+    }
+
+    const newDirection = sortColumn === column && sortDirection === 'asc' ? 'desc' : 'asc';
+    setSortColumn(column);
+    setSortDirection(newDirection);
+  };
+
+  // Sıralanmış veri
+  const sortedData = [...mainviewData].sort((a, b) => {
+    if (!sortColumn) return 0;
+    
+    const aValue = parseFloat(a[sortColumn]) || 0;
+    const bValue = parseFloat(b[sortColumn]) || 0;
+    
+    if (sortDirection === 'asc') {
+      return aValue - bValue;
+    } else {
+      return bValue - aValue;
+    }
+  });
+
+  // Sütun istatistikleri hesaplama
+  const getColumnStats = (column) => {
+    if (!mainviewData || mainviewData.length === 0) return { min: 0, max: 0 };
+    
+    const values = mainviewData
+      .map(row => parseFloat(row[column]) || 0)
+      .filter(val => !isNaN(val));
+    
+    if (values.length === 0) return { min: 0, max: 0 };
+    
+    return {
+      min: Math.min(...values),
+      max: Math.max(...values)
+    };
+  };
+
+  // Excel'e aktarma fonksiyonu
+  const exportToExcel = () => {
+    if (!mainviewData || mainviewData.length === 0) {
+      toast.error('Aktarılacak veri bulunamadı');
+      return;
+    }
+
+    // CSV formatında veri hazırla
+    const headers = ['SYS', 'CPU Busy%', 'zIIP Busy%', 'CPU Avg', 'I/O Rate', 'Queue I/O', 'DASD Busy%', 'CPU SPU', 'CPU EPU', 'SQ PU', 'ES PU', 'Date/Time', 'Time'];
+    const csvData = [
+      headers.join(','),
+      ...sortedData.map(row => [
+        row.syxsysn || '',
+        formatNumber(row.succpub),
+        formatNumber(row.sucziib),
+        formatNumber(row.scicpavg),
+        formatNumber(row.suciinrt),
+        formatNumber(row.suklqior),
+        formatNumber(row.sukadbpc),
+        formatNumber(row.csrecspu),
+        formatNumber(row.csreecpu),
+        formatNumber(row.csresqpu),
+        formatNumber(row.csreespu),
+        row.bmctime || '',
+        row.time || ''
+      ].join(','))
+    ].join('\n');
+
+    // BOM ekle (Türkçe karakterler için)
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvData], { type: 'text/csv;charset=utf-8;' });
+    
+    // Dosyayı indir
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `cpu_performance_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success('Veriler Excel formatında indirildi');
+  };
+
+  // PDF'e aktarma fonksiyonu
+  const exportToPDF = () => {
+    if (!mainviewData || mainviewData.length === 0) {
+      toast.error('Aktarılacak veri bulunamadı');
+      return;
+    }
+
+    try {
+      // jsPDF ve autoTable eklentisini dinamik olarak yükle
+      const loadScripts = () => {
+        return new Promise((resolve, reject) => {
+          let loadedCount = 0;
+          const totalScripts = 2;
+
+          const onScriptLoad = () => {
+            loadedCount++;
+            if (loadedCount === totalScripts) {
+              resolve();
+            }
+          };
+
+          const onScriptError = () => {
+            reject(new Error('Script yükleme hatası'));
+          };
+
+          // jsPDF yükle
+          const jsPDFScript = document.createElement('script');
+          jsPDFScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+          jsPDFScript.onload = onScriptLoad;
+          jsPDFScript.onerror = onScriptError;
+          document.head.appendChild(jsPDFScript);
+
+          // autoTable eklentisini yükle
+          const autoTableScript = document.createElement('script');
+          autoTableScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js';
+          autoTableScript.onload = onScriptLoad;
+          autoTableScript.onerror = onScriptError;
+          document.head.appendChild(autoTableScript);
+        });
+      };
+
+      loadScripts().then(() => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape', 'mm', 'a4');
+        
+        // Başlık ekle
+        doc.setFontSize(16);
+        doc.text('CPU Performans Raporu', 20, 20);
+        
+        // Tarih ekle
+        doc.setFontSize(10);
+        doc.text(`Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 20, 30);
+        
+        // Tablo verilerini hazırla
+        const tableData = sortedData.map(row => {
+          // Date/Time formatlaması
+          let dateTimeFormatted = '-';
+          let timeFormatted = '-';
+          
+          if (row.bmctime) {
+            const date = new Date(row.bmctime);
+            dateTimeFormatted = date.toLocaleDateString('tr-TR', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            }) + ' ' + date.toLocaleTimeString('tr-TR', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            });
+            timeFormatted = date.toLocaleTimeString('tr-TR', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            });
+          } else if (row.created_at) {
+            const date = new Date(row.created_at);
+            dateTimeFormatted = date.toLocaleDateString('tr-TR', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            }) + ' ' + date.toLocaleTimeString('tr-TR', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            });
+            timeFormatted = date.toLocaleTimeString('tr-TR', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            });
+          }
+
+          return [
+            row.syxsysn || '-',
+            formatNumber(row.succpub),
+            formatNumber(row.sucziib),
+            formatNumber(row.scicpavg),
+            formatNumber(row.suciinrt),
+            formatNumber(row.suklqior),
+            formatNumber(row.sukadbpc),
+            formatNumber(row.csrecspu),
+            formatNumber(row.csreecpu),
+            formatNumber(row.csresqpu),
+            formatNumber(row.csreespu),
+            dateTimeFormatted,
+            timeFormatted
+          ];
+        });
+
+        // Sütun başlıkları
+        const headers = ['SYS', 'CPU Busy%', 'zIIP Busy%', 'CPU Avg', 'I/O Rate', 'Queue I/O', 'DASD Busy%', 'CPU SPU', 'CPU EPU', 'SQ PU', 'ES PU', 'Date/Time', 'Time'];
+        
+        // Tablo oluştur
+        doc.autoTable({
+          head: [headers],
+          body: tableData,
+          startY: 40,
+          styles: {
+            fontSize: 8,
+            cellPadding: 2,
+            overflow: 'linebreak',
+            halign: 'left'
+          },
+          headStyles: {
+            fillColor: [242, 242, 242],
+            textColor: [0, 0, 0],
+            fontStyle: 'bold'
+          },
+          alternateRowStyles: {
+            fillColor: [249, 249, 249]
+          },
+          columnStyles: {
+            0: { cellWidth: 15 }, // SYS
+            1: { cellWidth: 20 }, // CPU Busy%
+            2: { cellWidth: 20 }, // zIIP Busy%
+            3: { cellWidth: 15 }, // CPU Avg
+            4: { cellWidth: 15 }, // I/O Rate
+            5: { cellWidth: 15 }, // Queue I/O
+            6: { cellWidth: 20 }, // DASD Busy%
+            7: { cellWidth: 15 }, // CPU SPU
+            8: { cellWidth: 15 }, // CPU EPU
+            9: { cellWidth: 15 }, // SQ PU
+            10: { cellWidth: 15 }, // ES PU
+            11: { cellWidth: 25 }, // Date/Time
+            12: { cellWidth: 15 }  // Time
+          }
+        });
+
+        // PDF'i indir
+        const fileName = `cpu_performance_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
+        
+        toast.success('PDF başarıyla indirildi');
+      }).catch((error) => {
+        console.error('Script yükleme hatası:', error);
+        toast.error('PDF oluşturma hatası. Lütfen sayfayı yenileyin ve tekrar deneyin.');
+      });
+      
+    } catch (error) {
+      console.error('PDF oluşturma hatası:', error);
+      toast.error('PDF oluşturulurken hata oluştu');
+    }
   };
 
   // Tablo kontrolü fonksiyonu
@@ -43,7 +296,7 @@ const ZOSPage = () => {
           return false; // Sadece false döndür, uyarı verme
         }
         
-        toast.success(`Tablo mevcut: ${tableInfo.rowCount} kayıt bulundu`);
+        toast.success(`Tablo mevcut: ${tableInfo.rowCount} kayıt bulundu`, { autoClose: 2000 });
         return true;
       }
     } catch (error) {
@@ -72,7 +325,7 @@ const ZOSPage = () => {
         if (response.data.data.length === 0) {
           // Tablo boşsa sessizce devam et, uyarı verme
         } else {
-          toast.success(`Veriler başarıyla yüklendi (${response.data.data.length} kayıt)`);
+          toast.success(`Veriler başarıyla yüklendi (${response.data.data.length} kayıt)`, { autoClose: 2000 });
         }
       } else {
         toast.error('Veri yüklenirken hata oluştu');
@@ -102,7 +355,7 @@ const ZOSPage = () => {
           return false; // Sadece false döndür, uyarı verme
         }
         
-        toast.success(`Tablo mevcut: ${tableInfoJespool.rowCount} kayıt bulundu`);
+        toast.success(`Tablo mevcut: ${tableInfoJespool.rowCount} kayıt bulundu`, { autoClose: 2000 });
         return true;
       }
     } catch (error) {
@@ -132,7 +385,7 @@ const ZOSPage = () => {
         if (responseJespool.data.data.length === 0) {
           // Tablo boşsa sessizce devam et, uyarı verme
         } else {
-          toast.success(`Veriler başarıyla yüklendi (${responseJespool.data.data.length} kayıt)`);
+          toast.success(`Veriler başarıyla yüklendi (${responseJespool.data.data.length} kayıt)`, { autoClose: 2000 });
         }
       } else {
         toast.error('Veri yüklenirken hata oluştu');
@@ -165,7 +418,7 @@ const ZOSPage = () => {
         if (responseJCPU.data.data.length === 0) {
           // Tablo boşsa sessizce devam et, uyarı verme
         } else {
-          toast.success(`Veriler başarıyla yüklendi (${responseJCPU.data.data.length} kayıt)`);
+          toast.success(`Veriler başarıyla yüklendi (${responseJCPU.data.data.length} kayıt)`, { autoClose: 2000 });
         }
       } else {
         toast.error('Veri yüklenirken hata oluştu');
@@ -195,7 +448,7 @@ const ZOSPage = () => {
           return false; // Sadece false döndür, uyarı verme
         }
         
-        toast.success(`Tablo mevcut: ${tableInfoJCPU.rowCount} kayıt bulundu`);
+        toast.success(`Tablo mevcut: ${tableInfoJCPU.rowCount} kayıt bulundu`, { autoClose: 2000 });
         return true;
       }
     } catch (error) {
@@ -514,6 +767,24 @@ const ZOSPage = () => {
                           {activeModal === 'cpu' && (
                             <div className="flex space-x-3">
                               <button
+                                onClick={exportToExcel}
+                                className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md hover:bg-green-200 transition-colors duration-200 flex items-center"
+                              >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Excel'e Aktar
+                              </button>
+                              <button
+                                onClick={exportToPDF}
+                                className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-200 transition-colors duration-200 flex items-center"
+                              >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                PDF'e Aktar
+                              </button>
+                              <button
                                 onClick={openTimeFilter}
                                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors duration-200 flex items-center"
                               >
@@ -522,13 +793,13 @@ const ZOSPage = () => {
                                 </svg>
                                 Zaman Filtresi
                               </button>
-                              <button
-                                onClick={fetchMainviewData}
-                                disabled={dataLoading}
-                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                {dataLoading ? 'Yükleniyor...' : 'Yenile'}
-                              </button>
+                            <button
+                              onClick={fetchMainviewData}
+                              disabled={dataLoading}
+                              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {dataLoading ? 'Yükleniyor...' : 'Yenile'}
+                            </button>
                             </div>
                           )}
                           {activeModal === 'addressSpace' && (
@@ -563,26 +834,214 @@ const ZOSPage = () => {
                                 <table className="w-full divide-y divide-gray-200" style={{ minWidth: '1400px' }}>
                                   <thead className="bg-gray-50">
                                     <tr>
-                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SYS</th>
-                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU Busy%</th>
-                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">zIIP Busy%</th>
-                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU Avg</th>
-                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">I/O Rate</th>
-                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Queue I/O</th>
-                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DASD Busy%</th>
-                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU SPU</th>
-                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPU EPU</th>
-                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SQ PU</th>
-                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ES PU</th>
-                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BMC Time</th>
+                                      <th 
+                                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSort('succpub')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>CPU Busy%</span>
+                                            {sortColumn === 'succpub' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {sortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getColumnStats('succpub').min.toFixed(1)} | Max: {getColumnStats('succpub').max.toFixed(1)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSort('sucziib')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>zIIP Busy%</span>
+                                            {sortColumn === 'sucziib' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {sortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getColumnStats('sucziib').min.toFixed(1)} | Max: {getColumnStats('sucziib').max.toFixed(1)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSort('scicpavg')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>CPU Avg</span>
+                                            {sortColumn === 'scicpavg' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {sortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getColumnStats('scicpavg').min.toFixed(2)} | Max: {getColumnStats('scicpavg').max.toFixed(2)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSort('suciinrt')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>I/O Rate</span>
+                                            {sortColumn === 'suciinrt' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {sortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getColumnStats('suciinrt').min.toFixed(1)} | Max: {getColumnStats('suciinrt').max.toFixed(1)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSort('suklqior')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>Queue I/O</span>
+                                            {sortColumn === 'suklqior' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {sortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getColumnStats('suklqior').min.toFixed(1)} | Max: {getColumnStats('suklqior').max.toFixed(1)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSort('sukadbpc')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>DASD Busy%</span>
+                                            {sortColumn === 'sukadbpc' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {sortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getColumnStats('sukadbpc').min.toFixed(1)} | Max: {getColumnStats('sukadbpc').max.toFixed(1)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSort('csrecspu')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>CPU SPU</span>
+                                            {sortColumn === 'csrecspu' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {sortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getColumnStats('csrecspu').min.toFixed(2)} | Max: {getColumnStats('csrecspu').max.toFixed(2)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSort('csreecpu')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>CPU EPU</span>
+                                            {sortColumn === 'csreecpu' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {sortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getColumnStats('csreecpu').min.toFixed(2)} | Max: {getColumnStats('csreecpu').max.toFixed(2)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSort('csresqpu')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>SQ PU</span>
+                                            {sortColumn === 'csresqpu' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {sortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getColumnStats('csresqpu').min.toFixed(2)} | Max: {getColumnStats('csresqpu').max.toFixed(2)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th 
+                                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                        onClick={() => handleSort('csreespu')}
+                                      >
+                                        <div className="space-y-1">
+                                          <div className="flex items-center space-x-1">
+                                            <span>ES PU</span>
+                                            {sortColumn === 'csreespu' ? (
+                                              <span className="text-blue-600 font-bold">
+                                                {sortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                              </span>
+                                            ) : (
+                                              <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                            )}
+                                          </div>
+                                          <div className="text-xs text-gray-400 font-normal">
+                                            Min: {getColumnStats('csreespu').min.toFixed(2)} | Max: {getColumnStats('csreespu').max.toFixed(2)}
+                                          </div>
+                                        </div>
+                                      </th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date/Time</th>
                                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
                                     </tr>
                                   </thead>
                                   <tbody className="bg-white divide-y divide-gray-200">
-                                    {mainviewData.map((row, index) => (
+                                    {sortedData.map((row, index) => (
                                       <tr key={row.id || index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{row.id}</td>
                                         <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{row.syxsysn || '-'}</td>
                                         <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.succpub)}</td>
                                         <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.sucziib)}</td>
@@ -1067,7 +1526,7 @@ const ZOSPage = () => {
                                           month: '2-digit',
                                           year: 'numeric'
                                         })}
-                                      </div>
+                              </div>
                                       <div className="text-sm text-blue-600">
                                         {new Date(mainviewData[0]?.bmctime || mainviewData[0]?.created_at || new Date()).toLocaleTimeString('tr-TR', {
                                           hour: '2-digit',
@@ -2567,28 +3026,28 @@ const ZOSPage = () => {
                           )}
                         </div>
                       ) : (
-                        <div className="bg-gray-50 rounded-lg p-8 text-center">
-                          <div className="text-6xl mb-4">📊</div>
-                          <p className="text-gray-600 text-lg mb-2">
-                            {selectedChart === 'lastUpdate' && 'Last Update% detaylı grafiği buraya eklenecek'}
-                            {selectedChart === 'spoolUtil' && 'SPOOL %UTİL detaylı grafiği buraya eklenecek'}
-                            {selectedChart === 'totalTracks' && 'TOTAL TRACKS detaylı grafiği buraya eklenecek'}
-                            {selectedChart === 'usedTracks' && 'USED TRACKS detaylı grafiği buraya eklenecek'}
-                            {selectedChart === 'activeUtil' && 'ACTİVE %UTİL detaylı grafiği buraya eklenecek'}
-                            {selectedChart === 'activeTracks' && 'ACTİVE TRACKS detaylı grafiği buraya eklenecek'}
-                            {selectedChart === 'allCpuSeconds' && 'ALL CPU seconds detaylı grafiği buraya eklenecek'}
-                            {selectedChart === 'unadjCpuUtil' && 'Unadj CPU Util detaylı grafiği buraya eklenecek'}
-                            {selectedChart === 'usingCpuPercentage' && 'Using CPU % detaylı grafiği buraya eklenecek'}
-                            {selectedChart === 'cpuDelayPercentage' && 'CPU Delay % detaylı grafiği buraya eklenecek'}
-                            {selectedChart === 'tcbTime' && 'TCB Time detaylı grafiği buraya eklenecek'}
-                            {selectedChart === 'srbTime' && '% SRB Time detaylı grafiği buraya eklenecek'}
-                            {selectedChart === 'jobTotalCpuTime' && 'Job Total CPU Time detaylı grafiği buraya eklenecek'}
-                            {selectedChart === 'ziipTotalCpuTime' && 'zIIP Total CPU Time detaylı grafiği buraya eklenecek'}
-                            {selectedChart === 'ziipIntervalCpuTime' && 'zIIP Interval CPU Time detaylı grafiği buraya eklenecek'}
-                          </p>
-                          <p className="text-gray-500 text-sm">
-                            Gerçek zamanlı veri görselleştirme bileşeni buraya entegre edilecek
-                          </p>
+                    <div className="bg-gray-50 rounded-lg p-8 text-center">
+                      <div className="text-6xl mb-4">📊</div>
+                      <p className="text-gray-600 text-lg mb-2">
+                        {selectedChart === 'lastUpdate' && 'Last Update% detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'spoolUtil' && 'SPOOL %UTİL detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'totalTracks' && 'TOTAL TRACKS detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'usedTracks' && 'USED TRACKS detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'activeUtil' && 'ACTİVE %UTİL detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'activeTracks' && 'ACTİVE TRACKS detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'allCpuSeconds' && 'ALL CPU seconds detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'unadjCpuUtil' && 'Unadj CPU Util detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'usingCpuPercentage' && 'Using CPU % detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'cpuDelayPercentage' && 'CPU Delay % detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'tcbTime' && 'TCB Time detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'srbTime' && '% SRB Time detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'jobTotalCpuTime' && 'Job Total CPU Time detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'ziipTotalCpuTime' && 'zIIP Total CPU Time detaylı grafiği buraya eklenecek'}
+                        {selectedChart === 'ziipIntervalCpuTime' && 'zIIP Interval CPU Time detaylı grafiği buraya eklenecek'}
+                      </p>
+                      <p className="text-gray-500 text-sm">
+                        Gerçek zamanlı veri görselleştirme bileşeni buraya entegre edilecek
+                      </p>
                         </div>
                       )}
                     </div>
