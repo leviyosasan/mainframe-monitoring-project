@@ -1819,10 +1819,10 @@ const getMainviewStorageCsasum = async (req, res) => {
         csghchp as percent_hwm_high_common_storage,
         
         -- Additional fields
-        bmctime,
-        "time"
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       FROM mainview_csasum
-      ORDER BY bmctime DESC
+      ORDER BY created_at DESC
       LIMIT 100
     `;
  
@@ -1914,6 +1914,455 @@ const checkTableExistsCsasum = async (req, res) => {
   }
 };
 
+const getMainviewStorageFrminfoCenter = async (req, res) => {
+  let pool = null;
+ 
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+ 
+    const client = await pool.connect();
+ 
+    // Önce sadece tüm kolonları çekelim ve görelim
+    const query = `
+      SELECT
+        spispcav, spispcmn, spispcmx,
+        spilpfav, spilpfmn, spilpfmx,
+        spicpfav, spicpfmn, spicpfmx,
+        spiqpcav, spiqpcmn, spiqpcmx,
+        spiapfav, spiapfmn, spiapfmx,
+        spiafcav, spiafcmn, spitfuav,
+        spiafumn, spiafumx, spitcpct,
+        bmctime, "time"
+      FROM mainview_frminfo_center
+      ORDER BY bmctime DESC
+      LIMIT 100
+    `;
+ 
+    const result = await client.query(query);
+    client.release();
+ 
+    res.status(200).json({
+      success: true,
+      message: 'mainview_frminfo_center verileri başarıyla getirildi',
+      count: result.rowCount,
+      data: result.rows
+    });
+  } catch (error) {
+    console.error('mainview_frminfo_center query error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'mainview_frminfo_center verileri getirilemedi',
+      error: error.message
+    });
+  } finally {
+    // Close the pool if it was created
+    if (pool) {
+      await pool.end();
+    }
+  }
+};
+ 
+const checkTableExistsFrminfoCenter = async (req, res) => {
+  let pool = null;
+ 
+  try {
+    // Get configuration from request body or use default
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+   
+    // Create new pool with provided configuration
+    pool = new Pool(config);
+   
+    // Test the connection
+    const client = await pool.connect();
+   
+    // Check if table exists and get table info
+    const tableCheckQuery = `
+      SELECT
+        table_name,
+        column_name,
+        data_type,
+        is_nullable
+      FROM information_schema.columns
+      WHERE table_name = 'mainview_frminfo_center'
+      ORDER BY ordinal_position;
+    `;
+   
+    const tableResult = await client.query(tableCheckQuery);
+   
+    // Get row count
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_frminfo_center`;
+    const countResult = await client.query(countQuery);
+   
+    // Get sample data if exists
+    const sampleQuery = `SELECT * FROM mainview_frminfo_center LIMIT 5`;
+    const sampleResult = await client.query(sampleQuery);
+   
+    client.release();
+   
+    res.status(200).json({
+      success: true,
+      message: 'Tablo bilgileri başarıyla getirildi',
+      tableInfo: {
+        exists: tableResult.rows.length > 0,
+        columns: tableResult.rows,
+        rowCount: parseInt(countResult.rows[0].count),
+        sampleData: sampleResult.rows
+      }
+    });
+   
+  } catch (error) {
+    console.error('Table check error:', error);
+   
+    res.status(500).json({
+      success: false,
+      message: 'Tablo kontrolü başarısız',
+      error: error.message
+    });
+  } finally {
+    // Close the pool if it was created
+    if (pool) {
+      await pool.end();
+    }
+  }
+};
+
+
+const getMainviewStorageFrminfofixed = async (req, res) => {
+  let pool = null;
+ 
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+ 
+    const client = await pool.connect();
+ 
+    // Önce sadece tüm kolonları çekelim ve görelim
+    const query = `
+      SELECT
+        system_name, server_name,
+        sqa_avg, sqa_min, sqa_max,
+        lpa_avg, lpa_min, lpa_max,
+        csa_avg, csa_min, csa_max,
+        lsqa_avg, lsqa_min, lsqa_max,
+        private_avg, private_min, private_max,
+        fixed_16m_avg, fixed_16m_min, fixed_16m_max,
+        fixed_total_avg, fixed_total_min, fixed_total_max,
+        fixed_percentage,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      FROM mainview_frminfo_fixed
+      ORDER BY timestamp DESC
+      LIMIT 100
+    `;
+ 
+    const result = await client.query(query);
+    client.release();
+ 
+    res.status(200).json({
+      success: true,
+      message: 'mainview_frminfo_fixed verileri başarıyla getirildi',
+      count: result.rowCount,
+      data: result.rows
+    });
+  } catch (error) {
+    console.error('mainview_frminfo_fixed query error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'mainview_frminfo_fixed verileri getirilemedi',
+      error: error.message
+    });
+  } finally {
+    // Close the pool if it was created
+    if (pool) {
+      await pool.end();
+    }
+  }
+};
+ 
+const checkTableExistsFrminfoFixed = async (req, res) => {
+  let pool = null;
+ 
+  try {
+    // Get configuration from request body or use default
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+   
+    // Create new pool with provided configuration
+    pool = new Pool(config);
+   
+    // Test the connection
+    const client = await pool.connect();
+   
+    // Check if table exists and get table info
+    const tableCheckQuery = `
+      SELECT
+        table_name,
+        column_name,
+        data_type,
+        is_nullable
+      FROM information_schema.columns
+      WHERE table_name = 'mainview_frminfo_fixed'
+      ORDER BY ordinal_position;
+    `;
+   
+    const tableResult = await client.query(tableCheckQuery);
+   
+    // Get row count
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_frminfo_fixed`;
+    const countResult = await client.query(countQuery);
+   
+    // Get sample data if exists
+    const sampleQuery = `SELECT * FROM mainview_frminfo_fixed LIMIT 5`;
+    const sampleResult = await client.query(sampleQuery);
+   
+    client.release();
+   
+    res.status(200).json({
+      success: true,
+      message: 'Tablo bilgileri başarıyla getirildi',
+      tableInfo: {
+        exists: tableResult.rows.length > 0,
+        columns: tableResult.rows,
+        rowCount: parseInt(countResult.rows[0].count),
+        sampleData: sampleResult.rows
+      }
+    });
+   
+  } catch (error) {
+    console.error('Table check error:', error);
+   
+    res.status(500).json({
+      success: false,
+      message: 'Tablo kontrolü başarısız',
+      error: error.message
+    });
+  } finally {
+    // Close the pool if it was created
+    if (pool) {
+      await pool.end();
+    }
+  }
+};
+
+
+const getMainviewStorageFrminfoHighVirtual = async (req, res) => {
+  let pool = null;
+ 
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+ 
+    const client = await pool.connect();
+ 
+    // Önce sadece tüm kolonları çekelim ve görelim
+    const query = `
+      SELECT
+        system_name, server_name,
+        hv_common_avg, hv_common_min, hv_common_max,
+        hv_shared_avg, hv_shared_min, hv_shared_max,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      FROM mainview_frminfo_high_virtual
+      ORDER BY created_at DESC
+      LIMIT 100
+    `;
+ 
+    const result = await client.query(query);
+    client.release();
+ 
+    res.status(200).json({
+      success: true,
+      message: 'mainview_frminfo_high_virtual verileri başarıyla getirildi',
+      count: result.rowCount,
+      data: result.rows
+    });
+  } catch (error) {
+    console.error('mainview_frminfo_high_virtual query error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'mainview_frminfo_high_virtual verileri getirilemedi',
+      error: error.message
+    });
+  } finally {
+    // Close the pool if it was created
+    if (pool) {
+      await pool.end();
+    }
+  }
+};
+ 
+const checkTableExistsFrminfoHighVirtual = async (req, res) => {
+  let pool = null;
+ 
+  try {
+    // Get configuration from request body or use default
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+   
+    // Create new pool with provided configuration
+    pool = new Pool(config);
+   
+    // Test the connection
+    const client = await pool.connect();
+   
+    // Check if table exists and get table info
+    const tableCheckQuery = `
+      SELECT
+        table_name,
+        column_name,
+        data_type,
+        is_nullable
+      FROM information_schema.columns
+      WHERE table_name = 'mainview_frminfo_high_virtual'
+      ORDER BY ordinal_position;
+    `;
+   
+    const tableResult = await client.query(tableCheckQuery);
+   
+    // Get row count
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_frminfo_high_virtual`;
+    const countResult = await client.query(countQuery);
+   
+    // Get sample data if exists
+    const sampleQuery = `SELECT * FROM mainview_frminfo_high_virtual LIMIT 5`;
+    const sampleResult = await client.query(sampleQuery);
+   
+    client.release();
+   
+    res.status(200).json({
+      success: true,
+      message: 'Tablo bilgileri başarıyla getirildi',
+      tableInfo: {
+        exists: tableResult.rows.length > 0,
+        columns: tableResult.rows,
+        rowCount: parseInt(countResult.rows[0].count),
+        sampleData: sampleResult.rows
+      }
+    });
+   
+  } catch (error) {
+    console.error('Table check error:', error);
+   
+    res.status(500).json({
+      success: false,
+      message: 'Tablo kontrolü başarısız',
+      error: error.message
+    });
+  } finally {
+    // Close the pool if it was created
+    if (pool) {
+      await pool.end();
+    }
+  }
+};
+
+
+const getMainviewStoragesysfrmiz = async (req, res) => {
+  let pool = null;
+ 
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+ 
+    const client = await pool.connect();
+ 
+    // Önce sadece tüm kolonları çekelim ve görelim
+    const query = `
+      SELECT
+        spgid, spluicav, spiuonlf, spifinav, sprefncp, spispcav, spreasrp, spilpfav, sprealpp,
+        spicpfav, spreavpp, spiqpcav, sprelsqp, spiapfav, spreprvp, spiafcav, spreavlp,
+        spihvcav, sprecmnp, spihvsav, spreshrp, bmc_time
+      FROM mainview_storage_sysfrmiz
+      ORDER BY bmc_time DESC
+      LIMIT 100
+    `;
+ 
+    const result = await client.query(query);
+    client.release();
+ 
+    res.status(200).json({
+      success: true,
+      message: 'mainview_storage_sysfrmiz verileri başarıyla getirildi',
+      count: result.rowCount,
+      data: result.rows
+    });
+  } catch (error) {
+    console.error('mainview_storage_sysfrmiz query error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'mainview_storage_sysfrmiz verileri getirilemedi',
+      error: error.message
+    });
+  } finally {
+    // Close the pool if it was created
+    if (pool) {
+      await pool.end();
+    }
+  }
+};
+ 
+const checkTableExistsSysfrmiz = async (req, res) => {
+  let pool = null;
+ 
+  try {
+    // Get configuration from request body or use default
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+   
+    // Create new pool with provided configuration
+    pool = new Pool(config);
+   
+    // Test the connection
+    const client = await pool.connect();
+   
+    // Check if table exists and get table info
+    const tableCheckQuery = `
+      SELECT
+        table_name,
+        column_name,
+        data_type,
+        is_nullable
+      FROM information_schema.columns
+      WHERE table_name = 'mainview_storage_sysfrmiz'
+      ORDER BY ordinal_position;
+    `;
+   
+    const tableResult = await client.query(tableCheckQuery);
+   
+    // Get row count
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_storage_sysfrmiz`;
+    const countResult = await client.query(countQuery);
+   
+    // Get sample data if exists
+    const sampleQuery = `SELECT * FROM mainview_storage_sysfrmiz LIMIT 5`;
+    const sampleResult = await client.query(sampleQuery);
+   
+    client.release();
+   
+    res.status(200).json({
+      success: true,
+      message: 'Tablo bilgileri başarıyla getirildi',
+      tableInfo: {
+        exists: tableResult.rows.length > 0,
+        columns: tableResult.rows,
+        rowCount: parseInt(countResult.rows[0].count),
+        sampleData: sampleResult.rows
+      }
+    });
+   
+  } catch (error) {
+    console.error('Table check error:', error);
+   
+    res.status(500).json({
+      success: false,
+      message: 'Tablo kontrolü başarısız',
+      error: error.message
+    });
+  } finally {
+    // Close the pool if it was created
+    if (pool) {
+      await pool.end();
+    }
+  }
+};
 
 module.exports = {
   testConnection,
@@ -1955,5 +2404,13 @@ module.exports = {
   getMainviewMQW2over,
   // CSA Storage tables
   getMainviewStorageCsasum,
-  checkTableExistsCsasum
+  checkTableExistsCsasum,
+  getMainviewStorageFrminfoCenter,
+  checkTableExistsFrminfoCenter,
+  getMainviewStorageFrminfofixed,
+  checkTableExistsFrminfoFixed,
+  getMainviewStorageFrminfoHighVirtual,
+  checkTableExistsFrminfoHighVirtual,
+  getMainviewStoragesysfrmiz,
+  checkTableExistsSysfrmiz
 };
