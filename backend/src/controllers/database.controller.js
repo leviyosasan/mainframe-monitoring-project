@@ -661,6 +661,22 @@ const getMainviewNetworkStackCPU = async (req, res) => {
   }
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Check table exists for vtamcsa
 const checkTableExistsVtamcsa = async (req, res) => {
   let pool = null;
@@ -1203,6 +1219,21 @@ const getMainviewNetworkVtamcsa = async (req, res) => {
   }
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Check table exists for vtmbuff
 const checkTableExistsVtmbuff = async (req, res) => {
   let pool = null;
@@ -1696,6 +1727,193 @@ const checkTableExistsZFS = async (req, res) => {
   }
 };
 
+const getMainviewStorageCsasum = async (req, res) => {
+  let pool = null;
+ 
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+ 
+    const client = await pool.connect();
+ 
+    // CSA Metrics query with all column names from METRICS object
+    const query = `
+      SELECT
+        -- CSA Metrics
+        csrecsad as csa_defined,
+        csrecsau as csa_in_use,
+        csrecsup as csa_in_use_percent,
+        csrecsfc as csa_free_areas_count,
+        csrecsac as csa_converted,
+        csrecscp as csa_converted_to_sqa_percent,
+        csrecsmn as csa_smallest_free_area,
+        csrecsmx as csa_largest_free_area,
+        csrecslp as csa_largest_percent_of_total,
+        csrecsaa as csa_available,
+        csrecsap as csa_available_percent,
+        
+        -- ECSA Metrics
+        csreecsd as ecsa_defined,
+        csreecsu as ecsa_in_use,
+        csreecup as ecsa_in_use_percent,
+        csreecsc as ecsa_converted,
+        csreeccp as ecsa_converted_to_esqa_percent,
+        csreecfc as ecsa_free_areas_count,
+        csreecsa as ecsa_available,
+        csreecap as ecsa_available_percent,
+        csreecmn as ecsa_smallest_free_area,
+        csreecmx as ecsa_largest_free_area,
+        csreeclp as ecsa_largest_percent_of_total,
+        
+        -- RUCSA Metrics
+        csrercsd as rucsa_defined,
+        csrercsu as rucsa_in_use,
+        csrercup as rucsa_in_use_percent,
+        csrercsf as rucsa_free_areas_count,
+        csrercsm as rucsa_smallest_free_area,
+        csrercsx as rucsa_largest_free_area,
+        csrerclp as rucsa_largest_percent_of_total,
+        
+        -- ERUCSA Metrics
+        csreercsd as erucsa_defined,
+        csreercsu as erucsa_in_use,
+        csreercup as erucsa_in_use_percent,
+        csreercsf as erucsa_free_areas_count,
+        csreercsm as erucsa_smallest_free_area,
+        csreercsx as erucsa_largest_free_area,
+        csreerclp as erucsa_largest_percent_of_total,
+        
+        -- SQA Metrics
+        csresqad as sqa_defined,
+        csresqau as sqa_in_use,
+        csresqup as sqa_in_use_percent,
+        csresqaa as sqa_available,
+        csresqap as sqa_available_percent,
+        
+        -- ESQA Metrics
+        csreesqa as esqa_available,
+        csreesap as esqa_available_percent,
+        
+        -- Total Common Storage Metrics
+        csretd as total_cs_defined,
+        csretu as total_cs_used,
+        csretup as total_cs_used_percent,
+        csretc as total_converted_csa_ecsa,
+        csreta as available_common_storage,
+        csretap as available_common_storage_percent,
+        
+        -- High Shared Storage Metrics
+        csgshsz as defined_high_shared_storage,
+        csgshus as used_high_shared_storage,
+        csgshup as percent_used_high_shared_storage,
+        csgshmo as number_of_shared_memory_objects,
+        csgshhw as used_hwm_high_shared_storage,
+        csgshhp as percent_hwm_high_shared_storage,
+        
+        -- High Common Storage Metrics
+        csghcsz as defined_high_common_storage,
+        csghcus as used_high_common_storage,
+        csghcup as percent_used_high_common_storage,
+        csghcmo as number_of_common_memory_objects,
+        csghchw as used_hwm_high_common_storage,
+        csghchp as percent_hwm_high_common_storage,
+        
+        -- Additional fields
+        bmctime,
+        "time"
+      FROM mainview_csasum
+      ORDER BY bmctime DESC
+      LIMIT 100
+    `;
+ 
+    const result = await client.query(query);
+    client.release();
+ 
+    res.status(200).json({
+      success: true,
+      message: 'mainview_csasum verileri başarıyla getirildi',
+      count: result.rowCount,
+      data: result.rows
+    });
+  } catch (error) {
+    console.error('mainview_csasum query error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'mainview_csasum verileri getirilemedi',
+      error: error.message
+    });
+  } finally {
+    // Close the pool if it was created
+    if (pool) {
+      await pool.end();
+    }
+  }
+};
+ 
+const checkTableExistsCsasum = async (req, res) => {
+  let pool = null;
+ 
+  try {
+    // Get configuration from request body or use default
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+   
+    // Create new pool with provided configuration
+    pool = new Pool(config);
+   
+    // Test the connection
+    const client = await pool.connect();
+   
+    // Check if table exists and get table info
+    const tableCheckQuery = `
+      SELECT
+        table_name,
+        column_name,
+        data_type,
+        is_nullable
+      FROM information_schema.columns
+      WHERE table_name = 'mainview_csasum'
+      ORDER BY ordinal_position;
+    `;
+   
+    const tableResult = await client.query(tableCheckQuery);
+   
+    // Get row count
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_csasum`;
+    const countResult = await client.query(countQuery);
+   
+    // Get sample data if exists
+    const sampleQuery = `SELECT * FROM mainview_csasum LIMIT 5`;
+    const sampleResult = await client.query(sampleQuery);
+   
+    client.release();
+   
+    res.status(200).json({
+      success: true,
+      message: 'Tablo bilgileri başarıyla getirildi',
+      tableInfo: {
+        exists: tableResult.rows.length > 0,
+        columns: tableResult.rows,
+        rowCount: parseInt(countResult.rows[0].count),
+        sampleData: sampleResult.rows
+      }
+    });
+   
+  } catch (error) {
+    console.error('Table check error:', error);
+   
+    res.status(500).json({
+      success: false,
+      message: 'Tablo kontrolü başarısız',
+      error: error.message
+    });
+  } finally {
+    // Close the pool if it was created
+    if (pool) {
+      await pool.end();
+    }
+  }
+};
+
 
 module.exports = {
   testConnection,
@@ -1734,5 +1952,8 @@ module.exports = {
   checkTableExistsMQQm,
   getMainviewMQQm,
   checkTableExistsMQW2over,
-  getMainviewMQW2over
+  getMainviewMQW2over,
+  // CSA Storage tables
+  getMainviewStorageCsasum,
+  checkTableExistsCsasum
 };
