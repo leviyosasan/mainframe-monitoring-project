@@ -2792,7 +2792,16 @@ const NetworkPage = () => {
                             </div>
                           </div>
                            {/* Last Update */}
-                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6"> <div className="text-center"> <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4"> <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /> </svg> </div> <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5> </div> </div>
+                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
+                            </div>
+                          </div>
                         </div>
                       )}
 
@@ -3186,7 +3195,33 @@ const NetworkPage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
+                              <h5 className="font-bold text-gray-500 text-lg mb-2">LAST UPDATE</h5>
+                              {stackCpuData.length > 0 && (
+                                <div className="text-sm text-gray-600 space-y-1">
+                                  <div className="font-medium">
+                                    {stackCpuData[stackCpuData.length - 1]?.created_at 
+                                      ? new Date(stackCpuData[stackCpuData.length - 1].created_at).toLocaleString('tr-TR', {
+                                          day: '2-digit',
+                                          month: '2-digit',
+                                          year: 'numeric',
+                                          hour: '2-digit',
+                                          minute: '2-digit',
+                                          second: '2-digit'
+                                        })
+                                      : stackCpuData[stackCpuData.length - 1]?.updated_at
+                                        ? new Date(stackCpuData[stackCpuData.length - 1].updated_at).toLocaleString('tr-TR', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            second: '2-digit'
+                                          })
+                                        : '-'
+                                    }
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -3518,7 +3553,33 @@ const NetworkPage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
+                              <h5 className="font-bold text-gray-500 text-lg mb-2">LAST UPDATE</h5>
+                              {vtamcsaData.length > 0 && (
+                                <div className="text-sm text-gray-600 space-y-1">
+                                  <div className="font-medium">
+                                    {vtamcsaData[vtamcsaData.length - 1]?.created_at 
+                                      ? new Date(vtamcsaData[vtamcsaData.length - 1].created_at).toLocaleString('tr-TR', {
+                                          day: '2-digit',
+                                          month: '2-digit',
+                                          year: 'numeric',
+                                          hour: '2-digit',
+                                          minute: '2-digit',
+                                          second: '2-digit'
+                                        })
+                                      : vtamcsaData[vtamcsaData.length - 1]?.updated_at
+                                        ? new Date(vtamcsaData[vtamcsaData.length - 1].updated_at).toLocaleString('tr-TR', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            second: '2-digit'
+                                          })
+                                        : '-'
+                                    }
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -3528,10 +3589,7 @@ const NetworkPage = () => {
                       {activeModal === 'STACKS' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                           {/* Job Name */}
-                          <div 
-                            onClick={() => openChart('jobName')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
+                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -3563,10 +3621,7 @@ const NetworkPage = () => {
                           </div>
 
                           {/* Step Name */}
-                          <div 
-                            onClick={() => openChart('stepName')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
+                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -3599,10 +3654,7 @@ const NetworkPage = () => {
 
 
                           {/* ASID - Grafik */}
-                          <div 
-                            onClick={() => openChart('asid')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
+                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -3634,10 +3686,7 @@ const NetworkPage = () => {
                           </div>
 
                           {/* MVS Level - Grafik */}
-                          <div 
-                            onClick={() => openChart('mvsLevel')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
+                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -3669,10 +3718,7 @@ const NetworkPage = () => {
                           </div>
 
                           {/* Version - Grafik */}
-                          <div 
-                            onClick={() => openChart('version')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
+                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -3704,10 +3750,7 @@ const NetworkPage = () => {
                           </div>
 
                           {/* IP Address - Grafik */}
-                          <div 
-                            onClick={() => openChart('ipAddress')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
+                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -3739,10 +3782,7 @@ const NetworkPage = () => {
                           </div>
 
                           {/* Status - Grafik */}
-                          <div 
-                            onClick={() => openChart('status')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
+                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -3779,10 +3819,7 @@ const NetworkPage = () => {
                           </div>
 
                           {/* Start Time - Grafik */}
-                          <div 
-                            onClick={() => openChart('startTime')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
+                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -3814,10 +3851,7 @@ const NetworkPage = () => {
                           </div>
 
                           {/* Target Field */}
-                          <div 
-                            onClick={() => openChart('targetField')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
+                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -3856,7 +3890,33 @@ const NetworkPage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
+                              <h5 className="font-bold text-gray-500 text-lg mb-2">LAST UPDATE</h5>
+                              {stacksData.length > 0 && (
+                                <div className="text-sm text-gray-600 space-y-1">
+                                  <div className="font-medium">
+                                    {stacksData[stacksData.length - 1]?.created_at 
+                                      ? new Date(stacksData[stacksData.length - 1].created_at).toLocaleString('tr-TR', {
+                                          day: '2-digit',
+                                          month: '2-digit',
+                                          year: 'numeric',
+                                          hour: '2-digit',
+                                          minute: '2-digit',
+                                          second: '2-digit'
+                                        })
+                                      : stacksData[stacksData.length - 1]?.updated_at
+                                        ? new Date(stacksData[stacksData.length - 1].updated_at).toLocaleString('tr-TR', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            second: '2-digit'
+                                          })
+                                        : '-'
+                                    }
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
