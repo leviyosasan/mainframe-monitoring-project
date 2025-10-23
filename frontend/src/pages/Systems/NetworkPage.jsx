@@ -30,6 +30,7 @@ const NetworkPage = () => {
   const [filteredConnsrpzData, setFilteredConnsrpzData] = useState([]);
   const [filteredTcpstorData, setFilteredTcpstorData] = useState([]);
   const [isFiltered, setIsFiltered] = useState(false);
+  const [chartData, setChartData] = useState([]);
 
   // Sayı formatı yardımcı fonksiyonu
   const formatNumber = (value) => {
@@ -1048,6 +1049,29 @@ const NetworkPage = () => {
   const openChart = (chartType) => {
     setSelectedChart(chartType);
     setChartTab('chart');
+    // Grafik veri setini seçilen karta göre hazırla
+    // VTMBUFF
+    if (chartType === 'vtmbuffIOBufSize') setChartData((isFiltered ? filteredVtmbuffData : vtmbuffData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.iobuf_size) || 0 })));
+    if (chartType === 'vtmbuffLPBufSize') setChartData((isFiltered ? filteredVtmbuffData : vtmbuffData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.lpbuf_size) || 0 })));
+    if (chartType === 'vtmbuffLFBufSize') setChartData((isFiltered ? filteredVtmbuffData : vtmbuffData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.lfbuf_size) || 0 })));
+    if (chartType === 'vtmbuffIOBufTimesExpanded') setChartData((isFiltered ? filteredVtmbuffData : vtmbuffData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.iobuf_times_expanded) || 0 })));
+    if (chartType === 'vtmbuffLPBufTimesExpanded') setChartData((isFiltered ? filteredVtmbuffData : vtmbuffData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.lpbuf_times_expanded) || 0 })));
+    if (chartType === 'vtmbuffLFBufTimesExpanded') setChartData((isFiltered ? filteredVtmbuffData : vtmbuffData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.lfbuf_times_expanded) || 0 })));
+
+    // TCPSTOR
+    if (chartType === 'tcpstorEcsaCurrent') setChartData((isFiltered ? filteredTcpstorData : tcpstorData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.ecsa_current) || 0 })));
+    if (chartType === 'tcpstorEcsaMax') setChartData((isFiltered ? filteredTcpstorData : tcpstorData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.ecsa_max) || 0 })));
+    if (chartType === 'tcpstorEcsaLimit') setChartData((isFiltered ? filteredTcpstorData : tcpstorData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.ecsa_limit) || 0 })));
+    if (chartType === 'tcpstorEcsaFree') setChartData((isFiltered ? filteredTcpstorData : tcpstorData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.ecsa_free) || 0 })));
+    if (chartType === 'tcpstorPrivateCurrent') setChartData((isFiltered ? filteredTcpstorData : tcpstorData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.private_current) || 0 })));
+    if (chartType === 'tcpstorPrivateMax') setChartData((isFiltered ? filteredTcpstorData : tcpstorData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.private_max) || 0 })));
+
+    // CONNSRPZ
+    if (chartType === 'connsrpzActiveConns') setChartData((isFiltered ? filteredConnsrpzData : connsrpzData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.active_conns) || 0 })));
+    if (chartType === 'connsrpzAvgRtt') setChartData((isFiltered ? filteredConnsrpzData : connsrpzData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.average_rtt_ms) || 0 })));
+    if (chartType === 'connsrpzMaxRtt') setChartData((isFiltered ? filteredConnsrpzData : connsrpzData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.max_rtt_ms) || 0 })));
+    if (chartType === 'connsrpzBytesIn') setChartData((isFiltered ? filteredConnsrpzData : connsrpzData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.interval_bytes_in_sum) || 0 })));
+    if (chartType === 'connsrpzBytesOut') setChartData((isFiltered ? filteredConnsrpzData : connsrpzData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.interval_bytes_out_sum) || 0 })));
   };
 
   const closeChart = () => {
@@ -2373,7 +2397,7 @@ const NetworkPage = () => {
                             </div>
                           </div>
                           {/* IOBuf Times Expanded */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                          <div onClick={() => openChart('vtmbuffIOBufTimesExpanded')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
                             <div className="text-center">
                               <div className="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">IOBuf Times Expanded</h5>
@@ -2389,7 +2413,7 @@ const NetworkPage = () => {
                             </div>
                           </div>
                           {/* LPBuf Times Expanded */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                          <div onClick={() => openChart('vtmbuffLPBufTimesExpanded')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
                             <div className="text-center">
                               <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">LPBuf Times Expanded</h5>
@@ -2405,7 +2429,7 @@ const NetworkPage = () => {
                             </div>
                           </div>
                           {/* LFBuf Times Expanded */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                          <div onClick={() => openChart('vtmbuffLFBufTimesExpanded')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
                             <div className="text-center">
                               <div className="w-12 h-12 bg-fuchsia-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-fuchsia-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">LFBuf Times Expanded</h5>
@@ -2443,7 +2467,7 @@ const NetworkPage = () => {
                             </div>
                           </div>
                           {/* ECSA Current */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                          <div onClick={() => openChart('tcpstorEcsaCurrent')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
                             <div className="text-center">
                               <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M6 12h12M8 17h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">ECSA Current</h5>
@@ -2451,7 +2475,7 @@ const NetworkPage = () => {
                             </div>
                           </div>
                           {/* ECSA Max */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                          <div onClick={() => openChart('tcpstorEcsaMax')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
                             <div className="text-center">
                               <div className="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">ECSA Max</h5>
@@ -2459,7 +2483,7 @@ const NetworkPage = () => {
                             </div>
                           </div>
                           {/* ECSA Limit */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                          <div onClick={() => openChart('tcpstorEcsaLimit')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
                             <div className="text-center">
                               <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">ECSA Limit</h5>
@@ -2467,7 +2491,7 @@ const NetworkPage = () => {
                             </div>
                           </div>
                           {/* ECSA Free */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                          <div onClick={() => openChart('tcpstorEcsaFree')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
                             <div className="text-center">
                               <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8M3 12h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">ECSA Free</h5>
@@ -2475,7 +2499,7 @@ const NetworkPage = () => {
                             </div>
                           </div>
                           {/* Private Current */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                          <div onClick={() => openChart('tcpstorPrivateCurrent')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
                             <div className="text-center">
                               <div className="w-12 h-12 bg-lime-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M6 12h12M8 17h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Private Current</h5>
@@ -2483,7 +2507,7 @@ const NetworkPage = () => {
                             </div>
                           </div>
                           {/* Private Max */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                          <div onClick={() => openChart('tcpstorPrivateMax')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
                             <div className="text-center">
                               <div className="w-12 h-12 bg-fuchsia-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-fuchsia-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Private Max</h5>
@@ -2513,7 +2537,7 @@ const NetworkPage = () => {
                             </div>
                           </div>
                           {/* Active Conns */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                          <div onClick={() => openChart('connsrpzActiveConns')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
                             <div className="text-center">
                               <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-6a2 2 0 00-2-2H5" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Active Conns</h5>
@@ -2521,19 +2545,27 @@ const NetworkPage = () => {
                             </div>
                           </div>
                           {/* Avg/Max RTT */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                          <div onClick={() => openChart('connsrpzAvgRtt')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
                             <div className="text-center">
                               <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8M3 12h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Avg/Max RTT (ms)</h5>
                               <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.average_rtt_ms ?? '-'} / {(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.max_rtt_ms ?? '-'}</div>
                             </div>
                           </div>
-                          {/* Bytes In/Out */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                          {/* Bytes In */}
+                          <div onClick={() => openChart('connsrpzBytesIn')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
                             <div className="text-center">
                               <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></div>
-                              <h5 className="font-bold text-gray-800 text-lg mb-2">Bytes In/Out</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.interval_bytes_in_sum ?? '-'} / {(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.interval_bytes_out_sum ?? '-'}</div>
+                              <h5 className="font-bold text-gray-800 text-lg mb-2">Bytes In</h5>
+                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.interval_bytes_in_sum ?? '-'}</div>
+                            </div>
+                          </div>
+                          {/* Bytes Out */}
+                          <div onClick={() => openChart('connsrpzBytesOut')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8M3 12h8" /></svg></div>
+                              <h5 className="font-bold text-gray-800 text-lg mb-2">Bytes Out</h5>
+                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.interval_bytes_out_sum ?? '-'}</div>
                             </div>
                           </div>
                           {/* Stack */}
@@ -3753,58 +3785,30 @@ const NetworkPage = () => {
           </div>
         )}
 
-        {/* Grafik Detay Modalı (Basit Placeholder, TCPCONF için örnek) */}
+        {/* Grafik Detay Modalı - ZOS sayfasındaki çizim şablonu ile benzer basit çizim */}
         {selectedChart && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
             <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-2xl font-bold text-gray-800">
-                    {/* TCPCONF Örnekleri */}
-                    {selectedChart === 'connectionCount' && 'Connection Count Grafiği'}
-                    {selectedChart === 'activeConnections' && 'Active Connections Grafiği'}
-                    {selectedChart === 'networkThroughput' && 'Network Throughput Grafiği'}
-                    {/* ACTCONS Örnekleri */}
-                    {selectedChart === 'sessionCount' && 'Session Count Grafiği'}
-                    {selectedChart === 'activeSessions' && 'Active Sessions Grafiği'}
-                    {selectedChart === 'sessionUtilization' && 'Session Utilization Grafiği'}
-                    {/* TCPCONF Örnekleri */}
-                    {selectedChart === 'tcpConfig' && 'TCP Config Grafiği'}
-                    {selectedChart === 'tcpSettings' && 'TCP Settings Grafiği'}
-                    {/* TCPCONS Örnekleri */}
-                    {selectedChart === 'tcpConnections' && 'TCP Connections Grafiği'}
-                    {selectedChart === 'connectionStates' && 'Connection States Grafiği'}
-                    {/* UDPCONF Örnekleri */}
-                    {selectedChart === 'udpConfig' && 'UDP Config Grafiği'}
-                    {selectedChart === 'udpSettings' && 'UDP Settings Grafiği'}
-                    {/* STACKS Örnekleri */}
-                    {selectedChart === 'jobName' && 'Job Name Grafiği'}
-                    {selectedChart === 'stepName' && 'Step Name Grafiği'}
-                    {selectedChart === 'targetField' && 'Target Field Grafiği'}
-                    {selectedChart === 'asid' && 'Stack ASID Grafiği'}
-                    {selectedChart === 'mvsLevel' && 'MVS Level Grafiği'}
-                    {selectedChart === 'version' && 'Stack Vers Grafiği'}
-                    {selectedChart === 'ipAddress' && 'Stack IPaddr Grafiği'}
-                    {selectedChart === 'status' && 'Stack Status Grafiği'}
-                    {selectedChart === 'startTime' && 'Start time of Stack Grafiği'}
-                    {/* STACKCPU Örnekleri */}
-                    {selectedChart === 'statstks' && 'TCPIP Stack Name Grafiği'}
-                    {selectedChart === 'ippktrcd' && 'Interval Packets Received Grafiği'}
-                    {selectedChart === 'ippktrtr' && 'Packets Received per Second Grafiği'}
-                    {selectedChart === 'ipoutred' && 'Current Output Requests Grafiği'}
-                    {selectedChart === 'ipoutrtr' && 'Output Requests per Second Grafiği'}
-                    {/* VTAMCSA Örnekleri */}
-                    {selectedChart === 'csacur' && 'Current ECSA Usage Grafiği'}
-                    {selectedChart === 'systemField' && 'System Field Grafiği'}
-                    {selectedChart === 'csamax' && 'Maximum ECSA Usage Grafiği'}
-                    {selectedChart === 'csalim' && 'CSA Limit Grafiği'}
-                    {selectedChart === 'csausage' && 'ECSA Storage Usage Grafiği'}
-                    {selectedChart === 'c24cur' && 'Current CSA24 Usage Grafiği'}
-                    {selectedChart === 'c24max' && 'Maximum CSA24 Usage Grafiği'}
-                    {selectedChart === 'vtmcur' && 'Current Private Usage Grafiği'}
-                    {selectedChart === 'vtmmax' && 'Maximum Private Usage Grafiği'}
-                    {/* Diğer chart tipleri için başlıklar eklenebilir */}
-                    {!['connectionCount', 'activeConnections', 'networkThroughput', 'sessionCount', 'activeSessions', 'sessionUtilization', 'jobName', 'stepName', 'targetField', 'asid', 'mvsLevel', 'version', 'ipAddress', 'status', 'startTime', 'statstks', 'ippktrcd', 'ippktrtr', 'ipoutred', 'ipoutrtr', 'csacur', 'systemField', 'csamax', 'csalim', 'csausage', 'c24cur', 'c24max', 'vtmcur', 'vtmmax'].includes(selectedChart) && `${selectedChart} Grafiği`}
+                    {selectedChart === 'vtmbuffIOBufSize' && 'IOBuf Size - Zaman Serisi Grafiği'}
+                    {selectedChart === 'vtmbuffLPBufSize' && 'LPBuf Size - Zaman Serisi Grafiği'}
+                    {selectedChart === 'vtmbuffLFBufSize' && 'LFBuf Size - Zaman Serisi Grafiği'}
+                    {selectedChart === 'vtmbuffIOBufTimesExpanded' && 'IOBuf Times Expanded - Zaman Serisi Grafiği'}
+                    {selectedChart === 'vtmbuffLPBufTimesExpanded' && 'LPBuf Times Expanded - Zaman Serisi Grafiği'}
+                    {selectedChart === 'vtmbuffLFBufTimesExpanded' && 'LFBuf Times Expanded - Zaman Serisi Grafiği'}
+                    {selectedChart === 'tcpstorEcsaCurrent' && 'ECSA Current - Zaman Serisi Grafiği'}
+                    {selectedChart === 'tcpstorEcsaMax' && 'ECSA Max - Zaman Serisi Grafiği'}
+                    {selectedChart === 'tcpstorEcsaLimit' && 'ECSA Limit - Zaman Serisi Grafiği'}
+                    {selectedChart === 'tcpstorEcsaFree' && 'ECSA Free - Zaman Serisi Grafiği'}
+                    {selectedChart === 'tcpstorPrivateCurrent' && 'Private Current - Zaman Serisi Grafiği'}
+                    {selectedChart === 'tcpstorPrivateMax' && 'Private Max - Zaman Serisi Grafiği'}
+                    {selectedChart === 'connsrpzActiveConns' && 'Active Conns - Zaman Serisi Grafiği'}
+                    {selectedChart === 'connsrpzAvgRtt' && 'Average RTT (ms) - Zaman Serisi Grafiği'}
+                    {selectedChart === 'connsrpzMaxRtt' && 'Max RTT (ms) - Zaman Serisi Grafiği'}
+                    {selectedChart === 'connsrpzBytesIn' && 'Bytes In - Zaman Serisi Grafiği'}
+                    {selectedChart === 'connsrpzBytesOut' && 'Bytes Out - Zaman Serisi Grafiği'}
                   </h3>
                   <button onClick={closeChart} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
                 </div>
@@ -3815,43 +3819,91 @@ const NetworkPage = () => {
                    </nav>
                  </div>
                 <div className="min-h-[400px]">
-                  {chartTab === 'chart' && ( 
-                    <div className="bg-gray-50 rounded-lg p-8 text-center">
-                      <div className="text-6xl mb-4">📊</div>
-                      <p className="text-gray-600 text-lg mb-2">
-                        {selectedChart === 'jobName' && 'Job Name detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'stepName' && 'Step Name detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'targetField' && 'Target Field detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'asid' && 'Stack ASID detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'mvsLevel' && 'MVS Level detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'version' && 'Stack Vers detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'ipAddress' && 'Stack IPaddr detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'status' && 'Stack Status detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'startTime' && 'Start time of Stack detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'statstks' && 'TCPIP Stack Name detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'ippktrcd' && 'Interval Packets Received detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'ippktrtr' && 'Packets Received per Second detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'ipoutred' && 'Current Output Requests detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'ipoutrtr' && 'Output Requests per Second detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'csacur' && 'Current ECSA Usage detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'systemField' && 'System Field detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'csamax' && 'Maximum ECSA Usage detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'csalim' && 'CSA Limit detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'csausage' && 'ECSA Storage Usage detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'c24cur' && 'Current CSA24 Usage detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'c24max' && 'Maximum CSA24 Usage detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'vtmcur' && 'Current Private Usage detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'vtmmax' && 'Maximum Private Usage detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'tcpConfig' && 'TCP Config detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'tcpSettings' && 'TCP Settings detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'tcpConnections' && 'TCP Connections detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'connectionStates' && 'Connection States detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'udpConfig' && 'UDP Config detaylı grafiği buraya eklenecek'}
-                        {selectedChart === 'udpSettings' && 'UDP Settings detaylı grafiği buraya eklenecek'}
-                        {!['jobName', 'stepName', 'targetField', 'asid', 'mvsLevel', 'version', 'ipAddress', 'status', 'startTime', 'statstks', 'ippktrcd', 'ippktrtr', 'ipoutred', 'ipoutrtr', 'csacur', 'systemField', 'csamax', 'csalim', 'csausage', 'c24cur', 'c24max', 'vtmcur', 'vtmmax', 'tcpConfig', 'tcpSettings', 'tcpConnections', 'connectionStates', 'udpConfig', 'udpSettings'].includes(selectedChart) && `${selectedChart} detaylı grafiği buraya eklenecek`}
-                      </p>
-                      <p className="text-gray-500 text-sm">Grafik bileşeni entegrasyonu gerekli</p>
-                    </div> 
+                  {chartTab === 'chart' && (
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                      <div className="flex justify-between items-center mb-6">
+                        <h4 className="text-lg font-semibold text-gray-800">Zaman Serisi Grafiği</h4>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => openChart(selectedChart)}
+                            className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                          >
+                            Yenile
+                          </button>
+                        </div>
+                      </div>
+
+                      {chartData.length === 0 ? (
+                        <div className="h-96 flex items-center justify-center bg-gray-50 rounded-lg">
+                          <div className="text-center">
+                            <div className="text-4xl mb-4">📊</div>
+                            <p className="text-gray-600 text-lg mb-2">Veri bulunamadı</p>
+                            <p className="text-gray-500 text-sm">Önce ilgili tablodan veri yükleyin</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="h-96 w-full">
+                            <svg width="100%" height="100%" viewBox="0 0 1200 300" className="overflow-visible">
+                              <defs>
+                                <pattern id="grid" width="40" height="30" patternUnits="userSpaceOnUse">
+                                  <path d="M 40 0 L 0 0 0 30" fill="none" stroke="#f3f4f6" strokeWidth="1"/>
+                                </pattern>
+                              </defs>
+                              <rect width="100%" height="100%" fill="url(#grid)" />
+
+                              {[0, 25, 50, 75, 100].map((value, index) => (
+                                <text key={value} x="20" y={280 - (index * 50)} className="text-xs fill-gray-500" textAnchor="end">{value}</text>
+                              ))}
+
+                              {chartData.filter((_, index) => index % Math.max(1, Math.floor(chartData.length / 8)) === 0).map((point, index) => (
+                                <text key={index} x={80 + (index * 140)} y="295" className="text-xs fill-gray-500" textAnchor="middle">{new Date(point.label).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</text>
+                              ))}
+
+                              <defs>
+                                <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3"/>
+                                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.05"/>
+                                </linearGradient>
+                              </defs>
+
+                              <path
+                                d={`M 80,${280 - (chartData[0]?.value || 0) * 2} ${chartData.map((p, i) => `L ${80 + (i * (1100 / Math.max(1, chartData.length - 1)))},${280 - p.value * 2}`).join(' ')} L ${80 + (chartData.length - 1) * (1100 / Math.max(1, chartData.length - 1))},280 L 80,280 Z`}
+                                fill="url(#areaGradient)"
+                              />
+                              <path
+                                d={`M 80,${280 - (chartData[0]?.value || 0) * 2} ${chartData.map((p, i) => `L ${80 + (i * (1100 / Math.max(1, chartData.length - 1)))},${280 - p.value * 2}`).join(' ')}`}
+                                fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                              />
+                              {chartData.map((p, i) => (
+                                <circle key={i} cx={80 + (i * (1100 / Math.max(1, chartData.length - 1)))} cy={280 - p.value * 2} r="3" fill="#3b82f6">
+                                  <title>{`${new Date(p.label).toLocaleString('tr-TR')}: ${p.value}`}</title>
+                                </circle>
+                              ))}
+                            </svg>
+                          </div>
+
+                          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="bg-gray-50 rounded-lg p-4 text-center">
+                              <div className="text-2xl font-bold text-gray-900">{chartData.length > 0 ? Math.max(...chartData.map(d => d.value)).toFixed(2) : '0'}</div>
+                              <div className="text-sm text-gray-500">Maksimum</div>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-4 text-center">
+                              <div className="text-2xl font-bold text-gray-900">{chartData.length > 0 ? Math.min(...chartData.map(d => d.value)).toFixed(2) : '0'}</div>
+                              <div className="text-sm text-gray-500">Minimum</div>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-4 text-center">
+                              <div className="text-2xl font-bold text-gray-900">{chartData.length > 0 ? (chartData.reduce((s, d) => s + d.value, 0) / chartData.length).toFixed(2) : '0'}</div>
+                              <div className="text-sm text-gray-500">Ortalama</div>
+                            </div>
+                            <div className="bg-gray-50 rounded-lg p-4 text-center">
+                              <div className="text-2xl font-bold text-gray-900">{chartData.length}</div>
+                              <div className="text-sm text-gray-500">Veri Noktası</div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   )}
                   {chartTab === 'threshold' && ( <div className="space-y-6"><h4 className="text-lg font-semibold text-gray-800">{selectedChart} için Threshold Ayarları</h4> {/* Basit Threshold içeriği */} <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div className="bg-gray-50 rounded-lg p-6"><h5 className="font-semibold text-gray-800 mb-4">Uyarı Eşikleri</h5><div className="space-y-3"><div className="flex justify-between items-center"><span className="text-sm text-gray-600">Kritik Eşik</span><input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" defaultValue="90"/></div><div className="flex justify-between items-center"><span className="text-sm text-gray-600">Uyarı Eşiği</span><input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" defaultValue="75"/></div></div></div><div className="bg-gray-50 rounded-lg p-6"><h5 className="font-semibold text-gray-800 mb-4">Bildirim Ayarları</h5><div className="space-y-3"><label className="flex items-center"><input type="checkbox" className="mr-2" defaultChecked /><span className="text-sm text-gray-600">E-posta</span></label><label className="flex items-center"><input type="checkbox" className="mr-2" /><span className="text-sm text-gray-600">SMS</span></label></div></div></div><div className="flex justify-end space-x-3 mt-6"><button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">İptal</button><button className={`px-4 py-2 text-sm font-medium text-white bg-${modalColor}-600 border border-transparent rounded-md hover:bg-${modalColor}-700`}>Kaydet</button></div></div> )}
                 </div>
