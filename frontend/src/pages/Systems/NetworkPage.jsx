@@ -165,6 +165,53 @@ const NetworkPage = () => {
           row.updated_at || ''
         ].join(','))
       ].join('\n');
+    } else if (activeModal === 'VTMBUFF') {
+      headers = ['System', 'IOBuf Size', 'IOBuf Times Expanded', 'LPBuf Size', 'LPBuf Times Expanded', 'LFBuf Size', 'LFBuf Times Expanded', 'Timestamp'];
+      csvData = [
+        headers.join(','),
+        ...data.map(row => [
+          row.system_name || '',
+          row.iobuf_size ?? '',
+          row.iobuf_times_expanded ?? '',
+          row.lpbuf_size ?? '',
+          row.lpbuf_times_expanded ?? '',
+          row.lfbuf_size ?? '',
+          row.lfbuf_times_expanded ?? '',
+          row.record_timestamp ? new Date(row.record_timestamp).toLocaleString('tr-TR') : ''
+        ].join(','))
+      ].join('\n');
+    } else if (activeModal === 'connsrpz') {
+      headers = ['Foreign IP', 'Active Conns', 'Avg RTT (ms)', 'Max RTT (ms)', 'Bytes In', 'Bytes Out', 'Stack', 'Remote Host', 'Timestamp'];
+      csvData = [
+        headers.join(','),
+        ...data.map(row => [
+          row.foreign_ip_address || '',
+          row.active_conns ?? '',
+          row.average_rtt_ms ?? '',
+          row.max_rtt_ms ?? '',
+          row.interval_bytes_in_sum ?? '',
+          row.interval_bytes_out_sum ?? '',
+          row.stack_name || '',
+          row.remote_host_name || '',
+          row.record_timestamp ? new Date(row.record_timestamp).toLocaleString('tr-TR') : ''
+        ].join(','))
+      ].join('\n');
+    } else if (activeModal === 'tcpstor') {
+      headers = ['Step', 'System', 'ECSA Current', 'ECSA Max', 'ECSA Limit', 'ECSA Free', 'Private Current', 'Private Max', 'Timestamp'];
+      csvData = [
+        headers.join(','),
+        ...data.map(row => [
+          row.step_name || '',
+          row.system_name || '',
+          row.ecsa_current ?? '',
+          row.ecsa_max ?? '',
+          row.ecsa_limit ?? '',
+          row.ecsa_free ?? '',
+          row.private_current ?? '',
+          row.private_max ?? '',
+          row.record_timestamp ? new Date(row.record_timestamp).toLocaleString('tr-TR') : ''
+        ].join(','))
+      ].join('\n');
     }
 
     // BOM ekle (Türkçe karakterler için)
@@ -328,6 +375,44 @@ const NetworkPage = () => {
             row.system_name || '-',
             row.created_at || '-',
             row.updated_at || '-'
+          ]);
+        } else if (activeModal === 'VTMBUFF') {
+          headers = ['System', 'IOBuf Size', 'IOBuf Times Expanded', 'LPBuf Size', 'LPBuf Times Expanded', 'LFBuf Size', 'LFBuf Times Expanded', 'Timestamp'];
+          tableData = data.map(row => [
+            row.system_name || '-',
+            row.iobuf_size ?? '-',
+            row.iobuf_times_expanded ?? '-',
+            row.lpbuf_size ?? '-',
+            row.lpbuf_times_expanded ?? '-',
+            row.lfbuf_size ?? '-',
+            row.lfbuf_times_expanded ?? '-',
+            row.record_timestamp ? new Date(row.record_timestamp).toLocaleString('tr-TR') : '-'
+          ]);
+        } else if (activeModal === 'connsrpz') {
+          headers = ['Foreign IP', 'Active Conns', 'Avg RTT (ms)', 'Max RTT (ms)', 'Bytes In', 'Bytes Out', 'Stack', 'Remote Host', 'Timestamp'];
+          tableData = data.map(row => [
+            row.foreign_ip_address || '-',
+            row.active_conns ?? '-',
+            row.average_rtt_ms ?? '-',
+            row.max_rtt_ms ?? '-',
+            row.interval_bytes_in_sum ?? '-',
+            row.interval_bytes_out_sum ?? '-',
+            row.stack_name || '-',
+            row.remote_host_name || '-',
+            row.record_timestamp ? new Date(row.record_timestamp).toLocaleString('tr-TR') : '-'
+          ]);
+        } else if (activeModal === 'tcpstor') {
+          headers = ['Step', 'System', 'ECSA Current', 'ECSA Max', 'ECSA Limit', 'ECSA Free', 'Private Current', 'Private Max', 'Timestamp'];
+          tableData = data.map(row => [
+            row.step_name || '-',
+            row.system_name || '-',
+            row.ecsa_current ?? '-',
+            row.ecsa_max ?? '-',
+            row.ecsa_limit ?? '-',
+            row.ecsa_free ?? '-',
+            row.private_current ?? '-',
+            row.private_max ?? '-',
+            row.record_timestamp ? new Date(row.record_timestamp).toLocaleString('tr-TR') : '-'
           ]);
         }
         
@@ -1750,8 +1835,8 @@ const NetworkPage = () => {
 
                         {activeModal === 'connsrpz' && (
                           <div className="flex space-x-3">
-                            <button onClick={() => exportToExcel(isFiltered ? filteredConnsrpzData : connsrpzData, 'CONNSRPZ')} className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md">Excel'e Aktar</button>
-                            <button onClick={() => exportToPDF(isFiltered ? filteredConnsrpzData : connsrpzData, 'CONNSRPZ')} className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md">PDF'e Aktar</button>
+                            <button onClick={() => exportToExcel(isFiltered ? filteredConnsrpzData : connsrpzData, 'CONNSRPZ')} className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md" disabled={dataLoading || (isFiltered ? filteredConnsrpzData : connsrpzData).length === 0}>Excel'e Aktar</button>
+                            <button onClick={() => exportToPDF(isFiltered ? filteredConnsrpzData : connsrpzData, 'CONNSRPZ')} className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md" disabled={dataLoading || (isFiltered ? filteredConnsrpzData : connsrpzData).length === 0}>PDF'e Aktar</button>
                             <button
                               onClick={openTimeFilter}
                               className={`px-4 py-2 text-sm font-medium border rounded-md transition-colors duration-200 flex items-center ${
@@ -1771,8 +1856,8 @@ const NetworkPage = () => {
 
                         {activeModal === 'tcpstor' && (
                           <div className="flex space-x-3">
-                            <button onClick={() => exportToExcel(isFiltered ? filteredTcpstorData : tcpstorData, 'TCPSTOR')} className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md">Excel'e Aktar</button>
-                            <button onClick={() => exportToPDF(isFiltered ? filteredTcpstorData : tcpstorData, 'TCPSTOR')} className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md">PDF'e Aktar</button>
+                            <button onClick={() => exportToExcel(isFiltered ? filteredTcpstorData : tcpstorData, 'TCPSTOR')} className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md" disabled={dataLoading || (isFiltered ? filteredTcpstorData : tcpstorData).length === 0}>Excel'e Aktar</button>
+                            <button onClick={() => exportToPDF(isFiltered ? filteredTcpstorData : tcpstorData, 'TCPSTOR')} className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md" disabled={dataLoading || (isFiltered ? filteredTcpstorData : tcpstorData).length === 0}>PDF'e Aktar</button>
                             <button
                               onClick={openTimeFilter}
                               className={`px-4 py-2 text-sm font-medium border rounded-md transition-colors duration-200 flex items-center ${
