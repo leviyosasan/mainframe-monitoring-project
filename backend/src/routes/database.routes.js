@@ -4,7 +4,12 @@ const { testConnection, getMainviewMvsSysover, getMainviewMvsJespool,
   getMainviewNetworkStacks, checkTableExistsStackCPU, getMainviewNetworkStackCPU, checkTableExistsVtamcsa, 
   getMainviewNetworkVtamcsa, getMainviewNetworkTcpconf, checkTableExiststcpconf,
   getMainviewNetworktcpcons, checkTableExiststcpcons, getMainviewNetworkudpconf, checkTableExiststudpconf,
-  getMainviewNetworkactcons, checkTableExistsactcons, getMainviewUSSZFS, checkTableExistsZFS,} = require('../controllers/database.controller');
+  getMainviewNetworkactcons, checkTableExistsactcons, getMainviewUSSZFS, checkTableExistsZFS,
+  // MQ
+  checkTableExistsMQConnz, getMainviewMQConnz,
+  checkTableExistsMQQm, getMainviewMQQm,
+  checkTableExistsMQW2over, getMainviewMQW2over,
+} = require('../controllers/database.controller');
 
 // New network tables
 const {
@@ -96,5 +101,15 @@ router.post('/check-table-connsrpz', checkTableExistsConnsrpz);
 // ZFS
 router.post('/mainview-uss-zfs', getMainviewUSSZFS);
 router.post('/check-table-zfs', checkTableExistsZFS);
+
+// MQ endpoints
+router.post('/mainview-mq-connz', getMainviewMQConnz);
+router.post('/check-table-mq-connz', checkTableExistsMQConnz);
+
+router.post('/mainview-mq-qm', getMainviewMQQm);
+router.post('/check-table-mq-qm', checkTableExistsMQQm);
+
+router.post('/mainview-mq-w2over', getMainviewMQW2over);
+router.post('/check-table-mq-w2over', checkTableExistsMQW2over);
 
 module.exports = router;

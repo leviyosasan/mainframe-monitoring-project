@@ -146,6 +146,16 @@ export const databaseAPI = {
     // ZFS
     getMainviewUSSZFS: (config) => api.post('/database/mainview-uss-zfs', config),
     checkTableExistsZFS: (config) => api.post('/database/check-table-zfs', config),
+
+    // MQ - Message Queue
+    getMainviewMQConnz: (config) => api.post('/database/mainview-mq-connz', config),
+    checkTableExistsMQConnz: (config) => api.post('/database/check-table-mq-connz', config),
+
+    getMainviewMQQm: (config) => api.post('/database/mainview-mq-qm', config),
+    checkTableExistsMQQm: (config) => api.post('/database/check-table-mq-qm', config),
+
+    getMainviewMQW2over: (config) => api.post('/database/mainview-mq-w2over', config),
+    checkTableExistsMQW2over: (config) => api.post('/database/check-table-mq-w2over', config),
 }
 
 export default api

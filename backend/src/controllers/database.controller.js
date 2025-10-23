@@ -1474,6 +1474,121 @@ const getMainviewNetworkConnsrpz = async (req, res) => {
   }
 };
 
+// ============================
+// MQ Tables (mq_connz, mq_qm, mq_w2over)
+// ============================
+
+const checkTableGeneric = async (res, client, tableName) => {
+  const tableResult = await client.query(`
+    SELECT column_name, data_type, is_nullable
+    FROM information_schema.columns
+    WHERE table_name = $1
+    ORDER BY ordinal_position
+  `, [tableName]);
+  const exists = tableResult.rows.length > 0;
+  if (!exists) {
+    return { exists: false, columns: [], rowCount: 0, sampleData: [] };
+  }
+  const countResult = await client.query(`SELECT COUNT(*) as count FROM ${tableName}`);
+  const sampleResult = await client.query(`SELECT * FROM ${tableName} LIMIT 5`);
+  return {
+    exists: true,
+    columns: tableResult.rows,
+    rowCount: parseInt(countResult.rows[0].count),
+    sampleData: sampleResult.rows
+  };
+};
+
+const checkTableExistsMQConnz = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const tableInfo = await checkTableGeneric(res, client, 'mainview_mq_connz');
+    client.release();
+    res.status(200).json({ success: true, message: 'Tablo bilgileri başarıyla getirildi', tableInfo });
+  } catch (error) {
+    console.error('MQ_CONNZ table check error:', error);
+    res.status(500).json({ success: false, message: 'Tablo kontrolü başarısız', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+
+const getMainviewMQConnz = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const result = await client.query(`SELECT * FROM mainview_mq_connz LIMIT 100`);
+    client.release();
+    res.status(200).json({ success: true, message: 'MQ_CONNZ verileri başarıyla getirildi', count: result.rowCount, data: result.rows });
+  } catch (error) {
+    console.error('MQ_CONNZ query error:', error);
+    res.status(500).json({ success: false, message: 'MQ_CONNZ verileri getirilemedi', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+
+const checkTableExistsMQQm = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const tableInfo = await checkTableGeneric(res, client, 'mainview_mq_qm');
+    client.release();
+    res.status(200).json({ success: true, message: 'Tablo bilgileri başarıyla getirildi', tableInfo });
+  } catch (error) {
+    console.error('MQ_QM table check error:', error);
+    res.status(500).json({ success: false, message: 'Tablo kontrolü başarısız', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+
+const getMainviewMQQm = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const result = await client.query(`SELECT * FROM mainview_mq_qm LIMIT 100`);
+    client.release();
+    res.status(200).json({ success: true, message: 'MQ_QM verileri başarıyla getirildi', count: result.rowCount, data: result.rows });
+  } catch (error) {
+    console.error('MQ_QM query error:', error);
+    res.status(500).json({ success: false, message: 'MQ_QM verileri getirilemedi', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+
+const checkTableExistsMQW2over = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const tableInfo = await checkTableGeneric(res, client, 'mainview_mq_w2over');
+    client.release();
+    res.status(200).json({ success: true, message: 'Tablo bilgileri başarıyla getirildi', tableInfo });
+  } catch (error) {
+    console.error('MQ_W2OVER table check error:', error);
+    res.status(500).json({ success: false, message: 'Tablo kontrolü başarısız', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+
+const getMainviewMQW2over = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const result = await client.query(`SELECT * FROM mainview_mq_w2over LIMIT 100`);
+    client.release();
+    res.status(200).json({ success: true, message: 'MQ_W2OVER verileri başarıyla getirildi', count: result.rowCount, data: result.rows });
+  } catch (error) {
+    console.error('MQ_W2OVER query error:', error);
+    res.status(500).json({ success: false, message: 'MQ_W2OVER verileri getirilemedi', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+
 const getMainviewUSSZFS = async (req, res) => {
   let pool = null;
  
@@ -1612,5 +1727,12 @@ module.exports = {
   checkTableExistsTcpstor,
   getMainviewNetworkTcpstor,
   checkTableExistsConnsrpz,
-  getMainviewNetworkConnsrpz
+  getMainviewNetworkConnsrpz,
+  // MQ tables
+  checkTableExistsMQConnz,
+  getMainviewMQConnz,
+  checkTableExistsMQQm,
+  getMainviewMQQm,
+  checkTableExistsMQW2over,
+  getMainviewMQW2over
 };
