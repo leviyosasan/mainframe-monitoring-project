@@ -505,7 +505,20 @@ const getMainviewNetworkStacks = async (req, res) => {
     // Test the connection
     const client = await pool.connect();
     
-    // Get all data from mainview_network_stacks table
+    // Create indexes for better performance (if they don't exist)
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_stacks_ipaddrc8 ON mainview_network_stacks(ipaddrc8);
+    `);
+    
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_stacks_bmctime ON mainview_network_stacks(bmctime DESC);
+    `);
+    
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_stacks_ipaddrc8_bmctime ON mainview_network_stacks(ipaddrc8, bmctime DESC);
+    `);
+    
+    // Get all data from mainview_network_stacks table with optimized query
     const query = `
       SELECT 
         jobnam8, stepnam8, jtarget, asid8, mvslvlx8, ver_rel, 
@@ -520,7 +533,7 @@ const getMainviewNetworkStacks = async (req, res) => {
     
     res.status(200).json({
       success: true,
-      message: 'Stacks verileri başarıyla getirildi',
+      message: 'Stacks verileri başarıyla getirildi (index\'ler ile optimize edildi)',
       data: result.rows
     });
     

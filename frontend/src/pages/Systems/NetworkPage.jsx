@@ -31,6 +31,22 @@ const NetworkPage = () => {
   const [filteredTcpstorData, setFilteredTcpstorData] = useState([]);
   const [isFiltered, setIsFiltered] = useState(false);
   const [chartData, setChartData] = useState([]);
+  
+  // Stacks sıralama state'leri
+  const [stacksSortColumn, setStacksSortColumn] = useState(null);
+  const [stacksSortDirection, setStacksSortDirection] = useState('asc');
+  
+  // STACKCPU sıralama state'leri
+  const [stackCpuSortColumn, setStackCpuSortColumn] = useState(null);
+  const [stackCpuSortDirection, setStackCpuSortDirection] = useState('asc');
+  
+  // VTAMCSA sıralama state'leri
+  const [vtamcsaSortColumn, setVtamcsaSortColumn] = useState(null);
+  const [vtamcsaSortDirection, setVtamcsaSortDirection] = useState('asc');
+
+  // STACKS için IP Address ve BMC Time filtreleme state'leri
+  const [ipAddressFilter, setIpAddressFilter] = useState('');
+  const [bmcTimeFilter, setBmcTimeFilter] = useState('');
 
   // Sayı formatı yardımcı fonksiyonu
   const formatNumber = (value) => {
@@ -46,6 +62,203 @@ const NetworkPage = () => {
     if (isNaN(num)) return '-';
     // Eğer sayı tam sayı ise .00 kısmını kaldır
     return num % 1 === 0 ? num.toString() : num.toFixed(2);
+  };
+
+  // Akıllı min/max formatlama fonksiyonu
+  const formatMinMaxValue = (value) => {
+    const num = parseFloat(value);
+    if (isNaN(num)) return '0';
+    // Eğer sayı tam sayı ise ondalık kısmı gösterme
+    return num % 1 === 0 ? num.toString() : num.toFixed(2);
+  };
+
+  // STACKS için IP Address filtreleme fonksiyonu
+  const filterStacksByIpAddress = (data) => {
+    if (!ipAddressFilter) return data;
+    return data.filter(row => 
+      row.ipaddrc8 && row.ipaddrc8.toLowerCase().includes(ipAddressFilter.toLowerCase())
+    );
+  };
+
+  // STACKS için BMC Time filtreleme fonksiyonu (zaman aralığına göre)
+  const filterStacksByBmcTime = (data) => {
+    if (!bmcTimeFilter) {
+      console.log('BMC Time filtresi yok, tüm veri döndürülüyor:', data.length);
+      return data;
+    }
+    
+    const now = new Date();
+    let startDate, endDate;
+    
+    // Seçilen zaman aralığına göre tarih hesaplama
+    switch (bmcTimeFilter) {
+      case 'last1h':
+        startDate = new Date(now.getTime() - 1 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'last6h':
+        startDate = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'last24h':
+        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'last7d':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'last30d':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'custom':
+        if (customFromDate && customToDate) {
+          startDate = new Date(customFromDate);
+          endDate = new Date(customToDate);
+        } else {
+          console.log('Özel tarih aralığı seçilmiş ama tarihler eksik');
+          return data;
+        }
+        break;
+      default:
+        console.log('Bilinmeyen zaman aralığı:', bmcTimeFilter);
+        return data;
+    }
+    
+    console.log('BMC Time filtresi uygulanıyor:', {
+      filter: bmcTimeFilter,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      dataLength: data.length
+    });
+    
+    const filteredData = data.filter(row => {
+      if (!row.bmctime) {
+        console.log('BMC Time eksik satır:', row);
+        return false;
+      }
+      const bmcTime = new Date(row.bmctime);
+      const isInRange = bmcTime >= startDate && bmcTime <= endDate;
+      if (!isInRange) {
+        console.log('Tarih aralığı dışında:', {
+          bmcTime: bmcTime.toISOString(),
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString()
+        });
+      }
+      return isInRange;
+    });
+    
+    console.log('Filtrelenmiş veri sayısı:', filteredData.length);
+    return filteredData;
+  };
+
+  // STACKS için birleşik filtreleme fonksiyonu
+  const getFilteredStacksData = () => {
+    console.log('getFilteredStacksData çağrıldı:', {
+      originalDataLength: stacksData.length,
+      ipAddressFilter,
+      bmcTimeFilter
+    });
+    
+    let filtered = stacksData;
+    console.log('IP Address filtresi öncesi:', filtered.length);
+    
+    filtered = filterStacksByIpAddress(filtered);
+    console.log('IP Address filtresi sonrası:', filtered.length);
+    
+    filtered = filterStacksByBmcTime(filtered);
+    console.log('BMC Time filtresi sonrası:', filtered.length);
+    
+    return filtered;
+  };
+
+  // Stacks sıralama fonksiyonu
+  const handleStacksSort = (column) => {
+    if (column === 'jobnam8' || column === 'stepnam8' || column === 'jtarget' || 
+        column === 'asid8' || column === 'mvslvlx8' || column === 'startc8' || 
+        column === 'ipaddrc8' || column === 'status18' || column === 'bmctime' || 
+        column === 'time') {
+      return; // String ve zaman sütunları için sıralama yapma
+    }
+
+    const newDirection = stacksSortColumn === column && stacksSortDirection === 'asc' ? 'desc' : 'asc';
+    setStacksSortColumn(column);
+    setStacksSortDirection(newDirection);
+  };
+
+  // STACKCPU sıralama fonksiyonu
+  const handleStackCpuSort = (column) => {
+    if (column === 'statstks' || column === 'bmctime' || column === 'time') {
+      return; // String ve zaman sütunları için sıralama yapma
+    }
+
+    const newDirection = stackCpuSortColumn === column && stackCpuSortDirection === 'asc' ? 'desc' : 'asc';
+    setStackCpuSortColumn(column);
+    setStackCpuSortDirection(newDirection);
+  };
+
+  // VTAMCSA sıralama fonksiyonu
+  const handleVtamcsaSort = (column) => {
+    if (column === 'j_system' || column === 'bmctime' || column === 'time') {
+      return; // String ve zaman sütunları için sıralama yapma
+    }
+
+    const newDirection = vtamcsaSortColumn === column && vtamcsaSortDirection === 'asc' ? 'desc' : 'asc';
+    setVtamcsaSortColumn(column);
+    setVtamcsaSortDirection(newDirection);
+  };
+
+  // Stacks sütun istatistikleri hesaplama
+  const getStacksColumnStats = (column) => {
+    const dataToUse = getFilteredStacksData();
+    if (!dataToUse || dataToUse.length === 0) return { min: 0, max: 0 };
+    
+    const values = dataToUse
+      .map(row => parseFloat(row[column]) || 0)
+      .filter(val => !isNaN(val));
+    
+    if (values.length === 0) return { min: 0, max: 0 };
+    
+    return {
+      min: Math.min(...values),
+      max: Math.max(...values)
+    };
+  };
+
+  // STACKCPU sütun istatistikleri hesaplama
+  const getStackCpuColumnStats = (column) => {
+    const dataToUse = isFiltered ? filteredStackCpuData : stackCpuData;
+    if (!dataToUse || dataToUse.length === 0) return { min: 0, max: 0 };
+    
+    const values = dataToUse
+      .map(row => parseFloat(row[column]) || 0)
+      .filter(val => !isNaN(val));
+    
+    if (values.length === 0) return { min: 0, max: 0 };
+    
+    return {
+      min: Math.min(...values),
+      max: Math.max(...values)
+    };
+  };
+
+  // VTAMCSA sütun istatistikleri hesaplama
+  const getVtamcsaColumnStats = (column) => {
+    const dataToUse = isFiltered ? filteredVtamcsaData : vtamcsaData;
+    if (!dataToUse || dataToUse.length === 0) return { min: 0, max: 0 };
+    
+    const values = dataToUse
+      .map(row => parseFloat(row[column]) || 0)
+      .filter(val => !isNaN(val));
+    
+    if (values.length === 0) return { min: 0, max: 0 };
+    
+    return {
+      min: Math.min(...values),
+      max: Math.max(...values)
+    };
   };
 
   // Excel'e aktarma fonksiyonu
@@ -489,9 +702,11 @@ const NetworkPage = () => {
     }
   };
 
-  // Veri çekme fonksiyonu
+  // Veri çekme fonksiyonu (optimize edilmiş)
   const fetchStacksData = async () => {
     setDataLoading(true);
+    const startTime = performance.now(); // Performans ölçümü
+    
     try {
       // Önce tablo kontrolü yap
       const tableExists = await checkTableInfoStacks();
@@ -505,10 +720,13 @@ const NetworkPage = () => {
       if (response.data.success) {
         setStacksData(response.data.data);
         
+        const endTime = performance.now();
+        const loadTime = Math.round(endTime - startTime);
+        
         if (response.data.data.length === 0) {
           // Tablo boşsa sessizce devam et, uyarı verme
         } else {
-          toast.success(`Veriler başarıyla yüklendi (${response.data.data.length} kayıt)`);
+          toast.success(`Veriler başarıyla yüklendi (${response.data.data.length} kayıt) - ${loadTime}ms`);
         }
       } else {
         toast.error('Veri yüklenirken hata oluştu');
@@ -1176,8 +1394,37 @@ const NetworkPage = () => {
     setTimeFilterModal(true);
   };
 
+  // STACKS için zaman filtresi uygulama
+  const applyStacksTimeFilter = () => {
+    const timeRangeLabels = {
+      'last1h': 'Son 1 Saat',
+      'last6h': 'Son 6 Saat', 
+      'last24h': 'Son 24 Saat',
+      'last7d': 'Son 7 Gün',
+      'last30d': 'Son 30 Gün',
+      'custom': customFromDate && customToDate ? 
+        `${new Date(customFromDate).toLocaleDateString('tr-TR')} - ${new Date(customToDate).toLocaleDateString('tr-TR')}` : 
+        'Özel Tarih Aralığı'
+    };
+    
+    setBmcTimeFilter(selectedTimeRange);
+    setTimeFilterModal(false);
+    
+    const label = timeRangeLabels[selectedTimeRange];
+    toast.success(`BMC Time filtresi uygulandı: ${label}`);
+    
+    console.log('BMC Time filtresi uygulandı:', selectedTimeRange);
+  };
+
   const closeTimeFilter = () => {
     setTimeFilterModal(false);
+  };
+
+  // STACKS için BMC Time filtresini temizleme
+  const clearStacksTimeFilter = () => {
+    setBmcTimeFilter('');
+    console.log('BMC Time filtresi temizlendi');
+    toast.success('BMC Time filtresi temizlendi');
   };
 
   const clearTimeFilter = () => {
@@ -1356,6 +1603,51 @@ const NetworkPage = () => {
     }
     const modalColor = getModalColor();
 
+  // Stacks sıralanmış veri - IP Address ve BMC Time filtrelerini de dahil et
+  const stacksDataToUse = getFilteredStacksData();
+  const sortedStacksData = [...stacksDataToUse].sort((a, b) => {
+    if (!stacksSortColumn) return 0;
+    
+    const aValue = parseFloat(a[stacksSortColumn]) || 0;
+    const bValue = parseFloat(b[stacksSortColumn]) || 0;
+    
+    if (stacksSortDirection === 'asc') {
+      return aValue - bValue;
+    } else {
+      return bValue - aValue;
+    }
+  });
+
+  // STACKCPU sıralanmış veri - filtrelenmiş veri varsa onu kullan
+  const stackCpuDataToUse = isFiltered ? filteredStackCpuData : stackCpuData;
+  const sortedStackCpuData = [...stackCpuDataToUse].sort((a, b) => {
+    if (!stackCpuSortColumn) return 0;
+    
+    const aValue = parseFloat(a[stackCpuSortColumn]) || 0;
+    const bValue = parseFloat(b[stackCpuSortColumn]) || 0;
+    
+    if (stackCpuSortDirection === 'asc') {
+      return aValue - bValue;
+    } else {
+      return bValue - aValue;
+    }
+  });
+
+  // VTAMCSA sıralanmış veri - filtrelenmiş veri varsa onu kullan
+  const vtamcsaDataToUse = isFiltered ? filteredVtamcsaData : vtamcsaData;
+  const sortedVtamcsaData = [...vtamcsaDataToUse].sort((a, b) => {
+    if (!vtamcsaSortColumn) return 0;
+    
+    const aValue = parseFloat(a[vtamcsaSortColumn]) || 0;
+    const bValue = parseFloat(b[vtamcsaSortColumn]) || 0;
+    
+    if (vtamcsaSortDirection === 'asc') {
+      return aValue - bValue;
+    } else {
+      return bValue - aValue;
+    }
+  });
+
   return (
     <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
@@ -1499,9 +1791,9 @@ const NetworkPage = () => {
                         {activeModal === 'STACKS' && (
                           <div className="flex space-x-3">
                             <button
-                              onClick={() => exportToExcel(isFiltered ? filteredStacksData : stacksData, 'STACKS')}
+                              onClick={() => exportToExcel(sortedStacksData, 'STACKS')}
                               className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md hover:bg-green-200 transition-colors duration-200 flex items-center"
-                              disabled={dataLoading || (isFiltered ? filteredStacksData : stacksData).length === 0}
+                              disabled={dataLoading || sortedStacksData.length === 0}
                             >
                               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -1509,9 +1801,9 @@ const NetworkPage = () => {
                               Excel'e Aktar
                             </button>
                             <button
-                              onClick={() => exportToPDF(isFiltered ? filteredStacksData : stacksData, 'STACKS')}
+                              onClick={() => exportToPDF(sortedStacksData, 'STACKS')}
                               className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-200 transition-colors duration-200 flex items-center"
-                              disabled={dataLoading || (isFiltered ? filteredStacksData : stacksData).length === 0}
+                              disabled={dataLoading || sortedStacksData.length === 0}
                             >
                               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -1521,16 +1813,32 @@ const NetworkPage = () => {
                             <button
                               onClick={openTimeFilter}
                               className={`px-4 py-2 text-sm font-medium border rounded-md transition-colors duration-200 flex items-center ${
-                                isFiltered 
+                                bmcTimeFilter 
                                   ? 'text-blue-700 bg-blue-100 border-blue-300 hover:bg-blue-200' 
                                   : 'text-gray-700 bg-gray-100 border-gray-300 hover:bg-gray-200'
                               }`}
                             >
                               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                               </svg>
-                              Zaman Filtresi
+                              BMC Time Filtresi
+                              {bmcTimeFilter && (
+                                <span className="ml-2 px-2 py-1 text-xs bg-blue-200 text-blue-800 rounded-full">
+                                  Aktif
+                                </span>
+                              )}
                             </button>
+                            {bmcTimeFilter && (
+                              <button
+                                onClick={clearStacksTimeFilter}
+                                className="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors duration-200 flex items-center"
+                              >
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Temizle
+                              </button>
+                            )}
                             <button
                               onClick={fetchStacksData}
                               disabled={dataLoading}
@@ -1543,9 +1851,9 @@ const NetworkPage = () => {
                         {activeModal === 'STACKCPU' && (
                           <div className="flex space-x-3">
                             <button
-                              onClick={() => exportToExcel(isFiltered ? filteredStackCpuData : stackCpuData, 'STACKCPU')}
+                              onClick={() => exportToExcel(sortedStackCpuData, 'STACKCPU')}
                               className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md hover:bg-green-200 transition-colors duration-200 flex items-center"
-                              disabled={dataLoading || (isFiltered ? filteredStackCpuData : stackCpuData).length === 0}
+                              disabled={dataLoading || sortedStackCpuData.length === 0}
                             >
                               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -1553,9 +1861,9 @@ const NetworkPage = () => {
                               Excel'e Aktar
                             </button>
                             <button
-                              onClick={() => exportToPDF(isFiltered ? filteredStackCpuData : stackCpuData, 'STACKCPU')}
+                              onClick={() => exportToPDF(sortedStackCpuData, 'STACKCPU')}
                               className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-200 transition-colors duration-200 flex items-center"
-                              disabled={dataLoading || (isFiltered ? filteredStackCpuData : stackCpuData).length === 0}
+                              disabled={dataLoading || sortedStackCpuData.length === 0}
                             >
                               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -1587,9 +1895,9 @@ const NetworkPage = () => {
                         {activeModal === 'vtamcsa' && (
                           <div className="flex space-x-3">
                             <button
-                              onClick={() => exportToExcel(isFiltered ? filteredVtamcsaData : vtamcsaData, 'VTAMCSA')}
+                              onClick={() => exportToExcel(sortedVtamcsaData, 'VTAMCSA')}
                               className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md hover:bg-green-200 transition-colors duration-200 flex items-center"
-                              disabled={dataLoading || (isFiltered ? filteredVtamcsaData : vtamcsaData).length === 0}
+                              disabled={dataLoading || sortedVtamcsaData.length === 0}
                             >
                               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -1597,9 +1905,9 @@ const NetworkPage = () => {
                               Excel'e Aktar
                             </button>
                             <button
-                              onClick={() => exportToPDF(isFiltered ? filteredVtamcsaData : vtamcsaData, 'VTAMCSA')}
+                              onClick={() => exportToPDF(sortedVtamcsaData, 'VTAMCSA')}
                               className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-200 transition-colors duration-200 flex items-center"
-                              disabled={dataLoading || (isFiltered ? filteredVtamcsaData : vtamcsaData).length === 0}
+                              disabled={dataLoading || sortedVtamcsaData.length === 0}
                             >
                               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -1878,12 +2186,61 @@ const NetworkPage = () => {
                       
                       {activeModal === 'STACKS' ? (
                         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                          {/* Sade Filtreleme */}
+                          <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-blue-50 border-b border-gray-200">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-4">
+                                <div className="flex items-center space-x-3">
+                                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9" />
+                                  </svg>
+                                  <span className="text-sm font-medium text-gray-700">IP Address:</span>
+                                  <input
+                                    type="text"
+                                    placeholder="192.168.1.1"
+                                    value={ipAddressFilter}
+                                    onChange={(e) => {
+                                      setIpAddressFilter(e.target.value);
+                                      console.log('IP Address filtresi değişti:', e.target.value);
+                                    }}
+                                    className="w-48 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
+                                  />
+                                </div>
+                              </div>
+                              
+                              {/* Sade Sonuç Gösterimi */}
+                              {ipAddressFilter && (
+                                <div className="flex items-center space-x-3">
+                                  <div className="flex items-center space-x-2 bg-green-50 rounded-lg px-3 py-1 border border-green-200">
+                                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                    <span className="text-sm text-green-700">
+                                      <span className="font-semibold">{sortedStacksData.length}</span> kayıt
+                                    </span>
+                                  </div>
+                                  
+                                  <button
+                                    onClick={() => {
+                                      setIpAddressFilter('');
+                                      console.log('IP Address filtresi temizlendi');
+                                    }}
+                                    className="flex items-center space-x-1 px-3 py-1 text-sm text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-colors duration-200"
+                                  >
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    <span>Temizle</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
                           {dataLoading ? (
                             <div className="p-8 text-center">
                               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
                               <p className="mt-4 text-gray-600">Veriler yükleniyor...</p>
                             </div>
-                          ) : (isFiltered ? filteredStacksData : stacksData).length > 0 ? (
+                          ) : sortedStacksData.length > 0 ? (
                             <div className="overflow-x-auto">
                               <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
@@ -1893,7 +2250,26 @@ const NetworkPage = () => {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">J Target</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ASID</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MVS Level</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
+                                    <th 
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                      onClick={() => handleStacksSort('ver_rel')}
+                                    >
+                                      <div className="space-y-1">
+                                        <div className="flex items-center space-x-1">
+                                          <span>Version</span>
+                                          {stacksSortColumn === 'ver_rel' ? (
+                                            <span className="text-blue-600 font-bold">
+                                              {stacksSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                            </span>
+                                          ) : (
+                                            <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                          )}
+                                        </div>
+                                        <div className="text-xs text-gray-400 font-normal">
+                                          Min: {formatMinMaxValue(getStacksColumnStats('ver_rel').min)} | Max: {formatMinMaxValue(getStacksColumnStats('ver_rel').max)}
+                                        </div>
+                                      </div>
+                                    </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Time</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP Address</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -1902,7 +2278,7 @@ const NetworkPage = () => {
                                   </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                  {(isFiltered ? filteredStacksData : stacksData).map((row, index) => (
+                                  {sortedStacksData.map((row, index) => (
                                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.jobnam8 || '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.stepnam8 || '-'}</td>
@@ -1946,22 +2322,98 @@ const NetworkPage = () => {
                               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto"></div>
                               <p className="mt-4 text-gray-600">Veriler yükleniyor...</p>
                             </div>
-                          ) : (isFiltered ? filteredStackCpuData : stackCpuData).length > 0 ? (
+                          ) : sortedStackCpuData.length > 0 ? (
                             <div className="overflow-x-auto">
                               <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                   <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATSTKS</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IPPKTRCD</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IPPKTRTR</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IPOUTRED</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IPOUTRTR</th>
+                                    <th 
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                      onClick={() => handleStackCpuSort('ippktrcd')}
+                                    >
+                                      <div className="space-y-1">
+                                        <div className="flex items-center space-x-1">
+                                          <span>IPPKTRCD</span>
+                                          {stackCpuSortColumn === 'ippktrcd' ? (
+                                            <span className="text-blue-600 font-bold">
+                                              {stackCpuSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                            </span>
+                                          ) : (
+                                            <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                          )}
+                                        </div>
+                                        <div className="text-xs text-gray-400 font-normal">
+                                          Min: {formatMinMaxValue(getStackCpuColumnStats('ippktrcd').min)} | Max: {formatMinMaxValue(getStackCpuColumnStats('ippktrcd').max)}
+                                        </div>
+                                      </div>
+                                    </th>
+                                    <th 
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                      onClick={() => handleStackCpuSort('ippktrtr')}
+                                    >
+                                      <div className="space-y-1">
+                                        <div className="flex items-center space-x-1">
+                                          <span>IPPKTRTR</span>
+                                          {stackCpuSortColumn === 'ippktrtr' ? (
+                                            <span className="text-blue-600 font-bold">
+                                              {stackCpuSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                            </span>
+                                          ) : (
+                                            <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                          )}
+                                        </div>
+                                        <div className="text-xs text-gray-400 font-normal">
+                                          Min: {formatMinMaxValue(getStackCpuColumnStats('ippktrtr').min)} | Max: {formatMinMaxValue(getStackCpuColumnStats('ippktrtr').max)}
+                                        </div>
+                                      </div>
+                                    </th>
+                                    <th 
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                      onClick={() => handleStackCpuSort('ipoutred')}
+                                    >
+                                      <div className="space-y-1">
+                                        <div className="flex items-center space-x-1">
+                                          <span>IPOUTRED</span>
+                                          {stackCpuSortColumn === 'ipoutred' ? (
+                                            <span className="text-blue-600 font-bold">
+                                              {stackCpuSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                            </span>
+                                          ) : (
+                                            <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                          )}
+                                        </div>
+                                        <div className="text-xs text-gray-400 font-normal">
+                                          Min: {formatMinMaxValue(getStackCpuColumnStats('ipoutred').min)} | Max: {formatMinMaxValue(getStackCpuColumnStats('ipoutred').max)}
+                                        </div>
+                                      </div>
+                                    </th>
+                                    <th 
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                      onClick={() => handleStackCpuSort('ipoutrtr')}
+                                    >
+                                      <div className="space-y-1">
+                                        <div className="flex items-center space-x-1">
+                                          <span>IPOUTRTR</span>
+                                          {stackCpuSortColumn === 'ipoutrtr' ? (
+                                            <span className="text-blue-600 font-bold">
+                                              {stackCpuSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                            </span>
+                                          ) : (
+                                            <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                          )}
+                                        </div>
+                                        <div className="text-xs text-gray-400 font-normal">
+                                          Min: {formatMinMaxValue(getStackCpuColumnStats('ipoutrtr').min)} | Max: {formatMinMaxValue(getStackCpuColumnStats('ipoutrtr').max)}
+                                        </div>
+                                      </div>
+                                    </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BMC Time</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
                                   </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                  {(isFiltered ? filteredStackCpuData : stackCpuData).map((row, index) => (
+                                  {sortedStackCpuData.map((row, index) => (
                                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.statstks || '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.ippktrcd)}</td>
@@ -1992,26 +2444,178 @@ const NetworkPage = () => {
                               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto"></div>
                               <p className="mt-4 text-gray-600">Veriler yükleniyor...</p>
                             </div>
-                          ) : (isFiltered ? filteredVtamcsaData : vtamcsaData).length > 0 ? (
+                          ) : sortedVtamcsaData.length > 0 ? (
                             <div className="overflow-x-auto">
                               <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                   <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">J System</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CSA Cur</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CSA Max</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CSA Lim</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CSA Usage</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">C24 Cur</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">C24 Max</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">VTM Cur</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">VTM Max</th>
+                                    <th 
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                      onClick={() => handleVtamcsaSort('csacur')}
+                                    >
+                                      <div className="space-y-1">
+                                        <div className="flex items-center space-x-1">
+                                          <span>CSA Cur</span>
+                                          {vtamcsaSortColumn === 'csacur' ? (
+                                            <span className="text-blue-600 font-bold">
+                                              {vtamcsaSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                            </span>
+                                          ) : (
+                                            <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                          )}
+                                        </div>
+                                        <div className="text-xs text-gray-400 font-normal">
+                                          Min: {formatMinMaxValue(getVtamcsaColumnStats('csacur').min)} | Max: {formatMinMaxValue(getVtamcsaColumnStats('csacur').max)}
+                                        </div>
+                                      </div>
+                                    </th>
+                                    <th 
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                      onClick={() => handleVtamcsaSort('csamax')}
+                                    >
+                                      <div className="space-y-1">
+                                        <div className="flex items-center space-x-1">
+                                          <span>CSA Max</span>
+                                          {vtamcsaSortColumn === 'csamax' ? (
+                                            <span className="text-blue-600 font-bold">
+                                              {vtamcsaSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                            </span>
+                                          ) : (
+                                            <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                          )}
+                                        </div>
+                                        <div className="text-xs text-gray-400 font-normal">
+                                          Min: {formatMinMaxValue(getVtamcsaColumnStats('csamax').min)} | Max: {formatMinMaxValue(getVtamcsaColumnStats('csamax').max)}
+                                        </div>
+                                      </div>
+                                    </th>
+                                    <th 
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                      onClick={() => handleVtamcsaSort('csalim')}
+                                    >
+                                      <div className="space-y-1">
+                                        <div className="flex items-center space-x-1">
+                                          <span>CSA Lim</span>
+                                          {vtamcsaSortColumn === 'csalim' ? (
+                                            <span className="text-blue-600 font-bold">
+                                              {vtamcsaSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                            </span>
+                                          ) : (
+                                            <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                          )}
+                                        </div>
+                                        <div className="text-xs text-gray-400 font-normal">
+                                          Min: {formatMinMaxValue(getVtamcsaColumnStats('csalim').min)} | Max: {formatMinMaxValue(getVtamcsaColumnStats('csalim').max)}
+                                        </div>
+                                      </div>
+                                    </th>
+                                    <th 
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                      onClick={() => handleVtamcsaSort('csausage')}
+                                    >
+                                      <div className="space-y-1">
+                                        <div className="flex items-center space-x-1">
+                                          <span>CSA Usage</span>
+                                          {vtamcsaSortColumn === 'csausage' ? (
+                                            <span className="text-blue-600 font-bold">
+                                              {vtamcsaSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                            </span>
+                                          ) : (
+                                            <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                          )}
+                                        </div>
+                                        <div className="text-xs text-gray-400 font-normal">
+                                          Min: {formatMinMaxValue(getVtamcsaColumnStats('csausage').min)} | Max: {formatMinMaxValue(getVtamcsaColumnStats('csausage').max)}
+                                        </div>
+                                      </div>
+                                    </th>
+                                    <th 
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                      onClick={() => handleVtamcsaSort('c24cur')}
+                                    >
+                                      <div className="space-y-1">
+                                        <div className="flex items-center space-x-1">
+                                          <span>C24 Cur</span>
+                                          {vtamcsaSortColumn === 'c24cur' ? (
+                                            <span className="text-blue-600 font-bold">
+                                              {vtamcsaSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                            </span>
+                                          ) : (
+                                            <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                          )}
+                                        </div>
+                                        <div className="text-xs text-gray-400 font-normal">
+                                          Min: {formatMinMaxValue(getVtamcsaColumnStats('c24cur').min)} | Max: {formatMinMaxValue(getVtamcsaColumnStats('c24cur').max)}
+                                        </div>
+                                      </div>
+                                    </th>
+                                    <th 
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                      onClick={() => handleVtamcsaSort('c24max')}
+                                    >
+                                      <div className="space-y-1">
+                                        <div className="flex items-center space-x-1">
+                                          <span>C24 Max</span>
+                                          {vtamcsaSortColumn === 'c24max' ? (
+                                            <span className="text-blue-600 font-bold">
+                                              {vtamcsaSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                            </span>
+                                          ) : (
+                                            <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                          )}
+                                        </div>
+                                        <div className="text-xs text-gray-400 font-normal">
+                                          Min: {formatMinMaxValue(getVtamcsaColumnStats('c24max').min)} | Max: {formatMinMaxValue(getVtamcsaColumnStats('c24max').max)}
+                                        </div>
+                                      </div>
+                                    </th>
+                                    <th 
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                      onClick={() => handleVtamcsaSort('vtmcur')}
+                                    >
+                                      <div className="space-y-1">
+                                        <div className="flex items-center space-x-1">
+                                          <span>VTM Cur</span>
+                                          {vtamcsaSortColumn === 'vtmcur' ? (
+                                            <span className="text-blue-600 font-bold">
+                                              {vtamcsaSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                            </span>
+                                          ) : (
+                                            <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                          )}
+                                        </div>
+                                        <div className="text-xs text-gray-400 font-normal">
+                                          Min: {formatMinMaxValue(getVtamcsaColumnStats('vtmcur').min)} | Max: {formatMinMaxValue(getVtamcsaColumnStats('vtmcur').max)}
+                                        </div>
+                                      </div>
+                                    </th>
+                                    <th 
+                                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                                      onClick={() => handleVtamcsaSort('vtmmax')}
+                                    >
+                                      <div className="space-y-1">
+                                        <div className="flex items-center space-x-1">
+                                          <span>VTM Max</span>
+                                          {vtamcsaSortColumn === 'vtmmax' ? (
+                                            <span className="text-blue-600 font-bold">
+                                              {vtamcsaSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
+                                            </span>
+                                          ) : (
+                                            <span className="text-gray-400 text-xs">↕ Sırala</span>
+                                          )}
+                                        </div>
+                                        <div className="text-xs text-gray-400 font-normal">
+                                          Min: {formatMinMaxValue(getVtamcsaColumnStats('vtmmax').min)} | Max: {formatMinMaxValue(getVtamcsaColumnStats('vtmmax').max)}
+                                        </div>
+                                      </div>
+                                    </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BMC Time</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
                                   </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                  {(isFiltered ? filteredVtamcsaData : vtamcsaData).map((row, index) => (
+                                  {sortedVtamcsaData.map((row, index) => (
                                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.j_system || '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatVtamcsaNumber(row.csacur)}</td>
@@ -4468,7 +5072,9 @@ const NetworkPage = () => {
             <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-2xl font-bold text-gray-800">Zaman ve Tarih Filtresi</h3>
+                  <h3 className="text-2xl font-bold text-gray-800">
+                    {activeModal === 'STACKS' ? 'Zaman Filtresi' : 'Zaman ve Tarih Filtresi'}
+                  </h3>
                   <button 
                     onClick={closeTimeFilter}
                     className="text-gray-500 hover:text-gray-700 text-2xl"
@@ -4564,12 +5170,21 @@ const NetworkPage = () => {
                     >
                       İptal
                     </button>
-                    <button
-                      onClick={applyTimeFilter}
-                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors duration-200"
-                    >
-                      Zaman Aralığını Uygula
-                    </button>
+                    {activeModal === 'STACKS' ? (
+                      <button
+                        onClick={applyStacksTimeFilter}
+                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors duration-200"
+                      >
+                        Zaman Filtresini Uygula
+                      </button>
+                    ) : (
+                      <button
+                        onClick={applyTimeFilter}
+                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors duration-200"
+                      >
+                        Zaman Aralığını Uygula
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
