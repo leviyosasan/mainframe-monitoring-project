@@ -56,20 +56,21 @@ const NetworkPage = () => {
     let csvData = [];
     
     if (activeModal === 'STACKS') {
-      headers = ['Job Name', 'Step Name', 'Target Field', 'Stack Name', 'Stack IPaddr', 'Status', 'Start time of Stack', 'System Name', 'Created At', 'Updated At'];
+      headers = ['Job Name', 'Step Name', 'Target Field', 'ASID', 'MVS Level', 'Version', 'Start Time', 'IP Address', 'Status', 'BMC Time', 'Time'];
       csvData = [
         headers.join(','),
         ...data.map(row => [
-          row.job_name || '',
-          row.step_name || '',
-          row.target_field || '',
-          row.stack_name || '',
-          row.stack_ipaddr || '',
-          row.status || '',
-          row.start_time_of_stack || '',
-          row.system_name || '',
-          row.created_at || '',
-          row.updated_at || ''
+          row.jobnam8 || '',
+          row.stepnam8 || '',
+          row.jtarget || '',
+          row.asid8 || '',
+          row.mvslvlx8 || '',
+          row.ver_rel || '',
+          row.startc8 || '',
+          row.ipaddrc8 || '',
+          row.status18 || '',
+          row.bmctime ? new Date(row.bmctime).toLocaleString('tr-TR') : '',
+          row.time || ''
         ].join(','))
       ].join('\n');
     } else if (activeModal === 'STACKCPU') {
@@ -240,43 +241,45 @@ const NetworkPage = () => {
         let headers = [];
         
         if (activeModal === 'STACKS') {
-          headers = ['Job Name', 'Step Name', 'Target Field', 'Stack Name', 'Stack IPaddr', 'Status', 'Start time of Stack', 'System Name', 'Created At', 'Updated At'];
+          headers = ['Job Name', 'Step Name', 'Target Field', 'ASID', 'MVS Level', 'Version', 'Start Time', 'IP Address', 'Status', 'BMC Time', 'Time'];
           tableData = data.map(row => [
-            row.job_name || '-',
-            row.step_name || '-',
-            row.target_field || '-',
-            row.stack_name || '-',
-            row.stack_ipaddr || '-',
-            row.status || '-',
-            row.start_time_of_stack || '-',
-            row.system_name || '-',
-            row.created_at || '-',
-            row.updated_at || '-'
+            row.jobnam8 || '-',
+            row.stepnam8 || '-',
+            row.jtarget || '-',
+            row.asid8 || '-',
+            row.mvslvlx8 || '-',
+            row.ver_rel || '-',
+            row.startc8 || '-',
+            row.ipaddrc8 || '-',
+            row.status18 || '-',
+            row.bmctime ? new Date(row.bmctime).toLocaleString('tr-TR') : '-',
+            row.time || '-'
           ]);
         } else if (activeModal === 'STACKCPU') {
-          headers = ['TCPIP Stack Name', 'CPU Time', 'Packets In', 'Packets Out', 'Bytes In', 'Bytes Out', 'System Name', 'Created At', 'Updated At'];
+          headers = ['TCPIP Stack Name', 'Packets In', 'Packets In per Second', 'Packets Out', 'Packets Out per Second', 'BMC Time', 'Time'];
           tableData = data.map(row => [
-            row.tcpip_stack_name || '-',
-            formatNumber(row.cpu_time),
-            formatNumber(row.packets_in),
-            formatNumber(row.packets_out),
-            formatNumber(row.bytes_in),
-            formatNumber(row.bytes_out),
-            row.system_name || '-',
-            row.created_at || '-',
-            row.updated_at || '-'
+            row.statstks || '-',
+            formatNumber(row.ippktrcd),
+            row.ippktrtr || '-',
+            formatNumber(row.ipoutred),
+            row.ipoutrtr || '-',
+            row.bmctime ? new Date(row.bmctime).toLocaleString('tr-TR') : '-',
+            row.time || '-'
           ]);
         } else if (activeModal === 'vtamcsa') {
-          headers = ['CSA Cur', 'CSA Max', 'CSA High', 'CSA Low', 'CSA Avg', 'System Name', 'Created At', 'Updated At'];
+          headers = ['J System', 'CSA Cur', 'CSA Max', 'CSA Lim', 'CSA Usage', 'C24 Cur', 'C24 Max', 'VTM Cur', 'VTM Max', 'BMC Time', 'Time'];
           tableData = data.map(row => [
-            formatNumber(row.csa_cur),
-            formatNumber(row.csa_max),
-            formatNumber(row.csa_high),
-            formatNumber(row.csa_low),
-            formatNumber(row.csa_avg),
-            row.system_name || '-',
-            row.created_at || '-',
-            row.updated_at || '-'
+            row.j_system || '-',
+            formatVtamcsaNumber(row.csacur),
+            formatVtamcsaNumber(row.csamax),
+            formatVtamcsaNumber(row.csalim),
+            formatVtamcsaNumber(row.csausage),
+            formatVtamcsaNumber(row.c24cur),
+            formatVtamcsaNumber(row.c24max),
+            formatVtamcsaNumber(row.vtmcur),
+            formatVtamcsaNumber(row.vtmmax),
+            row.bmctime ? new Date(row.bmctime).toLocaleString('tr-TR') : '-',
+            row.time || '-'
           ]);
         } else if (activeModal === 'tcpconf') {
           headers = ['Job Name', 'Step Name', 'Target Field', 'System Name', 'Created At', 'Updated At'];
