@@ -9,6 +9,12 @@ const { testConnection, getMainviewMvsSysover, getMainviewMvsJespool,
   checkTableExistsMQConnz, getMainviewMQConnz,
   checkTableExistsMQQm, getMainviewMQQm,
   checkTableExistsMQW2over, getMainviewMQW2over,
+  // Storage
+  checkTableExistsCsasum, getMainviewStorageCsasum,
+  checkTableExistsFrminfoCenter, getMainviewStorageFrminfoCenter,
+  checkTableExistsFrminfoFixed, getMainviewStorageFrminfofixed,
+  checkTableExistsFrminfoHighVirtual, getMainviewStorageFrminfoHighVirtual,
+  checkTableExistsSysfrmiz, getMainviewStoragesysfrmiz,
 } = require('../controllers/database.controller');
 
 // New network tables
@@ -111,5 +117,21 @@ router.post('/check-table-mq-qm', checkTableExistsMQQm);
 
 router.post('/mainview-mq-w2over', getMainviewMQW2over);
 router.post('/check-table-mq-w2over', checkTableExistsMQW2over);
+
+// Storage endpoints
+router.post('/mainview-storage-csasum', getMainviewStorageCsasum);
+router.post('/check-table-csasum', checkTableExistsCsasum);
+
+router.post('/mainview-storage-frminfo-center', getMainviewStorageFrminfoCenter);
+router.post('/check-table-frminfo-center', checkTableExistsFrminfoCenter);
+
+router.post('/mainview-storage-frminfo-fixed', getMainviewStorageFrminfofixed);
+router.post('/check-table-frminfo-fixed', checkTableExistsFrminfoFixed);
+
+router.post('/mainview-storage-frminfo-high-virtual', getMainviewStorageFrminfoHighVirtual);
+router.post('/check-table-frminfo-high-virtual', checkTableExistsFrminfoHighVirtual);
+
+router.post('/mainview-storage-sysfrmiz', getMainviewStoragesysfrmiz);
+router.post('/check-table-sysfrmiz', checkTableExistsSysfrmiz);
 
 module.exports = router;
