@@ -2467,6 +2467,9 @@ const NetworkPage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                           {/* System */}
                           <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('vtmbuffSystem'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">System</h5>
@@ -2475,6 +2478,9 @@ const NetworkPage = () => {
                           </div>
                           {/* IOBuf Size */}
                           <div onClick={() => openChart('vtmbuffIOBufSize')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('vtmbuffIobufSize'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-red-200"><svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7" /></svg></div>
                               <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">IOBuf Size</h5>
@@ -2483,6 +2489,9 @@ const NetworkPage = () => {
                           </div>
                           {/* IOBuf Times Expanded */}
                           <div onClick={() => openChart('vtmbuffIOBufTimesExpanded')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('vtmbuffIobufTimes'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">IOBuf Times Expanded</h5>
@@ -2491,6 +2500,9 @@ const NetworkPage = () => {
                           </div>
                           {/* LPBuf Size */}
                           <div onClick={() => openChart('vtmbuffLPBufSize')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('vtmbuffLpbufSize'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-amber-200"><svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10M20 7v10M4 12h16" /></svg></div>
                               <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">LPBuf Size</h5>
@@ -2499,6 +2511,9 @@ const NetworkPage = () => {
                           </div>
                           {/* LPBuf Times Expanded */}
                           <div onClick={() => openChart('vtmbuffLPBufTimesExpanded')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('vtmbuffLpbufTimes'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">LPBuf Times Expanded</h5>
@@ -2507,6 +2522,9 @@ const NetworkPage = () => {
                           </div>
                           {/* LFBuf Size */}
                           <div onClick={() => openChart('vtmbuffLFBufSize')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('vtmbuffLfbufSize'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-lime-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-lime-200"><svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M6 12h12M8 17h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">LFBuf Size</h5>
@@ -2515,6 +2533,9 @@ const NetworkPage = () => {
                           </div>
                           {/* LFBuf Times Expanded */}
                           <div onClick={() => openChart('vtmbuffLFBufTimesExpanded')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('vtmbuffLfbufTimes'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-fuchsia-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-fuchsia-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">LFBuf Times Expanded</h5>
@@ -2537,6 +2558,7 @@ const NetworkPage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                           {/* Step */}
                           <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('tcpstorStep'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg></button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 012-2h10a2 2 0 012 2M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Step</h5>
@@ -2545,6 +2567,7 @@ const NetworkPage = () => {
                           </div>
                           {/* System */}
                           <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('tcpstorSystem'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg></button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">System</h5>
@@ -2553,6 +2576,7 @@ const NetworkPage = () => {
                           </div>
                           {/* ECSA Current */}
                           <div onClick={() => openChart('tcpstorEcsaCurrent')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('tcpstorEcsaCurrent'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg></button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M6 12h12M8 17h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">ECSA Current</h5>
@@ -2561,6 +2585,7 @@ const NetworkPage = () => {
                           </div>
                           {/* ECSA Max */}
                           <div onClick={() => openChart('tcpstorEcsaMax')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('tcpstorEcsaMax'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg></button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">ECSA Max</h5>
@@ -2569,6 +2594,7 @@ const NetworkPage = () => {
                           </div>
                           {/* ECSA Limit */}
                           <div onClick={() => openChart('tcpstorEcsaLimit')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('tcpstorEcsaLimit'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg></button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">ECSA Limit</h5>
@@ -2577,6 +2603,7 @@ const NetworkPage = () => {
                           </div>
                           {/* ECSA Free */}
                           <div onClick={() => openChart('tcpstorEcsaFree')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('tcpstorEcsaFree'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg></button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8M3 12h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">ECSA Free</h5>
@@ -2585,6 +2612,7 @@ const NetworkPage = () => {
                           </div>
                           {/* Private Current */}
                           <div onClick={() => openChart('tcpstorPrivateCurrent')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('tcpstorPrivateCurrent'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg></button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-lime-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M6 12h12M8 17h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Private Current</h5>
@@ -2593,6 +2621,7 @@ const NetworkPage = () => {
                           </div>
                           {/* Private Max */}
                           <div onClick={() => openChart('tcpstorPrivateMax')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('tcpstorPrivateMax'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg></button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-fuchsia-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-fuchsia-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Private Max</h5>
@@ -2615,6 +2644,7 @@ const NetworkPage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                           {/* Foreign IP */}
                           <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('connsrpzForeignIp'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg></button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h10M9 20h6" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Foreign IP</h5>
@@ -2623,6 +2653,7 @@ const NetworkPage = () => {
                           </div>
                           {/* Active Conns */}
                           <div onClick={() => openChart('connsrpzActiveConns')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('connsrpzActiveConns'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg></button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-6a2 2 0 00-2-2H5" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Active Conns</h5>
@@ -2631,6 +2662,7 @@ const NetworkPage = () => {
                           </div>
                           {/* Avg/Max RTT */}
                           <div onClick={() => openChart('connsrpzAvgRtt')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('connsrpzRtt'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg></button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8M3 12h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Avg/Max RTT (ms)</h5>
@@ -2639,6 +2671,7 @@ const NetworkPage = () => {
                           </div>
                           {/* Bytes In */}
                           <div onClick={() => openChart('connsrpzBytesIn')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('connsrpzBytesIn'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg></button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Bytes In</h5>
@@ -2647,6 +2680,7 @@ const NetworkPage = () => {
                           </div>
                           {/* Bytes Out */}
                           <div onClick={() => openChart('connsrpzBytesOut')} className="group relative bg-white rounded-2xl border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:border-gray-400 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('connsrpzBytesOut'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg></button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8M3 12h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Bytes Out</h5>
@@ -2655,6 +2689,7 @@ const NetworkPage = () => {
                           </div>
                           {/* Stack */}
                           <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('connsrpzStack'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg></button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Stack</h5>
@@ -2663,6 +2698,7 @@ const NetworkPage = () => {
                           </div>
                           {/* Remote Host */}
                           <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('connsrpzRemoteHost'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg></button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Remote Host</h5>
@@ -4039,7 +4075,29 @@ const NetworkPage = () => {
                      {infoModal === 'connectionStates' && 'Connection States Hakkında'}
                      {infoModal === 'udpConfig' && 'UDP Config Hakkında'}
                      {infoModal === 'udpSettings' && 'UDP Settings Hakkında'}
-                     {!['connectionCount', 'activeConnections', 'networkThroughput', 'sessionCount', 'activeSessions', 'sessionUtilization', 'jobName', 'stepName', 'targetField', 'asid', 'mvsLevel', 'version', 'ipAddress', 'status', 'startTime', 'statstks', 'ippktrcd', 'ippktrtr', 'ipoutred', 'ipoutrtr', 'csacur', 'systemField', 'csamax', 'csalim', 'csausage', 'c24cur', 'c24max', 'vtmcur', 'vtmmax', 'tcpConfig', 'tcpSettings', 'tcpConnections', 'connectionStates', 'udpConfig', 'udpSettings'].includes(infoModal) && `${infoModal} Hakkında`}
+                     {infoModal === 'vtmbuffSystem' && 'VTMBUFF System Hakkında'}
+                     {infoModal === 'vtmbuffIobufSize' && 'IOBuf Size Hakkında'}
+                     {infoModal === 'vtmbuffIobufTimes' && 'IOBuf Times Expanded Hakkında'}
+                     {infoModal === 'vtmbuffLpbufSize' && 'LPBuf Size Hakkında'}
+                     {infoModal === 'vtmbuffLpbufTimes' && 'LPBuf Times Expanded Hakkında'}
+                     {infoModal === 'vtmbuffLfbufSize' && 'LFBuf Size Hakkında'}
+                     {infoModal === 'vtmbuffLfbufTimes' && 'LFBuf Times Expanded Hakkında'}
+                     {infoModal === 'tcpstorStep' && 'TCPSTOR Step Hakkında'}
+                     {infoModal === 'tcpstorSystem' && 'TCPSTOR System Hakkında'}
+                     {infoModal === 'tcpstorEcsaCurrent' && 'ECSA Current Hakkında'}
+                     {infoModal === 'tcpstorEcsaMax' && 'ECSA Max Hakkında'}
+                     {infoModal === 'tcpstorEcsaLimit' && 'ECSA Limit Hakkında'}
+                     {infoModal === 'tcpstorEcsaFree' && 'ECSA Free Hakkında'}
+                     {infoModal === 'tcpstorPrivateCurrent' && 'Private Current Hakkında'}
+                     {infoModal === 'tcpstorPrivateMax' && 'Private Max Hakkında'}
+                     {infoModal === 'connsrpzForeignIp' && 'CONNSRPZ Foreign IP Hakkında'}
+                     {infoModal === 'connsrpzActiveConns' && 'Active Conns Hakkında'}
+                     {infoModal === 'connsrpzRtt' && 'RTT (ms) Hakkında'}
+                     {infoModal === 'connsrpzBytesIn' && 'Bytes In Hakkında'}
+                     {infoModal === 'connsrpzBytesOut' && 'Bytes Out Hakkında'}
+                     {infoModal === 'connsrpzStack' && 'Stack Hakkında'}
+                     {infoModal === 'connsrpzRemoteHost' && 'Remote Host Hakkında'}
+                     {!['connectionCount', 'activeConnections', 'networkThroughput', 'sessionCount', 'activeSessions', 'sessionUtilization', 'jobName', 'stepName', 'targetField', 'asid', 'mvsLevel', 'version', 'ipAddress', 'status', 'startTime', 'statstks', 'ippktrcd', 'ippktrtr', 'ipoutred', 'ipoutrtr', 'csacur', 'systemField', 'csamax', 'csalim', 'csausage', 'c24cur', 'c24max', 'vtmcur', 'vtmmax', 'tcpConfig', 'tcpSettings', 'tcpConnections', 'connectionStates', 'udpConfig', 'udpSettings', 'vtmbuffSystem', 'vtmbuffIobufSize', 'vtmbuffIobufTimes', 'vtmbuffLpbufSize', 'vtmbuffLpbufTimes', 'vtmbuffLfbufSize', 'vtmbuffLfbufTimes', 'tcpstorStep', 'tcpstorSystem', 'tcpstorEcsaCurrent', 'tcpstorEcsaMax', 'tcpstorEcsaLimit', 'tcpstorEcsaFree', 'tcpstorPrivateCurrent', 'tcpstorPrivateMax', 'connsrpzForeignIp', 'connsrpzActiveConns', 'connsrpzRtt', 'connsrpzBytesIn', 'connsrpzBytesOut', 'connsrpzStack', 'connsrpzRemoteHost'].includes(infoModal) && `${infoModal} Hakkında`}
                   </h3>
                   <button onClick={closeInfo} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
                 </div>
@@ -4330,7 +4388,7 @@ const NetworkPage = () => {
                     )}
 
                     {/* Diğer info modal tipleri için placeholder */}
-                    {!['jobName', 'stepName', 'targetField', 'asid', 'mvsLevel', 'version', 'ipAddress', 'status', 'startTime', 'statstks', 'ippktrcd', 'ippktrtr', 'ipoutred', 'ipoutrtr', 'csacur', 'systemField', 'csamax', 'csalim', 'csausage', 'c24cur', 'c24max', 'vtmcur', 'vtmmax'].includes(infoModal) && (
+                    {!['jobName', 'stepName', 'targetField', 'asid', 'mvsLevel', 'version', 'ipAddress', 'status', 'startTime', 'statstks', 'ippktrcd', 'ippktrtr', 'ipoutred', 'ipoutrtr', 'csacur', 'systemField', 'csamax', 'csalim', 'csausage', 'c24cur', 'c24max', 'vtmcur', 'vtmmax', 'vtmbuffSystem', 'vtmbuffIobufSize', 'vtmbuffIobufTimes', 'vtmbuffLpbufSize', 'vtmbuffLpbufTimes', 'vtmbuffLfbufSize', 'vtmbuffLfbufTimes', 'tcpstorStep', 'tcpstorSystem', 'tcpstorEcsaCurrent', 'tcpstorEcsaMax', 'tcpstorEcsaLimit', 'tcpstorEcsaFree', 'tcpstorPrivateCurrent', 'tcpstorPrivateMax', 'connsrpzForeignIp', 'connsrpzActiveConns', 'connsrpzRtt', 'connsrpzBytesIn', 'connsrpzBytesOut', 'connsrpzStack', 'connsrpzRemoteHost'].includes(infoModal) && (
                     <div className={`bg-${modalColor}-50 rounded-lg p-4`}>
                       <h4 className={`font-semibold text-${modalColor}-900 mb-2`}>Açıklama</h4>
                       <p className={`text-${modalColor}-800 text-sm`}>
