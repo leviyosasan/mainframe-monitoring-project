@@ -35,6 +35,15 @@ const NetworkPage = () => {
     return isNaN(num) ? '-' : num.toFixed(2);
   };
 
+  // VTAMCSA için sayı formatı (sonundaki .00 kaldırılır)
+  const formatVtamcsaNumber = (value) => {
+    if (value === null || value === undefined || value === '') return '-';
+    const num = Number(value);
+    if (isNaN(num)) return '-';
+    // Eğer sayı tam sayı ise .00 kısmını kaldır
+    return num % 1 === 0 ? num.toString() : num.toFixed(2);
+  };
+
   // Excel'e aktarma fonksiyonu
   const exportToExcel = (data, filename) => {
     if (!data || data.length === 0) {
@@ -64,34 +73,35 @@ const NetworkPage = () => {
         ].join(','))
       ].join('\n');
     } else if (activeModal === 'STACKCPU') {
-      headers = ['TCPIP Stack Name', 'CPU Time', 'Packets In', 'Packets Out', 'Bytes In', 'Bytes Out', 'System Name', 'Created At', 'Updated At'];
+      headers = ['TCPIP Stack Name', 'Interval Packets Received', 'Packets Received per Second', 'Current Output Requests', 'Output Requests per Second', 'BMC Time', 'Time'];
       csvData = [
         headers.join(','),
         ...data.map(row => [
-          row.tcpip_stack_name || '',
-          formatNumber(row.cpu_time),
-          formatNumber(row.packets_in),
-          formatNumber(row.packets_out),
-          formatNumber(row.bytes_in),
-          formatNumber(row.bytes_out),
-          row.system_name || '',
-          row.created_at || '',
-          row.updated_at || ''
+          row.statstks || '',
+          formatNumber(row.ippktrcd),
+          row.ippktrtr || '',
+          formatNumber(row.ipoutred),
+          row.ipoutrtr || '',
+          row.bmctime || '',
+          row.time || ''
         ].join(','))
       ].join('\n');
     } else if (activeModal === 'vtamcsa') {
-      headers = ['CSA Cur', 'CSA Max', 'CSA High', 'CSA Low', 'CSA Avg', 'System Name', 'Created At', 'Updated At'];
+      headers = ['J System', 'CSA Cur', 'CSA Max', 'CSA Lim', 'CSA Usage', 'C24 Cur', 'C24 Max', 'VTM Cur', 'VTM Max', 'BMC Time', 'Time'];
       csvData = [
         headers.join(','),
         ...data.map(row => [
-          formatNumber(row.csa_cur),
-          formatNumber(row.csa_max),
-          formatNumber(row.csa_high),
-          formatNumber(row.csa_low),
-          formatNumber(row.csa_avg),
-          row.system_name || '',
-          row.created_at || '',
-          row.updated_at || ''
+          row.j_system || '',
+          formatVtamcsaNumber(row.csacur),
+          formatVtamcsaNumber(row.csamax),
+          formatVtamcsaNumber(row.csalim),
+          formatVtamcsaNumber(row.csausage),
+          formatVtamcsaNumber(row.c24cur),
+          formatVtamcsaNumber(row.c24max),
+          formatVtamcsaNumber(row.vtmcur),
+          formatVtamcsaNumber(row.vtmmax),
+          row.bmctime || '',
+          row.time || ''
         ].join(','))
       ].join('\n');
     } else if (activeModal === 'tcpconf') {
@@ -1707,9 +1717,9 @@ const NetworkPage = () => {
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.ipaddrc8 || '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                                          row.status18 === 'ACTIVE' ? 'bg-green-100 text-green-800' :
-                                          row.status18 === 'INACTIVE' ? 'bg-red-100 text-red-800' :
-                                          row.status18 === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                          row.status18?.toLowerCase() === 'active' ? 'bg-green-100 text-green-800' :
+                                          row.status18?.toLowerCase() === 'inactive' ? 'bg-red-100 text-red-800' :
+                                          row.status18?.toLowerCase() === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                                           'bg-gray-100 text-gray-800'
                                         }`}>
                                           {row.status18 || '-'}
@@ -1756,11 +1766,11 @@ const NetworkPage = () => {
                                 <tbody className="bg-white divide-y divide-gray-200">
                                   {(isFiltered ? filteredStackCpuData : stackCpuData).map((row, index) => (
                                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.statstks)}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.statstks || '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.ippktrcd)}</td>
-                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.ippktrtr)}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.ippktrtr || '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.ipoutred)}</td>
-                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.ipoutrtr)}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.ipoutrtr || '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {row.bmctime ? new Date(row.bmctime).toLocaleString('tr-TR') : '-'}
                                       </td>
@@ -1790,7 +1800,6 @@ const NetworkPage = () => {
                               <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                   <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">J System</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CSA Cur</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CSA Max</th>
@@ -1807,16 +1816,15 @@ const NetworkPage = () => {
                                 <tbody className="bg-white divide-y divide-gray-200">
                                   {(isFiltered ? filteredVtamcsaData : vtamcsaData).map((row, index) => (
                                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.id || '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.j_system || '-'}</td>
-                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.csacur)}</td>
-                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.csamax)}</td>
-                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.csalim)}</td>
-                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.csausage)}</td>
-                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.c24cur)}</td>
-                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.c24max)}</td>
-                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.vtmcur)}</td>
-                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(row.vtmmax)}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatVtamcsaNumber(row.csacur)}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatVtamcsaNumber(row.csamax)}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatVtamcsaNumber(row.csalim)}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatVtamcsaNumber(row.csausage)}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatVtamcsaNumber(row.c24cur)}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatVtamcsaNumber(row.c24max)}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatVtamcsaNumber(row.vtmcur)}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatVtamcsaNumber(row.vtmmax)}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {row.bmctime ? new Date(row.bmctime).toLocaleString('tr-TR') : '-'}
                                       </td>
@@ -2684,7 +2692,7 @@ const NetworkPage = () => {
                               <div className="text-2xl font-bold text-gray-900">
                                 {stackCpuData.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
-                                    {formatNumber(stackCpuData[0]?.statstks)}
+                                    {stackCpuData[0]?.statstks || '-'}
                                   </span>
                                 ) : (
                                   <span className="text-gray-400">-</span>
@@ -2754,7 +2762,7 @@ const NetworkPage = () => {
                               <div className="text-2xl font-bold text-gray-900">
                                 {stackCpuData.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
-                                    {formatNumber(stackCpuData[0]?.ippktrtr)}
+                                    {stackCpuData[0]?.ippktrtr || '-'}
                                   </span>
                                 ) : (
                                   <span className="text-gray-400">-</span>
@@ -2824,7 +2832,7 @@ const NetworkPage = () => {
                               <div className="text-2xl font-bold text-gray-900">
                                 {stackCpuData.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
-                                    {formatNumber(stackCpuData[0]?.ipoutrtr)}
+                                    {stackCpuData[0]?.ipoutrtr || '-'}
                                   </span>
                                 ) : (
                                   <span className="text-gray-400">-</span>
@@ -2876,7 +2884,7 @@ const NetworkPage = () => {
                               <div className="text-2xl font-bold text-gray-900">
                                 {vtamcsaData.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
-                                    {formatNumber(vtamcsaData[0]?.csacur)}
+                                    {formatVtamcsaNumber(vtamcsaData[0]?.csacur)}
                                   </span>
                                 ) : (
                                   <span className="text-gray-400">-</span>
@@ -2946,7 +2954,7 @@ const NetworkPage = () => {
                               <div className="text-2xl font-bold text-gray-900">
                                 {vtamcsaData.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
-                                    {formatNumber(vtamcsaData[0]?.csamax)}
+                                    {formatVtamcsaNumber(vtamcsaData[0]?.csamax)}
                                   </span>
                                 ) : (
                                   <span className="text-gray-400">-</span>
@@ -2981,7 +2989,7 @@ const NetworkPage = () => {
                               <div className="text-2xl font-bold text-gray-900">
                                 {vtamcsaData.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
-                                    {formatNumber(vtamcsaData[0]?.csalim)}
+                                    {formatVtamcsaNumber(vtamcsaData[0]?.csalim)}
                                   </span>
                                 ) : (
                                   <span className="text-gray-400">-</span>
@@ -3016,7 +3024,7 @@ const NetworkPage = () => {
                               <div className="text-2xl font-bold text-gray-900">
                                 {vtamcsaData.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
-                                    {formatNumber(vtamcsaData[0]?.csausage)}
+                                    {formatVtamcsaNumber(vtamcsaData[0]?.csausage)}
                                   </span>
                                 ) : (
                                   <span className="text-gray-400">-</span>
@@ -3051,7 +3059,7 @@ const NetworkPage = () => {
                               <div className="text-2xl font-bold text-gray-900">
                                 {vtamcsaData.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
-                                    {formatNumber(vtamcsaData[0]?.c24cur)}
+                                    {formatVtamcsaNumber(vtamcsaData[0]?.c24cur)}
                                   </span>
                                 ) : (
                                   <span className="text-gray-400">-</span>
@@ -3086,7 +3094,7 @@ const NetworkPage = () => {
                               <div className="text-2xl font-bold text-gray-900">
                                 {vtamcsaData.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
-                                    {formatNumber(vtamcsaData[0]?.c24max)}
+                                    {formatVtamcsaNumber(vtamcsaData[0]?.c24max)}
                                   </span>
                                 ) : (
                                   <span className="text-gray-400">-</span>
@@ -3121,7 +3129,7 @@ const NetworkPage = () => {
                               <div className="text-2xl font-bold text-gray-900">
                                 {vtamcsaData.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
-                                    {formatNumber(vtamcsaData[0]?.vtmcur)}
+                                    {formatVtamcsaNumber(vtamcsaData[0]?.vtmcur)}
                                   </span>
                                 ) : (
                                   <span className="text-gray-400">-</span>
@@ -3156,7 +3164,7 @@ const NetworkPage = () => {
                               <div className="text-2xl font-bold text-gray-900">
                                 {vtamcsaData.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
-                                    {formatNumber(vtamcsaData[0]?.vtmmax)}
+                                    {formatVtamcsaNumber(vtamcsaData[0]?.vtmmax)}
                                   </span>
                                 ) : (
                                   <span className="text-gray-400">-</span>
@@ -3419,9 +3427,9 @@ const NetworkPage = () => {
                               <div className="text-2xl font-bold text-gray-900">
                                 {stacksData.length > 0 ? (
                                   <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                                    stacksData[0]?.status18 === 'ACTIVE' ? 'bg-green-100 text-green-800' :
-                                    stacksData[0]?.status18 === 'INACTIVE' ? 'bg-red-100 text-red-800' :
-                                    stacksData[0]?.status18 === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                    stacksData[0]?.status18?.toLowerCase() === 'active' ? 'bg-green-100 text-green-800' :
+                                    stacksData[0]?.status18?.toLowerCase() === 'inactive' ? 'bg-red-100 text-red-800' :
+                                    stacksData[0]?.status18?.toLowerCase() === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                                     'bg-gray-100 text-gray-800'
                                   }`}>
                                     {stacksData[0]?.status18 || '-'}
