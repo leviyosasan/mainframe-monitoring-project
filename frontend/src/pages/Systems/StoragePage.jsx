@@ -235,6 +235,26 @@ const StoragePage = () => {
     toast.success('Veriler Excel formatında indirildi');
   };
 
+  // Tabs configuration
+  const tabs = [
+    { id: 'table', name: 'Tablo', icon: '📊' },
+    { id: 'chart', name: 'Grafik', icon: '📈' },
+    { id: 'threshold', name: 'Threshold', icon: '⚙️' }
+  ];
+
+  // Modal color system
+  const getModalColor = (modal = activeModal) => {
+    switch(modal) {
+      case 'CSASUM': return 'blue';
+      case 'FRMINFO_CENTER': return 'green';
+      case 'FRMINFO_FIXED': return 'purple';
+      case 'FRMINFO_HIGH_VIRTUAL': return 'orange';
+      case 'SYSFRMIZ': return 'indigo';
+      default: return 'blue';
+    }
+  };
+  const modalColor = getModalColor();
+
   // Modal functions
   const openModal = (modalType) => {
     setActiveModal(modalType);
@@ -369,12 +389,12 @@ const StoragePage = () => {
           Storage Management
         </h1>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
           {/* CSASUM Kartı */}
           <div onClick={() => openModal('CSASUM')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
-            <div className="p-8">
-              <div className="flex items-center justify-center w-14 h-14 bg-blue-100 rounded-xl mb-6 mx-auto group-hover:bg-blue-200">
+            <div className="p-6">
+              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-xl mb-4 mx-auto group-hover:bg-blue-200">
                 <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                 </svg>
@@ -383,10 +403,17 @@ const StoragePage = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">CSASUM</h2>
                 <p className="text-gray-500 text-sm font-medium">Common Storage Area Summary</p>
                 <div className="mt-4 flex items-center justify-center">
-                  <div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                    <span className="text-xs font-medium text-gray-600">Aktif</span>
-                  </div>
+                  {csasumData.length > 0 ? (
+                    <div className="flex items-center space-x-2 bg-green-100 rounded-full px-3 py-1">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <span className="text-xs font-medium text-green-800">Aktif</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                      <span className="text-xs font-medium text-gray-600">Pasif</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -394,8 +421,8 @@ const StoragePage = () => {
 
           {/* FRMINFO Center Kartı */}
           <div onClick={() => openModal('FRMINFO_CENTER')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
-            <div className="p-8">
-              <div className="flex items-center justify-center w-14 h-14 bg-green-100 rounded-xl mb-6 mx-auto group-hover:bg-green-200">
+            <div className="p-6">
+              <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-xl mb-4 mx-auto group-hover:bg-green-200">
                 <svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
@@ -404,10 +431,17 @@ const StoragePage = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">FRMINFO Center</h2>
                 <p className="text-gray-500 text-sm font-medium">Frame Information Center</p>
                 <div className="mt-4 flex items-center justify-center">
-                  <div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                    <span className="text-xs font-medium text-gray-600">Aktif</span>
-                  </div>
+                  {frminfoCenterData.length > 0 ? (
+                    <div className="flex items-center space-x-2 bg-green-100 rounded-full px-3 py-1">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <span className="text-xs font-medium text-green-800">Aktif</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                      <span className="text-xs font-medium text-gray-600">Pasif</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -415,8 +449,8 @@ const StoragePage = () => {
 
           {/* FRMINFO Fixed Kartı */}
           <div onClick={() => openModal('FRMINFO_FIXED')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
-            <div className="p-8">
-              <div className="flex items-center justify-center w-14 h-14 bg-purple-100 rounded-xl mb-6 mx-auto group-hover:bg-purple-200">
+            <div className="p-6">
+              <div className="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-xl mb-4 mx-auto group-hover:bg-purple-200">
                 <svg className="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
@@ -425,10 +459,17 @@ const StoragePage = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">FRMINFO Fixed</h2>
                 <p className="text-gray-500 text-sm font-medium">Frame Information Fixed</p>
                 <div className="mt-4 flex items-center justify-center">
-                  <div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                    <span className="text-xs font-medium text-gray-600">Aktif</span>
-                  </div>
+                  {frminfoFixedData.length > 0 ? (
+                    <div className="flex items-center space-x-2 bg-green-100 rounded-full px-3 py-1">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <span className="text-xs font-medium text-green-800">Aktif</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                      <span className="text-xs font-medium text-gray-600">Pasif</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -436,8 +477,8 @@ const StoragePage = () => {
 
           {/* FRMINFO High Virtual Kartı */}
           <div onClick={() => openModal('FRMINFO_HIGH_VIRTUAL')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
-            <div className="p-8">
-              <div className="flex items-center justify-center w-14 h-14 bg-orange-100 rounded-xl mb-6 mx-auto group-hover:bg-orange-200">
+            <div className="p-6">
+              <div className="flex items-center justify-center w-12 h-12 bg-orange-100 rounded-xl mb-4 mx-auto group-hover:bg-orange-200">
                 <svg className="w-7 h-7 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
@@ -446,10 +487,17 @@ const StoragePage = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">FRMINFO High Virtual</h2>
                 <p className="text-gray-500 text-sm font-medium">Frame Information High Virtual</p>
                 <div className="mt-4 flex items-center justify-center">
-                  <div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                    <span className="text-xs font-medium text-gray-600">Aktif</span>
-                  </div>
+                  {frminfoHighVirtualData.length > 0 ? (
+                    <div className="flex items-center space-x-2 bg-green-100 rounded-full px-3 py-1">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <span className="text-xs font-medium text-green-800">Aktif</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                      <span className="text-xs font-medium text-gray-600">Pasif</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -457,8 +505,8 @@ const StoragePage = () => {
 
           {/* SYSFRMIZ Kartı */}
           <div onClick={() => openModal('SYSFRMIZ')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
-            <div className="p-8">
-              <div className="flex items-center justify-center w-14 h-14 bg-indigo-100 rounded-xl mb-6 mx-auto group-hover:bg-indigo-200">
+            <div className="p-6">
+              <div className="flex items-center justify-center w-12 h-12 bg-indigo-100 rounded-xl mb-4 mx-auto group-hover:bg-indigo-200">
                 <svg className="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                 </svg>
@@ -467,10 +515,17 @@ const StoragePage = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">SYSFRMIZ</h2>
                 <p className="text-gray-500 text-sm font-medium">System Frame Information</p>
                 <div className="mt-4 flex items-center justify-center">
-                  <div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                    <span className="text-xs font-medium text-gray-600">Aktif</span>
-                  </div>
+                  {sysfrmizData.length > 0 ? (
+                    <div className="flex items-center space-x-2 bg-green-100 rounded-full px-3 py-1">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <span className="text-xs font-medium text-green-800">Aktif</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                      <span className="text-xs font-medium text-gray-600">Pasif</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -497,97 +552,126 @@ const StoragePage = () => {
                 </div>
 
                 {/* Sekmeler (Dinamik Renk) */}
-                <div className="flex space-x-1 mb-6">
-                  <button
-                    onClick={() => setActiveTab('table')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                      activeTab === 'table'
-                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                        : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-                    }`}
-                  >
-                    📊 Veri Tablosu
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('chart')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                      activeTab === 'chart'
-                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                        : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-                    }`}
-                  >
-                    📈 Grafik
-                  </button>
+                <div className="border-b border-gray-200 mb-6">
+                   <nav className="-mb-px flex space-x-8">
+                     {tabs.map((tab) => (
+                        <button
+                           key={tab.id}
+                           onClick={() => setActiveTab(tab.id)}
+                           className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                              activeTab === tab.id
+                              ? `border-${modalColor}-500 text-${modalColor}-600` // Dinamik renk
+                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                           }`}
+                        >
+                           <span className="mr-2">{tab.icon}</span>{tab.name}
+                        </button>
+                     ))}
+                  </nav>
                 </div>
 
-                {/* Tab Content */}
-                {activeTab === 'table' && (
-                  <div className="space-y-6">
-                    {/* Action Buttons */}
-                    <div className="flex flex-wrap items-center justify-between space-y-2 sm:space-y-0">
-                      <div className="flex flex-wrap items-center space-x-3">
-                        <button
-                          onClick={loadDataForActiveTab}
-                          disabled={isLoading}
-                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {isLoading ? (
-                            <>
-                              <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                              </svg>
-                              Loading...
-                            </>
-                          ) : (
-                            <>
-                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                              </svg>
-                              Refresh Data
-                            </>
-                          )}
-                        </button>
-                        
-                        <button
-                          onClick={() => exportToExcel(getCurrentData(), `${activeModal}_data`)}
-                          className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        >
-                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          Export Excel
-                        </button>
+                {/* Sekme İçerikleri */}
+                <div className="min-h-[400px]">
+                  {/* Tablo Sekmesi */}
+                  {activeTab === 'table' && (
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <h4 className="text-lg font-semibold text-gray-800">Veri Tablosu</h4>
+                        <div className="flex space-x-3">
+                          <button
+                            onClick={() => exportToExcel(getCurrentData(), activeModal)}
+                            className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md hover:bg-green-200 transition-colors duration-200 flex items-center"
+                            disabled={isLoading || getCurrentData().length === 0}
+                          >
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Excel'e Aktar
+                          </button>
+                          <button
+                            onClick={() => exportToExcel(getCurrentData(), activeModal)}
+                            className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-200 transition-colors duration-200 flex items-center"
+                            disabled={isLoading || getCurrentData().length === 0}
+                          >
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            PDF'e Aktar
+                          </button>
+                          <button
+                            onClick={openTimeFilter}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors duration-200 flex items-center"
+                          >
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Zaman Filtresi
+                          </button>
+                          <button
+                            onClick={loadDataForActiveTab}
+                            disabled={isLoading}
+                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {isLoading ? 'Yükleniyor...' : 'Yenile'}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Data Table */}
+                      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        {isLoading ? (
+                          <div className="flex items-center justify-center py-12">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+                            <span className="text-gray-600">Veriler yükleniyor...</span>
+                          </div>
+                        ) : getCurrentData().length === 0 ? (
+                          <div className="flex items-center justify-center py-12">
+                            <span className="text-gray-500">Veri bulunamadı</span>
+                          </div>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                              <thead className="bg-gray-50">
+                                {renderTableHeaders()}
+                              </thead>
+                              <tbody className="bg-white divide-y divide-gray-200">
+                                {renderTableRows()}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
                       </div>
                     </div>
+                  )}
 
-                    {/* Data Table */}
-                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
-                            {renderTableHeaders()}
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {renderTableRows()}
-                          </tbody>
-                        </table>
+                  {/* Grafik Sekmesi */}
+                  {activeTab === 'chart' && (
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-semibold text-gray-800">Grafik Görünümü</h4>
+                      <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
+                        <div className="text-6xl mb-4">📈</div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">Grafik Görünümü</h3>
+                        <p className="text-gray-600">
+                          {activeModal} verilerinin grafik görünümü burada gösterilecek
+                        </p>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {activeTab === 'chart' && (
-                  <div className="space-y-6">
-                    <div className="text-center py-12">
-                      <div className="text-6xl mb-4">📈</div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">Grafik Görünümü</h3>
-                      <p className="text-gray-600">
-                        {activeModal} verilerinin grafik görünümü burada gösterilecek
-                      </p>
+                  {/* Threshold Sekmesi */}
+                  {activeTab === 'threshold' && (
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-semibold text-gray-800">Threshold Ayarları</h4>
+                      <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
+                        <div className="text-6xl mb-4">⚙️</div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">Threshold Ayarları</h3>
+                        <p className="text-gray-600">
+                          {activeModal} için threshold ayarları burada yapılacak
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           </div>
