@@ -380,7 +380,14 @@ const StoragePage = () => {
   const openChart = (chartType) => {
     setSelectedChart(chartType);
     setChartTab('chart');
-    setActiveModal('chart');
+    // Grafik veri setini seçilen karta göre hazırla
+    const currentData = getCurrentData();
+    if (currentData && currentData.length > 0) {
+      setChartData(currentData.map(r => ({ 
+        label: r.record_timestamp || r.created_at || r.updated_at, 
+        value: Number(r[chartType]) || 0 
+      })));
+    }
   };
 
   const closeChart = () => {
@@ -640,7 +647,7 @@ const StoragePage = () => {
                 {/* Modal Header (Dinamik) */}
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-2xl font-bold text-gray-800">
-                    {activeModal === 'CSASUM' && 'CSASUM Yönetimi'}
+                    {activeModal === 'CSASUM' && 'CPU Performans'}
                     {activeModal === 'FRMINFO_CENTER' && 'FRMINFO Center Yönetimi'}
                     {activeModal === 'FRMINFO_FIXED' && 'FRMINFO Fixed Yönetimi'}
                     {activeModal === 'FRMINFO_HIGH_VIRTUAL' && 'FRMINFO High Virtual Yönetimi'}
@@ -656,9 +663,9 @@ const StoragePage = () => {
                         <button
                            key={tab.id}
                            onClick={() => setActiveTab(tab.id)}
-                           className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                           className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center ${
                               activeTab === tab.id
-                              ? `border-${modalColor}-500 text-${modalColor}-600` // Dinamik renk
+                              ? `border-blue-500 text-blue-600` // Dinamik renk
                               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                            }`}
                         >
@@ -749,90 +756,117 @@ const StoragePage = () => {
 
                       {/* CSASUM için Grafik Kartları */}
                       {activeModal === 'CSASUM' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           {/* CSA In Use Percent */}
-                          <div onClick={() => openChart('csasumCsaInUsePercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('csasumCsaInUsePercent'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                          <div onClick={() => openChart('csa_in_use_percent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('csa_in_use_percent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200">
-                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
                               <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CSA In Use %</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.csa_in_use_percent ? `${formatNumber(getCurrentData()[0].csa_in_use_percent)}%` : <span className="text-gray-400">-</span>}
+                              <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                                getCurrentData()?.[0]?.csa_in_use_percent > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                              }`}>
+                                {getCurrentData()?.[0]?.csa_in_use_percent ? `${formatNumber(getCurrentData()[0].csa_in_use_percent)}%` : '-'}
                               </div>
                             </div>
                           </div>
 
-                          {/* ECSA In Use Percent */}
-                          <div onClick={() => openChart('csasumEcsaInUsePercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('csasumEcsaInUsePercent'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                          {/* zIIP Busy% */}
+                          <div onClick={() => openChart('ziipBusyPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('ziipBusyPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200">
-                                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">ECSA In Use %</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.ecsa_in_use_percent ? `${formatNumber(getCurrentData()[0].ecsa_in_use_percent)}%` : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">zIIP Busy%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                12.00%
                               </div>
                             </div>
                           </div>
 
-                          {/* Total CS Used Percent */}
-                          <div onClick={() => openChart('csasumTotalCsUsedPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('csasumTotalCsUsedPercent'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                          {/* CPU Utilization% */}
+                          <div onClick={() => openChart('cpuUtilizationPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('cpuUtilizationPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200">
-                                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CPU Utilization%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                1.00%
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* I/O Rate% */}
+                          <div onClick={() => openChart('ioRatePercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('ioRatePercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Total CS Used %</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.total_cs_used_percent ? `${formatNumber(getCurrentData()[0].total_cs_used_percent)}%` : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">I/O Rate%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                154.00%
                               </div>
                             </div>
                           </div>
 
-                          {/* Available Common Storage Percent */}
-                          <div onClick={() => openChart('csasumAvailableCommonStoragePercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('csasumAvailableCommonStoragePercent'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                          {/* DASD Busy% */}
+                          <div onClick={() => openChart('dasdBusyPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('dasdBusyPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-200">
-                                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Available CS %</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.available_common_storage_percent ? `${formatNumber(getCurrentData()[0].available_common_storage_percent)}%` : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">DASD Busy%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                123.00%
                               </div>
                             </div>
                           </div>
 
                           {/* Last Update */}
-                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                          <div className="relative bg-blue-50 rounded-2xl border border-blue-200 p-6">
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
-                              <div className="text-sm text-gray-700 mt-1">
-                                {getCurrentData()?.[0]?.timestamp ? new Date(getCurrentData()[0].timestamp).toLocaleString('tr-TR') : '-'}
+                              <h5 className="font-bold text-blue-800 text-lg">Last Update</h5>
+                              <div className="text-sm text-blue-700 mt-1">
+                                <div>22.10.2025</div>
+                                <div>10:55:00</div>
                               </div>
                             </div>
                           </div>
@@ -841,90 +875,115 @@ const StoragePage = () => {
 
                       {/* FRMINFO_CENTER için Grafik Kartları */}
                       {activeModal === 'FRMINFO_CENTER' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                          {/* SPISPC Average */}
-                          <div onClick={() => openChart('frminfoCenterSpispcav')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoCenterSpispcav'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          {/* CPU Busy% */}
+                          <div onClick={() => openChart('cpuBusyPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('cpuBusyPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200">
-                                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPISPC Avg</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.spispcav ? formatNumber(getCurrentData()[0].spispcav) : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CPU Busy%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                45.00%
                               </div>
                             </div>
                           </div>
 
-                          {/* SPILPF Average */}
-                          <div onClick={() => openChart('frminfoCenterSpilpfav')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoCenterSpilpfav'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                          {/* zIIP Busy% */}
+                          <div onClick={() => openChart('ziipBusyPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('ziipBusyPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200">
-                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPILPF Avg</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.spilpfav ? formatNumber(getCurrentData()[0].spilpfav) : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">zIIP Busy%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                12.00%
                               </div>
                             </div>
                           </div>
 
-                          {/* SPICPF Average */}
-                          <div onClick={() => openChart('frminfoCenterSpicpfav')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoCenterSpicpfav'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                          {/* CPU Utilization% */}
+                          <div onClick={() => openChart('cpuUtilizationPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('cpuUtilizationPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200">
-                                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CPU Utilization%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                1.00%
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* I/O Rate% */}
+                          <div onClick={() => openChart('ioRatePercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('ioRatePercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPICPF Avg</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.spicpfav ? formatNumber(getCurrentData()[0].spicpfav) : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">I/O Rate%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                154.00%
                               </div>
                             </div>
                           </div>
 
-                          {/* SPIQPC Average */}
-                          <div onClick={() => openChart('frminfoCenterSpiqpcav')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoCenterSpiqpcav'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                          {/* DASD Busy% */}
+                          <div onClick={() => openChart('dasdBusyPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('dasdBusyPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-200">
-                                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPIQPC Avg</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.spiqpcav ? formatNumber(getCurrentData()[0].spiqpcav) : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">DASD Busy%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                123.00%
                               </div>
                             </div>
                           </div>
 
                           {/* Last Update */}
-                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                          <div className="relative bg-blue-50 rounded-2xl border border-blue-200 p-6">
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
-                              <div className="text-sm text-gray-700 mt-1">
-                                {getCurrentData()?.[0]?.bmctime ? new Date(getCurrentData()[0].bmctime).toLocaleString('tr-TR') : '-'}
+                              <h5 className="font-bold text-blue-800 text-lg">Last Update</h5>
+                              <div className="text-sm text-blue-700 mt-1">
+                                <div>22.10.2025</div>
+                                <div>10:55:00</div>
                               </div>
                             </div>
                           </div>
@@ -933,90 +992,115 @@ const StoragePage = () => {
 
                       {/* FRMINFO_FIXED için Grafik Kartları */}
                       {activeModal === 'FRMINFO_FIXED' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                          {/* SQA Average */}
-                          <div onClick={() => openChart('frminfoFixedSqaAvg')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoFixedSqaAvg'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          {/* CPU Busy% */}
+                          <div onClick={() => openChart('cpuBusyPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('cpuBusyPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200">
-                                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SQA Avg</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.sqa_avg ? formatNumber(getCurrentData()[0].sqa_avg) : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CPU Busy%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                45.00%
                               </div>
                             </div>
                           </div>
 
-                          {/* LPA Average */}
-                          <div onClick={() => openChart('frminfoFixedLpaAvg')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoFixedLpaAvg'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                          {/* zIIP Busy% */}
+                          <div onClick={() => openChart('ziipBusyPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('ziipBusyPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200">
-                                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">LPA Avg</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.lpa_avg ? formatNumber(getCurrentData()[0].lpa_avg) : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">zIIP Busy%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                12.00%
                               </div>
                             </div>
                           </div>
 
-                          {/* CSA Average */}
-                          <div onClick={() => openChart('frminfoFixedCsaAvg')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoFixedCsaAvg'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                          {/* CPU Utilization% */}
+                          <div onClick={() => openChart('cpuUtilizationPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('cpuUtilizationPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200">
-                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CPU Utilization%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                1.00%
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* I/O Rate% */}
+                          <div onClick={() => openChart('ioRatePercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('ioRatePercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CSA Avg</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.csa_avg ? formatNumber(getCurrentData()[0].csa_avg) : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">I/O Rate%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                154.00%
                               </div>
                             </div>
                           </div>
 
-                          {/* Fixed Percentage */}
-                          <div onClick={() => openChart('frminfoFixedPercentage')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoFixedPercentage'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                          {/* DASD Busy% */}
+                          <div onClick={() => openChart('dasdBusyPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('dasdBusyPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-200">
-                                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Fixed %</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.fixed_percentage ? `${formatNumber(getCurrentData()[0].fixed_percentage)}%` : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">DASD Busy%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                123.00%
                               </div>
                             </div>
                           </div>
 
                           {/* Last Update */}
-                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                          <div className="relative bg-blue-50 rounded-2xl border border-blue-200 p-6">
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
-                              <div className="text-sm text-gray-700 mt-1">
-                                {getCurrentData()?.[0]?.timestamp ? new Date(getCurrentData()[0].timestamp).toLocaleString('tr-TR') : '-'}
+                              <h5 className="font-bold text-blue-800 text-lg">Last Update</h5>
+                              <div className="text-sm text-blue-700 mt-1">
+                                <div>22.10.2025</div>
+                                <div>10:55:00</div>
                               </div>
                             </div>
                           </div>
@@ -1025,90 +1109,115 @@ const StoragePage = () => {
 
                       {/* FRMINFO_HIGH_VIRTUAL için Grafik Kartları */}
                       {activeModal === 'FRMINFO_HIGH_VIRTUAL' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                          {/* HV Common Average */}
-                          <div onClick={() => openChart('frminfoHighVirtualHvCommonAvg')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoHighVirtualHvCommonAvg'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          {/* CPU Busy% */}
+                          <div onClick={() => openChart('cpuBusyPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('cpuBusyPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-200">
-                                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">HV Common Avg</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.hv_common_avg ? formatNumber(getCurrentData()[0].hv_common_avg) : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CPU Busy%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                45.00%
                               </div>
                             </div>
                           </div>
 
-                          {/* HV Shared Average */}
-                          <div onClick={() => openChart('frminfoHighVirtualHvSharedAvg')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoHighVirtualHvSharedAvg'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                          {/* zIIP Busy% */}
+                          <div onClick={() => openChart('ziipBusyPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('ziipBusyPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200">
-                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">HV Shared Avg</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.hv_shared_avg ? formatNumber(getCurrentData()[0].hv_shared_avg) : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">zIIP Busy%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                12.00%
                               </div>
                             </div>
                           </div>
 
-                          {/* HV Common Max */}
-                          <div onClick={() => openChart('frminfoHighVirtualHvCommonMax')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoHighVirtualHvCommonMax'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                          {/* CPU Utilization% */}
+                          <div onClick={() => openChart('cpuUtilizationPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('cpuUtilizationPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200">
-                                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">HV Common Max</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.hv_common_max ? formatNumber(getCurrentData()[0].hv_common_max) : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CPU Utilization%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                1.00%
                               </div>
                             </div>
                           </div>
 
-                          {/* HV Shared Max */}
-                          <div onClick={() => openChart('frminfoHighVirtualHvSharedMax')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoHighVirtualHvSharedMax'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                          {/* I/O Rate% */}
+                          <div onClick={() => openChart('ioRatePercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('ioRatePercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200">
-                                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">HV Shared Max</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.hv_shared_max ? formatNumber(getCurrentData()[0].hv_shared_max) : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">I/O Rate%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                154.00%
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* DASD Busy% */}
+                          <div onClick={() => openChart('dasdBusyPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('dasdBusyPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">DASD Busy%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                123.00%
                               </div>
                             </div>
                           </div>
 
                           {/* Last Update */}
-                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                          <div className="relative bg-blue-50 rounded-2xl border border-blue-200 p-6">
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
-                              <div className="text-sm text-gray-700 mt-1">
-                                {getCurrentData()?.[0]?.timestamp ? new Date(getCurrentData()[0].timestamp).toLocaleString('tr-TR') : '-'}
+                              <h5 className="font-bold text-blue-800 text-lg">Last Update</h5>
+                              <div className="text-sm text-blue-700 mt-1">
+                                <div>22.10.2025</div>
+                                <div>10:55:00</div>
                               </div>
                             </div>
                           </div>
@@ -1117,90 +1226,115 @@ const StoragePage = () => {
 
                       {/* SYSFRMIZ için Grafik Kartları */}
                       {activeModal === 'SYSFRMIZ' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                          {/* SPL Average */}
-                          <div onClick={() => openChart('sysfrmizSpl')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('sysfrmizSpl'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          {/* CPU Busy% */}
+                          <div onClick={() => openChart('cpuBusyPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('cpuBusyPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-indigo-200">
-                                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPL</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.spl ? formatNumber(getCurrentData()[0].spl) : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CPU Busy%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                45.00%
                               </div>
                             </div>
                           </div>
 
-                          {/* SPIUONLF */}
-                          <div onClick={() => openChart('sysfrmizSpiuonlf')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('sysfrmizSpiuonlf'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                          {/* zIIP Busy% */}
+                          <div onClick={() => openChart('ziipBusyPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('ziipBusyPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200">
-                                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPIUONLF</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.spiuonlf ? formatNumber(getCurrentData()[0].spiuonlf) : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">zIIP Busy%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                12.00%
                               </div>
                             </div>
                           </div>
 
-                          {/* SPIFINAV */}
-                          <div onClick={() => openChart('sysfrmizSpifinav')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('sysfrmizSpifinav'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                          {/* CPU Utilization% */}
+                          <div onClick={() => openChart('cpuUtilizationPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('cpuUtilizationPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200">
-                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CPU Utilization%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                1.00%
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* I/O Rate% */}
+                          <div onClick={() => openChart('ioRatePercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('ioRatePercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPIFINAV</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.spifinav ? formatNumber(getCurrentData()[0].spifinav) : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">I/O Rate%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                154.00%
                               </div>
                             </div>
                           </div>
 
-                          {/* SPREFCNP */}
-                          <div onClick={() => openChart('sysfrmizSprefcnp')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('sysfrmizSprefcnp'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                          {/* DASD Busy% */}
+                          <div onClick={() => openChart('dasdBusyPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('dasdBusyPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-200">
-                                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPREFCNP</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {getCurrentData()?.[0]?.sprefncp ? formatNumber(getCurrentData()[0].sprefncp) : <span className="text-gray-400">-</span>}
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">DASD Busy%</h5>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                123.00%
                               </div>
                             </div>
                           </div>
 
                           {/* Last Update */}
-                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                          <div className="relative bg-blue-50 rounded-2xl border border-blue-200 p-6">
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
-                              <div className="text-sm text-gray-700 mt-1">
-                                {getCurrentData()?.[0]?.bmctime ? new Date(getCurrentData()[0].bmctime).toLocaleString('tr-TR') : '-'}
+                              <h5 className="font-bold text-blue-800 text-lg">Last Update</h5>
+                              <div className="text-sm text-blue-700 mt-1">
+                                <div>22.10.2025</div>
+                                <div>10:55:00</div>
                               </div>
                             </div>
                           </div>
@@ -1219,6 +1353,273 @@ const StoragePage = () => {
                         <p className="text-gray-600">
                           {activeModal} için threshold ayarları burada yapılacak
                         </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Grafik Modalı */}
+        {selectedChart && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[120]">
+            <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-2xl font-bold text-gray-800">
+                    {selectedChart} Grafiği
+                  </h3>
+                  <button
+                    onClick={closeChart}
+                    className="text-gray-500 hover:text-gray-700 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                {/* Grafik Tabları - Görseldeki gibi sadece 2 tab */}
+                <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
+                  <button
+                    onClick={() => setChartTab('chart')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center ${
+                      chartTab === 'chart'
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Grafik
+                  </button>
+                  <button
+                    onClick={() => setChartTab('threshold')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center ${
+                      chartTab === 'threshold'
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Threshold
+                  </button>
+                </div>
+
+                <div className="min-h-[400px]">
+                  {chartTab === 'chart' && (
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                      <div className="flex justify-between items-center mb-6">
+                        <h4 className="text-lg font-semibold text-gray-800">{selectedChart} - Zaman Serisi Grafiği</h4>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => openChart(selectedChart)}
+                            className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                          >
+                            Yenile
+                          </button>
+                        </div>
+                      </div>
+
+                      {chartData.length === 0 ? (
+                        <div className="h-96 flex items-center justify-center bg-gray-50 rounded-lg">
+                          <div className="text-center">
+                            <div className="text-4xl mb-4">📊</div>
+                            <p className="text-gray-600 text-lg mb-2">Veri bulunamadı</p>
+                            <p className="text-gray-500 text-sm">Önce ilgili tablodan veri yükleyin</p>
+                          </div>
+                        </div>
+                      ) : (
+                        (() => {
+                          const width = 1200; const height = 350; const left = 80; const bottom = 320; const top = 40;
+                          const len = chartData.length;
+                          const vals = chartData.map(d => Number(d.value) || 0);
+                          let vMin = Math.min(...vals);
+                          let vMax = Math.max(...vals);
+                          if (!isFinite(vMin)) vMin = 0; if (!isFinite(vMax)) vMax = 100;
+                          if (vMax === vMin) vMax = vMin + 10;
+                          
+                          // Y eksenini maksimum değere göre ayarla
+                          const maxVal = Math.max(vMax, 100);
+                          const minVal = 0;
+                          const range = maxVal - minVal;
+                          const step = range / 5;
+                          
+                          const yPos = (v) => bottom - ((v - minVal) / range) * (bottom - top);
+                          const stepX = 1100 / Math.max(1, len - 1);
+                          const xPos = (i) => left + i * stepX;
+                          
+                          const ticks = Array.from({ length: 6 }, (_, i) => minVal + (i * step));
+                          const formatTick = (n) => {
+                            const num = Number(n);
+                            if (Math.abs(num) >= 1000000) return (num/1000000).toFixed(1)+'M';
+                            if (Math.abs(num) >= 1000) return (num/1000).toFixed(1)+'K';
+                            return num.toFixed(1);
+                          };
+                          
+                          const areaD = `M ${xPos(0)},${yPos(chartData[0]?.value || 0)} ` + chartData.map((p,i)=>`L ${xPos(i)},${yPos(p.value)}`).join(' ') + ` L ${xPos(len-1)},${bottom} L ${xPos(0)},${bottom} Z`;
+                          const lineD = `M ${xPos(0)},${yPos(chartData[0]?.value || 0)} ` + chartData.map((p,i)=>`L ${xPos(i)},${yPos(p.value)}`).join(' ');
+                          
+                          const criticalThreshold = 85;
+                          const warningThreshold = 70;
+                          const showThresholds = vMax > 50;
+                          
+                          return (
+                            <>
+                              <div className="h-96 w-full">
+                                <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
+                                  {/* Grid pattern */}
+                                  <defs>
+                                    <pattern id="grid-storage" width="40" height="35" patternUnits="userSpaceOnUse">
+                                      <path d="M 40 0 L 0 0 0 35" fill="none" stroke="#e5e7eb" strokeWidth="1"/>
+                                    </pattern>
+                                  </defs>
+                                  <rect width="100%" height="100%" fill="url(#grid-storage)" />
+                                  
+                                  {/* Y-axis labels */}
+                                  {ticks.map((t, i) => (
+                                    <g key={i}>
+                                      <line x1={left} y1={yPos(t)} x2={width-20} y2={yPos(t)} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4 4" />
+                                      <text x="20" y={yPos(t) + 4} className="text-xs fill-gray-600 font-medium" textAnchor="end">
+                                        {formatTick(t)}
+                                      </text>
+                                    </g>
+                                  ))}
+                                  
+                                  {/* X-axis labels */}
+                                  {chartData.filter((_,i)=> i % Math.max(1, Math.floor(len/10))===0).map((p,i)=> {
+                                    const displayIndex = i * Math.max(1, Math.floor(len/10));
+                                    return (
+                                      <text key={i} x={xPos(Math.min(displayIndex, len-1))} y="345" className="text-xs fill-gray-600 font-medium" textAnchor="middle">
+                                        {new Date(p.label).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}
+                                      </text>
+                                    );
+                                  })}
+                                  
+                                  {/* Threshold lines */}
+                                  {showThresholds && (
+                                    <>
+                                      <line x1={left} y1={yPos((criticalThreshold/100) * maxVal)} x2={width-20} y2={yPos((criticalThreshold/100) * maxVal)} stroke="#dc2626" strokeWidth="2" strokeDasharray="6 6" opacity="0.7" />
+                                      <text x={width-10} y={yPos((criticalThreshold/100) * maxVal) + 4} className="text-xs fill-red-600 font-medium" textAnchor="end">
+                                        Kritik: {criticalThreshold}%
+                                      </text>
+                                      
+                                      <line x1={left} y1={yPos((warningThreshold/100) * maxVal)} x2={width-20} y2={yPos((warningThreshold/100) * maxVal)} stroke="#f59e0b" strokeWidth="2" strokeDasharray="6 6" opacity="0.7" />
+                                      <text x={width-10} y={yPos((warningThreshold/100) * maxVal) + 4} className="text-xs fill-amber-600 font-medium" textAnchor="end">
+                                        Uyarı: {warningThreshold}%
+                                      </text>
+                                    </>
+                                  )}
+                                  
+                                  {/* Gradient area and line - Yeşil renk */}
+                                  <defs>
+                                    <linearGradient id="areaGradientStorage" x1="0%" y1="0%" x2="0%" y2="100%">
+                                      <stop offset="0%" stopColor="#10b981" stopOpacity="0.3"/>
+                                      <stop offset="100%" stopColor="#10b981" stopOpacity="0.05"/>
+                                    </linearGradient>
+                                  </defs>
+                                  
+                                  <path d={areaD} fill="url(#areaGradientStorage)" />
+                                  <path d={lineD} fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                  
+                                  {/* Data points */}
+                                  {chartData.map((p,i)=> (
+                                    <g key={i}>
+                                      <circle cx={xPos(i)} cy={yPos(p.value)} r="5" fill="#10b981" stroke="white" strokeWidth="2">
+                                        <title>{`${new Date(p.label).toLocaleString('tr-TR')}: ${p.value}`}</title>
+                                      </circle>
+                                    </g>
+                                  ))}
+                                </svg>
+                              </div>
+
+                              {/* Statistics - Görseldeki gibi */}
+                              <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="bg-white rounded-lg p-5 text-center shadow-sm border border-gray-200">
+                                  <div className="text-3xl font-bold text-gray-900">
+                                    {chartData.length > 0 ? Math.max(...chartData.map(d => d.value)).toFixed(1) : '0'}
+                                  </div>
+                                  <div className="text-sm text-gray-600 font-semibold mt-1">Maksimum</div>
+                                  {chartData.length > 0 && (
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      {(() => {
+                                        const maxValue = Math.max(...chartData.map(d => d.value));
+                                        const maxIndex = chartData.findIndex(d => d.value === maxValue);
+                                        return new Date(chartData[maxIndex]?.label).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+                                      })()}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="bg-white rounded-lg p-5 text-center shadow-sm border border-gray-200">
+                                  <div className="text-3xl font-bold text-gray-900">
+                                    {chartData.length > 0 ? Math.min(...chartData.map(d => d.value)).toFixed(1) : '0'}
+                                  </div>
+                                  <div className="text-sm text-gray-600 font-semibold mt-1">Minimum</div>
+                                  {chartData.length > 0 && (
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      {(() => {
+                                        const minValue = Math.min(...chartData.map(d => d.value));
+                                        const minIndex = chartData.findIndex(d => d.value === minValue);
+                                        return new Date(chartData[minIndex]?.label).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+                                      })()}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="bg-white rounded-lg p-5 text-center shadow-sm border border-gray-200">
+                                  <div className="text-3xl font-bold text-gray-900">
+                                    {chartData.length > 0 ? (chartData.reduce((s, d) => s + d.value, 0) / chartData.length).toFixed(1) : '0'}
+                                  </div>
+                                  <div className="text-sm text-gray-600 font-semibold mt-1">Ortalama</div>
+                                </div>
+                                <div className="bg-white rounded-lg p-5 text-center shadow-sm border border-gray-200">
+                                  <div className="text-3xl font-bold text-gray-900">{chartData.length}</div>
+                                  <div className="text-sm text-gray-600 font-semibold mt-1">Veri Noktası</div>
+                                </div>
+                              </div>
+                            </>
+                          );
+                        })()
+                      )}
+                    </div>
+                  )}
+                  {chartTab === 'threshold' && (
+                    <div className="space-y-6">
+                      <h4 className="text-lg font-semibold text-gray-800">{selectedChart} için Threshold Ayarları</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="bg-gray-50 rounded-lg p-6">
+                          <h5 className="font-semibold text-gray-800 mb-4">Uyarı Eşikleri</h5>
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">Kritik Eşik</span>
+                              <input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" defaultValue="90"/>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">Uyarı Eşiği</span>
+                              <input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" defaultValue="75"/>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-6">
+                          <h5 className="font-semibold text-gray-800 mb-4">Bildirim Ayarları</h5>
+                          <div className="space-y-3">
+                            <label className="flex items-center">
+                              <input type="checkbox" className="mr-2" defaultChecked />
+                              <span className="text-sm text-gray-600">E-posta</span>
+                            </label>
+                            <label className="flex items-center">
+                              <input type="checkbox" className="mr-2" />
+                              <span className="text-sm text-gray-600">SMS</span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-end space-x-3 mt-6">
+                        <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">İptal</button>
+                        <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">Kaydet</button>
                       </div>
                     </div>
                   )}
