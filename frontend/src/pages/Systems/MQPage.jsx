@@ -137,19 +137,266 @@ const MQPage = () => {
     } catch (e) { toast.error('Zaman filtresi sırasında hata'); }
   };
 
-  // Export yardımcıları (kolaylaştırılmış - tablo alanları örnek)
+  // Export yardımcıları - Excel (CSV)
   const exportToExcel = (rows, filename) => {
-    if (!rows || rows.length === 0) return toast.error('Aktarılacak veri bulunamadı');
-    const headers = Object.keys(rows[0] || {});
-    const csv = [headers.join(','), ...rows.map(r => headers.map(h => r[h] ?? '').join(','))].join('\n');
-    const BOM='\uFEFF'; const blob=new Blob([BOM+csv],{type:'text/csv;charset=utf-8;'});
-    const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`${filename}_${new Date().toISOString().split('T')[0]}.csv`; a.click(); URL.revokeObjectURL(url);
-    toast.success('Excel indirildi');
+    if (!rows || rows.length === 0) {
+      toast.error('Aktarılacak veri bulunamadı');
+      return;
+    }
+    
+    try {
+      const rawHeaders = Object.keys(rows[0] || {});
+      
+      // Header'ları temizle ve formatla
+      const cleanHeader = (header) => {
+        return header.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      };
+      
+      const headers = rawHeaders.map(cleanHeader);
+      
+      // CSV satırlarını oluştur - güvenli formatlama
+      const escapeCSV = (value) => {
+        if (value === null || value === undefined) return '';
+        const stringValue = String(value);
+        // Virgül, tırnak veya newline içeriyorsa tırnak içine al
+        if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+          return `"${stringValue.replace(/"/g, '""')}"`;
+        }
+        return stringValue;
+      };
+      
+      const formatValue = (value) => {
+        if (value === null || value === undefined) return '';
+        
+        // Date objesi ise
+        if (value instanceof Date) {
+          return value.toLocaleString('tr-TR');
+        }
+        
+        // String olarak tarih formatını kontrol et
+        if (typeof value === 'string' && value.match(/\d{4}-\d{2}-\d{2}/)) {
+          try {
+            return new Date(value).toLocaleString('tr-TR');
+          } catch {
+            return value;
+          }
+        }
+        
+        // Number formatlama (binlik ayracı)
+        if (typeof value === 'number') {
+          return value.toLocaleString('tr-TR');
+        }
+        
+        return String(value);
+      };
+      
+      const csvRows = rows.map(row => 
+        rawHeaders.map(header => {
+          const value = row[header];
+          return escapeCSV(formatValue(value));
+        }).join(',')
+      );
+      
+      const csv = [headers.join(','), ...csvRows].join('\r\n');
+      
+      // UTF-8 BOM ile blob oluştur (Türkçe karakterler için)
+      const BOM = '\uFEFF';
+      const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
+      
+      // Dosyayı indir
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${filename.replace(/[^a-zA-Z0-9_]/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast.success('Excel dosyası başarıyla indirildi');
+    } catch (error) {
+      console.error('Excel export hatası:', error);
+      toast.error('Excel oluşturulurken hata oluştu');
+    }
   };
+  
+  // Export yardımcıları - PDF
   const exportToPDF = (rows, filename) => {
-    if (!rows || rows.length === 0) return toast.error('Aktarılacak veri bulunamadı');
-    // Basit PDF: jsPDF autotable benzeri dış import NetworkPage’deki gibi dinamik yüklenebilir
-    toast('PDF export bu sayfada basitleştirilmiş placeholder');
+    if (!rows || rows.length === 0) {
+      toast.error('Aktarılacak veri bulunamadı');
+      return;
+    }
+    
+    try {
+      // jsPDF ve autoTable eklentisini dinamik olarak yükle
+      const loadScripts = () => {
+        return new Promise((resolve, reject) => {
+          // Script zaten yüklenmişse direkt resolve et
+          if (window.jspdf && window.jspdf.autoTable) {
+            resolve();
+            return;
+          }
+          
+          let loadedCount = 0;
+          const totalScripts = 2;
+          
+          const onScriptLoad = () => {
+            loadedCount++;
+            if (loadedCount === totalScripts) {
+              resolve();
+            }
+          };
+          
+          const onScriptError = () => {
+            reject(new Error('Script yükleme hatası'));
+          };
+          
+          // jsPDF yükle
+          if (!window.jspdf) {
+            const jsPDFScript = document.createElement('script');
+            jsPDFScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+            jsPDFScript.onload = onScriptLoad;
+            jsPDFScript.onerror = onScriptError;
+            document.head.appendChild(jsPDFScript);
+          } else {
+            onScriptLoad();
+          }
+          
+          // autoTable eklentisini yükle
+          if (!window.jspdf?.autoTable) {
+            const autoTableScript = document.createElement('script');
+            autoTableScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js';
+            autoTableScript.onload = onScriptLoad;
+            autoTableScript.onerror = onScriptError;
+            document.head.appendChild(autoTableScript);
+          } else {
+            onScriptLoad();
+          }
+        });
+      };
+      
+      loadScripts().then(() => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Başlık ekle
+        doc.setFontSize(16);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${filename} Raporu`, 14, 22);
+        
+        // Tarih ekle
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        const currentDate = new Date().toLocaleString('tr-TR');
+        doc.text(`Oluşturulma Tarihi: ${currentDate}`, 14, 30);
+        
+        // Veri hazırlama - Kolon isimlerini ve değerleri temizle
+        const cleanHeader = (header) => {
+          // Header'ı daha okunabilir hale getir
+          return header.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        };
+        
+        const formatDataValue = (value) => {
+          if (value === null || value === undefined) return '-';
+          
+          // Date kontrolü
+          if (value instanceof Date) {
+            return value.toLocaleString('tr-TR');
+          }
+          
+          // String tarih kontrolü
+          if (typeof value === 'string' && value.match(/\d{4}-\d{2}-\d{2}/)) {
+            try {
+              return new Date(value).toLocaleString('tr-TR');
+            } catch {
+              return value;
+            }
+          }
+          
+          // Number formatlama (büyük sayılar için)
+          if (typeof value === 'number') {
+            return value.toLocaleString('tr-TR');
+          }
+          
+          let stringValue = String(value);
+          
+          // Uzun string'leri kısalt
+          if (stringValue.length > 25) {
+            stringValue = stringValue.substring(0, 22) + '...';
+          }
+          
+          return stringValue;
+        };
+        
+        const rawHeaders = Object.keys(rows[0] || {});
+        const headers = rawHeaders.map(cleanHeader);
+        const tableData = rows.map(row => 
+          rawHeaders.map(header => formatDataValue(row[header]))
+        );
+        
+        // PDF tablosunu oluştur - Alt satıra kayma önleme
+        doc.autoTable({
+          head: [headers],
+          body: tableData,
+          startY: 40,
+          styles: {
+            fontSize: 7,
+            cellPadding: 3,
+            overflow: 'hidden',
+            halign: 'left',
+            valign: 'middle',
+            lineWidth: 0.1,
+            lineColor: [220, 220, 220]
+          },
+          headStyles: {
+            fillColor: [59, 130, 246], // cyan blue
+            textColor: [255, 255, 255],
+            fontStyle: 'bold',
+            cellPadding: 3,
+            overflow: 'hidden',
+            minCellWidth: 30
+          },
+          bodyStyles: {
+            overflow: 'hidden',
+            cellPadding: 2
+          },
+          alternateRowStyles: {
+            fillColor: [249, 250, 251]
+          },
+          columnStyles: {
+            // Tarih kolonları için özel stil
+            ...(rawHeaders.reduce((acc, header, index) => {
+              if (header.toLowerCase().includes('timestamp') || 
+                  header.toLowerCase().includes('created_at') ||
+                  header.toLowerCase().includes('updated_at') ||
+                  header.toLowerCase().includes('time') ||
+                  header.toLowerCase().includes('date')) {
+                acc[index] = { fontSize: 6 };
+              } else if (header.toLowerCase().includes('id')) {
+                acc[index] = { fontSize: 7, cellWidth: 'auto' };
+              }
+              return acc;
+            }, {}))
+          },
+          margin: { top: 40, left: 5, right: 5 },
+          tableWidth: 'wrap'
+        });
+        
+        // PDF'i indir - Dosya adını temizle
+        const cleanFileName = filename.replace(/[^a-zA-Z0-9_]/g, '_');
+        const fileName = `${cleanFileName}_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
+        
+        toast.success('PDF başarıyla indirildi');
+      }).catch((error) => {
+        console.error('PDF script yükleme hatası:', error);
+        toast.error('PDF oluşturma hatası. Lütfen sayfayı yenileyin ve tekrar deneyin.');
+      });
+      
+    } catch (error) {
+      console.error('PDF oluşturma hatası:', error);
+      toast.error('PDF oluşturulurken hata oluştu');
+    }
   };
 
   const modalColor = 'cyan';
@@ -210,10 +457,224 @@ const MQPage = () => {
     setChartData(points);
   };
 
-  // Grafik kartı için ikon seçici (kolon adına göre)
+  // Grafik kartı için ikon seçici (kolon adına göre) - Daha detaylı ikon eşleştirmeleri
   const renderIconForKey = (key, iconClasses) => {
     const k = String(key || '').toLowerCase();
-    // Öncelik: spesifik desenler (exception vs reply gibi)
+    
+    // 0. Özel MQ alan adları için öncelikli eşleştirmeler - Daha spesifik kontrol
+    if ((k.includes('msg') || k.includes('mes')) && k.length <= 10) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+        </svg>
+      );
+    }
+    
+    if (k.includes('comlv') || k.includes('comlvx') || k.includes('compare')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+      );
+    }
+    
+    if (k.includes('getr') || (k.includes('get') && k.length > 3 && k.length < 10)) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+      );
+    }
+    
+    if (k.includes('put') || (k.includes('send') && k.length < 10)) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+      );
+    }
+    
+    // 0.5. Özel channel ve retry pattern'leri
+    if (k.includes('retry') || k.includes('retrying')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+      );
+    }
+    
+    // 0.6. Depth (Derinlik) pattern'i
+    if (k.includes('depth') || k.includes('yüksek') || k.includes('high')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14-7H5m14 14H5m14-7H5" />
+        </svg>
+      );
+    }
+    
+    // 0.7. Local/Transmit queue pattern'i
+    if (k.includes('local_queues') || k.includes('transmit_queues')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      );
+    }
+    
+    // 0.8. Channel pattern'i
+    if (k.includes('channel') && !k.includes('message')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+      );
+    }
+    
+    // 0.9. Free pages pattern'i
+    if (k.includes('free_pages') || k.includes('page_set') || k.includes('page')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+        </svg>
+      );
+    }
+    
+    // 0.10. Events count pattern'i
+    if (k.includes('events_count') || (k.includes('events') && k.includes('count'))) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 11-6 0h6z" />
+        </svg>
+      );
+    }
+    
+    // Özel q ile başlayan alanlar için queue manager şeması
+    if (k.startsWith('qm') && k.length <= 10) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+      );
+    }
+    
+    // q ile başlayan diğer alanlar için kuyruk ikonu
+    if (k.startsWith('q') && k.length <= 10 && !k.includes('msg') && !k.includes('mes')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+      );
+    }
+    
+    // 1. Bağlantı ve iletişim
+    if (k.includes('conn') || k.includes('link') || k.includes('connection')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+        </svg>
+      );
+    }
+    
+    // 2. Queue (Kuyruk) - Sadece queue kelimesini içerenler için
+    if (k.includes('queue') && !k.startsWith('q')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h11M5 12h14M2 17h14" />
+        </svg>
+      );
+    }
+    
+    // 3. Channel (Kanal)
+    if (k.includes('channel') || k.includes('kanal')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+      );
+    }
+    
+    // 4. Message (Mesaj)
+    if (k.includes('message') || k.includes('msg')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+        </svg>
+      );
+    }
+    
+    // 5. Application (Uygulama)
+    if (k.includes('app') || k.includes('applic')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      );
+    }
+    
+    // 6. Manager (Yönetici)
+    if (k.includes('manager') || k.includes('qmgr')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+      );
+    }
+    
+    // 7. Depth (Derinlik)
+    if (k.includes('depth') || k.includes('derinlik')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14-7H5m14 14H5m14-7H5" />
+        </svg>
+      );
+    }
+    
+    // 8. Count (Sayaç)
+    if (k.includes('count') || k.includes('sayac')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M13 4v16M4 8h16M4 14h16" />
+        </svg>
+      );
+    }
+    
+    // 9. Status (Durum)
+    if (k.includes('status') || k.includes('state') || k.includes('durum')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      );
+    }
+    
+    // 10. Rate (Hız/Oran)
+    if (k.includes('rate') || k.includes('speed') || k.includes('throughput')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      );
+    }
+    
+    // 11. Workload (İş Yükü)
+    if (k.includes('workload') || k.includes('load')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      );
+    }
+    
+    // 12. Overflow (Taşma)
+    if (k.includes('overflow') || k.includes('taşma')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" />
+        </svg>
+      );
+    }
+    
+    // 13. Exception (Hata)
     if (k.includes('exception') || k.includes('error') || k.includes('fail')) {
       return (
         <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,63 +682,53 @@ const MQPage = () => {
         </svg>
       );
     }
-    if (k.includes('event') || k.includes('listener')) {
-      // Bildirim/olay: zil simgesi
+    
+    // 14. Free/Used/Buffer (Serbest/Kullanılan/Bellek)
+    if (k.includes('free') || k.includes('used') || k.includes('buffer') || k.includes('memory')) {
       return (
         <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 11-6 0h6z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
         </svg>
       );
     }
-    // Saat/tarih
-    if (k.includes('time') || k.includes('second') || k.includes('timestamp')) {
+    
+    // 15. Time/Duration (Zaman/Süre)
+    if (k.includes('time') || k.includes('duration') || k.includes('second') || k.includes('timestamp')) {
       return (
         <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3M12 22a10 10 0 100-20 10 10 0 000 20z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       );
     }
-    // Yüzde / kullanım
-    if (k.includes('percent') || k.includes('util') || k.includes('ratio')) {
+    
+    // 16. Percentage/Utilization (Yüzde/Kullanım)
+    if (k.includes('percent') || k.includes('util') || k.includes('ratio') || k.includes('usage')) {
       return (
         <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 20h16M6 16h4v4H6zM11 12h4v8h-4zM16 9h4v11h-4z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
       );
     }
-    // Sayaç / adet
-    if (k.includes('count') || k.includes('total') || k.includes('num') || k.includes('events')) {
+    
+    // 17. Size/Capacity (Boyut/Kapasite)
+    if (k.includes('size') || k.includes('capacity') || k.includes('limit') || k.includes('max') || k.includes('min')) {
       return (
         <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M13 4v16M4 8h16M4 14h16" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
         </svg>
       );
     }
-    // Durum / status
-    if (k.includes('status') || k.includes('state')) {
-      return (
-        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M12 22a10 10 0 100-20 10 10 0 000 20z" />
-        </svg>
-      );
-    }
-    // Derinlik/queue
-    if (k.includes('depth') || k.includes('queue')) {
-      return (
-        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h11M5 12h14M2 17h14" />
-        </svg>
-      );
-    }
-    // Retry/transmit
-    if (k.includes('retry') || k.includes('transmit')) {
+    
+    // 18. Retry/Transmit (Yeniden Deneme/Gönderme)
+    if (k.includes('retry') || k.includes('transmit') || k.includes('send')) {
       return (
         <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v6h6M20 20v-6h-6M5 15a7 7 0 0111-6M19 9a7 7 0 01-11 6" />
         </svg>
       );
     }
-    // Dead letter -> mail
+    
+    // 19. Dead Letter (Ölü Mektup)
     if (k.includes('dead_letter') || k.includes('letter')) {
       return (
         <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -285,15 +736,26 @@ const MQPage = () => {
         </svg>
       );
     }
-    // Reply (cevap) → ok
-    if (k.includes('reply')) {
+    
+    // 20. Total/Num/Events (Toplam/Sayı/Olaylar)
+    if (k.includes('total') || k.includes('num') || k.includes('events') || k.includes('sum')) {
       return (
         <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9V5l-7 7 7 7v-4h8v-6h-8z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M13 4v16M4 8h16M4 14h16" />
         </svg>
       );
     }
-    // Free pages / page
+    
+    // 21. Reply/Response (Cevap/Yanıt)
+    if (k.includes('reply') || k.includes('response')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+        </svg>
+      );
+    }
+    
+    // 22. Page (Sayfa)
     if (k.includes('page')) {
       return (
         <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -301,10 +763,29 @@ const MQPage = () => {
         </svg>
       );
     }
-    // Varsayılan (liste)
+    
+    // 23. Event/Listener (Olay/Dinleyici)
+    if (k.includes('event') || k.includes('listener')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 11-6 0h6z" />
+        </svg>
+      );
+    }
+    
+    // 24. ID/Identifier (Kimlik)
+    if (k.includes('id') && !k.includes('middle') && !k.includes('middleware')) {
+      return (
+        <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+        </svg>
+      );
+    }
+    
+    // 25. Varsayılan - Bar/Bars (Grafik/Bars)
     return (
       <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M6 12h12M8 17h8" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
       </svg>
     );
   };
@@ -420,24 +901,7 @@ const MQPage = () => {
                         ? (activeModal==='mq_connz' ? filteredMqConnzData : activeModal==='mq_qm' ? filteredMqQmData : filteredMqW2overData)
                         : (activeModal==='mq_connz' ? mqConnzData : activeModal==='mq_qm' ? mqQmData : mqW2overData);
                       const first = rows?.[0] || {};
-                      const numericKeys = Object.keys(first || {}).filter(k => {
-                        const v = first[k];
-                        if (v === null || v === undefined) return false;
-                        const str = String(v).toLowerCase();
-                        // string/text/tarih alanları ve kimlikler hariç
-                        if (/[a-z]/.test(str) && isNaN(Number(v))) return false;
-                        if (k.toLowerCase().includes('name')) return false;
-                        if (k.toLowerCase().includes('system')) return false;
-                        if (k.toLowerCase().includes('host')) return false;
-                        if (k.toLowerCase().includes('ip')) return false;
-                        if (k.toLowerCase().includes('job')) return false;
-                        if (k.toLowerCase().includes('step')) return false;
-                        if (k.toLowerCase().includes('time')) return false;
-                        if (k.toLowerCase().includes('date')) return false;
-                        if (k.toLowerCase()==='id') return false;
-                        // sayıya çevrilebilen alanlar
-                        return !isNaN(Number(v));
-                      });
+                      
                       if (!rows || rows.length === 0) {
                         return (
                           <div className="p-8 text-center bg-gray-50 rounded-lg">
@@ -446,51 +910,231 @@ const MQPage = () => {
                           </div>
                         );
                       }
-                      if (numericKeys.length === 0) {
+
+                      // MQ CONNZ Grafik Kartları - Dinamik olarak veri tablosundaki alanları göster
+                      if (activeModal === 'mq_connz') {
+                        // Get all keys from the data
+                        const dataKeys = Object.keys(first);
+                        const numericKeys = dataKeys.filter(k => {
+                          const v = first[k];
+                          if (v === null || v === undefined) return false;
+                          // Exclude non-numeric fields
+                          if (k.toLowerCase().includes('name') || 
+                              k.toLowerCase().includes('system') || 
+                              k.toLowerCase().includes('host') || 
+                              k.toLowerCase().includes('ip') || 
+                              k.toLowerCase().includes('id') ||
+                              k.toLowerCase().includes('time') ||
+                              k.toLowerCase().includes('date') ||
+                              k.toLowerCase().includes('timestamp')) return false;
+                          return !isNaN(Number(v)) && isFinite(Number(v));
+                        });
+
                         return (
-                          <div className="p-8 text-center bg-gray-50 rounded-lg">
-                            <div className="text-4xl mb-2">ℹ️</div>
-                            <div className="text-gray-600">Sayısal alan bulunamadı. Metin alanları için grafik oluşturulmaz.</div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {numericKeys.length > 0 ? numericKeys.map((key) => (
+                              <div key={key} onClick={() => openChart(key)} className="group relative bg-white rounded-2xl border border-gray-200 p-6 flex flex-col hover:shadow-lg transition-all duration-300 cursor-pointer">
+                                <div className="flex-grow flex flex-col items-center justify-center text-center">
+                                  <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-gray-200 transition-colors duration-300 flex-shrink-0">
+                                    {renderIconForKey(key, 'w-7 h-7 text-gray-700')}
+                                  </div>
+                                  <h5 className="font-semibold text-gray-800 group-hover:text-gray-600 text-xs mb-3 line-clamp-2 px-2 min-h-[2rem]">{key}</h5>
+                                  <div className="mt-auto">
+                                    {first[key] !== null && first[key] !== undefined ? (
+                                      <span className="inline-block px-3 py-1.5 rounded-full text-sm font-bold bg-cyan-100 text-cyan-800 border border-cyan-200">
+                                        {typeof first[key] === 'number' ? first[key].toLocaleString() : first[key]}
+                                      </span>
+                                    ) : (
+                                      <span className="text-gray-400 text-sm">-</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )) : (
+                              <div className="col-span-full p-8 text-center bg-gray-50 rounded-lg">
+                                <div className="text-4xl mb-2">📊</div>
+                                <div className="text-gray-600">Sayısal veri bulunamadı</div>
+                              </div>
+                            )}
+
+                            {/* LAST UPDATE */}
+                            <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6 flex flex-col">
+                              <div className="flex-grow flex flex-col items-center justify-center text-center">
+                                <div className="w-14 h-14 bg-gray-200 rounded-xl flex items-center justify-center mb-4 flex-shrink-0">
+                                  <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-semibold text-gray-600 text-xs mb-3">LAST UPDATE</h5>
+                                {first.record_timestamp ? (
+                                  <div className="text-xs text-gray-500">
+                                    {new Date(first.record_timestamp).toLocaleString('tr-TR', {
+                                      day: '2-digit',
+                                      month: '2-digit',
+                                      year: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </div>
+                                ) : (
+                                  <div className="text-xs text-gray-400">-</div>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         );
                       }
-                      const formatNum = (n) => {
-                        const num = Number(n);
-                        if (isNaN(num)) return '-';
-                        if (Math.abs(num) >= 1000000) return (num/1000000).toFixed(2) + 'M';
-                        if (Math.abs(num) >= 1000) return (num/1000).toFixed(2) + 'K';
-                        return num.toString();
-                      };
-                      const palette = activeModal==='mq_connz'
-                        ? { iconBg: 'bg-gray-100 group-hover:bg-gray-200', iconText: 'text-gray-500', badge: 'text-cyan-700 bg-cyan-50 border-cyan-200' }
-                        : activeModal==='mq_qm'
-                          ? { iconBg: 'bg-gray-100 group-hover:bg-gray-200', iconText: 'text-gray-500', badge: 'text-indigo-700 bg-indigo-50 border-indigo-200' }
-                          : { iconBg: 'bg-gray-100 group-hover:bg-gray-200', iconText: 'text-gray-500', badge: 'text-rose-700 bg-rose-50 border-rose-200' };
-                      return (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                          {numericKeys.map((key) => (
-                            <div key={key} onClick={() => openChart(key)} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                              <div className="text-center">
-                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 ${palette.iconBg}`}>
-                                  {renderIconForKey(key, `w-6 h-6 ${palette.iconText}`)}
-                                </div>
-                                <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{key}</h5>
-                                <div className="mt-2">
-                                  <span className={`inline-block px-3 py-1 text-sm font-semibold border rounded-full ${palette.badge}`}>
-                                    {formatNum(first[key])}
-                                  </span>
+
+                      // MQ QM Grafik Kartları - Dinamik olarak veri tablosundaki alanları göster
+                      if (activeModal === 'mq_qm') {
+                        const dataKeys = Object.keys(first);
+                        const numericKeys = dataKeys.filter(k => {
+                          const v = first[k];
+                          if (v === null || v === undefined) return false;
+                          if (k.toLowerCase().includes('name') || 
+                              k.toLowerCase().includes('system') || 
+                              k.toLowerCase().includes('host') || 
+                              k.toLowerCase().includes('ip') || 
+                              k.toLowerCase().includes('id') ||
+                              k.toLowerCase().includes('time') ||
+                              k.toLowerCase().includes('date') ||
+                              k.toLowerCase().includes('timestamp')) return false;
+                          return !isNaN(Number(v)) && isFinite(Number(v));
+                        });
+
+                        return (
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {numericKeys.length > 0 ? numericKeys.map((key) => (
+                              <div key={key} onClick={() => openChart(key)} className="group relative bg-white rounded-2xl border border-gray-200 p-6 flex flex-col hover:shadow-lg transition-all duration-300 cursor-pointer">
+                                <div className="flex-grow flex flex-col items-center justify-center text-center">
+                                  <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-gray-200 transition-colors duration-300 flex-shrink-0">
+                                    {renderIconForKey(key, 'w-7 h-7 text-gray-700')}
+                                  </div>
+                                  <h5 className="font-semibold text-gray-800 group-hover:text-gray-600 text-xs mb-3 line-clamp-2 px-2 min-h-[2rem]">{key}</h5>
+                                  <div className="mt-auto">
+                                    {first[key] !== null && first[key] !== undefined ? (
+                                      <span className="inline-block px-3 py-1.5 rounded-full text-sm font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
+                                        {typeof first[key] === 'number' ? first[key].toLocaleString() : first[key]}
+                                      </span>
+                                    ) : (
+                                      <span className="text-gray-400 text-sm">-</span>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
-                          {/* Son Güncelleme */}
-                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3" /></svg></div>
-                              <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
-                              <div className="text-sm text-gray-700 mt-1">{first.record_timestamp ? new Date(first.record_timestamp).toLocaleString('tr-TR') : (first.updated_at || first.created_at || '-')}</div>
+                            )) : (
+                              <div className="col-span-full p-8 text-center bg-gray-50 rounded-lg">
+                                <div className="text-4xl mb-2">📊</div>
+                                <div className="text-gray-600">Sayısal veri bulunamadı</div>
+                              </div>
+                            )}
+
+                            {/* LAST UPDATE */}
+                            <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6 flex flex-col">
+                              <div className="flex-grow flex flex-col items-center justify-center text-center">
+                                <div className="w-14 h-14 bg-gray-200 rounded-xl flex items-center justify-center mb-4 flex-shrink-0">
+                                  <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-semibold text-gray-600 text-xs mb-3">LAST UPDATE</h5>
+                                {first.record_timestamp ? (
+                                  <div className="text-xs text-gray-500">
+                                    {new Date(first.record_timestamp).toLocaleString('tr-TR', {
+                                      day: '2-digit',
+                                      month: '2-digit',
+                                      year: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </div>
+                                ) : (
+                                  <div className="text-xs text-gray-400">-</div>
+                                )}
+                              </div>
                             </div>
                           </div>
+                        );
+                      }
+
+                      // MQ W2OVER Grafik Kartları - Dinamik olarak veri tablosundaki alanları göster
+                      if (activeModal === 'mq_w2over') {
+                        const dataKeys = Object.keys(first);
+                        const numericKeys = dataKeys.filter(k => {
+                          const v = first[k];
+                          if (v === null || v === undefined) return false;
+                          if (k.toLowerCase().includes('name') || 
+                              k.toLowerCase().includes('system') || 
+                              k.toLowerCase().includes('host') || 
+                              k.toLowerCase().includes('ip') || 
+                              k.toLowerCase().includes('id') ||
+                              k.toLowerCase().includes('time') ||
+                              k.toLowerCase().includes('date') ||
+                              k.toLowerCase().includes('timestamp')) return false;
+                          return !isNaN(Number(v)) && isFinite(Number(v));
+                        });
+
+                        return (
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {numericKeys.length > 0 ? numericKeys.map((key) => (
+                              <div key={key} onClick={() => openChart(key)} className="group relative bg-white rounded-2xl border border-gray-200 p-6 flex flex-col hover:shadow-lg transition-all duration-300 cursor-pointer">
+                                <div className="flex-grow flex flex-col items-center justify-center text-center">
+                                  <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-gray-200 transition-colors duration-300 flex-shrink-0">
+                                    {renderIconForKey(key, 'w-7 h-7 text-gray-700')}
+                                  </div>
+                                  <h5 className="font-semibold text-gray-800 group-hover:text-gray-600 text-xs mb-3 line-clamp-2 px-2 min-h-[2rem]">{key}</h5>
+                                  <div className="mt-auto">
+                                    {first[key] !== null && first[key] !== undefined ? (
+                                      <span className="inline-block px-3 py-1.5 rounded-full text-sm font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                        {typeof first[key] === 'number' ? first[key].toLocaleString() : first[key]}
+                                      </span>
+                                    ) : (
+                                      <span className="text-gray-400 text-sm">-</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )) : (
+                              <div className="col-span-full p-8 text-center bg-gray-50 rounded-lg">
+                                <div className="text-4xl mb-2">📊</div>
+                                <div className="text-gray-600">Sayısal veri bulunamadı</div>
+                              </div>
+                            )}
+
+                            {/* LAST UPDATE */}
+                            <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6 flex flex-col">
+                              <div className="flex-grow flex flex-col items-center justify-center text-center">
+                                <div className="w-14 h-14 bg-gray-200 rounded-xl flex items-center justify-center mb-4 flex-shrink-0">
+                                  <svg className="w-7 h-7 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-semibold text-gray-600 text-xs mb-3">LAST UPDATE</h5>
+                                {first.record_timestamp ? (
+                                  <div className="text-xs text-gray-500">
+                                    {new Date(first.record_timestamp).toLocaleString('tr-TR', {
+                                      day: '2-digit',
+                                      month: '2-digit',
+                                      year: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </div>
+                                ) : (
+                                  <div className="text-xs text-gray-400">-</div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      // Fallback for other cases
+                      return (
+                        <div className="p-8 text-center bg-gray-50 rounded-lg">
+                          <div className="text-4xl mb-2">📈</div>
+                          <div className="text-gray-600">Grafik kartları buraya eklenecek</div>
+                          <div className="text-gray-500 text-sm mt-2">{activeModal} grafikleri</div>
                         </div>
                       );
                     })()}
@@ -504,10 +1148,12 @@ const MQPage = () => {
         {/* Grafik Detay Modalı */}
         {selectedChart && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
-            <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-2xl font-bold text-gray-800">{selectedChart} Grafiği</h3>
+                  <h3 className="text-2xl font-bold text-gray-800">
+                    {selectedChart} - Zaman Serisi Grafiği
+                  </h3>
                   <button onClick={() => setSelectedChart(null)} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
                 </div>
                 <div className="border-b border-gray-200 mb-6">
@@ -528,63 +1174,144 @@ const MQPage = () => {
                       </div>
                     ) : (
                       (() => {
-                        const width = 1200; const height = 300; const left = 80; const bottom = 280; const top = 20;
+                        const width = 1200; const height = 350; const left = 80; const bottom = 320; const top = 40;
                         const len = chartData.length;
                         const vals = chartData.map(d => Number(d.value) || 0);
                         let vMin = Math.min(...vals);
                         let vMax = Math.max(...vals);
-                        if (!isFinite(vMin)) vMin = 0; if (!isFinite(vMax)) vMax = 1;
-                        if (vMax === vMin) vMax = vMin + 1;
-                        const pad = (vMax - vMin) * 0.1;
-                        const dMin = vMin - pad;
-                        const dMax = vMax + pad;
-                        const yPos = (v) => bottom - ((v - dMin) / (dMax - dMin)) * (bottom - top);
+                        if (!isFinite(vMin)) vMin = 0; if (!isFinite(vMax)) vMax = 100;
+                        if (vMax === vMin) vMax = vMin + 10;
+                        
+                        // Y eksenini maksimum değere göre ayarla
+                        const maxVal = Math.max(vMax, 100);
+                        const minVal = 0;
+                        const range = maxVal - minVal;
+                        const step = range / 5;
+                        
+                        const yPos = (v) => bottom - ((v - minVal) / range) * (bottom - top);
                         const stepX = 1100 / Math.max(1, len - 1);
                         const xPos = (i) => left + i * stepX;
-                        const tickCount = 5;
-                        const ticks = Array.from({ length: tickCount }, (_, i) => dMin + (i * (dMax - dMin)) / (tickCount - 1));
+                        
+                        const ticks = Array.from({ length: 6 }, (_, i) => minVal + (i * step));
                         const formatTick = (n) => {
                           const num = Number(n);
-                          if (Math.abs(num) >= 1000000) return (num/1000000).toFixed(2)+'M';
-                          if (Math.abs(num) >= 1000) return (num/1000).toFixed(2)+'K';
-                          return num.toFixed(2);
+                          if (Math.abs(num) >= 1000000) return (num/1000000).toFixed(1)+'M';
+                          if (Math.abs(num) >= 1000) return (num/1000).toFixed(1)+'K';
+                          return num.toFixed(1);
                         };
+                        
+                        const formatTickWithPercent = (n) => {
+                          const num = Number(n);
+                          return num.toFixed(0) + '%';
+                        };
+                        
                         const areaD = `M ${xPos(0)},${yPos(chartData[0]?.value || 0)} ` + chartData.map((p,i)=>`L ${xPos(i)},${yPos(p.value)}`).join(' ') + ` L ${xPos(len-1)},${bottom} L ${xPos(0)},${bottom} Z`;
                         const lineD = `M ${xPos(0)},${yPos(chartData[0]?.value || 0)} ` + chartData.map((p,i)=>`L ${xPos(i)},${yPos(p.value)}`).join(' ');
+                        
+                        // Threshold değerleri
+                        const criticalThreshold = 90;
+                        const warningThreshold = 75;
+                        const showThresholds = vMax > 50;
+                        
                         return (
                           <>
-                            <div className="h-96 w-full">
-                              <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
-                                <defs>
-                                  <pattern id="grid-mq" width="40" height="30" patternUnits="userSpaceOnUse">
-                                    <path d="M 40 0 L 0 0 0 30" fill="none" stroke="#f3f4f6" strokeWidth="1"/>
-                                  </pattern>
-                                </defs>
-                                <rect width="100%" height="100%" fill="url(#grid-mq)" />
-                                {ticks.map((t, i) => (
-                                  <text key={i} x="20" y={yPos(t)} className="text-xs fill-gray-500" textAnchor="end">{formatTick(t)}</text>
-                                ))}
-                                {chartData.filter((_,i)=> i % Math.max(1, Math.floor(len/8))===0).map((p,i)=> (
-                                  <text key={i} x={xPos(i)} y="295" className="text-xs fill-gray-500" textAnchor="middle">{new Date(p.label).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}</text>
-                                ))}
-                                <defs>
-                                  <linearGradient id="areaGradientMq" x1="0%" y1="0%" x2="0%" y2="100%">
-                                    <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.3"/>
-                                    <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.05"/>
-                                  </linearGradient>
-                                </defs>
-                                <path d={areaD} fill="url(#areaGradientMq)" />
-                                <path d={lineD} fill="none" stroke="#06b6d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                {chartData.map((p,i)=> (
-                                  <circle key={i} cx={xPos(i)} cy={yPos(p.value)} r="3" fill="#06b6d4"><title>{`${new Date(p.label).toLocaleString('tr-TR')}: ${p.value}`}</title></circle>
-                                ))}
-                              </svg>
+                            <div className="bg-white rounded-lg border border-gray-200 p-6">
+                              <div className="flex justify-between items-center mb-4">
+                                <h4 className="text-lg font-semibold text-gray-800">{selectedChart}</h4>
+                                <button onClick={() => {
+                                  const rows = isFiltered
+                                    ? (activeModal==='mq_connz' ? filteredMqConnzData : activeModal==='mq_qm' ? filteredMqQmData : filteredMqW2overData)
+                                    : (activeModal==='mq_connz' ? mqConnzData : activeModal==='mq_qm' ? mqQmData : mqW2overData);
+                                  const points = rows.map((r) => ({
+                                    label: r.record_timestamp || r.bmctime || r.updated_at || r.created_at,
+                                    value: Number(r[selectedChart]) || 0,
+                                  })).filter(p => !isNaN(p.value));
+                                  setChartData(points);
+                                }} className="px-4 py-2 text-sm font-medium text-white bg-cyan-600 rounded-md hover:bg-cyan-700">Yenile</button>
+                              </div>
+                              <div className="h-96 w-full">
+                                <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
+                                  {/* Grid pattern */}
+                                  <defs>
+                                    <pattern id="grid-mq-detailed" width="40" height="35" patternUnits="userSpaceOnUse">
+                                      <path d="M 40 0 L 0 0 0 35" fill="none" stroke="#e5e7eb" strokeWidth="1"/>
+                                    </pattern>
+                                  </defs>
+                                  <rect width="100%" height="100%" fill="url(#grid-mq-detailed)" />
+                                  
+                                  {/* Y-axis labels */}
+                                  {ticks.map((t, i) => (
+                                    <g key={i}>
+                                      <line x1={left} y1={yPos(t)} x2={width-20} y2={yPos(t)} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4 4" />
+                                      <text x="20" y={yPos(t) + 4} className="text-xs fill-gray-600 font-medium" textAnchor="end">
+                                        {showThresholds ? formatTickWithPercent(t) : formatTick(t)}
+                                      </text>
+                                    </g>
+                                  ))}
+                                  
+                                  {/* X-axis labels */}
+                                  {chartData.filter((_,i)=> i % Math.max(1, Math.floor(len/10))===0).map((p,i)=> {
+                                    const displayIndex = i * Math.max(1, Math.floor(len/10));
+                                    return (
+                                      <text key={i} x={xPos(Math.min(displayIndex, len-1))} y="345" className="text-xs fill-gray-600 font-medium" textAnchor="middle">
+                                        {new Date(p.label).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}
+                                      </text>
+                                    );
+                                  })}
+                                  
+                                  {/* Threshold lines */}
+                                  {showThresholds && (
+                                    <>
+                                      <line x1={left} y1={yPos(criticalThreshold)} x2={width-20} y2={yPos(criticalThreshold)} stroke="#ef4444" strokeWidth="2" strokeDasharray="6 4" opacity="0.6" />
+                                      <text x={width-40} y={yPos(criticalThreshold) - 5} className="text-xs fill-red-600 font-semibold" textAnchor="end">Kritik: {criticalThreshold}%</text>
+                                      
+                                      <line x1={left} y1={yPos(warningThreshold)} x2={width-20} y2={yPos(warningThreshold)} stroke="#f59e0b" strokeWidth="2" strokeDasharray="6 4" opacity="0.6" />
+                                      <text x={width-40} y={yPos(warningThreshold) - 5} className="text-xs fill-amber-600 font-semibold" textAnchor="end">Uyarı: {warningThreshold}%</text>
+                                    </>
+                                  )}
+                                  
+                                  {/* Area gradient */}
+                                  <defs>
+                                    <linearGradient id="areaGradientMqDetailed" x1="0%" y1="0%" x2="0%" y2="100%">
+                                      <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3"/>
+                                      <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.05"/>
+                                    </linearGradient>
+                                  </defs>
+                                  
+                                  {/* Area under curve */}
+                                  <path d={areaD} fill="url(#areaGradientMqDetailed)" />
+                                  
+                                  {/* Line */}
+                                  <path d={lineD} fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                  
+                                  {/* Data points */}
+                                  {chartData.map((p,i)=> (
+                                    <circle key={i} cx={xPos(i)} cy={yPos(p.value)} r="4" fill="#3b82f6" stroke="white" strokeWidth="2">
+                                      <title>{`${new Date(p.label).toLocaleString('tr-TR')}: ${p.value}`}</title>
+                                    </circle>
+                                  ))}
+                                </svg>
+                              </div>
                             </div>
+                            
+                            {/* Statistics */}
                             <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                              <div className="bg-gray-50 rounded-lg p-4 text-center"><div className="text-2xl font-bold text-gray-900">{Math.max(...vals).toFixed(2)}</div><div className="text-sm text-gray-500">Maksimum</div></div>
-                              <div className="bg-gray-50 rounded-lg p-4 text-center"><div className="text-2xl font-bold text-gray-900">{Math.min(...vals).toFixed(2)}</div><div className="text-sm text-gray-500">Minimum</div></div>
-                              <div className="bg-gray-50 rounded-lg p-4 text-center"><div className="text-2xl font-bold text-gray-900">{(vals.reduce((s,d)=>s+d,0)/vals.length).toFixed(2)}</div><div className="text-sm text-gray-500">Ortalama</div></div>
-                              <div className="bg-gray-50 rounded-lg p-4 text-center"><div className="text-2xl font-bold text-gray-900">{len}</div><div className="text-sm text-gray-500">Veri Noktası</div></div>
+                              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 text-center border border-blue-200">
+                                <div className="text-3xl font-bold text-blue-900">{Math.max(...vals).toFixed(1)}</div>
+                                <div className="text-sm text-blue-700 font-medium">Maksimum</div>
+                              </div>
+                              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 text-center border border-green-200">
+                                <div className="text-3xl font-bold text-green-900">{Math.min(...vals).toFixed(1)}</div>
+                                <div className="text-sm text-green-700 font-medium">Minimum</div>
+                              </div>
+                              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 text-center border border-purple-200">
+                                <div className="text-3xl font-bold text-purple-900">{(vals.reduce((s,d)=>s+d,0)/vals.length).toFixed(1)}</div>
+                                <div className="text-sm text-purple-700 font-medium">Ortalama</div>
+                              </div>
+                              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 text-center border border-orange-200">
+                                <div className="text-3xl font-bold text-orange-900">{len}</div>
+                                <div className="text-sm text-orange-700 font-medium">Veri Noktası</div>
+                              </div>
                             </div>
                           </>
                         );
