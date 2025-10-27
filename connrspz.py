@@ -20,7 +20,7 @@ logging.basicConfig(
 # --- CONFIGURATION ---
 CONFIG = {
     'database': {
-        'host': "192.168.60.145",
+        'host': "192.168.60.148",
         'port': 5432,
         'database': "mainview",
         'user': "postgres",

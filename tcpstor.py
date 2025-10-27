@@ -21,7 +21,7 @@ logging.basicConfig(
 # Update these settings according to your database and API environment.
 CONFIG = {
     'database': {
-        'host': "192.168.60.145",
+        'host': "192.168.60.148",
         'port': 5432,
         'database': "mainview",
         'user': "postgres",

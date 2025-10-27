@@ -24,7 +24,7 @@ CONFIG = {
         'password': "OZAN1239"
     },
     'database': {
-        'host': "192.168.60.145",
+        'host': "192.168.60.148",
         'port': 5432,
         'database': "mainview",
         'user': "postgres",
