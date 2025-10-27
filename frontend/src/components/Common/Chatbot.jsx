@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { databaseAPI } from '../../services/api'
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -33,17 +34,61 @@ const Chatbot = () => {
     }
   }
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (inputMessage.trim() === '') return
 
+    const message = inputMessage
+    const lowerMessage = message.toLowerCase().trim()
+
     // Kullanıcı mesajını ekle
-    const userMessage = { text: inputMessage, sender: 'user' }
+    const userMessage = { text: message, sender: 'user' }
     setMessages(prev => [...prev, userMessage])
     setInputMessage('')
 
-    // Bot cevabını ekle (küçük bir gecikme ile)
+    // CPU datası isteğini kontrol et
+    if (lowerMessage.includes('son cpu') || lowerMessage.includes('cpu getir') || lowerMessage.includes('cpu verisi')) {
+      setMessages(prev => [...prev, { text: 'CPU verilerini çekiyorum...', sender: 'bot' }])
+      
+      try {
+        const response = await databaseAPI.getLatestCpuData({})
+        
+        if (response.data.success) {
+          const data = response.data.data
+          
+          // Tarihi formatla
+          let formattedDate = 'N/A'
+          if (data.bmctime) {
+            try {
+              const date = new Date(data.bmctime)
+              formattedDate = date.toLocaleString('tr-TR', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+              })
+            } catch {
+              formattedDate = data.bmctime
+            }
+          }
+          
+          const cpuResponse = `⚡ CPU Busy: %${data.cpuBusyPercent || 'N/A'}\n` +
+            `🖥️ System: ${data.syxsysn || 'N/A'}\n` +
+            `📅 Tarih: ${formattedDate}`
+          
+          setMessages(prev => [...prev, { text: cpuResponse, sender: 'bot' }])
+        } else {
+          setMessages(prev => [...prev, { text: 'CPU verisi alınamadı. Lütfen daha sonra tekrar deneyin.', sender: 'bot' }])
+        }
+      } catch (error) {
+        setMessages(prev => [...prev, { text: 'CPU verisi alınırken bir hata oluştu.', sender: 'bot' }])
+      }
+      return
+    }
+
+    // Diğer bot cevapları
     setTimeout(() => {
-      const botMessage = { text: getBotResponse(inputMessage), sender: 'bot' }
+      const botMessage = { text: getBotResponse(message), sender: 'bot' }
       setMessages(prev => [...prev, botMessage])
     }, 500)
   }
