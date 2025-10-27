@@ -382,6 +382,59 @@ const getMainviewMvsJCPU = async (req, res) => {
   }
 };
 
+const getLatestCpuData = async (req, res) => {
+  let pool = null;
+  
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+
+    // En son CPU verisini çek (mainview_mvs_sysover tablosundan)
+    const query = `
+      SELECT 
+        syxsysn, succpub, bmctime, "time"
+      FROM mainview_mvs_sysover
+      ORDER BY bmctime DESC
+      LIMIT 1
+    `;
+
+    const result = await client.query(query);
+    client.release();
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'CPU verisi bulunamadı'
+      });
+    }
+
+    const cpuData = result.rows[0];
+    
+    res.status(200).json({
+      success: true,
+      data: {
+        syxsysn: cpuData.syxsysn,
+        cpuBusyPercent: cpuData.succpub,
+        bmctime: cpuData.bmctime,
+        time: cpuData.time
+      }
+    });
+    
+  } catch (error) {
+    console.error('Latest CPU data error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'CPU verisi getirilemedi',
+      error: error.message
+    });
+  } finally {
+    if (pool) {
+      await pool.end();
+    }
+  }
+};
+
 const checkTableExistsJCPU = async (req, res) => {
   let pool = null;
   
@@ -2835,6 +2888,7 @@ module.exports = {
   checkTableExistsJespool,
   getMainviewMvsJCPU,
   checkTableExistsJCPU,
+  getLatestCpuData,
   checkTableExistsStacks,
   getMainviewNetworkStacks, 
   checkTableExistsStackCPU,

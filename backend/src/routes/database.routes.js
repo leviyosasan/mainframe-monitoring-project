@@ -1,6 +1,6 @@
 const express = require('express');
 const { testConnection, getMainviewMvsSysover, getMainviewMvsJespool,
-  checkTableExists,checkTableExistsJespool, getMainviewMvsJCPU, checkTableExistsJCPU, checkTableExistsStacks, 
+  checkTableExists,checkTableExistsJespool, getMainviewMvsJCPU, checkTableExistsJCPU, getLatestCpuData, checkTableExistsStacks, 
   getMainviewNetworkStacks, checkTableExistsStackCPU, getMainviewNetworkStackCPU, checkTableExistsVtamcsa, 
   getMainviewNetworkVtamcsa, getMainviewNetworkTcpconf, checkTableExiststcpconf,
   getMainviewNetworktcpcons, checkTableExiststcpcons, getMainviewNetworkudpconf, checkTableExiststudpconf,
@@ -66,6 +66,9 @@ router.post('/mainview-mvs-jcpu', getMainviewMvsJCPU);
 
 // Check table exists for jcpu
 router.post('/check-table-jcpu', checkTableExistsJCPU);
+
+// Get latest CPU data
+router.post('/latest-cpu', getLatestCpuData);
 
 // Check table exists for stacks
 router.post('/check-table-stacks', checkTableExistsStacks);
