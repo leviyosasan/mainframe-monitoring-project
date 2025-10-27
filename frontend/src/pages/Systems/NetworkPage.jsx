@@ -1183,7 +1183,11 @@ const NetworkPage = () => {
 
       const response = await databaseAPI.getMainviewNetworkVtmbuff();
       if (response.data.success) {
-        setVtmbuffData(response.data.data);
+        const dataWithIndex = (response.data.data || []).map((item, index) => ({
+          ...item,
+          index: index + 1
+        }));
+        setVtmbuffData(dataWithIndex);
         if (response.data.data.length > 0) toast.success(`Veriler başarıyla yüklendi (${response.data.data.length} kayıt)`);
       } else {
         toast.error('Veri yüklenirken hata oluştu');
@@ -1230,7 +1234,11 @@ const NetworkPage = () => {
 
       const response = await databaseAPI.getMainviewNetworkTcpstor();
       if (response.data.success) {
-        setTcpstorData(response.data.data);
+        const dataWithIndex = (response.data.data || []).map((item, index) => ({
+          ...item,
+          index: index + 1
+        }));
+        setTcpstorData(dataWithIndex);
         if (response.data.data.length > 0) toast.success(`Veriler başarıyla yüklendi (${response.data.data.length} kayıt)`);
       } else {
         toast.error('Veri yüklenirken hata oluştu');
@@ -1277,7 +1285,11 @@ const NetworkPage = () => {
 
       const response = await databaseAPI.getMainviewNetworkConnsrpz();
       if (response.data.success) {
-        setConnsrpzData(response.data.data);
+        const dataWithIndex = (response.data.data || []).map((item, index) => ({
+          ...item,
+          index: index + 1
+        }));
+        setConnsrpzData(dataWithIndex);
         if (response.data.data.length > 0) toast.success(`Veriler başarıyla yüklendi (${response.data.data.length} kayıt)`);
       } else {
         toast.error('Veri yüklenirken hata oluştu');
@@ -1479,15 +1491,15 @@ const NetworkPage = () => {
         filteredVtmbuff = vtmbuffData.filter(item => {
           const itemTime = new Date(item.record_timestamp || item.created_at || item.updated_at);
           return itemTime >= fromDate && itemTime <= toDate;
-        });
+        }).map((item, index) => ({ ...item, index: index + 1 }));
         filteredConnsrpz = connsrpzData.filter(item => {
           const itemTime = new Date(item.record_timestamp || item.created_at || item.updated_at);
           return itemTime >= fromDate && itemTime <= toDate;
-        });
+        }).map((item, index) => ({ ...item, index: index + 1 }));
         filteredTcpstor = tcpstorData.filter(item => {
           const itemTime = new Date(item.record_timestamp || item.created_at || item.updated_at);
           return itemTime >= fromDate && itemTime <= toDate;
-        });
+        }).map((item, index) => ({ ...item, index: index + 1 }));
       } else {
         // Hızlı zaman aralıkları
         const now = new Date();
@@ -1544,15 +1556,15 @@ const NetworkPage = () => {
         filteredVtmbuff = vtmbuffData.filter(item => {
           const itemTime = new Date(item.record_timestamp || item.created_at || item.updated_at);
           return itemTime >= fromDate;
-        });
+        }).map((item, index) => ({ ...item, index: index + 1 }));
         filteredConnsrpz = connsrpzData.filter(item => {
           const itemTime = new Date(item.record_timestamp || item.created_at || item.updated_at);
           return itemTime >= fromDate;
-        });
+        }).map((item, index) => ({ ...item, index: index + 1 }));
         filteredTcpstor = tcpstorData.filter(item => {
           const itemTime = new Date(item.record_timestamp || item.created_at || item.updated_at);
           return itemTime >= fromDate;
-        });
+        }).map((item, index) => ({ ...item, index: index + 1 }));
       }
       
       setFilteredStacksData(filteredStacks);
@@ -2921,6 +2933,7 @@ const NetworkPage = () => {
                               <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                   <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">System</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IOBuf Size</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IOBuf Times Expanded</th>
@@ -2934,6 +2947,7 @@ const NetworkPage = () => {
                                 <tbody className="bg-white divide-y divide-gray-200">
                                   {(isFiltered ? filteredVtmbuffData : vtmbuffData).map((row, index) => (
                                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.index || index + 1}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.system_name || '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.iobuf_size ?? '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.iobuf_times_expanded ?? '-'}</td>
@@ -2967,6 +2981,7 @@ const NetworkPage = () => {
                               <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                   <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foreign IP</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Active Conns</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg RTT (ms)</th>
@@ -2981,6 +2996,7 @@ const NetworkPage = () => {
                                 <tbody className="bg-white divide-y divide-gray-200">
                                   {(isFiltered ? filteredConnsrpzData : connsrpzData).map((row, index) => (
                                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.index || index + 1}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.foreign_ip_address || '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.active_conns ?? '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.average_rtt_ms ?? '-'}</td>
@@ -3015,6 +3031,7 @@ const NetworkPage = () => {
                               <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                   <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Step</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">System</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ECSA Current</th>
@@ -3029,6 +3046,7 @@ const NetworkPage = () => {
                                 <tbody className="bg-white divide-y divide-gray-200">
                                   {(isFiltered ? filteredTcpstorData : tcpstorData).map((row, index) => (
                                     <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.index || index + 1}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.step_name || '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.system_name || '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.ecsa_current ?? '-'}</td>
@@ -3077,7 +3095,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">System</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredVtmbuffData : vtmbuffData)?.[0]?.system_name || <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredVtmbuffData : vtmbuffData)?.[0]?.system_name ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                    {(isFiltered ? filteredVtmbuffData : vtmbuffData)[0]?.system_name}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* IOBuf Size */}
@@ -3088,7 +3114,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-red-200"><svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7" /></svg></div>
                               <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">IOBuf Size</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredVtmbuffData : vtmbuffData)?.[0]?.iobuf_size ?? <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredVtmbuffData : vtmbuffData)?.[0]?.iobuf_size ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-800">
+                                    {(isFiltered ? filteredVtmbuffData : vtmbuffData)[0]?.iobuf_size}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* IOBuf Times Expanded */}
@@ -3099,7 +3133,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">IOBuf Times Expanded</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredVtmbuffData : vtmbuffData)?.[0]?.iobuf_times_expanded ?? <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredVtmbuffData : vtmbuffData)?.[0]?.iobuf_times_expanded ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-rose-100 text-rose-800">
+                                    {(isFiltered ? filteredVtmbuffData : vtmbuffData)[0]?.iobuf_times_expanded}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* LPBuf Size */}
@@ -3110,7 +3152,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-amber-200"><svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10M20 7v10M4 12h16" /></svg></div>
                               <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">LPBuf Size</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredVtmbuffData : vtmbuffData)?.[0]?.lpbuf_size ?? <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredVtmbuffData : vtmbuffData)?.[0]?.lpbuf_size ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-amber-100 text-amber-800">
+                                    {(isFiltered ? filteredVtmbuffData : vtmbuffData)[0]?.lpbuf_size}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* LPBuf Times Expanded */}
@@ -3121,7 +3171,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">LPBuf Times Expanded</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredVtmbuffData : vtmbuffData)?.[0]?.lpbuf_times_expanded ?? <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredVtmbuffData : vtmbuffData)?.[0]?.lpbuf_times_expanded ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-orange-100 text-orange-800">
+                                    {(isFiltered ? filteredVtmbuffData : vtmbuffData)[0]?.lpbuf_times_expanded}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* LFBuf Size */}
@@ -3132,7 +3190,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-lime-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-lime-200"><svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M6 12h12M8 17h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">LFBuf Size</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredVtmbuffData : vtmbuffData)?.[0]?.lfbuf_size ?? <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredVtmbuffData : vtmbuffData)?.[0]?.lfbuf_size ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-lime-100 text-lime-800">
+                                    {(isFiltered ? filteredVtmbuffData : vtmbuffData)[0]?.lfbuf_size}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* LFBuf Times Expanded */}
@@ -3143,7 +3209,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-fuchsia-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-fuchsia-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">LFBuf Times Expanded</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredVtmbuffData : vtmbuffData)?.[0]?.lfbuf_times_expanded ?? <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredVtmbuffData : vtmbuffData)?.[0]?.lfbuf_times_expanded ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-fuchsia-100 text-fuchsia-800">
+                                    {(isFiltered ? filteredVtmbuffData : vtmbuffData)[0]?.lfbuf_times_expanded}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* Last Update */}
@@ -3166,7 +3240,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 012-2h10a2 2 0 012 2M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Step</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredTcpstorData : tcpstorData)?.[0]?.step_name || <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredTcpstorData : tcpstorData)?.[0]?.step_name ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-sky-100 text-sky-800">
+                                    {(isFiltered ? filteredTcpstorData : tcpstorData)[0]?.step_name}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* System */}
@@ -3175,7 +3257,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">System</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredTcpstorData : tcpstorData)?.[0]?.system_name || <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredTcpstorData : tcpstorData)?.[0]?.system_name ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-emerald-100 text-emerald-800">
+                                    {(isFiltered ? filteredTcpstorData : tcpstorData)[0]?.system_name}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* ECSA Current */}
@@ -3184,7 +3274,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M6 12h12M8 17h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">ECSA Current</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredTcpstorData : tcpstorData)?.[0]?.ecsa_current ?? <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredTcpstorData : tcpstorData)?.[0]?.ecsa_current ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-800">
+                                    {(isFiltered ? filteredTcpstorData : tcpstorData)[0]?.ecsa_current}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* ECSA Max */}
@@ -3193,7 +3291,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">ECSA Max</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredTcpstorData : tcpstorData)?.[0]?.ecsa_max ?? <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredTcpstorData : tcpstorData)?.[0]?.ecsa_max ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-rose-100 text-rose-800">
+                                    {(isFiltered ? filteredTcpstorData : tcpstorData)[0]?.ecsa_max}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* ECSA Limit */}
@@ -3202,7 +3308,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">ECSA Limit</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredTcpstorData : tcpstorData)?.[0]?.ecsa_limit ?? <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredTcpstorData : tcpstorData)?.[0]?.ecsa_limit ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-orange-100 text-orange-800">
+                                    {(isFiltered ? filteredTcpstorData : tcpstorData)[0]?.ecsa_limit}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* ECSA Free */}
@@ -3211,7 +3325,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8M3 12h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">ECSA Free</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredTcpstorData : tcpstorData)?.[0]?.ecsa_free ?? <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredTcpstorData : tcpstorData)?.[0]?.ecsa_free ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-800">
+                                    {(isFiltered ? filteredTcpstorData : tcpstorData)[0]?.ecsa_free}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* Private Current */}
@@ -3220,7 +3342,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-lime-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M6 12h12M8 17h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Private Current</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredTcpstorData : tcpstorData)?.[0]?.private_current ?? <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredTcpstorData : tcpstorData)?.[0]?.private_current ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-lime-100 text-lime-800">
+                                    {(isFiltered ? filteredTcpstorData : tcpstorData)[0]?.private_current}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* Private Max */}
@@ -3229,7 +3359,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-fuchsia-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-fuchsia-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v8m-4-4h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Private Max</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredTcpstorData : tcpstorData)?.[0]?.private_max ?? <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredTcpstorData : tcpstorData)?.[0]?.private_max ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-fuchsia-100 text-fuchsia-800">
+                                    {(isFiltered ? filteredTcpstorData : tcpstorData)[0]?.private_max}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* Created/Updated at info not displayed as a card - keep LAST UPDATE card */}
@@ -3252,7 +3390,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h10M9 20h6" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Foreign IP</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.foreign_ip_address || <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.foreign_ip_address ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
+                                    {(isFiltered ? filteredConnsrpzData : connsrpzData)[0]?.foreign_ip_address}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* Active Conns */}
@@ -3261,7 +3407,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-6a2 2 0 00-2-2H5" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Active Conns</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.active_conns ?? <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.active_conns ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-pink-100 text-pink-800">
+                                    {(isFiltered ? filteredConnsrpzData : connsrpzData)[0]?.active_conns}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* Avg/Max RTT */}
@@ -3270,7 +3424,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8M3 12h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Avg/Max RTT (ms)</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.average_rtt_ms ?? '-'} / {(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.max_rtt_ms ?? '-'}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.average_rtt_ms ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-teal-100 text-teal-800">
+                                    {(isFiltered ? filteredConnsrpzData : connsrpzData)[0]?.average_rtt_ms} / {(isFiltered ? filteredConnsrpzData : connsrpzData)[0]?.max_rtt_ms ?? '-'}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* Bytes In */}
@@ -3279,7 +3441,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Bytes In</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.interval_bytes_in_sum ?? '-'}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.interval_bytes_in_sum ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-indigo-100 text-indigo-800">
+                                    {(isFiltered ? filteredConnsrpzData : connsrpzData)[0]?.interval_bytes_in_sum}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* Bytes Out */}
@@ -3288,7 +3458,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8M3 12h8" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Bytes Out</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.interval_bytes_out_sum ?? '-'}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.interval_bytes_out_sum ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-teal-100 text-teal-800">
+                                    {(isFiltered ? filteredConnsrpzData : connsrpzData)[0]?.interval_bytes_out_sum}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* Stack */}
@@ -3297,7 +3475,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Stack</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.stack_name || <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.stack_name ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-800">
+                                    {(isFiltered ? filteredConnsrpzData : connsrpzData)[0]?.stack_name}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* Remote Host */}
@@ -3306,7 +3492,15 @@ const NetworkPage = () => {
                             <div className="text-center">
                               <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-4"><svg className="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0" /></svg></div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Remote Host</h5>
-                              <div className="text-2xl font-bold text-gray-900">{(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.remote_host_name || <span className="text-gray-400">-</span>}</div>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {(isFiltered ? filteredConnsrpzData : connsrpzData)?.[0]?.remote_host_name ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-slate-100 text-slate-800">
+                                    {(isFiltered ? filteredConnsrpzData : connsrpzData)[0]?.remote_host_name}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           {/* Last Update */}
@@ -4627,66 +4821,139 @@ const NetworkPage = () => {
                           </div>
                         </div>
                       ) : (
-                        <>
-                          <div className="h-96 w-full">
-                            <svg width="100%" height="100%" viewBox="0 0 1200 300" className="overflow-visible">
-                              <defs>
-                                <pattern id="grid" width="40" height="30" patternUnits="userSpaceOnUse">
-                                  <path d="M 40 0 L 0 0 0 30" fill="none" stroke="#f3f4f6" strokeWidth="1"/>
-                                </pattern>
-                              </defs>
-                              <rect width="100%" height="100%" fill="url(#grid)" />
+                        (() => {
+                          const width = 1200; const height = 350; const left = 80; const bottom = 320; const top = 40;
+                          const len = chartData.length;
+                          const vals = chartData.map(d => Number(d.value) || 0);
+                          let vMin = Math.min(...vals);
+                          let vMax = Math.max(...vals);
+                          if (!isFinite(vMin)) vMin = 0; if (!isFinite(vMax)) vMax = 100;
+                          if (vMax === vMin) vMax = vMin + 10;
+                          
+                          // Y eksenini maksimum değere göre ayarla
+                          const maxVal = Math.max(vMax, 100);
+                          const minVal = 0;
+                          const range = maxVal - minVal;
+                          const step = range / 5;
+                          
+                          const yPos = (v) => bottom - ((v - minVal) / range) * (bottom - top);
+                          const stepX = 1100 / Math.max(1, len - 1);
+                          const xPos = (i) => left + i * stepX;
+                          
+                          const ticks = Array.from({ length: 6 }, (_, i) => minVal + (i * step));
+                          const formatTick = (n) => {
+                            const num = Number(n);
+                            if (Math.abs(num) >= 1000000) return (num/1000000).toFixed(1)+'M';
+                            if (Math.abs(num) >= 1000) return (num/1000).toFixed(1)+'K';
+                            return num.toFixed(1);
+                          };
+                          
+                          const areaD = `M ${xPos(0)},${yPos(chartData[0]?.value || 0)} ` + chartData.map((p,i)=>`L ${xPos(i)},${yPos(p.value)}`).join(' ') + ` L ${xPos(len-1)},${bottom} L ${xPos(0)},${bottom} Z`;
+                          const lineD = `M ${xPos(0)},${yPos(chartData[0]?.value || 0)} ` + chartData.map((p,i)=>`L ${xPos(i)},${yPos(p.value)}`).join(' ');
+                          
+                          const criticalThreshold = 90;
+                          const warningThreshold = 75;
+                          const showThresholds = vMax > 50;
+                          
+                          return (
+                            <>
+                              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                                <div className="flex justify-between items-center mb-4">
+                                  <h4 className="text-lg font-semibold text-gray-800">{selectedChart}</h4>
+                                  <button onClick={() => {
+                                    openChart(selectedChart);
+                                  }} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">Yenile</button>
+                                </div>
+                                <div className="h-96 w-full">
+                                  <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
+                                    {/* Grid pattern */}
+                                    <defs>
+                                      <pattern id="grid-network" width="40" height="35" patternUnits="userSpaceOnUse">
+                                        <path d="M 40 0 L 0 0 0 35" fill="none" stroke="#e5e7eb" strokeWidth="1"/>
+                                      </pattern>
+                                    </defs>
+                                    <rect width="100%" height="100%" fill="url(#grid-network)" />
+                                    
+                                    {/* Y-axis labels */}
+                                    {ticks.map((t, i) => (
+                                      <g key={i}>
+                                        <line x1={left} y1={yPos(t)} x2={width-20} y2={yPos(t)} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4 4" />
+                                        <text x="20" y={yPos(t) + 4} className="text-xs fill-gray-600 font-medium" textAnchor="end">
+                                          {formatTick(t)}
+                                        </text>
+                                      </g>
+                                    ))}
+                                    
+                                    {/* X-axis labels */}
+                                    {chartData.filter((_,i)=> i % Math.max(1, Math.floor(len/10))===0).map((p,i)=> {
+                                      const displayIndex = i * Math.max(1, Math.floor(len/10));
+                                      return (
+                                        <text key={i} x={xPos(Math.min(displayIndex, len-1))} y="345" className="text-xs fill-gray-600 font-medium" textAnchor="middle">
+                                          {new Date(p.label).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}
+                                        </text>
+                                      );
+                                    })}
+                                    
+                                    {/* Threshold lines */}
+                                    {showThresholds && (
+                                      <>
+                                        <line x1={left} y1={yPos((criticalThreshold/100) * maxVal)} x2={width-20} y2={yPos((criticalThreshold/100) * maxVal)} stroke="#dc2626" strokeWidth="2" strokeDasharray="6 6" opacity="0.7" />
+                                        <text x={width-10} y={yPos((criticalThreshold/100) * maxVal) + 4} className="text-xs fill-red-600 font-medium" textAnchor="end">
+                                          Kritik: {criticalThreshold}%
+                                        </text>
+                                        
+                                        <line x1={left} y1={yPos((warningThreshold/100) * maxVal)} x2={width-20} y2={yPos((warningThreshold/100) * maxVal)} stroke="#f59e0b" strokeWidth="2" strokeDasharray="6 6" opacity="0.7" />
+                                        <text x={width-10} y={yPos((warningThreshold/100) * maxVal) + 4} className="text-xs fill-amber-600 font-medium" textAnchor="end">
+                                          Uyarı: {warningThreshold}%
+                                        </text>
+                                      </>
+                                    )}
+                                    
+                                    {/* Gradient area and line */}
+                                    <defs>
+                                      <linearGradient id="areaGradientNetwork" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3"/>
+                                        <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.05"/>
+                                      </linearGradient>
+                                    </defs>
+                                    
+                                    <path d={areaD} fill="url(#areaGradientNetwork)" />
+                                    <path d={lineD} fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                    
+                                    {/* Data points */}
+                                    {chartData.map((p,i)=> (
+                                      <g key={i}>
+                                        <circle cx={xPos(i)} cy={yPos(p.value)} r="5" fill="#3b82f6" stroke="white" strokeWidth="2">
+                                          <title>{`${new Date(p.label).toLocaleString('tr-TR')}: ${p.value}`}</title>
+                                        </circle>
+                                      </g>
+                                    ))}
+                                  </svg>
+                                </div>
+                              </div>
 
-                              {[0, 25, 50, 75, 100].map((value, index) => (
-                                <text key={value} x="20" y={280 - (index * 50)} className="text-xs fill-gray-500" textAnchor="end">{value}</text>
-                              ))}
-
-                              {chartData.filter((_, index) => index % Math.max(1, Math.floor(chartData.length / 8)) === 0).map((point, index) => (
-                                <text key={index} x={80 + (index * 140)} y="295" className="text-xs fill-gray-500" textAnchor="middle">{new Date(point.label).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</text>
-                              ))}
-
-                              <defs>
-                                <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3"/>
-                                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.05"/>
-                                </linearGradient>
-                              </defs>
-
-                              <path
-                                d={`M 80,${280 - (chartData[0]?.value || 0) * 2} ${chartData.map((p, i) => `L ${80 + (i * (1100 / Math.max(1, chartData.length - 1)))},${280 - p.value * 2}`).join(' ')} L ${80 + (chartData.length - 1) * (1100 / Math.max(1, chartData.length - 1))},280 L 80,280 Z`}
-                                fill="url(#areaGradient)"
-                              />
-                              <path
-                                d={`M 80,${280 - (chartData[0]?.value || 0) * 2} ${chartData.map((p, i) => `L ${80 + (i * (1100 / Math.max(1, chartData.length - 1)))},${280 - p.value * 2}`).join(' ')}`}
-                                fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                              />
-                              {chartData.map((p, i) => (
-                                <circle key={i} cx={80 + (i * (1100 / Math.max(1, chartData.length - 1)))} cy={280 - p.value * 2} r="3" fill="#3b82f6">
-                                  <title>{`${new Date(p.label).toLocaleString('tr-TR')}: ${p.value}`}</title>
-                                </circle>
-                              ))}
-                            </svg>
-                          </div>
-
-                          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="bg-gray-50 rounded-lg p-4 text-center">
-                              <div className="text-2xl font-bold text-gray-900">{chartData.length > 0 ? Math.max(...chartData.map(d => d.value)).toFixed(2) : '0'}</div>
-                              <div className="text-sm text-gray-500">Maksimum</div>
-                            </div>
-                            <div className="bg-gray-50 rounded-lg p-4 text-center">
-                              <div className="text-2xl font-bold text-gray-900">{chartData.length > 0 ? Math.min(...chartData.map(d => d.value)).toFixed(2) : '0'}</div>
-                              <div className="text-sm text-gray-500">Minimum</div>
-                            </div>
-                            <div className="bg-gray-50 rounded-lg p-4 text-center">
-                              <div className="text-2xl font-bold text-gray-900">{chartData.length > 0 ? (chartData.reduce((s, d) => s + d.value, 0) / chartData.length).toFixed(2) : '0'}</div>
-                              <div className="text-sm text-gray-500">Ortalama</div>
-                            </div>
-                            <div className="bg-gray-50 rounded-lg p-4 text-center">
-                              <div className="text-2xl font-bold text-gray-900">{chartData.length}</div>
-                              <div className="text-sm text-gray-500">Veri Noktası</div>
-                            </div>
-                          </div>
-                        </>
+                              {/* Statistics */}
+                              <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-5 text-center shadow-sm">
+                                  <div className="text-3xl font-bold text-blue-900">{chartData.length > 0 ? Math.max(...chartData.map(d => d.value)).toFixed(1) : '0'}</div>
+                                  <div className="text-sm text-blue-700 font-semibold mt-1">Maksimum</div>
+                                </div>
+                                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-5 text-center shadow-sm">
+                                  <div className="text-3xl font-bold text-green-900">{chartData.length > 0 ? Math.min(...chartData.map(d => d.value)).toFixed(1) : '0'}</div>
+                                  <div className="text-sm text-green-700 font-semibold mt-1">Minimum</div>
+                                </div>
+                                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-5 text-center shadow-sm">
+                                  <div className="text-3xl font-bold text-purple-900">{chartData.length > 0 ? (chartData.reduce((s, d) => s + d.value, 0) / chartData.length).toFixed(1) : '0'}</div>
+                                  <div className="text-sm text-purple-700 font-semibold mt-1">Ortalama</div>
+                                </div>
+                                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-5 text-center shadow-sm">
+                                  <div className="text-3xl font-bold text-orange-900">{chartData.length}</div>
+                                  <div className="text-sm text-orange-700 font-semibold mt-1">Veri Noktası</div>
+                                </div>
+                              </div>
+                            </>
+                          );
+                        })()
                       )}
                     </div>
                   )}
@@ -5046,6 +5313,251 @@ const NetworkPage = () => {
                           <h4 className="font-semibold text-purple-900 mb-2">Ne Ölçer?</h4>
                           <p className="text-purple-800 text-sm">
                             The Maximum Private Usage field displays the largest amount of VTAM primate storage that was in use since VTAM was started.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* VTMBUFF Info Modals */}
+                    {infoModal === 'vtmbuffSystem' && (
+                      <div className="space-y-4">
+                        <div className="bg-teal-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-teal-800 text-sm">
+                            VTAM buffer yönetim sisteminin adını gösterir. Buffer allocation ve memory management işlemlerini takip eder.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'vtmbuffIobufSize' && (
+                      <div className="space-y-4">
+                        <div className="bg-teal-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-teal-800 text-sm">
+                            IOBuf (Input/Output Buffer) boyutunu gösterir. VTAM'ın veri alış-veriş işlemleri için kullandığı buffer alanının büyüklüğünü ölçer.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'vtmbuffIobufTimes' && (
+                      <div className="space-y-4">
+                        <div className="bg-teal-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-teal-800 text-sm">
+                            IOBuf buffer'ın kaç kez genişletildiğini gösterir. Yüksek değerler bellek baskısını işaret eder.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'vtmbuffLpbufSize' && (
+                      <div className="space-y-4">
+                        <div className="bg-teal-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-teal-800 text-sm">
+                            LPBuf (Line Protocol Buffer) boyutunu gösterir. Line protokol işlemleri için kullanılan buffer boyutunu ölçer.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'vtmbuffLpbufTimes' && (
+                      <div className="space-y-4">
+                        <div className="bg-teal-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-teal-800 text-sm">
+                            LPBuf buffer'ın kaç kez genişletildiğini gösterir. Line protokol buffer büyüklüğünün yetersizliğini işaret eder.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'vtmbuffLfbufSize' && (
+                      <div className="space-y-4">
+                        <div className="bg-teal-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-teal-800 text-sm">
+                            LFBuf (Logon Frame Buffer) boyutunu gösterir. Logon ve authentication işlemleri için buffer boyutunu ölçer.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'vtmbuffLfbufTimes' && (
+                      <div className="space-y-4">
+                        <div className="bg-teal-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-teal-800 text-sm">
+                            LFBuf buffer'ın kaç kez genişletildiğini gösterir. Logon buffer yetersizliklerini işaret eder.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* CONNSRPZ Info Modals */}
+                    {infoModal === 'connsrpzForeignIp' && (
+                      <div className="space-y-4">
+                        <div className="bg-amber-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-amber-800 text-sm">
+                            Karşı tarafın (remote host) IP adresini gösterir. Bağlantının hedef IP bilgisini verir.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'connsrpzActiveConns' && (
+                      <div className="space-y-4">
+                        <div className="bg-amber-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-amber-800 text-sm">
+                            Aktif TCP/IP bağlantılarının sayısını gösterir. Aynı anda açık olan bağlantıları ölçer.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'connsrpzRtt' && (
+                      <div className="space-y-4">
+                        <div className="bg-amber-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-amber-800 text-sm">
+                            Round Trip Time (RTT) değerini milisaniye olarak gösterir. Ağ gecikme süresini ölçer.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'connsrpzBytesIn' && (
+                      <div className="space-y-4">
+                        <div className="bg-amber-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-amber-800 text-sm">
+                            Gelen veri miktarını byte cinsinden gösterir. Bağlantı üzerinden alınan toplam veriyi ölçer.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'connsrpzBytesOut' && (
+                      <div className="space-y-4">
+                        <div className="bg-amber-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-amber-800 text-sm">
+                            Giden veri miktarını byte cinsinden gösterir. Bağlantı üzerinden gönderilen toplam veriyi ölçer.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'connsrpzStack' && (
+                      <div className="space-y-4">
+                        <div className="bg-amber-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-amber-800 text-sm">
+                            Bağlantının ait olduğu TCP/IP stack adını gösterir. Hangi stack üzerinden bağlantı kurulduğunu belirtir.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'connsrpzRemoteHost' && (
+                      <div className="space-y-4">
+                        <div className="bg-amber-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-amber-800 text-sm">
+                            Uzak host'un adını gösterir. Bağlantının hedef host bilgisini verir.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* TCPSTOR Info Modals */}
+                    {infoModal === 'tcpstorStep' && (
+                      <div className="space-y-4">
+                        <div className="bg-orange-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-orange-800 text-sm">
+                            TCP/IP storage yönetiminin step adını gösterir. Memory management için step bilgisini verir.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'tcpstorSystem' && (
+                      <div className="space-y-4">
+                        <div className="bg-orange-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-orange-800 text-sm">
+                            TCP/IP storage yönetiminin sistem bilgisini gösterir. Hangi sistem üzerinde storage yönetimi yapıldığını belirtir.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'tcpstorEcsaCurrent' && (
+                      <div className="space-y-4">
+                        <div className="bg-orange-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-orange-800 text-sm">
+                            ECSA (Extended Common Storage Area) mevcut kullanımını gösterir. TCP/IP için ayrılmış mevcut bellek miktarını ölçer.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'tcpstorEcsaMax' && (
+                      <div className="space-y-4">
+                        <div className="bg-orange-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-orange-800 text-sm">
+                            ECSA maksimum kullanımını gösterir. TCP/IP için ayrılmış bellek limitini ölçer.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'tcpstorEcsaLimit' && (
+                      <div className="space-y-4">
+                        <div className="bg-orange-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-orange-800 text-sm">
+                            ECSA limit değerini gösterir. TCP/IP için maksimum ayrılabilir bellek limitini ölçer.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'tcpstorEcsaFree' && (
+                      <div className="space-y-4">
+                        <div className="bg-orange-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-orange-800 text-sm">
+                            ECSA boş bellek miktarını gösterir. TCP/IP için kullanılabilir serbest bellek alanını ölçer.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'tcpstorPrivateCurrent' && (
+                      <div className="space-y-4">
+                        <div className="bg-orange-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-orange-800 text-sm">
+                            Private memory mevcut kullanımını gösterir. TCP/IP için özel bellek alanının mevcut kullanımını ölçer.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {infoModal === 'tcpstorPrivateMax' && (
+                      <div className="space-y-4">
+                        <div className="bg-orange-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-orange-800 text-sm">
+                            Private memory maksimum kullanımını gösterir. TCP/IP için özel bellek alanının maksimum limitini ölçer.
                           </p>
                         </div>
                       </div>
