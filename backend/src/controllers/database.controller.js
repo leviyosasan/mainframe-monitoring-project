@@ -40,6 +40,18 @@ const testConnection = async (req, res) => {
     const timeResult = await client.query('SELECT now()');
     const serverTime = timeResult.rows[0].now;
     
+    // Get all tables in the database
+    const tablesResult = await client.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' 
+      ORDER BY table_name
+    `);
+    const tables = tablesResult.rows.map(row => row.table_name);
+    
+    // Check specifically for mainview_csasum table
+    const csasumExists = tables.includes('mainview_csasum');
+    
     client.release();
     
     res.status(200).json({
@@ -51,7 +63,10 @@ const testConnection = async (req, res) => {
         database: database,
         user: user,
         version: version,
-        serverTime: serverTime
+        serverTime: serverTime,
+        tables: tables,
+        tableCount: tables.length,
+        mainview_csasum_exists: csasumExists
       }
     });
     
@@ -1732,101 +1747,120 @@ const getMainviewStorageCsasum = async (req, res) => {
  
   try {
     const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    console.log('CSASUM - Using config:', config);
     pool = new Pool(config);
  
     const client = await pool.connect();
+    console.log('CSASUM - Database connected successfully');
  
-    // CSA Metrics query with all column names from METRICS object
+    // First check if table exists
+    const tableCheckQuery = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'mainview_csasum'
+      );
+    `;
+    
+    const tableExists = await client.query(tableCheckQuery);
+    console.log('CSASUM - Table exists:', tableExists.rows[0].exists);
+    
+    if (!tableExists.rows[0].exists) {
+      throw new Error('Table mainview_csasum does not exist. Please run the table creation script first.');
+    }
+ 
+    // CSA Metrics query with correct column names from the table
     const query = `
       SELECT
         -- CSA Metrics
-        csrecsad as csa_defined,
-        csrecsau as csa_in_use,
-        csrecsup as csa_in_use_percent,
-        csrecsfc as csa_free_areas_count,
-        csrecsac as csa_converted,
-        csrecscp as csa_converted_to_sqa_percent,
-        csrecsmn as csa_smallest_free_area,
-        csrecsmx as csa_largest_free_area,
-        csrecslp as csa_largest_percent_of_total,
-        csrecsaa as csa_available,
-        csrecsap as csa_available_percent,
+        csa_defined,
+        csa_in_use,
+        csa_in_use_percent,
+        csa_free_areas_count,
+        csa_converted,
+        csa_converted_to_sqa_percent,
+        csa_smallest_free_area,
+        csa_largest_free_area,
+        csa_largest_percent_of_total,
+        csa_available,
+        csa_available_percent,
         
         -- ECSA Metrics
-        csreecsd as ecsa_defined,
-        csreecsu as ecsa_in_use,
-        csreecup as ecsa_in_use_percent,
-        csreecsc as ecsa_converted,
-        csreeccp as ecsa_converted_to_esqa_percent,
-        csreecfc as ecsa_free_areas_count,
-        csreecsa as ecsa_available,
-        csreecap as ecsa_available_percent,
-        csreecmn as ecsa_smallest_free_area,
-        csreecmx as ecsa_largest_free_area,
-        csreeclp as ecsa_largest_percent_of_total,
+        ecsa_defined,
+        ecsa_in_use,
+        ecsa_in_use_percent,
+        ecsa_converted,
+        ecsa_converted_to_esqa_percent,
+        ecsa_free_areas_count,
+        ecsa_available,
+        ecsa_available_percent,
+        ecsa_smallest_free_area,
+        ecsa_largest_free_area,
+        ecsa_largest_percent_of_total,
         
         -- RUCSA Metrics
-        csrercsd as rucsa_defined,
-        csrercsu as rucsa_in_use,
-        csrercup as rucsa_in_use_percent,
-        csrercsf as rucsa_free_areas_count,
-        csrercsm as rucsa_smallest_free_area,
-        csrercsx as rucsa_largest_free_area,
-        csrerclp as rucsa_largest_percent_of_total,
+        rucsa_defined,
+        rucsa_in_use,
+        rucsa_in_use_percent,
+        rucsa_free_areas_count,
+        rucsa_smallest_free_area,
+        rucsa_largest_free_area,
+        rucsa_largest_percent_of_total,
         
         -- ERUCSA Metrics
-        csreercsd as erucsa_defined,
-        csreercsu as erucsa_in_use,
-        csreercup as erucsa_in_use_percent,
-        csreercsf as erucsa_free_areas_count,
-        csreercsm as erucsa_smallest_free_area,
-        csreercsx as erucsa_largest_free_area,
-        csreerclp as erucsa_largest_percent_of_total,
+        erucsa_defined,
+        erucsa_in_use,
+        erucsa_in_use_percent,
+        erucsa_free_areas_count,
+        erucsa_smallest_free_area,
+        erucsa_largest_free_area,
+        erucsa_largest_percent_of_total,
         
         -- SQA Metrics
-        csresqad as sqa_defined,
-        csresqau as sqa_in_use,
-        csresqup as sqa_in_use_percent,
-        csresqaa as sqa_available,
-        csresqap as sqa_available_percent,
+        sqa_defined,
+        sqa_in_use,
+        sqa_in_use_percent,
+        sqa_available,
+        sqa_available_percent,
         
         -- ESQA Metrics
-        csreesqa as esqa_available,
-        csreesap as esqa_available_percent,
+        esqa_available,
+        esqa_available_percent,
         
         -- Total Common Storage Metrics
-        csretd as total_cs_defined,
-        csretu as total_cs_used,
-        csretup as total_cs_used_percent,
-        csretc as total_converted_csa_ecsa,
-        csreta as available_common_storage,
-        csretap as available_common_storage_percent,
+        total_cs_defined,
+        total_cs_used,
+        total_cs_used_percent,
+        total_converted_csa_ecsa,
+        available_common_storage,
+        available_common_storage_percent,
         
         -- High Shared Storage Metrics
-        csgshsz as defined_high_shared_storage,
-        csgshus as used_high_shared_storage,
-        csgshup as percent_used_high_shared_storage,
-        csgshmo as number_of_shared_memory_objects,
-        csgshhw as used_hwm_high_shared_storage,
-        csgshhp as percent_hwm_high_shared_storage,
+        defined_high_shared_storage,
+        used_high_shared_storage,
+        percent_used_high_shared_storage,
+        number_of_shared_memory_objects,
+        used_hwm_high_shared_storage,
+        percent_hwm_high_shared_storage,
         
         -- High Common Storage Metrics
-        csghcsz as defined_high_common_storage,
-        csghcus as used_high_common_storage,
-        csghcup as percent_used_high_common_storage,
-        csghcmo as number_of_common_memory_objects,
-        csghchw as used_hwm_high_common_storage,
-        csghchp as percent_hwm_high_common_storage,
+        defined_high_common_storage,
+        used_high_common_storage,
+        percent_used_high_common_storage,
+        number_of_common_memory_objects,
+        used_hwm_high_common_storage,
+        percent_hwm_high_common_storage,
         
         -- Additional fields
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at,
+        timestamp
       FROM mainview_csasum
       ORDER BY created_at DESC
       LIMIT 100
     `;
  
+    console.log('CSASUM - Executing query...');
     const result = await client.query(query);
+    console.log('CSASUM - Query executed successfully, rows:', result.rowCount);
     client.release();
  
     res.status(200).json({
@@ -1836,11 +1870,15 @@ const getMainviewStorageCsasum = async (req, res) => {
       data: result.rows
     });
   } catch (error) {
-    console.error('mainview_csasum query error:', error);
+    console.error('CSASUM - Query error details:', error);
+    console.error('CSASUM - Error message:', error.message);
+    console.error('CSASUM - Error code:', error.code);
+    console.error('CSASUM - Error detail:', error.detail);
     res.status(500).json({
       success: false,
       message: 'mainview_csasum verileri getirilemedi',
-      error: error.message
+      error: error.message,
+      details: error.detail || 'No additional details'
     });
   } finally {
     // Close the pool if it was created
@@ -1934,7 +1972,7 @@ const getMainviewStorageFrminfoCenter = async (req, res) => {
         spiafcav, spiafcmn, spitfuav,
         spiafumn, spiafumx, spitcpct,
         bmctime, "time"
-      FROM mainview_frminfo_center
+      FROM mainview_frminfo_central
       ORDER BY bmctime DESC
       LIMIT 100
     `;
@@ -1944,15 +1982,15 @@ const getMainviewStorageFrminfoCenter = async (req, res) => {
  
     res.status(200).json({
       success: true,
-      message: 'mainview_frminfo_center verileri başarıyla getirildi',
+      message: 'mainview_frminfo_central verileri başarıyla getirildi',
       count: result.rowCount,
       data: result.rows
     });
   } catch (error) {
-    console.error('mainview_frminfo_center query error:', error);
+    console.error('mainview_frminfo_central query error:', error);
     res.status(500).json({
       success: false,
-      message: 'mainview_frminfo_center verileri getirilemedi',
+      message: 'mainview_frminfo_central verileri getirilemedi',
       error: error.message
     });
   } finally {
@@ -1984,18 +2022,18 @@ const checkTableExistsFrminfoCenter = async (req, res) => {
         data_type,
         is_nullable
       FROM information_schema.columns
-      WHERE table_name = 'mainview_frminfo_center'
+      WHERE table_name = 'mainview_frminfo_central'
       ORDER BY ordinal_position;
     `;
    
     const tableResult = await client.query(tableCheckQuery);
    
     // Get row count
-    const countQuery = `SELECT COUNT(*) as count FROM mainview_frminfo_center`;
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_frminfo_central`;
     const countResult = await client.query(countQuery);
    
     // Get sample data if exists
-    const sampleQuery = `SELECT * FROM mainview_frminfo_center LIMIT 5`;
+    const sampleQuery = `SELECT * FROM mainview_frminfo_central LIMIT 5`;
     const sampleResult = await client.query(sampleQuery);
    
     client.release();
@@ -2171,13 +2209,12 @@ const getMainviewStorageFrminfoHighVirtual = async (req, res) => {
     // Önce sadece tüm kolonları çekelim ve görelim
     const query = `
       SELECT
+        timestamp,
         system_name, server_name,
         hv_common_avg, hv_common_min, hv_common_max,
-        hv_shared_avg, hv_shared_min, hv_shared_max,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        hv_shared_avg, hv_shared_min, hv_shared_max
       FROM mainview_frminfo_high_virtual
-      ORDER BY created_at DESC
+      ORDER BY timestamp DESC
       LIMIT 100
     `;
  
@@ -2282,9 +2319,12 @@ const getMainviewStoragesysfrmiz = async (req, res) => {
     // Önce sadece tüm kolonları çekelim ve görelim
     const query = `
       SELECT
-        spgid, spluicav, spiuonlf, spifinav, sprefncp, spispcav, spreasrp, spilpfav, sprealpp,
+        spgid, 
+        spluicav as spl,
+        spiuonlf, spifinav, sprefncp, spispcav, spreasrp, spilpfav, sprealpp,
         spicpfav, spreavpp, spiqpcav, sprelsqp, spiapfav, spreprvp, spiafcav, spreavlp,
-        spihvcav, sprecmnp, spihvsav, spreshrp, bmc_time
+        spihvcav, sprecmnp, spihvsav, spreshrp, 
+        bmc_time as bmctime
       FROM mainview_storage_sysfrmiz
       ORDER BY bmc_time DESC
       LIMIT 100

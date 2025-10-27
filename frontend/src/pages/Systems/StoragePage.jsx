@@ -45,7 +45,73 @@ const StoragePage = () => {
     if (value === null || value === undefined || value === '') return '-';
     
     // String sütunlar için özel format
-    if (columnName === 'timestamp' || columnName === 'system_name' || columnName === 'server_name') {
+    if (columnName === 'system_name' || columnName === 'server_name' || columnName === 'spgid') {
+      return value.toString();
+    }
+    
+    // Timestamp sütunu için özel format
+    if (columnName === 'timestamp' || columnName === 'bmctime') {
+      if (value instanceof Date) {
+        return value.toLocaleString('tr-TR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+      }
+      // String olarak gelen tarih için
+      if (typeof value === 'string') {
+        const date = new Date(value);
+        return date.toLocaleString('tr-TR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+      }
+      return value.toString();
+    }
+    
+    // Tarih/saat sütunları için özel format
+    if (columnName === 'bmctime') {
+      if (value instanceof Date) {
+        return value.toLocaleString('tr-TR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+      }
+      // String olarak gelen tarih için
+      if (typeof value === 'string') {
+        const date = new Date(value);
+        return date.toLocaleString('tr-TR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+      }
+      return value.toString();
+    }
+    
+    if (columnName === 'time') {
+      if (value instanceof Date) {
+        return value.toLocaleTimeString('tr-TR');
+      }
+      // String olarak gelen saat için
+      if (typeof value === 'string') {
+        const date = new Date(`2000-01-01T${value}`);
+        return date.toLocaleTimeString('tr-TR');
+      }
       return value.toString();
     }
     
@@ -88,7 +154,7 @@ const StoragePage = () => {
   const fetchCsasumData = async () => {
     setIsLoading(true);
     try {
-      const response = await databaseAPI.getMainviewStorageCsasum();
+      const response = await databaseAPI.getMainviewStorageCsasum({});
       if (response.data.success) {
         setCsasumData(response.data.data);
         toast.success(`CSASUM verileri yüklendi (${response.data.data.length} kayıt)`);
@@ -106,16 +172,23 @@ const StoragePage = () => {
   const fetchFrminfoCenterData = async () => {
     setIsLoading(true);
     try {
-      const response = await databaseAPI.getMainviewStorageFrminfoCenter();
+      console.log('=== FRMINFO CENTER DEBUG ===');
+      console.log('Calling API...');
+      const response = await databaseAPI.getMainviewStorageFrminfoCenter({});
+      console.log('Response received:', response);
       if (response.data.success) {
         setFrminfoCenterData(response.data.data);
         toast.success(`FRMINFO Center verileri yüklendi (${response.data.data.length} kayıt)`);
       } else {
         toast.error('FRMINFO Center veri yüklenirken hata oluştu');
       }
+      console.log('=== END FRMINFO CENTER DEBUG ===');
     } catch (error) {
       console.error('FRMINFO Center veri yüklenirken hata:', error);
-      toast.error(`FRMINFO Center veri yüklenirken hata oluştu: ${error.message}`);
+      console.error('Error details:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      console.error('Error config:', error.config);
+      toast.error(`FRMINFO Center veri yüklenirken hata oluştu: ${error.response?.data?.error || error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -155,7 +228,7 @@ const StoragePage = () => {
   const fetchFrminfoHighVirtualData = async () => {
     setIsLoading(true);
     try {
-      const response = await databaseAPI.getMainviewStorageFrminfoHighVirtual();
+      const response = await databaseAPI.getMainviewStorageFrminfoHighVirtual({});
       if (response.data.success) {
         setFrminfoHighVirtualData(response.data.data);
         toast.success(`FRMINFO High Virtual verileri yüklendi (${response.data.data.length} kayıt)`);
@@ -173,7 +246,7 @@ const StoragePage = () => {
   const fetchSysfrmizData = async () => {
     setIsLoading(true);
     try {
-      const response = await databaseAPI.getMainviewStoragesysfrmiz();
+      const response = await databaseAPI.getMainviewStoragesysfrmiz({});
       if (response.data.success) {
         setSysfrmizData(response.data.data);
         toast.success(`SYSFRMIZ verileri yüklendi (${response.data.data.length} kayıt)`);
@@ -191,7 +264,7 @@ const StoragePage = () => {
   // Table info checking functions
   const checkCsasumTable = async () => {
     try {
-      const response = await databaseAPI.checkTableExistsCsasum();
+      const response = await databaseAPI.checkTableExistsCsasum({});
       setCsasumTableInfo(response.data);
     } catch (error) {
       console.error('CSASUM tablo kontrolü hatası:', error);
@@ -200,7 +273,7 @@ const StoragePage = () => {
 
   const checkFrminfoCenterTable = async () => {
     try {
-      const response = await databaseAPI.checkTableExistsFrminfoCenter();
+      const response = await databaseAPI.checkTableExistsFrminfoCenter({});
       setFrminfoCenterTableInfo(response.data);
     } catch (error) {
       console.error('FRMINFO Center tablo kontrolü hatası:', error);
@@ -209,7 +282,7 @@ const StoragePage = () => {
 
   const checkFrminfoFixedTable = async () => {
     try {
-      const response = await databaseAPI.checkTableExistsFrminfofixed();
+      const response = await databaseAPI.checkTableExistsFrminfofixed({});
       setFrminfoFixedTableInfo(response.data);
     } catch (error) {
       console.error('FRMINFO Fixed tablo kontrolü hatası:', error);
@@ -218,7 +291,7 @@ const StoragePage = () => {
 
   const checkFrminfoHighVirtualTable = async () => {
     try {
-      const response = await databaseAPI.checkTableExistsFrminfoHighVirtual();
+      const response = await databaseAPI.checkTableExistsFrminfoHighVirtual({});
       setFrminfoHighVirtualTableInfo(response.data);
     } catch (error) {
       console.error('FRMINFO High Virtual tablo kontrolü hatası:', error);
@@ -227,7 +300,7 @@ const StoragePage = () => {
 
   const checkSysfrmizTable = async () => {
     try {
-      const response = await databaseAPI.checkTableExistsSysfrmiz();
+      const response = await databaseAPI.checkTableExistsSysfrmiz({});
       setSysfrmizTableInfo(response.data);
     } catch (error) {
       console.error('SYSFRMIZ tablo kontrolü hatası:', error);
@@ -672,14 +745,467 @@ const StoragePage = () => {
                   {/* Grafik Sekmesi */}
                   {activeTab === 'chart' && (
                     <div className="space-y-4">
-                      <h4 className="text-lg font-semibold text-gray-800">Grafik Görünümü</h4>
-                      <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
-                        <div className="text-6xl mb-4">📈</div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">Grafik Görünümü</h3>
-                        <p className="text-gray-600">
-                          {activeModal} verilerinin grafik görünümü burada gösterilecek
-                        </p>
-                      </div>
+                      <h4 className="text-lg font-semibold text-gray-800 mb-4">Performans Grafikleri</h4>
+
+                      {/* CSASUM için Grafik Kartları */}
+                      {activeModal === 'CSASUM' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                          {/* CSA In Use Percent */}
+                          <div onClick={() => openChart('csasumCsaInUsePercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('csasumCsaInUsePercent'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200">
+                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CSA In Use %</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.csa_in_use_percent ? `${formatNumber(getCurrentData()[0].csa_in_use_percent)}%` : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* ECSA In Use Percent */}
+                          <div onClick={() => openChart('csasumEcsaInUsePercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('csasumEcsaInUsePercent'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200">
+                                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">ECSA In Use %</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.ecsa_in_use_percent ? `${formatNumber(getCurrentData()[0].ecsa_in_use_percent)}%` : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Total CS Used Percent */}
+                          <div onClick={() => openChart('csasumTotalCsUsedPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('csasumTotalCsUsedPercent'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200">
+                                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Total CS Used %</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.total_cs_used_percent ? `${formatNumber(getCurrentData()[0].total_cs_used_percent)}%` : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Available Common Storage Percent */}
+                          <div onClick={() => openChart('csasumAvailableCommonStoragePercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('csasumAvailableCommonStoragePercent'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-200">
+                                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Available CS %</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.available_common_storage_percent ? `${formatNumber(getCurrentData()[0].available_common_storage_percent)}%` : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Last Update */}
+                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
+                              <div className="text-sm text-gray-700 mt-1">
+                                {getCurrentData()?.[0]?.timestamp ? new Date(getCurrentData()[0].timestamp).toLocaleString('tr-TR') : '-'}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* FRMINFO_CENTER için Grafik Kartları */}
+                      {activeModal === 'FRMINFO_CENTER' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                          {/* SPISPC Average */}
+                          <div onClick={() => openChart('frminfoCenterSpispcav')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoCenterSpispcav'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200">
+                                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPISPC Avg</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.spispcav ? formatNumber(getCurrentData()[0].spispcav) : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* SPILPF Average */}
+                          <div onClick={() => openChart('frminfoCenterSpilpfav')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoCenterSpilpfav'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200">
+                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPILPF Avg</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.spilpfav ? formatNumber(getCurrentData()[0].spilpfav) : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* SPICPF Average */}
+                          <div onClick={() => openChart('frminfoCenterSpicpfav')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoCenterSpicpfav'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200">
+                                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPICPF Avg</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.spicpfav ? formatNumber(getCurrentData()[0].spicpfav) : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* SPIQPC Average */}
+                          <div onClick={() => openChart('frminfoCenterSpiqpcav')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoCenterSpiqpcav'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-200">
+                                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPIQPC Avg</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.spiqpcav ? formatNumber(getCurrentData()[0].spiqpcav) : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Last Update */}
+                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
+                              <div className="text-sm text-gray-700 mt-1">
+                                {getCurrentData()?.[0]?.bmctime ? new Date(getCurrentData()[0].bmctime).toLocaleString('tr-TR') : '-'}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* FRMINFO_FIXED için Grafik Kartları */}
+                      {activeModal === 'FRMINFO_FIXED' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                          {/* SQA Average */}
+                          <div onClick={() => openChart('frminfoFixedSqaAvg')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoFixedSqaAvg'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200">
+                                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SQA Avg</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.sqa_avg ? formatNumber(getCurrentData()[0].sqa_avg) : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* LPA Average */}
+                          <div onClick={() => openChart('frminfoFixedLpaAvg')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoFixedLpaAvg'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200">
+                                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">LPA Avg</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.lpa_avg ? formatNumber(getCurrentData()[0].lpa_avg) : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* CSA Average */}
+                          <div onClick={() => openChart('frminfoFixedCsaAvg')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoFixedCsaAvg'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200">
+                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CSA Avg</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.csa_avg ? formatNumber(getCurrentData()[0].csa_avg) : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Fixed Percentage */}
+                          <div onClick={() => openChart('frminfoFixedPercentage')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoFixedPercentage'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-200">
+                                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Fixed %</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.fixed_percentage ? `${formatNumber(getCurrentData()[0].fixed_percentage)}%` : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Last Update */}
+                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
+                              <div className="text-sm text-gray-700 mt-1">
+                                {getCurrentData()?.[0]?.timestamp ? new Date(getCurrentData()[0].timestamp).toLocaleString('tr-TR') : '-'}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* FRMINFO_HIGH_VIRTUAL için Grafik Kartları */}
+                      {activeModal === 'FRMINFO_HIGH_VIRTUAL' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                          {/* HV Common Average */}
+                          <div onClick={() => openChart('frminfoHighVirtualHvCommonAvg')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoHighVirtualHvCommonAvg'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-200">
+                                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">HV Common Avg</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.hv_common_avg ? formatNumber(getCurrentData()[0].hv_common_avg) : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* HV Shared Average */}
+                          <div onClick={() => openChart('frminfoHighVirtualHvSharedAvg')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoHighVirtualHvSharedAvg'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200">
+                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">HV Shared Avg</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.hv_shared_avg ? formatNumber(getCurrentData()[0].hv_shared_avg) : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* HV Common Max */}
+                          <div onClick={() => openChart('frminfoHighVirtualHvCommonMax')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoHighVirtualHvCommonMax'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200">
+                                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">HV Common Max</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.hv_common_max ? formatNumber(getCurrentData()[0].hv_common_max) : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* HV Shared Max */}
+                          <div onClick={() => openChart('frminfoHighVirtualHvSharedMax')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('frminfoHighVirtualHvSharedMax'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200">
+                                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">HV Shared Max</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.hv_shared_max ? formatNumber(getCurrentData()[0].hv_shared_max) : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Last Update */}
+                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
+                              <div className="text-sm text-gray-700 mt-1">
+                                {getCurrentData()?.[0]?.timestamp ? new Date(getCurrentData()[0].timestamp).toLocaleString('tr-TR') : '-'}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* SYSFRMIZ için Grafik Kartları */}
+                      {activeModal === 'SYSFRMIZ' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                          {/* SPL Average */}
+                          <div onClick={() => openChart('sysfrmizSpl')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('sysfrmizSpl'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-indigo-200">
+                                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPL</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.spl ? formatNumber(getCurrentData()[0].spl) : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* SPIUONLF */}
+                          <div onClick={() => openChart('sysfrmizSpiuonlf')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('sysfrmizSpiuonlf'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200">
+                                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPIUONLF</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.spiuonlf ? formatNumber(getCurrentData()[0].spiuonlf) : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* SPIFINAV */}
+                          <div onClick={() => openChart('sysfrmizSpifinav')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('sysfrmizSpifinav'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200">
+                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPIFINAV</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.spifinav ? formatNumber(getCurrentData()[0].spifinav) : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* SPREFCNP */}
+                          <div onClick={() => openChart('sysfrmizSprefcnp')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('sysfrmizSprefcnp'); }} className={`absolute top-3 right-3 w-6 h-6 bg-${modalColor}-100 hover:bg-${modalColor}-200 text-${modalColor}-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10`}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-200">
+                                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPREFCNP</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {getCurrentData()?.[0]?.sprefncp ? formatNumber(getCurrentData()[0].sprefncp) : <span className="text-gray-400">-</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Last Update */}
+                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-500 text-lg">LAST UPDATE</h5>
+                              <div className="text-sm text-gray-700 mt-1">
+                                {getCurrentData()?.[0]?.bmctime ? new Date(getCurrentData()[0].bmctime).toLocaleString('tr-TR') : '-'}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
