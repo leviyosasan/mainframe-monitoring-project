@@ -27,6 +27,22 @@ const {
   getMainviewNetworkConnsrpz
 } = require('../controllers/database.controller');
 
+// RMF tables
+const {
+  checkTableExistsRmfPgspp, getMainviewRmfPgspp,
+  checkTableExistsRmfArd, getMainviewRmfArd,
+  checkTableExistsRmfTrx, getMainviewRmfTrx,
+  checkTableExistsRmfAsrm, getMainviewRmfAsrm,
+  checkTableExistsRmfSrcs, getMainviewRmfSrcs,
+  checkTableExistsRmfAsd, getMainviewRmfAsd,
+  checkTableExistsRmfSpag, getMainviewRmfSpag,
+  checkTableExistsCmfDspcz, getMainviewCmfDspcz,
+  checkTableExistsCmfXcfsys, getMainviewCmfXcfsys,
+  checkTableExistsCmfJcsa, getMainviewCmfJcsa,
+  checkTableExistsCmfXcfmbr, getMainviewCmfXcfmbr,
+  checkTableExistsCmfSyscpc, getMainviewCmfSyscpc
+} = require('../controllers/database.controller');
+
 const router = express.Router();
 
 // Test database connection
@@ -133,5 +149,43 @@ router.post('/check-table-frminfo-high-virtual', checkTableExistsFrminfoHighVirt
 
 router.post('/mainview-storage-sysfrmiz', getMainviewStoragesysfrmiz);
 router.post('/check-table-sysfrmiz', checkTableExistsSysfrmiz);
+
+// RMF endpoints
+router.post('/mainview-rmf-pgspp', getMainviewRmfPgspp);
+router.post('/check-table-rmf-pgspp', checkTableExistsRmfPgspp);
+
+router.post('/mainview-rmf-ard', getMainviewRmfArd);
+router.post('/check-table-rmf-ard', checkTableExistsRmfArd);
+
+router.post('/mainview-rmf-trx', getMainviewRmfTrx);
+router.post('/check-table-rmf-trx', checkTableExistsRmfTrx);
+
+router.post('/mainview-rmf-asrm', getMainviewRmfAsrm);
+router.post('/check-table-rmf-asrm', checkTableExistsRmfAsrm);
+
+router.post('/mainview-rmf-srcs', getMainviewRmfSrcs);
+router.post('/check-table-rmf-srcs', checkTableExistsRmfSrcs);
+
+router.post('/mainview-rmf-asd', getMainviewRmfAsd);
+router.post('/check-table-rmf-asd', checkTableExistsRmfAsd);
+
+router.post('/mainview-rmf-spag', getMainviewRmfSpag);
+router.post('/check-table-rmf-spag', checkTableExistsRmfSpag);
+
+// CMF endpoints
+router.post('/mainview-cmf-dspcz', getMainviewCmfDspcz);
+router.post('/check-table-cmf-dspcz', checkTableExistsCmfDspcz);
+
+router.post('/mainview-cmf-xcfsys', getMainviewCmfXcfsys);
+router.post('/check-table-cmf-xcfsys', checkTableExistsCmfXcfsys);
+
+router.post('/mainview-cmf-jcsa', getMainviewCmfJcsa);
+router.post('/check-table-cmf-jcsa', checkTableExistsCmfJcsa);
+
+router.post('/mainview-cmf-xcfmbr', getMainviewCmfXcfmbr);
+router.post('/check-table-cmf-xcfmbr', checkTableExistsCmfXcfmbr);
+
+router.post('/mainview-cmf-syscpc', getMainviewCmfSyscpc);
+router.post('/check-table-cmf-syscpc', checkTableExistsCmfSyscpc);
 
 module.exports = router;

@@ -2378,6 +2378,415 @@ const checkTableExistsSysfrmiz = async (req, res) => {
   }
 };
 
+// ========== RMF Endpoints ==========
+
+// RMF PGSPP
+const checkTableExistsRmfPgspp = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const tableCheckQuery = `SELECT table_name FROM information_schema.tables WHERE table_name = 'mainview_rmf_pgspp'`;
+    const tableResult = await client.query(tableCheckQuery);
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_rmf_pgspp`;
+    const countResult = await client.query(countQuery);
+    client.release();
+    res.status(200).json({ success: true, tableInfo: { exists: tableResult.rows.length > 0, rowCount: parseInt(countResult.rows[0].count) } });
+  } catch (error) {
+    console.error('Table check error:', error);
+    res.status(500).json({ success: false, message: 'Tablo kontrolü başarısız', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+const getMainviewRmfPgspp = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const query = `SELECT * FROM mainview_rmf_pgspp ORDER BY timestamp DESC LIMIT 100`;
+    const result = await client.query(query);
+    client.release();
+    res.status(200).json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error('Query error:', error);
+    res.status(500).json({ success: false, message: 'Veriler getirilemedi', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+
+// RMF ARD
+const checkTableExistsRmfArd = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const tableCheckQuery = `SELECT table_name FROM information_schema.tables WHERE table_name = 'mainview_rmf_ard'`;
+    const tableResult = await client.query(tableCheckQuery);
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_rmf_ard`;
+    const countResult = await client.query(countQuery);
+    client.release();
+    res.status(200).json({ success: true, tableInfo: { exists: tableResult.rows.length > 0, rowCount: parseInt(countResult.rows[0].count) } });
+  } catch (error) {
+    console.error('Table check error:', error);
+    res.status(500).json({ success: false, message: 'Tablo kontrolü başarısız', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+const getMainviewRmfArd = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const query = `SELECT * FROM mainview_rmf_ard ORDER BY updated_at DESC LIMIT 100`;
+    const result = await client.query(query);
+    client.release();
+    res.status(200).json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error('Query error:', error);
+    res.status(500).json({ success: false, message: 'Veriler getirilemedi', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+
+// RMF TRX
+const checkTableExistsRmfTrx = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const tableCheckQuery = `SELECT table_name FROM information_schema.tables WHERE table_name = 'mainview_rmf_trx'`;
+    const tableResult = await client.query(tableCheckQuery);
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_rmf_trx`;
+    const countResult = await client.query(countQuery);
+    client.release();
+    res.status(200).json({ success: true, tableInfo: { exists: tableResult.rows.length > 0, rowCount: parseInt(countResult.rows[0].count) } });
+  } catch (error) {
+    console.error('Table check error:', error);
+    res.status(500).json({ success: false, message: 'Tablo kontrolü başarısız', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+const getMainviewRmfTrx = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const query = `SELECT * FROM mainview_rmf_trx ORDER BY bmctime DESC LIMIT 100`;
+    const result = await client.query(query);
+    client.release();
+    res.status(200).json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error('Query error:', error);
+    res.status(500).json({ success: false, message: 'Veriler getirilemedi', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+
+// RMF ASRM
+const checkTableExistsRmfAsrm = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect帮تب;
+    const tableCheckQuery = `SELECT table_name FROM information_schema.tables WHERE table_name = 'mainview_rmf_asrm'`;
+    const tableResult = await client.query(tableCheckQuery);
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_rmf_asrm`;
+    const countResult = await client.query(countQuery);
+    client.release();
+    res.status(200).json({ success: true, tableInfo: { exists: tableResult.rows.length > 0, rowCount: parseInt(countResult.rows[0].count) } });
+兼具: console.error('Table check error:', error);
+    res.status(500).json({ success: false, message: 'Tablo kontrolü başarısız', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+const getMainviewRmfAsrm = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const query = `SELECT * FROM mainview_rmf_asrm ORDER BY bmctime DESC LIMIT 100`;
+    const result = await client.query(query);
+    client.release();
+    res.status(200).json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error('Query error depend', error);
+    res.status(500).json({ success: false, message: 'Veriler getirilemedi', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+
+// RMF SRCS
+const checkTableExistsRmfSrcs = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const tableCheckQuery = `SELECT table_name FROM information_schema.tables WHERE table_name = 'mainview_rmf_srcs'`;
+    const tableResult = await client.query(tableCheckQuery);
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_rmf_srcs`;
+    const countResult = await client.query(countQuery);
+    client.release();
+    res.status(200).json({ success: true, tableInfo: { exists: tableResult.rows.length > 0, rowCount: parseInt(countResult.rows[0].count) } });
+  } catch (error) {
+    console.error('Table check error:', error);
+    res.status(500).json({ success: false, message: 'Tablo kontrolü başarısız', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+const getMainviewRmfSrcs = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const query = `SELECT * FROM mainview_rmf_srcs ORDER BY bmctime DESC LIMIT 100`;
+    const result = await client.query(query);
+    client.release();
+    res.status(200).json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error('Query error:', error);
+    res.status(500).json({ success: false, message: 'Veriler getirilemedi', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+
+// RMF ASD
+const checkTableExistsRmfAsd = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const tableCheckQuery = `SELECT table_name FROM information_schema.tables WHERE table_name = 'mainview_rmf_asd'`;
+    const tableResult = await client.query(tableCheckQuery);
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_rmf_asd`;
+    const countResult = await client.query(countQuery);
+    client.release();
+    res.status(200).json({ success: true, tableInfo: { exists: tableResult.rows.length > 0, rowCount: parseInt(countResult.rows[0].count) } });
+  } catch (error) {
+    console.error('Table check error:', error);
+    res.status(500).json({ success: false, message: 'Tablo kontrolü başarısız', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+const getMainviewRmfAsd = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const query = `SELECT * FROM mainview_rmf_asd ORDER BY record_timestamp DESC LIMIT 100`;
+    const result = await client.query(query);
+    client.release();
+    res.status(200).json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error('Query error:', error);
+    res.status(500).json({ success: false, message: 'Veriler getirilemedi', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+
+// RMF SPAG
+const checkTableExistsRmfSpag = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const tableCheckQuery = `SELECT table_name FROM information_schema.tables WHERE table_name = 'mainview_rmf_spag'`;
+    const tableResult = await client.query(tableCheckQuery);
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_rmf_spag`;
+    const countResult = await client.query(countQuery);
+    client.release();
+    res.status(200).json({ success: true, tableInfo: { exists: tableResult.rows.length > 0, rowCount: parseInt(countResult.rows[0].count) } });
+  } catch (error) {
+    console.error('Table check error:', error);
+    res.status(500).json({ success: false, message: 'Tablo kontrolü başarısız', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+const getMainviewRmfSpag = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const query = `SELECT * FROM mainview_rmf_spag ORDER BY record_timestamp DESC LIMIT 100`;
+    const result = await client.query(query);
+    client.release();
+    res.status(200).json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error('Query error:', error);
+    res.status(500).json({ success: false, message: 'Veriler getirilemedi', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+
+// CMF XCFSYS
+const checkTableExistsCmfXcfsys = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const tableCheckQuery = `SELECT table_name FROM information_schema.tables WHERE table_name = 'mainview_cmf_xcfsys'`;
+    const tableResult = await client.query(tableCheckQuery);
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_cmf_xcfsys`;
+    const countResult = await client.query(countQuery);
+    client.release();
+    res.status(200).json({ success: true, tableInfo: { exists: tableResult.rows.length > 0, rowCount: parseInt(countResult.rows[0].count) } });
+  } catch (error) {
+    console.error('Table check error:', error);
+    res.status(500).json({ success: false, message: 'Tablo kontrolü başarısız', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+const getMainviewCmfXcfsys = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const query = `SELECT * FROM mainview_cmf_xcfsys ORDER BY record_timestamp DESC LIMIT 100`;
+    const result = await client.query(query);
+    client.release();
+    res.status(200).json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error('Query error:', error);
+    res.status(500).json({ success: false, message: 'Veriler getirilemedi', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+
+// CMF DSPCZ
+const checkTableExistsCmfDspcz = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const tableCheckQuery = `SELECT table_name FROM information_schema.tables WHERE table_name = 'mainview_cmf_dspcz'`;
+    const tableResult = await client.query(tableCheckQuery);
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_cmf_dspcz`;
+    const countResult = await client.query(countQuery);
+    client.release();
+    res.status(200).json({ success: true, tableInfo: { exists: tableResult.rows.length > 0, rowCount: parseInt(countResult.rows[0].count) } });
+  } catch (error) {
+    console.error('Table check error:', error);
+    res.status(500).json({ success: false, message: 'Tablo kontrolü başarısız', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+const getMainviewCmfDspcz = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const query = `SELECT * FROM mainview_cmf_dspcz ORDER BY bmctime DESC LIMIT 100`;
+    const result = await client.query(query);
+    client.release();
+    res.status(200).json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error('Query error:', error);
+    res.status(500).json({ success: false, message: 'Veriler getirilemedi', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+
+// CMF JCSA
+const checkTableExistsCmfJcsa = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const tableCheckQuery = `SELECT table_name FROM information_schema.tables WHERE table_name = 'mainview_cmf_jcsa'`;
+    const tableResult = await client.query(tableCheckQuery);
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_cmf_jcsa`;
+    const countResult = await client.query(countQuery);
+    client.release();
+    res.status(200).json({ success: true, tableInfo: { exists: tableResult.rows.length > 0, rowCount: parseInt(countResult.rows[0].count) } });
+  } catch (error) {
+    console.error('Table check error:', error);
+    res.status(500).json({ success: false, message: 'Tablo kontrolü başarısız', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+const getMainviewCmfJcsa = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const query = `SELECT * FROM mainview_cmf_jcsa ORDER BY bmc_time DESC LIMIT 100`;
+    const result = await client.query(query);
+    client.release();
+    res.status(200).json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error('Query error:', error);
+    res.status(500).json({ success: false, message: 'Veriler getirilemedi', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+
+// CMF XCFMBR
+const checkTableExistsCmfXcfmbr = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const tableCheckQuery = `SELECT table_name FROM information_schema.tables WHERE table_name = 'mainview_xcfmbr'`;
+    const tableResult = await client.query(tableCheckQuery);
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_xcfmbr`;
+    const countResult = await client.query(countQuery);
+    client.release();
+    res.status(200).json({ success: true, tableInfo: { exists: tableResult.rows.length > 0, rowCount: parseInt(countResult.rows[0].count) } });
+  } catch (error) {
+    console.error('Table check error:', error);
+    res.status(500).json({ success: false, message: 'Tablo kontrolü başarısız', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+const getMainviewCmfXcfmbr = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const query = `SELECT * FROM mainview_xcfmbr ORDER BY timestamp DESC LIMIT 100`;
+    const result = await client.query(query);
+    client.release();
+    res.status(200).json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error('Query error:', error);
+    res.status(500).json({ success: false, message: 'Veriler getirilemedi', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+
+// CMF SYSCPC
+const checkTableExistsCmfSyscpc = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const tableCheckQuery = `SELECT table_name FROM information_schema.tables WHERE table_name = 'mainview_syscpc'`;
+    const tableResult = await client.query(tableCheckQuery);
+    const countQuery = `SELECT COUNT(*) as count FROM mainview_syscpc`;
+    const countResult = await client.query(countQuery);
+    client.release();
+    res.status(200).json({ success: true, tableInfo: { exists: tableResult.rows.length > 0, rowCount: parseInt(countResult.rows[0].count) } });
+  } catch (error) {
+    console.error('Table check error:', error);
+    res.status(500).json({ success: false, message: 'Tablo kontrolü başarısız', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+const getMainviewCmfSyscpc = async (req, res) => {
+  let pool = null;
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    const query = `SELECT * FROM mainview_syscpc ORDER BY timestamp DESC LIMIT 100`;
+    const result = await client.query(query);
+    client.release();
+    res.status(200).json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error('Query error:', error);
+    res.status(500).json({ success: false, message: 'Veriler getirilemedi', error: error.message });
+  } finally { if (pool) await pool.end(); }
+};
+
 module.exports = {
   testConnection,
   getMainviewMvsSysover,
@@ -2426,5 +2835,31 @@ module.exports = {
   getMainviewStorageFrminfoHighVirtual,
   checkTableExistsFrminfoHighVirtual,
   getMainviewStoragesysfrmiz,
-  checkTableExistsSysfrmiz
+  checkTableExistsSysfrmiz,
+  // RMF tables
+  checkTableExistsRmfPgspp,
+  getMainviewRmfPgspp,
+  checkTableExistsRmfArd,
+  getMainviewRmfArd,
+  checkTableExistsRmfTrx,
+  getMainviewRmfTrx,
+  checkTableExistsRmfAsrm,
+  getMainviewRmfAsrm,
+  checkTableExistsRmfSrcs,
+  getMainviewRmfSrcs,
+  checkTableExistsRmfAsd,
+  getMainviewRmfAsd,
+  checkTableExistsRmfSpag,
+  getMainviewRmfSpag,
+  // CMF tables
+  checkTableExistsCmfDspcz,
+  getMainviewCmfDspcz,
+  checkTableExistsCmfXcfsys,
+  getMainviewCmfXcfsys,
+  checkTableExistsCmfJcsa,
+  getMainviewCmfJcsa,
+  checkTableExistsCmfXcfmbr,
+  getMainviewCmfXcfmbr,
+  checkTableExistsCmfSyscpc,
+  getMainviewCmfSyscpc
 };

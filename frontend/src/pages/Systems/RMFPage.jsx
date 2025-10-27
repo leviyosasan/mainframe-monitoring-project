@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { databaseAPI } from '../../services/api';
+import toast from 'react-hot-toast';
 
 const RMFPage = () => {
   const [activeModal, setActiveModal] = useState(null);
@@ -7,6 +9,301 @@ const RMFPage = () => {
   const [selectedTimeRange, setSelectedTimeRange] = useState('last6h');
   const [customFromDate, setCustomFromDate] = useState('');
   const [customToDate, setCustomToDate] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortDirection, setSortDirection] = useState('asc');
+  
+  // Optimized: Single object to store all data states
+  const [data, setData] = useState({
+    rmf_pgspp: [],
+    rmf_ard: [],
+    rmf_trx: [],
+    rmf_asrm: [],
+    rmf_srcs: [],
+    rmf_asd: [],
+    rmf_spag: [],
+    cmf_dspcz: [],
+    cmf_xcfsys: [],
+    cmf_jcsa: [],
+    cmf_xcfmbr: [],
+    cmf_syscpc: []
+  });
+  
+  const [filteredData, setFilteredData] = useState([]);
+  const [isFiltered, setIsFiltered] = useState(false);
+  
+  // Helper functions
+  const formatNumber = (value) => {
+    if (value === null || value === undefined || value === '') return '-';
+    const num = Number(value);
+    return isNaN(num) ? '-' : num.toFixed(2);
+  };
+
+  const formatValue = (value, columnName) => {
+    if (value === null || value === undefined || value === '') return '-';
+    
+    if (columnName.includes('timestamp') || columnName.includes('time') || columnName === 'bmctime' || columnName === 'record_timestamp') {
+      try {
+        return new Date(value).toLocaleString('tr-TR');
+      } catch {
+        return value.toString();
+      }
+    }
+    
+    return value.toString();
+  };
+
+  // Optimized: API mapping
+  const apiMapping = {
+    rmf_pgspp: databaseAPI.getMainviewRmfPgspp,
+    rmf_ard: databaseAPI.getMainviewRmfArd,
+    rmf_trx: databaseAPI.getMainviewRmfTrx,
+    rmf_asrm: databaseAPI.getMainviewRmfAsrm,
+    rmf_srcs: databaseAPI.getMainviewRmfSrcs,
+    rmf_asd: databaseAPI.getMainviewRmfAsd,
+    rmf_spag: databaseAPI.getMainviewRmfSpag,
+    cmf_dspcz: databaseAPI.getMainviewCmfDspcz,
+    cmf_xcfsys: databaseAPI.getMainviewCmfXcfsys,
+    cmf_jcsa: databaseAPI.getMainviewCmfJcsa,
+    cmf_xcfmbr: databaseAPI.getMainviewCmfXcfmbr,
+    cmf_syscpc: databaseAPI.getMainviewCmfSyscpc
+  };
+
+  const getCurrentRawData = () => {
+    return activeModal ? data[activeModal] || [] : [];
+  };
+
+  const getCurrentData = () => {
+    return isFiltered ? filteredData : getCurrentRawData();
+  };
+
+  // Optimized: Single generic fetch function
+  const fetchData = async (modalType) => {
+    if (!apiMapping[modalType]) {
+      toast.error('Geçersiz kart seçimi');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await apiMapping[modalType]();
+      if (response.data.success) {
+        setData(prev => ({ ...prev, [modalType]: response.data.data }));
+        toast.success(`Veriler yüklendi (${response.data.data.length} kayıt)`);
+      } else {
+        toast.error('Veri bulunamadı');
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error);
+      toast.error(`Veri yüklenirken hata: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const loadDataForActiveModal = () => {
+    if (activeModal) {
+      fetchData(activeModal);
+    }
+  };
+
+  // OLD DATA FETCHING FUNCTIONS - TO BE REMOVED
+  /* Data fetching functions
+  const fetchRmfPgsppData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await databaseAPI.getMainviewRmfPgspp();
+      if (response.data.success) {
+        setRmfPgsppData(response.data.data);
+        toast.success(`PGSPP verileri yüklendi (${response.data.data.length} kayıt)`);
+      } else {
+        toast.error('Veri bulunamadı');
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error);
+      toast.error(`Veri yüklenirken hata: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchRmfArdData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await databaseAPI.getMainviewRmfArd();
+      if (response.data.success) {
+        setRmfArdData(response.data.data);
+        toast.success(`ARD verileri yüklendi (${response.data.data.length} kayıt)`);
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error);
+      toast.error(`Veri yüklenirken hata: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchRmfTrxData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await databaseAPI.getMainviewRmfTrx();
+      if (response.data.success) {
+        setRmfTrxData(response.data.data);
+        toast.success(`TRX verileri yüklendi (${response.data.data.length} kayıt)`);
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error);
+      toast.error(`Veri yüklenirken hata: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchRmfAsrmData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await databaseAPI.getMainviewRmfAsrm();
+      if (response.data.success) {
+        setRmfAsrmData(response.data.data);
+        toast.success(`ASRM verileri yüklendi (${response.data.data.length} kayıt)`);
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error);
+      toast.error(`Veri yüklenirken hata: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchRmfSrcsData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await databaseAPI.getMainviewRmfSrcs();
+      if (response.data.success) {
+        setRmfSrcsData(response.data.data);
+        toast.success(`SRCS verileri yüklendi (${response.data.data.length} kayıt)`);
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error);
+      toast.error(`Veri yüklenirken hata: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchRmfAsdData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await databaseAPI.getMainviewRmfAsd();
+      if (response.data.success) {
+        setRmfAsdData(response.data.data);
+        toast.success(`ASD verileri yüklendi (${response.data.data.length} kayıt)`);
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error);
+      toast.error(`Veri yüklenirken hata: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchRmfSpagData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await databaseAPI.getMainviewRmfSpag();
+      if (response.data.success) {
+        setRmfSpagData(response.data.data);
+        toast.success(`SPAG verileri yüklendi (${response.data.data.length} kayıt)`);
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error);
+      toast.error(`Veri yüklenirken hata: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchCmfDspczData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await databaseAPI.getMainviewCmfDspcz();
+      if (response.data.success) {
+        setCmfDspczData(response.data.data);
+        toast.success(`DSPCZ verileri yüklendi (${response.data.data.length} kayıt)`);
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error);
+      toast.error(`Veri yüklenirken hata: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchCmfXcfsysData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await databaseAPI.getMainviewCmfXcfsys();
+      if (response.data.success) {
+        setCmfXcfsysData(response.data.data);
+        toast.success(`XCFSYS verileri yüklendi (${response.data.data.length} kayıt)`);
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error);
+      toast.error(`Veri yüklenirken hata: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchCmfJcsaData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await databaseAPI.getMainviewCmfJcsa();
+      if (response.data.success) {
+        setCmfJcsaData(response.data.data);
+        toast.success(`JCSA verileri yüklendi (${response.data.data.length} kayıt)`);
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error);
+      toast.error(`Veri yüklenirken hata: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchCmfXcfmbrData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await databaseAPI.getMainviewCmfXcfmbr();
+      if (response.data.success) {
+        setCmfXcfmbrData(response.data.data);
+        toast.success(`XCFMBR verileri yüklendi (${response.data.data.length} kayıt)`);
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error);
+      toast.error(`Veri yüklenirken hata: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchCmfSyscpcData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await databaseAPI.getMainviewCmfSyscpc();
+      if (response.data.success) {
+        setCmfSyscpcData(response.data.data);
+        toast.success(`SYSCPC verileri yüklendi (${response.data.data.length} kayıt)`);
+      }
+    } catch (error) {
+      console.error('Veri yükleme hatası:', error);
+      toast.error(`Veri yüklenirken hata: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  */
 
   const tabs = [
     { id: 'table', name: 'Tablo', icon: '📊' },
@@ -14,10 +311,219 @@ const RMFPage = () => {
     { id: 'threshold', name: 'Threshold', icon: '⚙️' }
   ];
 
+  const handleSort = (column) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  // Export to Excel function
+  const exportToExcel = () => {
+    const data = getCurrentData();
+    if (!data || data.length === 0) {
+      toast.error('Aktarılacak veri bulunamadı');
+      return;
+    }
+
+    const headers = Object.keys(data[0]);
+    const csvData = [
+      headers.join(','),
+      ...data.map(row => 
+        headers.map(header => {
+          const value = row[header];
+          if (value === null || value === undefined || value === '') return '';
+          if (typeof value === 'number') return value;
+          // Escape quotes and wrap in quotes if contains comma
+          const stringValue = value.toString();
+          if (stringValue.includes(',') || stringValue.includes('"')) {
+            return `"${stringValue.replace(/"/g, '""')}"`;
+          }
+          return stringValue;
+        }).join(',')
+      )
+    ].join('\n');
+
+    // BOM ekle (Türkçe karakterler için)
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvData], { type: 'text/csv;charset=utf-8;' });
+    
+    // Dosyayı indir
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    const cardTitle = cardData.find(card => card.id === activeModal)?.title || 'rmf_data';
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${cardTitle.toLowerCase().replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success('Veriler Excel formatında indirildi');
+  };
+
+  // Export to PDF function
+  const exportToPDF = () => {
+    const data = getCurrentData();
+    if (!data || data.length === 0) {
+      toast.error('Aktarılacak veri bulunamadı');
+      return;
+    }
+
+    try {
+      // jsPDF ve autoTable eklentisini dinamik olarak yükle
+      const loadScripts = () => {
+        return new Promise((resolve, reject) => {
+          let loadedCount = 0;
+          const totalScripts = 2;
+
+          const onScriptLoad = () => {
+            loadedCount++;
+            if (loadedCount === totalScripts) {
+              resolve();
+            }
+          };
+
+          const onScriptError = () => {
+            reject(new Error('Script yükleme hatası'));
+          };
+
+          // jsPDF yükle
+          const jsPDFScript = document.createElement('script');
+          jsPDFScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+          jsPDFScript.onload = onScriptLoad;
+          jsPDFScript.onerror = onScriptError;
+          document.head.appendChild(jsPDFScript);
+
+          // autoTable eklentisini yükle
+          const autoTableScript = document.createElement('script');
+          autoTableScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js';
+          autoTableScript.onload = onScriptLoad;
+          autoTableScript.onerror = onScriptError;
+          document.head.appendChild(autoTableScript);
+        });
+      };
+
+      loadScripts().then(() => {
+        const data = getCurrentData();
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape', 'mm', 'a4');
+        
+        // Başlık ekle
+        const cardTitle = cardData.find(card => card.id === activeModal)?.title || 'RMF Data';
+        doc.setFontSize(16);
+        doc.text(`${cardTitle} Raporu`, 20, 20);
+        
+        // Tarih ekle
+        doc.setFontSize(10);
+        doc.text(`Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 20, 30);
+        
+        // Tablo verilerini hazırla
+        const headers = Object.keys(data[0]);
+        const tableData = data.map(row => 
+          headers.map(header => {
+            const value = row[header];
+            if (value === null || value === undefined || value === '') return '-';
+            if (typeof value === 'number') return formatNumber(value);
+            return value.toString();
+          })
+        );
+
+        // AutoTable kullanarak tablo oluştur
+        doc.autoTable({
+          head: [headers],
+          body: tableData,
+          startY: 35,
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [79, 70, 229] },
+          alternateRowStyles: { fillColor: [249, 250, 251] }
+        });
+
+        // PDF'i indir
+        const fileName = `${cardTitle.toLowerCase().replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
+        
+        toast.success('PDF oluşturuldu ve indirildi');
+      }).catch((error) => {
+        console.error('Script yükleme hatası:', error);
+        toast.error('PDF oluşturma sırasında hata oluştu');
+      });
+    } catch (error) {
+      console.error('PDF oluşturma hatası:', error);
+      toast.error('PDF oluşturma sırasında hata oluştu');
+    }
+  };
+
+  // Refresh data function
+  const refreshData = () => {
+    if (activeModal) {
+      loadDataForActiveModal();
+    }
+  };
+
+  const renderTableHeaders = () => {
+    const data = getCurrentData();
+    if (!data || data.length === 0) return null;
+
+    const headers = Object.keys(data[0]);
+    return (
+      <tr>
+        {headers.map((header, index) => (
+          <th
+            key={index}
+            onClick={() => handleSort(header)}
+            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+          >
+            <div className="flex items-center space-x-1">
+              <span>{header}</span>
+              {sortColumn === header && (
+                <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+              )}
+            </div>
+          </th>
+        ))}
+      </tr>
+    );
+  };
+
+  const renderTableRows = () => {
+    const data = getCurrentData();
+    if (!data || data.length === 0) {
+      return (
+        <tr>
+          <td colSpan="100%" className="px-6 py-4 text-center text-gray-500">
+            Veri bulunamadı
+          </td>
+        </tr>
+      );
+    }
+
+    return data.map((row, index) => (
+      <tr key={index} className="hover:bg-gray-50">
+        {Object.entries(row).map(([columnName, value], cellIndex) => (
+          <td key={cellIndex} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            {formatValue(value, columnName)}
+          </td>
+        ))}
+      </tr>
+    ));
+  };
+
   const openModal = (modalType) => {
     setActiveModal(modalType);
-    setActiveTab('table'); // Her modal açıldığında tablo sekmesine git
+    setActiveTab('table');
+    // Kart değişince filtreyi sıfırla
+    setIsFiltered(false);
+    setFilteredData([]);
   };
+
+  useEffect(() => {
+    if (activeModal) {
+      loadDataForActiveModal();
+    }
+  }, [activeModal]);
 
   const closeModal = () => {
     setActiveModal(null);
@@ -32,9 +538,94 @@ const RMFPage = () => {
     setTimeFilterModal(false);
   };
 
+  const clearTimeFilter = () => {
+    setFilteredData([]);
+    setIsFiltered(false);
+    setSelectedTimeRange('last6h');
+    setCustomFromDate('');
+    setCustomToDate('');
+    toast.success('Zaman filtresi temizlendi');
+  };
+
   const applyTimeFilter = () => {
-    // Time filter logic will be implemented here
-    setTimeFilterModal(false);
+    try {
+      const currentData = getCurrentRawData();
+      if (!currentData || currentData.length === 0) {
+        toast.error('Filtrelenecek veri bulunamadı');
+        closeTimeFilter();
+        return;
+      }
+
+      let filtered = [];
+
+      // Özel tarih aralığı seçilmişse
+      if (selectedTimeRange === 'custom') {
+        if (!customFromDate || !customToDate) {
+          toast.error('Lütfen başlangıç ve bitiş tarihlerini seçin');
+          return;
+        }
+        
+        const fromDate = new Date(customFromDate);
+        const toDate = new Date(customToDate);
+        
+        filtered = currentData.filter(item => {
+          const itemTime = new Date(item.timestamp || item.bmctime || item.record_timestamp || item.time);
+          return itemTime >= fromDate && itemTime <= toDate;
+        });
+      } else {
+        // Hızlı zaman aralıkları
+        const now = new Date();
+        let fromDate;
+        
+        switch (selectedTimeRange) {
+          case 'last5m':
+            fromDate = new Date(now.getTime() - 5 * 60 * 1000);
+            break;
+          case 'last15m':
+            fromDate = new Date(now.getTime() - 15 * 60 * 1000);
+            break;
+          case 'last30m':
+            fromDate = new Date(now.getTime() - 30 * 60 * 1000);
+            break;
+          case 'last1h':
+            fromDate = new Date(now.getTime() - 60 * 60 * 1000);
+            break;
+          case 'last3h':
+            fromDate = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+            break;
+          case 'last6h':
+            fromDate = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+            break;
+          case 'last12h':
+            fromDate = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+            break;
+          case 'last24h':
+            fromDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            break;
+          case 'last2d':
+            fromDate = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+            break;
+          default:
+            fromDate = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+        }
+        
+        filtered = currentData.filter(item => {
+          const itemTime = new Date(item.timestamp || item.bmctime || item.record_timestamp || item.time);
+          return itemTime >= fromDate;
+        });
+      }
+      
+      // Filtrelenmiş verileri set et
+      setFilteredData(filtered);
+      setIsFiltered(true);
+      
+      toast.success(`Filtreleme uygulandı. ${filtered.length} kayıt bulundu.`);
+      closeTimeFilter();
+      
+    } catch (error) {
+      console.error('Filtreleme hatası:', error);
+      toast.error('Filtreleme sırasında hata oluştu');
+    }
   };
 
   const cardData = [
@@ -241,6 +832,7 @@ const RMFPage = () => {
                         </div>
                         <div className="flex space-x-3">
                           <button
+                            onClick={exportToExcel}
                             className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-md hover:bg-green-200 transition-colors duration-200 flex items-center"
                           >
                             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -249,6 +841,7 @@ const RMFPage = () => {
                             Excel'e Aktar
                           </button>
                           <button
+                            onClick={exportToPDF}
                             className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-200 transition-colors duration-200 flex items-center"
                           >
                             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -266,6 +859,7 @@ const RMFPage = () => {
                             Zaman Filtresi
                           </button>
                           <button
+                            onClick={refreshData}
                             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
                           >
                             Yenile
@@ -274,22 +868,23 @@ const RMFPage = () => {
                       </div>
                       
                       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                        <div className="p-8 text-center">
-                          <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
+                        {isLoading ? (
+                          <div className="p-8 text-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                            <p className="mt-4 text-gray-600">Veriler yükleniyor...</p>
                           </div>
-                          <h4 className="text-xl font-semibold text-gray-700 mb-2">
-                            {cardData.find(card => card.id === activeModal)?.title}
-                          </h4>
-                          <p className="text-gray-500 mb-4">
-                            {cardData.find(card => card.id === activeModal)?.description}
-                          </p>
-                          <p className="text-sm text-gray-400">
-                            Detaylı tablo içeriği yakında eklenecek...
-                          </p>
-                        </div>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                              <thead className="bg-gray-50">
+                                {renderTableHeaders()}
+                              </thead>
+                              <tbody className="bg-white divide-y divide-gray-200">
+                                {renderTableRows()}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -473,6 +1068,12 @@ const RMFPage = () => {
 
                   {/* Butonlar */}
                   <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={clearTimeFilter}
+                      className="px-4 py-2 text-sm font-medium text-red-700 bg-red-100 border border-red-300 rounded-md hover:bg-red-200 transition-colors duration-200"
+                    >
+                      Filtreyi Temizle
+                    </button>
                     <button
                       onClick={closeTimeFilter}
                       className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors duration-200"

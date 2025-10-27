@@ -173,6 +173,44 @@ export const databaseAPI = {
     getMainviewStoragesysfrmiz: (config) => api.post('/database/mainview-storage-sysfrmiz', config),
     checkTableExistsSysfrmiz: (config) => api.post('/database/check-table-sysfrmiz', config),
 
+    // RMF tables
+    getMainviewRmfPgspp: (config) => api.post('/database/mainview-rmf-pgspp', config),
+    checkTableExistsRmfPgspp: (config) => api.post('/database/check-table-rmf-pgspp', config),
+    
+    getMainviewRmfArd: (config) => api.post('/database/mainview-rmf-ard', config),
+    checkTableExistsRmfArd: (config) => api.post('/database/check-table-rmf-ard', config),
+    
+    getMainviewRmfTrx: (config) => api.post('/database/mainview-rmf-trx', config),
+    checkTableExistsRmfTrx: (config) => api.post('/database/check-table-rmf-trx', config),
+    
+    getMainviewRmfAsrm: (config) => api.post('/database/mainview-rmf-asrm', config),
+    checkTableExistsRmfAsrm: (config) => api.post('/database/check-table-rmf-asrm', config),
+    
+    getMainviewRmfSrcs: (config) => api.post('/database/mainview-rmf-srcs', config),
+    checkTableExistsRmfSrcs: (config) => api.post('/database/check-table-rmf-srcs', config),
+    
+    getMainviewRmfAsd: (config) => api.post('/database/mainview-rmf-asd', config),
+    checkTableExistsRmfAsd: (config) => api.post('/database/check-table-rmf-asd', config),
+    
+    getMainviewRmfSpag: (config) => api.post('/database/mainview-rmf-spag', config),
+    checkTableExistsRmfSpag: (config) => api.post('/database/check-table-rmf-spag', config),
+    
+    // CMF tables
+    getMainviewCmfDspcz: (config) => api.post('/database/mainview-cmf-dspcz', config),
+    checkTableExistsCmfDspcz: (config) => api.post('/database/check-table-cmf-dspcz', config),
+    
+    getMainviewCmfXcfsys: (config) => api.post('/database/mainview-cmf-xcfsys', config),
+    checkTableExistsCmfXcfsys: (config) => api.post('/database/check-table-cmf-xcfsys', config),
+    
+    getMainviewCmfJcsa: (config) => api.post('/database/mainview-cmf-jcsa', config),
+    checkTableExistsCmfJcsa: (config) => api.post('/database/check-table-cmf-jcsa', config),
+    
+    getMainviewCmfXcfmbr: (config) => api.post('/database/mainview-cmf-xcfmbr', config),
+    checkTableExistsCmfXcfmbr: (config) => api.post('/database/check-table-cmf-xcfmbr', config),
+    
+    getMainviewCmfSyscpc: (config) => api.post('/database/mainview-cmf-syscpc', config),
+    checkTableExistsCmfSyscpc: (config) => api.post('/database/check-table-cmf-syscpc', config),
+
 }
 
 export default api
