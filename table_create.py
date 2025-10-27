@@ -415,6 +415,7 @@ def trx_create_table():
             mxiasac FLOAT,
             mxixavg FLOAT,
             mxircp INTEGER,
+            mxirate FLOAT,
             bmctime TIMESTAMP WITH TIME ZONE,
             "time" TIME WITHOUT TIME ZONE
         )
