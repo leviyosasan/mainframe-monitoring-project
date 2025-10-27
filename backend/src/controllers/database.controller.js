@@ -2040,6 +2040,7 @@ const getMainviewStorageFrminfofixed = async (req, res) => {
     // Önce sadece tüm kolonları çekelim ve görelim
     const query = `
       SELECT
+        timestamp,
         system_name, server_name,
         sqa_avg, sqa_min, sqa_max,
         lpa_avg, lpa_min, lpa_max,
@@ -2048,17 +2049,30 @@ const getMainviewStorageFrminfofixed = async (req, res) => {
         private_avg, private_min, private_max,
         fixed_16m_avg, fixed_16m_min, fixed_16m_max,
         fixed_total_avg, fixed_total_min, fixed_total_max,
-        fixed_percentage,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        fixed_percentage
       FROM mainview_frminfo_fixed
       ORDER BY timestamp DESC
       LIMIT 100
     `;
  
     const result = await client.query(query);
+    
+    // Debug: Veri kalitesini kontrol edelim
+    console.log('=== FRMINFO FIXED DEBUG ===');
+    console.log('Query result count:', result.rowCount);
+    if (result.rows.length > 0) {
+      const firstRow = result.rows[0];
+      console.log('First row data:');
+      console.log('  timestamp:', firstRow.timestamp, typeof firstRow.timestamp);
+      console.log('  system_name:', firstRow.system_name, typeof firstRow.system_name);
+      console.log('  server_name:', firstRow.server_name, typeof firstRow.server_name);
+      console.log('  All columns:', Object.keys(firstRow));
+      console.log('  Full first row:', JSON.stringify(firstRow, null, 2));
+    }
+    console.log('=== END DEBUG ===');
+    
     client.release();
- 
+
     res.status(200).json({
       success: true,
       message: 'mainview_frminfo_fixed verileri başarıyla getirildi',

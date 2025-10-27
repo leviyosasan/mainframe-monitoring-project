@@ -41,6 +41,18 @@ const StoragePage = () => {
     return isNaN(num) ? '-' : num.toFixed(2);
   };
 
+  const formatValue = (value, columnName) => {
+    if (value === null || value === undefined || value === '') return '-';
+    
+    // String sütunlar için özel format
+    if (columnName === 'timestamp' || columnName === 'system_name' || columnName === 'server_name') {
+      return value.toString();
+    }
+    
+    // Sayısal sütunlar için formatNumber kullan
+    return formatNumber(value);
+  };
+
   const handleSort = (column) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -112,16 +124,29 @@ const StoragePage = () => {
   const fetchFrminfoFixedData = async () => {
     setIsLoading(true);
     try {
-      const response = await databaseAPI.getMainviewStorageFrminfofixed();
+      const response = await databaseAPI.getMainviewStorageFrminfofixed({});
+      console.log('=== FRONTEND DEBUG ===');
+      console.log('Response:', response);
+      console.log('Response data:', response.data);
       if (response.data.success) {
+        console.log('Data received:', response.data.data);
+        if (response.data.data.length > 0) {
+          console.log('First row in frontend:', response.data.data[0]);
+          console.log('First row keys:', Object.keys(response.data.data[0]));
+          console.log('First row timestamp:', response.data.data[0].timestamp);
+          console.log('First row system_name:', response.data.data[0].system_name);
+          console.log('First row server_name:', response.data.data[0].server_name);
+        }
         setFrminfoFixedData(response.data.data);
         toast.success(`FRMINFO Fixed verileri yüklendi (${response.data.data.length} kayıt)`);
       } else {
         toast.error('FRMINFO Fixed veri yüklenirken hata oluştu');
       }
+      console.log('=== END FRONTEND DEBUG ===');
     } catch (error) {
       console.error('FRMINFO Fixed veri yüklenirken hata:', error);
-      toast.error(`FRMINFO Fixed veri yüklenirken hata oluştu: ${error.message}`);
+      console.error('Error details:', error.response?.data);
+      toast.error(`FRMINFO Fixed veri yüklenirken hata oluştu: ${error.response?.data?.error || error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -358,9 +383,9 @@ const StoragePage = () => {
 
     return data.map((row, index) => (
       <tr key={index} className="hover:bg-gray-50">
-        {Object.values(row).map((value, cellIndex) => (
+        {Object.entries(row).map(([columnName, value], cellIndex) => (
           <td key={cellIndex} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-            {formatNumber(value)}
+            {formatValue(value, columnName)}
           </td>
         ))}
       </tr>

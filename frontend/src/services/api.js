@@ -161,8 +161,8 @@ export const databaseAPI = {
     getMainviewStorageCsasum: (config) => api.post('/database/mainview-storage-csasum', config),
     checkTableExistsCsasum: (config) => api.post('/database/check-table-csasum', config),
 
-    getMainviewStorageFrminfoCenter: (config) => api.post('/database/mainview-storage-frminfo-center', config),
-    checkTableExistsFrminfoCenter: (config) => api.post('/database/check-table-frminfo-center', config),
+    getMainviewStorageFrminfoCenter: (config) => api.post('/database/mainview-storage-frminfo-central', config),
+    checkTableExistsFrminfoCenter: (config) => api.post('/database/check-table-frminfo-central', config),
     
     getMainviewStorageFrminfofixed: (config) => api.post('/database/mainview-storage-frminfo-fixed', config),
     checkTableExistsFrminfofixed: (config) => api.post('/database/check-table-frminfo-fixed', config),

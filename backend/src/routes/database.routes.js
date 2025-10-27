@@ -122,8 +122,8 @@ router.post('/check-table-mq-w2over', checkTableExistsMQW2over);
 router.post('/mainview-storage-csasum', getMainviewStorageCsasum);
 router.post('/check-table-csasum', checkTableExistsCsasum);
 
-router.post('/mainview-storage-frminfo-center', getMainviewStorageFrminfoCenter);
-router.post('/check-table-frminfo-center', checkTableExistsFrminfoCenter);
+router.post('/mainview-storage-frminfo-central', getMainviewStorageFrminfoCenter);
+router.post('/check-table-frminfo-central', checkTableExistsFrminfoCenter);
 
 router.post('/mainview-storage-frminfo-fixed', getMainviewStorageFrminfofixed);
 router.post('/check-table-frminfo-fixed', checkTableExistsFrminfoFixed);
