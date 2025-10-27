@@ -95,6 +95,8 @@ export const databaseAPI = {
   
   getMainviewMvsJCPU: (config) => api.post('/database/mainview-mvs-jcpu', config),
 
+  getLatestCpuData: (config) => api.post('/database/latest-cpu', config),
+
   getMainviewNetworkStacks: (config) => api.post('/database/mainview-network-stacks', config),
   
   checkTableExistsStacks: (config) => api.post('/database/check-table-stacks', config),
