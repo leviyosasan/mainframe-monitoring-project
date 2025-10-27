@@ -3,7 +3,7 @@ const { Pool } = require('pg');
 // Default PostgreSQL configuration
 const DEFAULT_CONFIG = {
   'database': {
-    'host': "192.168.60.145",
+    'host': "192.168.60.148",
     'port': 5432,
     'database': "mainview",
     'user': "postgres",
