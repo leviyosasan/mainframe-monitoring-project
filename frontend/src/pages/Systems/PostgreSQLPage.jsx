@@ -11,7 +11,7 @@ const PostgreSQLPage = () => {
   const [authError, setAuthError] = useState('');
   const [showEditModal, setShowEditModal] = useState(false);
   const [dbConfig, setDbConfig] = useState({
-    host: '192.168.60.145',
+    host: '192.168.60.148',
     port: '5432',
     database: 'mainview',
     user: 'postgres',

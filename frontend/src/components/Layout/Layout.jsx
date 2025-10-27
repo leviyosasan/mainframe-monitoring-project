@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import Navbar from './Navbar'
+import Chatbot from '../Common/Chatbot'
 
 const Layout = () => {
   return (
@@ -10,6 +11,7 @@ const Layout = () => {
           <Outlet />
         </div>
       </main>
+      <Chatbot />
     </div>
   )
 }
