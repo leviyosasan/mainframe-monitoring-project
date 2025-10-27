@@ -156,6 +156,23 @@ export const databaseAPI = {
 
     getMainviewMQW2over: (config) => api.post('/database/mainview-mq-w2over', config),
     checkTableExistsMQW2over: (config) => api.post('/database/check-table-mq-w2over', config),
+
+    // Storage
+    getMainviewStorageCsasum: (config) => api.post('/database/mainview-storage-csasum', config),
+    checkTableExistsCsasum: (config) => api.post('/database/check-table-csasum', config),
+
+    getMainviewStorageFrminfoCenter: (config) => api.post('/database/mainview-storage-frminfo-center', config),
+    checkTableExistsFrminfoCenter: (config) => api.post('/database/check-table-frminfo-center', config),
+    
+    getMainviewStorageFrminfofixed: (config) => api.post('/database/mainview-storage-frminfo-fixed', config),
+    checkTableExistsFrminfofixed: (config) => api.post('/database/check-table-frminfo-fixed', config),
+    
+    getMainviewStorageFrminfoHighVirtual: (config) => api.post('/database/mainview-storage-frminfo-high-virtual', config),
+    checkTableExistsFrminfoHighVirtual: (config) => api.post('/database/check-table-frminfo-high-virtual', config),
+    
+    getMainviewStoragesysfrmiz: (config) => api.post('/database/mainview-storage-sysfrmiz', config),
+    checkTableExistsSysfrmiz: (config) => api.post('/database/check-table-sysfrmiz', config),
+
 }
 
 export default api
