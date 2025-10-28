@@ -28,6 +28,60 @@ const MQPage = () => {
   const [chartData, setChartData] = useState([]);
   const [infoModal, setInfoModal] = useState(null);
 
+  // MQ CONNZ özel kolon başlık eşlemesi
+  const getConnzDisplayLabel = (rawKey) => {
+    const key = String(rawKey || '').trim();
+    if (!key) return '';
+    const n = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    // 1) Application Name Type Of Information
+    if (n === 'applname' || n === 'applicationname' || n === 'appname' || n === 'applicationnametype' || n === 'applicationnametypeofinformation' || n === 'appnametype') {
+      return 'Application Name Type Of Information';
+    }
+
+    // 2) Address Space Identifier
+    if (n === 'asid' || n === 'addressspaceidentifier') {
+      return 'Address Space Identifier';
+    }
+
+    // 3) Application Type(Maximum)
+    if (n === 'appltypemax' || n === 'applicationtypemax' || n === 'applicationtype' || n === 'appltype') {
+      return 'Application Type(Maximum)';
+    }
+
+    // 4) CICS Transaction Id
+    if (n === 'cicstranid' || n === 'cicstransid' || n === 'cicstransactionid') {
+      return 'CICS Transaction Id';
+    }
+
+    // 5) CICS Task number
+    if (n === 'cicstasknumber' || n === 'cicstaskno' || n === 'cicstask') {
+      return 'CICS Task number';
+    }
+
+    // 6) IMS PSB Name
+    if (n === 'imspsbname' || n === 'psbname' || n === 'psb') {
+      return 'IMS PSB Name';
+    }
+
+    // 7) Object Name(Maximum)
+    if (n === 'objectnamemaximum' || n === 'objectnamemax' || n === 'objnamemax' || n === 'objname' || n === 'objectname') {
+      return 'Object Name(Maximum)';
+    }
+
+    // 8) Queue Manager
+    if (n === 'queuemanager' || n === 'qmgr' || n === 'qm' || n === 'queuemgr') {
+      return 'Queue Manager';
+    }
+
+    // Varsayılan: orijinal key'i göster
+    return key;
+  };
+
+  const getDisplayLabelForActive = (rawKey) => {
+    return activeModal === 'mq_connz' ? getConnzDisplayLabel(rawKey) : rawKey;
+  };
+
   const tabs = [
     { id: 'table', name: 'Tablo', icon: '📊' },
     { id: 'chart', name: 'Grafik', icon: '📈' },
@@ -233,7 +287,10 @@ const MQPage = () => {
         return header.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       };
       
-      const headers = rawHeaders.map(cleanHeader);
+      const headers = rawHeaders.map((h) => {
+        const isConnz = String(filename || '').toUpperCase().includes('MQ_CONNZ');
+        return isConnz ? getConnzDisplayLabel(h) : cleanHeader(h);
+      });
       
       // CSV satırlarını oluştur - güvenli formatlama
       const escapeCSV = (value) => {
@@ -358,120 +415,94 @@ const MQPage = () => {
       
       loadScripts().then(() => {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        // Başlık ekle
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text(`${filename} Raporu`, 14, 22);
-        
-        // Tarih ekle
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        const currentDate = new Date().toLocaleString('tr-TR');
-        doc.text(`Oluşturulma Tarihi: ${currentDate}`, 14, 30);
-        
-        // Veri hazırlama - Kolon isimlerini ve değerleri temizle
-        const cleanHeader = (header) => {
-          // Header'ı daha okunabilir hale getir
-          return header.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        };
-        
+        // Geniş tablolar için yatay sayfa
+        const doc = new jsPDF('l', 'pt', 'a4');
+
+        // Yardımcılar
+        const cleanHeader = (header) => header.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const isConnz = String(filename || '').toUpperCase().includes('MQ_CONNZ');
         const formatDataValue = (value) => {
           if (value === null || value === undefined) return '-';
-          
-          // Date kontrolü
-          if (value instanceof Date) {
-            return value.toLocaleString('tr-TR');
-          }
-          
-          // String tarih kontrolü
+          if (value instanceof Date) return value.toLocaleString('tr-TR');
           if (typeof value === 'string' && value.match(/\d{4}-\d{2}-\d{2}/)) {
-            try {
-              return new Date(value).toLocaleString('tr-TR');
-            } catch {
-              return value;
-            }
+            try { return new Date(value).toLocaleString('tr-TR'); } catch { return value; }
           }
-          
-          // Number formatlama (büyük sayılar için)
-          if (typeof value === 'number') {
-            return value.toLocaleString('tr-TR');
-          }
-          
+          if (typeof value === 'number') return value.toLocaleString('tr-TR');
           let stringValue = String(value);
-          
-          // Uzun string'leri kısalt
-          if (stringValue.length > 25) {
-            stringValue = stringValue.substring(0, 22) + '...';
-          }
-          
+          if (stringValue.length > 60) stringValue = stringValue.substring(0, 57) + '...';
           return stringValue;
         };
+
+        let rawHeaders = Object.keys(rows[0] || {}).filter(h => h !== 'index');
+        const colCount = rawHeaders.length;
+        const currentDate = new Date().toLocaleString('tr-TR');
+
+        // Dinamik boyutlar (tüm sütunları tek tabloda sığdırmak için)
+        const fontSize = colCount > 24 ? 5 : colCount > 18 ? 6 : 7;
+        const headPad = 3;
+        const bodyPad = 2;
+        const minCellWidth = colCount > 24 ? 18 : colCount > 18 ? 22 : 28;
+
+        // Başlık
+        doc.setFontSize(16);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${filename} Raporu`, 40, 40);
         
-        let rawHeaders = Object.keys(rows[0] || {});
-        
-        // Index kolonunu çıkar
-        rawHeaders = rawHeaders.filter(h => h !== 'index');
-        
-        const headers = rawHeaders.map(cleanHeader);
-        const tableData = rows.map(row => 
-          rawHeaders.map(header => formatDataValue(row[header]))
-        );
-        
-        // PDF tablosunu oluştur - Alt satıra kayma önleme
+        // Tarih
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text(`Oluşturulma Tarihi: ${currentDate}`, 40, 58);
+
+        const headers = rawHeaders.map(h => isConnz ? getConnzDisplayLabel(h) : cleanHeader(h));
+        const tableData = rows.map(row => rawHeaders.map(h => formatDataValue(row[h])));
+
         doc.autoTable({
           head: [headers],
           body: tableData,
-          startY: 40,
+          startY: 70,
           styles: {
-            fontSize: 7,
-            cellPadding: 3,
-            overflow: 'hidden',
+            fontSize,
+            cellPadding: bodyPad,
+            overflow: 'linebreak',
             halign: 'left',
             valign: 'middle',
             lineWidth: 0.1,
             lineColor: [220, 220, 220]
           },
           headStyles: {
-            fillColor: [59, 130, 246], // cyan blue
+            fillColor: [59, 130, 246],
             textColor: [255, 255, 255],
             fontStyle: 'bold',
-            cellPadding: 3,
-            overflow: 'hidden',
-            minCellWidth: 30
+            cellPadding: headPad,
+            overflow: 'linebreak',
+            minCellWidth
           },
           bodyStyles: {
-            overflow: 'hidden',
-            cellPadding: 2
+            overflow: 'linebreak',
+            cellPadding: bodyPad
           },
           alternateRowStyles: {
             fillColor: [249, 250, 251]
           },
           columnStyles: {
-            // Tarih kolonları için özel stil
             ...(rawHeaders.reduce((acc, header, index) => {
-              if (header.toLowerCase().includes('timestamp') || 
-                  header.toLowerCase().includes('created_at') ||
-                  header.toLowerCase().includes('updated_at') ||
-                  header.toLowerCase().includes('time') ||
-                  header.toLowerCase().includes('date')) {
-                acc[index] = { fontSize: 6 };
-              } else if (header.toLowerCase().includes('id')) {
-                acc[index] = { fontSize: 7, cellWidth: 'auto' };
+              const h = header.toLowerCase();
+              if (h.includes('timestamp') || h.includes('created_at') || h.includes('updated_at') || h.includes('time') || h.includes('date')) {
+                acc[index] = { fontSize: Math.max(4, fontSize - 1) };
+              } else if (h.includes('id')) {
+                acc[index] = { cellWidth: 'auto' };
               }
               return acc;
             }, {}))
           },
-          margin: { top: 40, left: 5, right: 5 },
+          margin: { top: 40, left: 10, right: 10 },
           tableWidth: 'wrap'
         });
-        
-        // PDF'i indir - Dosya adını temizle
+
         const cleanFileName = filename.replace(/[^a-zA-Z0-9_]/g, '_');
         const fileName = `${cleanFileName}_${new Date().toISOString().split('T')[0]}.pdf`;
         doc.save(fileName);
-        
+
         toast.success('PDF başarıyla indirildi');
       }).catch((error) => {
         console.error('PDF script yükleme hatası:', error);
@@ -488,7 +519,7 @@ const MQPage = () => {
 
   // Sayfa açılışında rozet durumlarını kontrol et
   useEffect(() => {
-    const refreshStatuses = async () => {1
+    const refreshStatuses = async () => {
       try {
         const [c1, c2, c3] = await Promise.all([
           databaseAPI.checkTableExistsMQConnz(),
@@ -968,7 +999,7 @@ const MQPage = () => {
                                 const sortedKeys = ['index', ...keys.filter(k => k !== 'index')];
                                 return sortedKeys.map(k => (
                                   <th key={k} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    {k === 'index' ? '#' : k}
+                                    {k === 'index' ? '#' : getDisplayLabelForActive(k)}
                                   </th>
                                 ));
                               })()}
@@ -1051,7 +1082,7 @@ const MQPage = () => {
                                   <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-gray-200 transition-colors duration-300 flex-shrink-0">
                                     {renderIconForKey(key, 'w-7 h-7 text-gray-700')}
                                   </div>
-                                  <h5 className="font-semibold text-gray-800 group-hover:text-gray-600 text-xs mb-3 line-clamp-2 px-2 min-h-[2rem]">{key}</h5>
+                                  <h5 className="font-semibold text-gray-800 group-hover:text-gray-600 text-xs mb-3 line-clamp-2 px-2 min-h-[2rem]">{getConnzDisplayLabel(key)}</h5>
                                   <div className="mt-auto">
                                     {first[key] !== null && first[key] !== undefined ? (
                                       <span className="inline-block px-3 py-1.5 rounded-full text-sm font-bold bg-cyan-100 text-cyan-800 border border-cyan-200">
@@ -1338,7 +1369,7 @@ const MQPage = () => {
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-2xl font-bold text-gray-800">
-                    {selectedChart} - Zaman Serisi Grafiği
+                    {getDisplayLabelForActive(selectedChart)} - Zaman Serisi Grafiği
                   </h3>
                   <button onClick={() => setSelectedChart(null)} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
                 </div>
@@ -1403,7 +1434,7 @@ const MQPage = () => {
                           <>
                             <div className="bg-white rounded-lg border border-gray-200 p-6">
                               <div className="flex justify-between items-center mb-4">
-                                <h4 className="text-lg font-semibold text-gray-800">{selectedChart}</h4>
+                                <h4 className="text-lg font-semibold text-gray-800">{getDisplayLabelForActive(selectedChart)}</h4>
                                 <button onClick={() => {
                                   const rows = isFiltered
                                     ? (activeModal==='mq_connz' ? filteredMqConnzData : activeModal==='mq_qm' ? filteredMqQmData : filteredMqW2overData)
@@ -1682,7 +1713,7 @@ const MQPage = () => {
                 <div className="p-6">
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-2xl font-bold text-gray-800">
-                      {infoModal} Hakkında
+                      {getDisplayLabelForActive(infoModal)} Hakkında
                     </h3>
                     <button onClick={closeInfo} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
                   </div>
