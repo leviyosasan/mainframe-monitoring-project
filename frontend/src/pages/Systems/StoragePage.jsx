@@ -778,79 +778,107 @@ const StoragePage = () => {
                             </div>
                           </div>
 
-                          {/* zIIP Busy% */}
-                          <div onClick={() => openChart('ziipBusyPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('ziipBusyPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
+                          {/* ECSA In Use Percent */}
+                          <div onClick={() => openChart('ecsa_in_use_percent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-blue-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('ecsa_in_use_percent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
                                 <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">zIIP Busy%</h5>
-                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                12.00%
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">ECSA In Use %</h5>
+                              <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                                getCurrentData()?.[0]?.ecsa_in_use_percent > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                              }`}>
+                                {getCurrentData()?.[0]?.ecsa_in_use_percent ? `${formatNumber(getCurrentData()[0].ecsa_in_use_percent)}%` : '-'}
                               </div>
                             </div>
                           </div>
 
-                          {/* CPU Utilization% */}
-                          <div onClick={() => openChart('cpuUtilizationPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('cpuUtilizationPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
+                          {/* RUCSA In Use Percent */}
+                          <div onClick={() => openChart('rucsa_in_use_percent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-purple-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('rucsa_in_use_percent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
                                 <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CPU Utilization%</h5>
-                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                1.00%
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">RUCSA In Use %</h5>
+                              <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                                getCurrentData()?.[0]?.rucsa_in_use_percent > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                              }`}>
+                                {getCurrentData()?.[0]?.rucsa_in_use_percent ? `${formatNumber(getCurrentData()[0].rucsa_in_use_percent)}%` : '-'}
                               </div>
                             </div>
                           </div>
 
-                          {/* I/O Rate% */}
-                          <div onClick={() => openChart('ioRatePercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('ioRatePercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
+                          {/* SQA In Use Percent */}
+                          <div onClick={() => openChart('sqa_in_use_percent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-orange-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('sqa_in_use_percent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
                                 <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">I/O Rate%</h5>
-                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-                                154.00%
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SQA In Use %</h5>
+                              <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                                getCurrentData()?.[0]?.sqa_in_use_percent > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                              }`}>
+                                {getCurrentData()?.[0]?.sqa_in_use_percent ? `${formatNumber(getCurrentData()[0].sqa_in_use_percent)}%` : '-'}
                               </div>
                             </div>
                           </div>
 
-                          {/* DASD Busy% */}
-                          <div onClick={() => openChart('dasdBusyPercent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
-                            <button onClick={(e) => { e.stopPropagation(); openInfo('dasdBusyPercent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
+                          {/* Total CS Used Percent */}
+                          <div onClick={() => openChart('total_cs_used_percent')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-red-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('total_cs_used_percent'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
                                 <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">DASD Busy%</h5>
-                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-                                123.00%
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Total CS Used %</h5>
+                              <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                                getCurrentData()?.[0]?.total_cs_used_percent > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                              }`}>
+                                {getCurrentData()?.[0]?.total_cs_used_percent ? `${formatNumber(getCurrentData()[0].total_cs_used_percent)}%` : '-'}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* High Shared Storage Used Percent */}
+                          <div onClick={() => openChart('percent_used_high_shared_storage')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
+                            <div className="absolute top-3 left-3 w-3 h-3 bg-indigo-400 rounded-sm"></div>
+                            <button onClick={(e) => { e.stopPropagation(); openInfo('percent_used_high_shared_storage'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200">
+                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">High Shared Storage %</h5>
+                              <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                                getCurrentData()?.[0]?.percent_used_high_shared_storage > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                              }`}>
+                                {getCurrentData()?.[0]?.percent_used_high_shared_storage ? `${formatNumber(getCurrentData()[0].percent_used_high_shared_storage)}%` : '-'}
                               </div>
                             </div>
                           </div>
@@ -865,8 +893,17 @@ const StoragePage = () => {
                               </div>
                               <h5 className="font-bold text-blue-800 text-lg">Last Update</h5>
                               <div className="text-sm text-blue-700 mt-1">
-                                <div>22.10.2025</div>
-                                <div>10:55:00</div>
+                                {getCurrentData()?.[0]?.created_at ? (
+                                  <>
+                                    <div>{new Date(getCurrentData()[0].created_at).toLocaleDateString('tr-TR')}</div>
+                                    <div>{new Date(getCurrentData()[0].created_at).toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})}</div>
+                                  </>
+                                ) : (
+                                  <>
+                                    <div>22.10.2025</div>
+                                    <div>10:55:00</div>
+                                  </>
+                                )}
                               </div>
                             </div>
                           </div>
