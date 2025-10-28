@@ -2,6 +2,76 @@ import React, { useState, useEffect } from 'react';
 import { databaseAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 
+// CSS stilleri tanımı
+const customStyles = `
+  /* Pulse Subtle Animasyonu */
+  @keyframes pulseSubtle {
+    0%, 100% { 
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% { 
+      opacity: 0.95;
+      transform: scale(1.005);
+    }
+  }
+  
+  .pulse-subtle {
+    animation: pulseSubtle 3s ease-in-out infinite;
+  }
+  
+  /* Primary Renk Paleti CSS Değişkenleri */
+  .rmf-primary-50 { background-color: #eff6ff; }
+  .rmf-primary-100 { background-color: #dbeafe; }
+  .rmf-primary-200 { background-color: #bfdbfe; }
+  .rmf-primary-300 { background-color: #93c5fd; }
+  .rmf-primary-400 { background-color: #60a5fa; }
+  .rmf-primary-500 { background-color: #3b82f6; }
+  .rmf-primary-600 { background-color: #2563eb; }
+  .rmf-primary-700 { background-color: #1d4ed8; }
+  .rmf-primary-800 { background-color: #1e40af; }
+  .rmf-primary-900 { background-color: #1e3a8a; }
+  
+  /* Primary Text Renkleri */
+  .rmf-text-primary-50 { color: #eff6ff; }
+  .rmf-text-primary-100 { color: #dbeafe; }
+  .rmf-text-primary-200 { color: #bfdbfe; }
+  .rmf-text-primary-300 { color: #93c5fd; }
+  .rmf-text-primary-400 { color: #60a5fa; }
+  .rmf-text-primary-500 { color: #3b82f6; }
+  .rmf-text-primary-600 { color: #2563eb; }
+  .rmf-text-primary-700 { color: #1d4ed8; }
+  .rmf-text-primary-800 { color: #1e40af; }
+  .rmf-text-primary-900 { color: #1e3a8a; }
+  
+  /* Primary Border Renkleri */
+  .rmf-border-primary-50 { border-color: #eff6ff; }
+  .rmf-border-primary-100 { border-color: #dbeafe; }
+  .rmf-border-primary-200 { border-color: #bfdbfe; }
+  .rmf-border-primary-300 { border-color: #93c5fd; }
+  .rmf-border-primary-400 { border-color: #60a5fa; }
+  .rmf-border-primary-500 { border-color: #3b82f6; }
+  .rmf-border-primary-600 { border-color: #2563eb; }
+  .rmf-border-primary-700 { border-color: #1d4ed8; }
+  .rmf-border-primary-800 { border-color: #1e40af; }
+  .rmf-border-primary-900 { border-color: #1e3a8a; }
+  
+  /* Hover Durumları */
+  .rmf-hover-primary-100:hover { background-color: #dbeafe; }
+  .rmf-hover-primary-200:hover { background-color: #bfdbfe; }
+  .rmf-hover-primary-500:hover { background-color: #3b82f6; }
+  .rmf-hover-primary-600:hover { background-color: #2563eb; }
+  .rmf-hover-primary-700:hover { background-color: #1d4ed8; }
+`;
+
+// Style tag'i head'e ekle (sadece bir kez)
+if (typeof document !== 'undefined' && !document.getElementById('rmf-custom-styles')) {
+  const styleSheet = document.createElement("style");
+  styleSheet.id = 'rmf-custom-styles';
+  styleSheet.innerText = customStyles;
+  document.head.appendChild(styleSheet);
+}
+
 const RMFPage = () => {
   const [activeModal, setActiveModal] = useState(null);
   const [activeTab, setActiveTab] = useState('table');
@@ -15,6 +85,7 @@ const RMFPage = () => {
   const [selectedChart, setSelectedChart] = useState(null);
   const [chartTab, setChartTab] = useState('chart');
   const [chartData, setChartData] = useState([]);
+  const [infoModal, setInfoModal] = useState(null);
   
   // Optimized: Single object to store all data states
   const [data, setData] = useState({
@@ -103,6 +174,7 @@ const RMFPage = () => {
       'pdippbav': 'Average Pages per Burst',
       'pdgvioc': 'VIO Eligibility',
       'pdibsyPC': 'In Use Percentage',
+      'PDIBSYPC': 'In Use Percentage',
       'pdgdsn': 'Page Data Set Name',
       'timestamp': 'Timestamp'
     },
@@ -145,6 +217,18 @@ const RMFPage = () => {
   };
 
   const getDisplayName = (columnName, modalType) => {
+    // PDIBSYPC için kapsamlı kontrol - tüm olası formatlar
+    if (columnName && typeof columnName === 'string') {
+      const upperColumnName = columnName.toUpperCase();
+      if (upperColumnName === 'PDIBSYPC' || 
+          upperColumnName === 'PDIBSYPC' || 
+          upperColumnName.includes('PDIBSYPC') ||
+          columnName === 'pdibsyPC' ||
+          columnName.toLowerCase().includes('pdibsypc')) {
+        return 'In Use Percentage';
+      }
+    }
+    
     if (columnMapping[modalType] && columnMapping[modalType][columnName]) {
       return columnMapping[modalType][columnName];
     }
@@ -404,8 +488,7 @@ const RMFPage = () => {
 
   const tabs = [
     { id: 'table', name: 'Tablo', icon: '📊' },
-    { id: 'chart', name: 'Grafik', icon: '📈' },
-    { id: 'threshold', name: 'Threshold', icon: '⚙️' }
+    { id: 'chart', name: 'Grafik', icon: '📈' }
   ];
 
   const handleSort = (column) => {
@@ -815,12 +898,11 @@ const RMFPage = () => {
   };
 
   const openInfo = (chartType) => {
-    // Info modal için (implementasyona göre eklenebilir)
-    console.log('Info clicked for:', chartType);
+    setInfoModal(chartType);
   };
 
   const closeInfo = () => {
-    // Info modal kapatma (implementasyona göre eklenebilir)
+    setInfoModal(null);
   };
 
   const openModal = (modalType) => {
@@ -1490,22 +1572,22 @@ const RMFPage = () => {
                                 e.stopPropagation();
                                 openInfo('pdgnum');
                               }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                              className="absolute top-3 right-3 w-6 h-6 rmf-primary-100 rmf-hover-primary-200 rmf-text-primary-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
                             >
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className="w-12 h-12 rmf-primary-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-6 h-6 rmf-text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                               </div>
                               <h5 className="font-bold text-gray-800 text-lg mb-2">Page Data Set Number</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_pgspp && data.rmf_pgspp.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold rmf-primary-100 rmf-text-primary-800">
                                     {data.rmf_pgspp[0]?.pdgnum || '-'}
                                   </span>
                                 ) : (
@@ -1675,12 +1757,42 @@ const RMFPage = () => {
                             </div>
                           </div>
 
+                          {/* Page Data Set Name - Tıklanamaz */}
+                          <div className="relative bg-white rounded-2xl border border-gray-200 p-6">
+                            <button
+                              onClick={() => openInfo('pdgdsn')}
+                              className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                            >
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                              </svg>
+                            </button>
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 text-lg mb-2">Page Data Set Name</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {data.rmf_pgspp && data.rmf_pgspp.length > 0 ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                    {data.rmf_pgspp[0]?.pdgdsn || '-'}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
                           {/* Sayısal kartlar - Tıklanabilir */}
                           {/* Page Slot In Use Percentage */}
                           <div 
                             onClick={() => openChart('pdislupc')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
                           >
+                            {/* Info Icon */}
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -1692,17 +1804,34 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            {/* Grafik Butonu */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openChart('pdislupc');
+                              }}
+                              className="absolute top-3 left-3 w-6 h-6 bg-green-100 hover:bg-green-200 text-green-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                            >
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                            </button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Page Slot In Use Percentage</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">Page Slot In Use Percentage</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_pgspp && data.rmf_pgspp.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
-                                    {formatNumber(data.rmf_pgspp[0]?.pdislupc || 0)}
+                                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                    parseFloat(data.rmf_pgspp[0]?.pdislupc || 0) < 60 ? 'bg-green-100 text-green-800' :
+                                    parseFloat(data.rmf_pgspp[0]?.pdislupc || 0) < 75 ? 'bg-yellow-100 text-yellow-800' :
+                                    parseFloat(data.rmf_pgspp[0]?.pdislupc || 0) < 90 ? 'bg-orange-100 text-orange-800' :
+                                    'bg-red-100 text-red-800'
+                                  }`}>
+                                    {formatNumber(data.rmf_pgspp[0]?.pdislupc || 0)}%
                                   </span>
                                 ) : (
                                   <span className="text-gray-400">-</span>
@@ -1714,7 +1843,7 @@ const RMFPage = () => {
                           {/* Average Page Transfer Time */}
                           <div 
                             onClick={() => openChart('pdipxtav')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                           >
                             <button
                               onClick={(e) => {
@@ -1724,16 +1853,27 @@ const RMFPage = () => {
                               className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
                             >
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116灵气0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
+                            
+                            {/* Grafik ikonu */}
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                            </div>
+
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
+                              <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0  mine 0118 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Average Page Transfer Time</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">Average Page Transfer Time</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_pgspp && data.rmf_pgspp.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
@@ -1749,26 +1889,37 @@ const RMFPage = () => {
                           {/* I/O Request Rate */}
                           <div 
                             onClick={() => openChart('pdipiort')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                           >
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 openInfo('pdipiort');
                               }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200úst z-10"
+                              className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
                             >
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
+                            
+                            {/* Grafik ikonu */}
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                            </div>
+
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
+                              <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h比较复杂-7z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg록 mb-2">I/O Request Rate</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">I/O Request Rate</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_pgspp && data.rmf_pgspp.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
@@ -1784,10 +1935,10 @@ const RMFPage = () => {
                           {/* Average Pages per Burst */}
                           <div 
                             onClick={() => openChart('pdippbav')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                           >
                             <button
-                              onClick暴躁={(e) => {
+                              onClick={(e) => {
                                 e.stopPropagation();
                                 openInfo('pdippbav');
                               }}
@@ -1797,13 +1948,24 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
+                            
+                            {/* Grafik ikonu */}
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                            </div>
+
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
+                              <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Average Pages per Burst</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">Average Pages per Burst</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_pgspp && data.rmf_pgspp.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
@@ -1819,29 +1981,40 @@ const RMFPage = () => {
                           {/* In Use Percentage */}
                           <div 
                             onClick={() => openChart('pdibsyPC')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                           >
                             <button
-图示 onClick={(e) => {
+                              onClick={(e) => {
                                 e.stopPropagation();
                                 openInfo('pdibsyPC');
                               }}
                               className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
                             >
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10ainned 8 0 11-16 0 8 8 0 0116 姑娘0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z quartet" clipRule="evenodd" />
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
+                            
+                            {/* Grafik ikonu */}
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                            </div>
+
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
+                              <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01- obtenir 1H5a1 1 0 01-1-1V4z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">In Use Percentage</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">In Use Percentage</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_pgspp && data.rmf_pgspp.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800isasi">
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
                                     {formatNumber(data.rmf_pgspp[0]?.pdibsyPC || 0)}
                                   </span>
                                 ) : (
@@ -2395,60 +2568,6 @@ const RMFPage = () => {
                     </div>
                   )}
 
-                  {/* Threshold Sekmesi */}
-                  {activeTab === 'threshold' && (
-                    <div className="space-y-4">
-                      <h4 className="text-lg font-semibold text-gray-800 mb-4">Threshold Ayarları</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="bg-gray-50 rounded-lg p-6">
-                          <h5 className="font-semibold text-gray-800 mb-4">Uyarı Eşikleri</h5>
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-gray-600">Kritik Eşik</span>
-                              <input 
-                                type="number" 
-                                className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
-                                defaultValue="90"
-                              />
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-gray-600">Uyarı Eşiği</span>
-                              <input 
-                                type="number" 
-                                className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
-                                defaultValue="75"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="bg-gray-50 rounded-lg p-6">
-                          <h5 className="font-semibold text-gray-800 mb-4">Bildirim Ayarları</h5>
-                          <div className="space-y-3">
-                            <label className="flex items-center">
-                              <input type="checkbox" className="mr-2" defaultChecked />
-                              <span className="text-sm text-gray-600">E-posta bildirimi</span>
-                            </label>
-                            <label className="flex items-center">
-                              <input type="checkbox" className="mr-2" defaultChecked />
-                              <span className="text-sm text-gray-600">SMS bildirimi</span>
-                            </label>
-                            <label className="flex items-center">
-                              <input type="checkbox" className="mr-2" />
-                              <span className="text-sm text-gray-600">Sistem bildirimi</span>
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex justify-end space-x-3 mt-6">
-                        <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">
-                          İptal
-                        </button>
-                        <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">
-                          Kaydet
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -2478,7 +2597,7 @@ const RMFPage = () => {
                     {selectedChart === 'pdipxtav' && 'Page Type Average'}
                     {selectedChart === 'pdipiort' && 'I/O Rate'}
                     {selectedChart === 'pdippbav' && 'Page Protection Buffer Average'}
-                    {selectedChart === 'pdibsyPC' && 'Busy Percentage'}
+                    {selectedChart === 'pdibsyPC' && 'In Use Percentage'}
                     {/* RMF ARD */}
                     {selectedChart === 'device_connection_time_seconds' && 'Device Connection Time'}
                     {selectedChart === 'cpu_seconds' && 'CPU Seconds'}
@@ -2503,7 +2622,40 @@ const RMFPage = () => {
                   </button>
                 </div>
 
-                {/* Grafik */}
+                {/* Grafik Sekmeleri - Tüm RMF kartları için */}
+                <div className="border-b border-gray-200 mb-6">
+                  <nav className="-mb-px flex space-x-8">
+                    <button
+                      onClick={() => setChartTab('chart')}
+                      className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                        chartTab === 'chart'
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="mr-2">📈</span>
+                      Grafik
+                    </button>
+                    <button
+                      onClick={() => setChartTab('threshold')}
+                      className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                        chartTab === 'threshold'
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="mr-2">⚙️</span>
+                      Threshold
+                    </button>
+                  </nav>
+                </div>
+
+                {/* Grafik İçeriği */}
+                <div className="min-h-[400px]">
+                  {/* Grafik Sekmesi */}
+                  {chartTab === 'chart' && (
+                    <div>
+                      {/* Grafik */}
                 {chartData && chartData.length > 0 && (
                   <div className="bg-white rounded-lg border border-gray-200 p-6 mb-4">
                     <div className="mb-4">
@@ -2605,6 +2757,164 @@ const RMFPage = () => {
                       {chartData.length}
                     </div>
                   </div>
+                </div>
+                    </div>
+                  )}
+
+                  {/* Threshold Sekmesi */}
+                  {chartTab === 'threshold' && (
+                    <div className="space-y-6">
+                      <h4 className="text-lg font-semibold text-gray-800">
+                        {selectedChart === 'pdislupc' && 'Page Slot In Use Percentage Threshold Ayarları'}
+                        {selectedChart === 'pdipxtav' && 'Average Page Transfer Time Threshold Ayarları'}
+                        {selectedChart === 'pdipiort' && 'I/O Request Rate Threshold Ayarları'}
+                        {selectedChart === 'pdippbav' && 'Average Pages per Burst Threshold Ayarları'}
+                        {selectedChart === 'pdibsyPC' && 'In Use Percentage Threshold Ayarları'}
+                        {selectedChart === 'mxiasac' && 'Average Number of AS Counted Threshold Ayarları'}
+                        {selectedChart === 'mxixavg' && 'Average Active Time Threshold Ayarları'}
+                        {selectedChart === 'mxirate' && 'Transaction Rate Threshold Ayarları'}
+                        {selectedChart === 'mxircp' && 'Transactions Completed Threshold Ayarları'}
+                        {selectedChart === 'device_connection_time_seconds' && 'Device Connection Time Threshold Ayarları'}
+                        {selectedChart === 'cpu_seconds' && 'CPU Seconds Threshold Ayarları'}
+                        {selectedChart === 'current_fixed_frames_16m' && 'Current Fixed Frames < 16M Threshold Ayarları'}
+                        {selectedChart === 'current_fixed_frame_count' && 'Current Fixed Frame Count Threshold Ayarları'}
+                        {selectedChart === 'session_srm_service_absorption_rate' && 'Session SRM Service Absorption Rate Threshold Ayarları'}
+                        {selectedChart === 'session_cpu_seconds_tcb_mode' && 'Session CPU Seconds (TCB Mode) Threshold Ayarları'}
+                        {selectedChart === 'excp_rate_per_second' && 'EXCP Rate Per Second Threshold Ayarları'}
+                        {selectedChart === 'swap_page_rate_per_second' && 'Swap Page Rate Per Second Threshold Ayarları'}
+                        {selectedChart === 'interval_lpa_page_rate' && 'Interval LPA Page Rate Threshold Ayarları'}
+                        {selectedChart === 'interval_csa_page_in_rate' && 'Interval CSA Page-In Rate Threshold Ayarları'}
+                        {selectedChart === 'realtime_non_vio_page_rate' && 'Realtime Non-VIO Page Rate Threshold Ayarları'}
+                        {selectedChart === 'private_vio_hiperspace_page_rate' && 'Private VIO and Hiperspace Page Rate Threshold Ayarları'}
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="bg-gray-50 rounded-lg p-6">
+                          <h5 className="font-semibold text-gray-800 mb-4">Uyarı Eşikleri</h5>
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">Kritik Eşik (%)</span>
+                              <input 
+                                type="number" 
+                                className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                                defaultValue={
+                                  selectedChart === 'pdislupc' ? "90" :
+                                  selectedChart === 'pdipxtav' ? "1000" :
+                                  selectedChart === 'pdipiort' ? "500" :
+                                  selectedChart === 'pdippbav' ? "100" :
+                                  selectedChart === 'pdibsyPC' ? "95" :
+                                  selectedChart === 'mxiasac' ? "1000" :
+                                  selectedChart === 'mxixavg' ? "500" :
+                                  selectedChart === 'mxirate' ? "10000" :
+                                  selectedChart === 'mxircp' ? "5000" :
+                                  selectedChart === 'device_connection_time_seconds' ? "300" :
+                                  selectedChart === 'cpu_seconds' ? "1000" :
+                                  selectedChart === 'current_fixed_frames_16m' ? "10000" :
+                                  selectedChart === 'current_fixed_frame_count' ? "50000" :
+                                  selectedChart === 'session_srm_service_absorption_rate' ? "95" :
+                                  selectedChart === 'session_cpu_seconds_tcb_mode' ? "800" :
+                                  selectedChart === 'excp_rate_per_second' ? "1000" :
+                                  selectedChart === 'swap_page_rate_per_second' ? "100" :
+                                  selectedChart === 'interval_lpa_page_rate' ? "50" :
+                                  selectedChart === 'interval_csa_page_in_rate' ? "30" :
+                                  selectedChart === 'realtime_non_vio_page_rate' ? "200" :
+                                  selectedChart === 'private_vio_hiperspace_page_rate' ? "150" : "90"
+                                }
+                              />
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">Uyarı Eşiği (%)</span>
+                              <input 
+                                type="number" 
+                                className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                                defaultValue={
+                                  selectedChart === 'pdislupc' ? "75" :
+                                  selectedChart === 'pdipxtav' ? "750" :
+                                  selectedChart === 'pdipiort' ? "350" :
+                                  selectedChart === 'pdippbav' ? "75" :
+                                  selectedChart === 'pdibsyPC' ? "80" :
+                                  selectedChart === 'mxiasac' ? "750" :
+                                  selectedChart === 'mxixavg' ? "350" :
+                                  selectedChart === 'mxirate' ? "7500" :
+                                  selectedChart === 'mxircp' ? "3500" :
+                                  selectedChart === 'device_connection_time_seconds' ? "200" :
+                                  selectedChart === 'cpu_seconds' ? "750" :
+                                  selectedChart === 'current_fixed_frames_16m' ? "7500" :
+                                  selectedChart === 'current_fixed_frame_count' ? "35000" :
+                                  selectedChart === 'session_srm_service_absorption_rate' ? "80" :
+                                  selectedChart === 'session_cpu_seconds_tcb_mode' ? "600" :
+                                  selectedChart === 'excp_rate_per_second' ? "750" :
+                                  selectedChart === 'swap_page_rate_per_second' ? "75" :
+                                  selectedChart === 'interval_lpa_page_rate' ? "35" :
+                                  selectedChart === 'interval_csa_page_in_rate' ? "20" :
+                                  selectedChart === 'realtime_non_vio_page_rate' ? "150" :
+                                  selectedChart === 'private_vio_hiperspace_page_rate' ? "100" : "75"
+                                }
+                              />
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">Bilgi Eşiği (%)</span>
+                              <input 
+                                type="number" 
+                                className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                                defaultValue={
+                                  selectedChart === 'pdislupc' ? "60" :
+                                  selectedChart === 'pdipxtav' ? "500" :
+                                  selectedChart === 'pdipiort' ? "200" :
+                                  selectedChart === 'pdippbav' ? "50" :
+                                  selectedChart === 'pdibsyPC' ? "65" :
+                                  selectedChart === 'mxiasac' ? "500" :
+                                  selectedChart === 'mxixavg' ? "200" :
+                                  selectedChart === 'mxirate' ? "5000" :
+                                  selectedChart === 'mxircp' ? "2000" :
+                                  selectedChart === 'device_connection_time_seconds' ? "100" :
+                                  selectedChart === 'cpu_seconds' ? "500" :
+                                  selectedChart === 'current_fixed_frames_16m' ? "5000" :
+                                  selectedChart === 'current_fixed_frame_count' ? "20000" :
+                                  selectedChart === 'session_srm_service_absorption_rate' ? "65" :
+                                  selectedChart === 'session_cpu_seconds_tcb_mode' ? "400" :
+                                  selectedChart === 'excp_rate_per_second' ? "500" :
+                                  selectedChart === 'swap_page_rate_per_second' ? "50" :
+                                  selectedChart === 'interval_lpa_page_rate' ? "20" :
+                                  selectedChart === 'interval_csa_page_in_rate' ? "10" :
+                                  selectedChart === 'realtime_non_vio_page_rate' ? "100" :
+                                  selectedChart === 'private_vio_hiperspace_page_rate' ? "75" : "60"
+                                }
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-6">
+                          <h5 className="font-semibold text-gray-800 mb-4">Bildirim Ayarları</h5>
+                          <div className="space-y-3">
+                            <label className="flex items-center">
+                              <input type="checkbox" className="mr-2" defaultChecked />
+                              <span className="text-sm text-gray-600">E-posta bildirimi</span>
+                            </label>
+                            <label className="flex items-center">
+                              <input type="checkbox" className="mr-2" defaultChecked />
+                              <span className="text-sm text-gray-600">SMS bildirimi</span>
+                            </label>
+                            <label className="flex items-center">
+                              <input type="checkbox" className="mr-2" />
+                              <span className="text-sm text-gray-600">Sistem bildirimi</span>
+                            </label>
+                            <label className="flex items-center">
+                              <input type="checkbox" className="mr-2" defaultChecked />
+                              <span className="text-sm text-gray-600">Otomatik raporlama</span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-end space-x-3 mt-6">
+                        <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">
+                          İptal
+                        </button>
+                        <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">
+                          Kaydet
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -2726,6 +3036,424 @@ const RMFPage = () => {
                       Zaman Aralığını Uygula
                     </button>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Info Modal */}
+        {infoModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[110]">
+            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                {/* Info Modal Header */}
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-2xl font-bold text-gray-800">
+                    {infoModal === 'pdgnum' && 'PDGNUM Hakkında'}
+                    {infoModal === 'pdgtypc' && 'PDGTYPC Hakkında'}
+                    {infoModal === 'pdgser' && 'PDGSER Hakkında'}
+                    {infoModal === 'pdredevc' && 'PDREDEVC Hakkında'}
+                    {infoModal === 'pdgstat' && 'PDGSTAT Hakkında'}
+                    {infoModal === 'pdislupc' && 'PDISLUPC Hakkında'}
+                    {infoModal === 'pdipxtav' && 'PDIPXTAV Hakkında'}
+                    {infoModal === 'pdipiort' && 'PDIPIORT Hakkında'}
+                    {infoModal === 'pdippbav' && 'PDIPPBAV Hakkında'}
+                    {infoModal === 'pdgvioc' && 'PDGVIOC Hakkında'}
+                    {infoModal === 'pdibsyPC' && 'PDIBSYPC Hakkında'}
+                    {infoModal === 'pdgdsn' && 'PDGDSN Hakkında'}
+                  </h3>
+                  <button 
+                    onClick={closeInfo}
+                    className="text-gray-500 hover:text-gray-700 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                {/* Info Content */}
+                <div className="space-y-6">
+                  {/* Page Data Set Number Info Card */}
+                  {infoModal === 'pdgnum' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Page Data Set Number (PDGNUM), RMF PGSPP kayıtlarında sayfa veri setini benzersiz şekilde 
+                          tanımlayan alanı gösterir. Bu alan, sayfa veri setinin sistem içindeki kimliğini belirtir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Format:</strong> İki hexadecimal basamak (00-FF)</li>
+                          <li>• <strong>Benzersizlik:</strong> Her sayfa veri seti için farklı değer</li>
+                          <li>• <strong>Kimlik:</strong> Sayfa veri setinin sistem içindeki tanımlayıcısı</li>
+                          <li>• <strong>Örnek:</strong> 01, 02, 0A, FF gibi hexadecimal değerler</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Page Data Set Number, sayfa performansının hangi veri setinden geldiğini belirlemek için kritik öneme sahiptir. 
+                          Bu bilgi sayesinde hangi sayfa veri setinin performans sorunları yaşadığını tespit edebilir ve 
+                          sistem optimizasyonu yapabilirsiniz. Ayrıca sayfa veri setlerinin kullanım dağılımını analiz etmek için gereklidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Page Data Set Type Info Card */}
+                  {infoModal === 'pdgtypc' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Page Data Set Type (PDGTYPC), RMF PGSPP kayıtlarında sayfa veri setinin türünü 
+                          belirten alanı gösterir. Bu alan, sayfa veri setinin hangi tipte olduğunu ve 
+                          nasıl kullanıldığını tanımlar.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Veri Seti Türü:</strong> Sayfa veri setinin kategorisini belirtir</li>
+                          <li>• <strong>Kullanım Amacı:</strong> Veri setinin hangi amaçla kullanıldığını gösterir</li>
+                          <li>• <strong>Sistem Tanımı:</strong> z/OS tarafından atanan tür bilgisi</li>
+                          <li>• <strong>Performans Etkisi:</strong> Farklı türler farklı performans karakteristikleri gösterir</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Page Data Set Type, sayfa veri setinin özelliklerini ve davranışını anlamak için kritik öneme sahiptir. 
+                          Farklı türdeki veri setleri farklı performans karakteristikleri gösterir ve farklı optimizasyon 
+                          stratejileri gerektirir. Bu bilgi sayesinde hangi tür veri setlerinin sistem performansını 
+                          nasıl etkilediğini analiz edebilir ve uygun performans ayarlamalarını yapabilirsiniz.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Volume Serial Number Info Card */}
+                  {infoModal === 'pdgser' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Volume Serial Number (PDGSER), RMF PGSPP kayıtlarında sayfa veri setinin bulunduğu volume'ü 
+                          benzersiz şekilde tanımlayan alanı gösterir. Bu alan, sayfa veri setinin hangi depolama cihazında 
+                          saklandığını belirtir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Format:</strong> En fazla altı karakter (alfanumerik)</li>
+                          <li>• <strong>Benzersizlik:</strong> Her volume için farklı seri numarası</li>
+                          <li>• <strong>Depolama:</strong> Sayfa veri setinin fiziksel konumunu gösterir</li>
+                          <li>• <strong>SCM İstisnası:</strong> Storage Class Memory (SCM) sayfalama için geçerli değildir</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Volume Serial Number, sayfa verilerinin hangi depolama cihazında saklandığını belirlemek için kritik öneme sahiptir. 
+                          Bu bilgi sayesinde performans sorunlarının hangi volume'den kaynaklandığını tespit edebilirsiniz. 
+                          Disk performansı ve I/O sıkışmalarını analiz etmek için kullanılır. Ayrıca sayfa veri setlerinin 
+                          volume'ler arasındaki dağılımını optimize etmek için gereklidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Device Number Info Card */}
+                  {infoModal === 'pdredevc' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Device Number (PDREDEVC), RMF PGSPP kayıtlarında sayfa veri setinin bulunduğu fiziksel I/O cihazını 
+                          benzersiz şekilde tanımlayan alanı gösterir. Bu alan, sayfa verilerinin hangi fiziksel cihazda 
+                          saklandığını belirtir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Format:</strong> En fazla beş hexadecimal basamak</li>
+                          <li>• <strong>Benzersizlik:</strong> Her fiziksel I/O cihazı için farklı numara</li>
+                          <li>• <strong>Cihaz Kimliği:</strong> Sayfa veri setinin fiziksel depolama cihazını gösterir</li>
+                          <li>• <strong>SCM İstisnası:</strong> Storage Class Memory (SCM) sayfalama için geçerli değildir</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Device Number, sayfa verilerinin hangi fiziksel I/O cihazında bulunduğunu belirlemek için kritik öneme sahiptir. 
+                          Bu bilgi sayesinde performans sorunlarının hangi cihazdan kaynaklandığını tespit edebilirsiniz. 
+                          I/O performansı ve cihaz yoğunluğunu analiz etmek için kullanılır. Ayrıca sayfa veri setlerinin 
+                          fiziksel cihazlar arasındaki dağılımını optimize etmek için gereklidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Page Data Set Status Info Card */}
+                  {infoModal === 'pdgstat' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Page Data Set Status (PDGSTAT), RMF PGSPP kayıtlarında sayfa veri setinin mevcut durumunu 
+                          gösteren alanı gösterir. Bu alan, sayfa veri setinin sistem içindeki operasyonel durumunu 
+                          ve kullanılabilirlik seviyesini belirtir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Durum Göstergesi:</strong> Sayfa veri setinin operasyonel durumu</li>
+                          <li>• <strong>Kullanılabilirlik:</strong> Veri setinin erişilebilirlik seviyesi</li>
+                          <li>• <strong>Sistem Durumu:</strong> Sayfa veri setinin sistem içindeki konumu</li>
+                          <li>• <strong>Operasyonel Bilgi:</strong> Veri setinin çalışma durumu hakkında bilgi</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Page Data Set Status, sayfa veri setinin kullanılabilirlik durumunu belirlemek için kritik öneme sahiptir. 
+                          Bu bilgi sayesinde hangi veri setlerinin aktif olduğunu, hangilerinin sorun yaşadığını tespit edebilirsiniz. 
+                          Sistem yönetimi ve performans optimizasyonu için gerekli olan bu bilgi, sayfa veri setlerinin 
+                          sağlık durumunu izlemek ve proaktif bakım yapmak için kullanılır.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Page Slot In Use Percentage Info Card */}
+                  {infoModal === 'pdislupc' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Page Slot In Use Percentage (PDISLUPC), RMF PGSPP kayıtlarında bu sayfa veri setindeki 
+                          sayfa slotlarının ne kadarının şu anda kullanımda olduğunu yüzde olarak gösteren alanı gösterir. 
+                          Bu metrik, sayfa veri setinin doluluk oranını belirtir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Format:</strong> Yüzde değeri (0-100%)</li>
+                          <li>• <strong>Hesaplama:</strong> Kullanılan slot sayısı / Toplam slot sayısı × 100</li>
+                          <li>• <strong>Slot Durumu:</strong> Aktif olarak kullanılan sayfa slotları</li>
+                          <li>• <strong>Kapasite Göstergesi:</strong> Veri setinin doluluk seviyesi</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Page Slot In Use Percentage, sayfa veri setinin kapasite kullanımını izlemek için kritik öneme sahiptir. 
+                          Yüksek yüzde değerleri veri setinin dolmaya yakın olduğunu gösterir ve performans sorunlarına yol açabilir. 
+                          Bu metrik sayesinde proaktif kapasite planlaması yapabilir, yeni sayfa veri setleri ekleme ihtiyacını 
+                          önceden tespit edebilir ve sistem performansını optimize edebilirsiniz.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Average Page Transfer Time Info Card */}
+                  {infoModal === 'pdipxtav' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Average Page Transfer Time (PDIPXTAV), RMF PGSPP kayıtlarında sayfa veri setinden gerçek 
+                          belleğe tek bir sayfayı aktarmak için gereken ortalama milisaniye süresini gösteren alanı gösterir. 
+                          Bu metrik, sayfa aktarım performansının bir göstergesidir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Birim:</strong> Milisaniye (ms)</li>
+                          <li>• <strong>Hesaplama:</strong> Belirli zaman aralığındaki ortalama değer</li>
+                          <li>• <strong>Aktarım Yönü:</strong> Sayfa veri setinden gerçek belleğe</li>
+                          <li>• <strong>Performans Göstergesi:</strong> I/O aktarım hızının ölçümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Average Page Transfer Time, sayfa aktarım performansını değerlendirmek için kritik öneme sahiptir. 
+                          Yüksek değerler I/O darboğazlarını ve depolama performans sorunlarını gösterir. Bu metrik sayesinde 
+                          hangi sayfa veri setlerinin yavaş performans sergilediğini tespit edebilir, depolama optimizasyonu 
+                          yapabilir ve sistem yanıt sürelerini iyileştirebilirsiniz.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* I/O Request Rate Info Card */}
+                  {infoModal === 'pdipiort' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          I/O Request Rate (PDIPIORT), RMF PGSPP kayıtlarında belirli zaman aralığında bu sayfa veri setine 
+                          yönelik saniye başına yapılan sayfalama I/O isteklerinin oranını gösteren alanı gösterir. 
+                          Bu metrik, sayfa veri setinin I/O yoğunluğunu ölçer.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Birim:</strong> İstek/saniye (requests per second)</li>
+                          <li>• <strong>Kapsam:</strong> Sayfalama I/O istekleri</li>
+                          <li>• <strong>Zaman Aralığı:</strong> Belirli ölçüm periyodu boyunca</li>
+                          <li>• <strong>Aktivite Göstergesi:</strong> Sayfa veri setinin I/O yoğunluğu</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          I/O Request Rate, sayfa veri setinin ne kadar yoğun kullanıldığını belirlemek için kritik öneme sahiptir. 
+                          Yüksek değerler o veri setinin sistem performansında önemli rol oynadığını gösterir. Bu metrik sayesinde 
+                          hangi sayfa veri setlerinin en çok I/O trafiği aldığını tespit edebilir, I/O dağılımını optimize edebilir 
+                          ve performans darboğazlarını önceden belirleyebilirsiniz.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Average Pages per Burst Info Card */}
+                  {infoModal === 'pdippbav' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Average Pages per Burst (PDIPPBAV), RMF PGSPP kayıtlarında page-in veya page-out işlemi sonucunda 
+                          sayfa veri setinden veya sayfa veri setine yapılan her I/O isteği başına aktarılan ortalama sayfa 
+                          sayısını gösteren alanı gösterir. Bu metrik, I/O verimliliğinin bir göstergesidir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Birim:</strong> Sayfa/I/O isteği (pages per I/O request)</li>
+                          <li>• <strong>İşlem Türü:</strong> Page-in ve page-out operasyonları</li>
+                          <li>• <strong>Hesaplama:</strong> Toplam aktarılan sayfa / Toplam I/O isteği</li>
+                          <li>• <strong>Verimlilik Göstergesi:</strong> I/O operasyonlarının etkinliği</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Average Pages per Burst, I/O operasyonlarının verimliliğini değerlendirmek için kritik öneme sahiptir. 
+                          Yüksek değerler daha verimli I/O operasyonlarını gösterirken, düşük değerler I/O overhead'ının 
+                          yüksek olduğunu işaret eder. Bu metrik sayesinde sayfalama performansını optimize edebilir, 
+                          I/O verimliliğini artırabilir ve sistem kaynaklarının daha etkin kullanılmasını sağlayabilirsiniz.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* VIO Eligibility Info Card */}
+                  {infoModal === 'pdgvioc' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          VIO Eligibility (PDGVIOC), RMF PGSPP kayıtlarında sayfa veri setinin VIO (Virtual I/O) 
+                          sayfalarını kabul edip etmediğini belirten alanı gösterir. Bu alan, sayfa veri setinin 
+                          VIO uygunluk durumunu gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>VIO Sayfaları:</strong> Virtual I/O sayfalarının kabul durumu</li>
+                          <li>• <strong>Yapılandırma:</strong> SYS1.PARMLIB(IEASYSxx) üyesinde tanımlanır</li>
+                          <li>• <strong>Uygunluk Durumu:</strong> VIO-eligible sayfa veri setleri</li>
+                          <li>• <strong>Sistem Parametresi:</strong> IEASYSxx parmlib üyesi ile kontrol edilir</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          VIO Eligibility, sayfa veri setinin Virtual I/O özelliklerinden yararlanıp yararlanamayacağını 
+                          belirlemek için kritik öneme sahiptir. VIO uygun veri setleri daha hızlı I/O performansı 
+                          sağlayabilir. Bu bilgi sayesinde hangi sayfa veri setlerinin VIO avantajlarından 
+                          yararlandığını tespit edebilir ve sistem performansını optimize edebilirsiniz.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* In Use Percentage Info Card */}
+                  {infoModal === 'pdibsyPC' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          In Use Percentage (PDIBSYPC), RMF PGSPP kayıtlarında ölçüm aralığının ne kadarında 
+                          sayfa veri setinin Auxiliary Storage Manager (ASM) tarafından kullanıldığını yüzde olarak 
+                          gösteren alanı gösterir. Bu metrik, sayfa veri setinin aktif kullanım süresini belirtir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Birim:</strong> Yüzde değeri (0-100%)</li>
+                          <li>• <strong>Hesaplama:</strong> Kullanım süresi / Toplam ölçüm aralığı × 100</li>
+                          <li>• <strong>ASM Kullanımı:</strong> Auxiliary Storage Manager tarafından aktif kullanım</li>
+                          <li>• <strong>Zaman Aralığı:</strong> Belirli ölçüm periyodu boyunca</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          In Use Percentage, sayfa veri setinin ne kadar aktif kullanıldığını belirlemek için kritik öneme sahiptir. 
+                          Yüksek değerler o veri setinin sistem için önemli olduğunu gösterirken, düşük değerler 
+                          az kullanılan veri setlerini işaret eder. Bu metrik sayesinde sayfa veri setlerinin 
+                          kullanım yoğunluğunu analiz edebilir, kaynak planlaması yapabilir ve performans optimizasyonu gerçekleştirebilirsiniz.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Page Data Set Name Info Card */}
+                  {infoModal === 'pdgdsn' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Page Data Set Name (PDGDSN), RMF PGSPP kayıtlarında sayfa veri setinin adını içeren 
+                          alanı gösterir. Bu alan, sayfa veri setinin sistem içindeki tam ismini belirtir ve 
+                          veri setini benzersiz şekilde tanımlar.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>İçerik:</strong> Sayfa veri setinin tam adı</li>
+                          <li>• <strong>Benzersizlik:</strong> Her sayfa veri seti için farklı isim</li>
+                          <li>• <strong>Tanımlama:</strong> Veri setini sistem içinde benzersiz tanımlama</li>
+                          <li>• <strong>SCM İstisnası:</strong> Storage Class Memory (SCM) sayfalama için geçerli değildir</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Page Data Set Name, sayfa veri setlerini tanımlamak ve yönetmek için kritik öneme sahiptir. 
+                          Bu bilgi sayesinde hangi veri setinin performans sorunları yaşadığını kesin olarak tespit edebilir, 
+                          sistem yöneticileri ile iletişimde doğru veri setini belirtebilir ve sayfa veri setlerinin 
+                          organizasyonunu anlayabilirsiniz. Ayrıca kapasité planlaması ve bakım işlemleri için gereklidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
