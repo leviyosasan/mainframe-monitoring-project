@@ -34,6 +34,110 @@ const Chatbot = () => {
     }
   }
 
+  // MQ QM sorgu çözücü
+  const parseMqQuery = (lowerMessage) => {
+    const candidates = [
+      { col: 'qmiputtr', label: 'Interval Total Put Rate', keys: ['qmiputtr', 'put rate', 'interval put rate', 'intervaltotalputrate', 'putrate', 'put oranı'] },
+      { col: 'qmigetr', label: 'Interval Get Rate', keys: ['qmigetr', 'get rate', 'interval get rate', 'intervalgetrate', 'getrate', 'get oranı'] },
+      { col: 'qmnqmes', label: 'Number of Normal Queue Messages', keys: ['qmnqmes', 'normal queue', 'normal queue messages', 'number of normal queue messages', 'normalkuyruk', 'normal kuyruk'] },
+      { col: 'qmxqmes', label: 'Number of Transmission Queue Messages', keys: ['qmxqmes', 'transmission queue', 'transmission queue messages', 'number of transmission queue messages', 'iletim kuyruğu', 'iletimkuyrugu'] },
+      { col: 'qmcomlv', label: 'Queue Manager Version', keys: ['qmcomlv', 'version', 'queue manager version', 'queuemanagerversion', 'versiyon'] },
+      { col: 'qmplatn', label: 'Platform Name', keys: ['qmplatn', 'platform name', 'platformname', 'platform adı', 'platform adi'] },
+      { col: 'qmplat', label: 'Platform Type', keys: ['qmplat', 'platform type', 'platformtype', 'platform tipi', 'platform tip'] },
+    ]
+    for (const c of candidates) {
+      if (c.keys.some(k => lowerMessage.includes(k))) return c
+    }
+    return null
+  }
+
+  // MQ CONNZ sorgu çözücü (örnek metrikler)
+  const parseConnzQuery = (lowerMessage) => {
+    const candidates = [
+      { col: 'connapltag', label: 'Application Name', keys: ['connapltag', 'application name', 'app name'] },
+      { col: 'conninfotyp', label: 'Type Of Information (Hex) (Count)', keys: ['conninfotyp', 'type of information', 'information type', 'info type'] },
+      { col: 'connasid', label: 'Address Space Identifier', keys: ['connasid', 'asid', 'address space identifier'] },
+      { col: 'connapltyx', label: 'Application Type(Maximum)', keys: ['connapltyx', 'application type(maximum)', 'application type', 'appl type'] },
+      { col: 'conntranid', label: 'CICS Transaction Id', keys: ['conntranid', 'cics transaction id', 'transaction id', 'tranid'] },
+      { col: 'conntaskno', label: 'CICS Task number', keys: ['conntaskno', 'cics task number', 'task number', 'taskno'] },
+      { col: 'connpsbnm', label: 'IMS PSB Name', keys: ['connpsbnm', 'ims psb name', 'psb name'] },
+      { col: 'connobject', label: 'Object Name(Maximum)', keys: ['connobject', 'object name', 'object name(maximum)'] },
+      { col: 'connqmgr', label: 'Queue Manager', keys: ['connqmgr', 'queue manager', 'qmgr', 'qm'] },
+      { col: 'applname', label: 'Application Name Type Of Information', keys: ['applname', 'application name type of information', 'app name type'] },
+      { col: 'asid', label: 'Address Space Identifier', keys: ['asid', 'address space identifier'] },
+      { col: 'appltypemax', label: 'Application Type(Maximum)', keys: ['appltypemax', 'application type(maximum)', 'application type'] },
+      { col: 'cicstranid', label: 'CICS Transaction Id', keys: ['cicstranid', 'cics transaction id'] },
+      { col: 'cicstaskno', label: 'CICS Task number', keys: ['cicstaskno', 'cics task number'] },
+    ]
+    for (const c of candidates) {
+      if (c.keys.some(k => lowerMessage.includes(k))) return c
+    }
+    return null
+  }
+
+  // MQ W2OVER sorgu çözücü (örnek metrikler)
+  const parseW2overQuery = (lowerMessage) => {
+    const candidates = [
+      { col: 'wzonrchl', label: 'Channels Retrying', keys: ['wzonrchl', 'channels retrying', 'retrying channels', 'kanallar yeniden deneme', 'kanal retry'] },
+      { col: 'wzolqhi', label: 'Local Queues at Max Depth High', keys: ['wzolqhi', 'local queues at max depth high', 'local queues high', 'local queue high'] },
+      { col: 'wzoxqhi', label: 'Transmit Queues at Max Depth High', keys: ['wzoxqhi', 'transmit queues at max depth high', 'transmit queues high', 'xmitq high'] },
+      { col: 'wzodlmct', label: 'Dead-Letter Message Count', keys: ['wzodlmct', 'dead-letter message count', 'dead letter', 'dead-letter'] },
+      { col: 'wzoevtc', label: 'Queue Manager Events', keys: ['wzoevtc', 'queue manager events', 'qmgr events', 'events'] },
+      { col: 'wzoqmst', label: 'Queue Manager Status', keys: ['wzoqmst', 'queue manager status', 'qmgr status'] },
+      { col: 'wzoqmgr', label: 'Queue Manager Name', keys: ['wzoqmgr', 'queue manager name', 'qmgr name'] },
+      { col: 'wzops0fp', label: 'Free Pages in Page Set 0', keys: ['wzops0fp', 'free pages in page set 0', 'free pages'] },
+      { col: 'wzoevta', label: 'Event Listener Status', keys: ['wzoevta', 'event listener status'] },
+      { col: 'wzocmdsv', label: 'Command Server Status', keys: ['wzocmdsv', 'command server status'] },
+      { col: 'wzocpf', label: 'Command Prefix', keys: ['wzocpf', 'command prefix'] },
+      { col: 'wzorqexc', label: 'Reply Q Exceptions', keys: ['wzorqexc', 'reply q exceptions', 'reply queue exceptions'] },
+    ]
+    for (const c of candidates) {
+      if (c.keys.some(k => lowerMessage.includes(k))) return c
+    }
+    return null
+  }
+
+  const formatTrDate = (raw) => {
+    if (!raw) return 'N/A'
+    try {
+      const d = new Date(raw)
+      return d.toLocaleString('tr-TR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+    } catch {
+      return String(raw)
+    }
+  }
+
+  const normalizeKey = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+  const isNumeric = (v) => Number.isFinite(Number(v))
+  const getAllKeys = (rows) => {
+    const set = new Set()
+    rows.forEach(r => Object.keys(r || {}).forEach(k => { if (k !== 'index') set.add(k) }))
+    return Array.from(set)
+  }
+  const pickColumnByMessage = (lowerMessage, keys) => {
+    const msgNorm = normalizeKey(lowerMessage)
+    // exact contains
+    for (const k of keys) { if (msgNorm.includes(normalizeKey(k))) return k }
+    return null
+  }
+  const formatValue = (v) => {
+    if (v === null || v === undefined) return 'N/A'
+    const n = Number(v)
+    if (!Number.isFinite(n)) return String(v)
+    return Math.abs(n) < 1 ? n.toFixed(4) : n.toLocaleString('tr-TR')
+  }
+  const buildSummary = (rows, maxPairs = 12) => {
+    const first = rows?.[0] || {}
+    const keys = Object.keys(first).filter(k => k !== 'index')
+    const pairs = []
+    for (const k of keys) {
+      const r = rows.find(row => row?.[k] !== null && row?.[k] !== undefined) || first
+      pairs.push(`${k}: ${formatValue(r?.[k])}`)
+      if (pairs.length >= maxPairs) break
+    }
+    return pairs.join('\n')
+  }
+
   const handleSendMessage = async () => {
     if (inputMessage.trim() === '') return
 
@@ -82,6 +186,145 @@ const Chatbot = () => {
         }
       } catch (error) {
         setMessages(prev => [...prev, { text: 'CPU verisi alınırken bir hata oluştu.', sender: 'bot' }])
+      }
+      return
+    }
+
+    // MQ CONNZ data query
+    if (lowerMessage.includes('connz')) {
+      const listAll = lowerMessage.includes('tüm') || lowerMessage.includes('hepsi') || lowerMessage.includes('kolon') || lowerMessage.includes('columns') || lowerMessage.includes('liste')
+      const target = parseConnzQuery(lowerMessage)
+      if (!target && !listAll) {
+        setMessages(prev => [...prev, { text: 'CONNZ için örnek sorgular: conntranid, conntaskno, connasid, conninfotyp, connapltyx. Tüm kolonlar için: "connz tüm" yazabilirsiniz.', sender: 'bot' }])
+      } else {
+        setMessages(prev => [...prev, { text: `MQ CONNZ ${target ? target.label : 'tüm kolonlar'} verisini çekiyorum...`, sender: 'bot' }])
+        try {
+          const response = await databaseAPI.getMainviewMQConnz({})
+          if (response.data?.success) {
+            const rows = Array.isArray(response.data.data) ? response.data.data : []
+            if (listAll) {
+              const summary = buildSummary(rows, 20)
+              setMessages(prev => [...prev, { text: `📦 MQ CONNZ - Tüm Kolonlar (son değerler)\n${summary}`, sender: 'bot' }])
+            } else {
+              const row = rows.find(r => Number.isFinite(Number(r?.[target.col]))) || rows[0]
+              const valueRaw = row?.[target.col]
+              const ts = row?.record_timestamp || row?.bmctime || row?.updated_at || row?.created_at
+              const formattedVal = formatValue(valueRaw)
+              const reply = `📦 MQ CONNZ - ${target.label}\n` +
+                `• Değer: ${formattedVal}\n` +
+                `• Zaman: ${formatTrDate(ts)}`
+              setMessages(prev => [...prev, { text: reply, sender: 'bot' }])
+            }
+          } else {
+            setMessages(prev => [...prev, { text: 'MQ CONNZ verisi alınamadı.', sender: 'bot' }])
+          }
+        } catch (err) {
+          setMessages(prev => [...prev, { text: 'MQ CONNZ verisi alınırken bir hata oluştu.', sender: 'bot' }])
+        }
+      }
+      return
+    }
+
+    // MQ W2OVER data query
+    if (lowerMessage.includes('w2over') || lowerMessage.includes('w2 over')) {
+      const listAll = lowerMessage.includes('tüm') || lowerMessage.includes('hepsi') || lowerMessage.includes('kolon') || lowerMessage.includes('columns') || lowerMessage.includes('liste')
+      const target = parseW2overQuery(lowerMessage)
+      if (!target && !listAll) {
+        setMessages(prev => [...prev, { text: 'W2OVER için örnek sorgular: wzonrchl, wzolqhi, wzoxqhi, wzodlmct, wzoevtc. Tüm kolonlar için: "w2over tüm" yazabilirsiniz.', sender: 'bot' }])
+      } else {
+        setMessages(prev => [...prev, { text: `MQ W2OVER ${target ? target.label : 'tüm kolonlar'} verisini çekiyorum...`, sender: 'bot' }])
+        try {
+          const response = await databaseAPI.getMainviewMQW2over({})
+          if (response.data?.success) {
+            const rows = Array.isArray(response.data.data) ? response.data.data : []
+            if (listAll) {
+              const summary = buildSummary(rows, 20)
+              setMessages(prev => [...prev, { text: `📦 MQ W2OVER - Tüm Kolonlar (son değerler)\n${summary}`, sender: 'bot' }])
+            } else {
+              const row = rows.find(r => Number.isFinite(Number(r?.[target.col]))) || rows[0]
+              const valueRaw = row?.[target.col]
+              const ts = row?.record_timestamp || row?.bmctime || row?.updated_at || row?.created_at
+              const formattedVal = formatValue(valueRaw)
+              const reply = `📦 MQ W2OVER - ${target.label}\n` +
+                `• Değer: ${formattedVal}\n` +
+                `• Zaman: ${formatTrDate(ts)}`
+              setMessages(prev => [...prev, { text: reply, sender: 'bot' }])
+            }
+          } else {
+            setMessages(prev => [...prev, { text: 'MQ W2OVER verisi alınamadı.', sender: 'bot' }])
+          }
+        } catch (err) {
+          setMessages(prev => [...prev, { text: 'MQ W2OVER verisi alınırken bir hata oluştu.', sender: 'bot' }])
+        }
+      }
+      return
+    }
+
+    // MQ QM data query
+    if (
+      lowerMessage.includes('mq') ||
+      lowerMessage.includes('message queue') ||
+      lowerMessage.includes('queue manager') ||
+      lowerMessage.includes('qm')
+    ) {
+      const mqTarget = parseMqQuery(lowerMessage)
+
+      if (mqTarget) {
+        setMessages(prev => [...prev, { text: `MQ QM ${mqTarget.label} verisini çekiyorum...`, sender: 'bot' }])
+        try {
+          const response = await databaseAPI.getMainviewMQQm({})
+          if (response.data?.success) {
+            const rows = Array.isArray(response.data.data) ? response.data.data : []
+            // En güncel sayısal değeri bul (ilk sayısal geleni kabul et)
+            const row = rows.find(r => Number.isFinite(Number(r?.[mqTarget.col]))) || rows[0]
+            const valueRaw = row?.[mqTarget.col]
+            const ts = row?.record_timestamp || row?.bmctime || row?.updated_at || row?.created_at
+            const val = Number.isFinite(Number(valueRaw)) ? Number(valueRaw) : null
+            const formattedVal = val === null ? 'N/A' : (Math.abs(val) < 1 ? val.toFixed(4) : val.toLocaleString('tr-TR'))
+            const reply = `📦 MQ QM - ${mqTarget.label}\n` +
+              `• Değer: ${formattedVal}\n` +
+              `• Zaman: ${formatTrDate(ts)}`
+            setMessages(prev => [...prev, { text: reply, sender: 'bot' }])
+          } else {
+            setMessages(prev => [...prev, { text: 'MQ QM verisi alınamadı.', sender: 'bot' }])
+          }
+        } catch (err) {
+          setMessages(prev => [...prev, { text: 'MQ QM verisi alınırken bir hata oluştu.', sender: 'bot' }])
+        }
+        return
+      }
+
+      // Dynamic QM: all columns or specific column by name
+      const listAll = lowerMessage.includes('tüm') || lowerMessage.includes('hepsi') || lowerMessage.includes('kolon') || lowerMessage.includes('columns') || lowerMessage.includes('liste')
+      try {
+        const response = await databaseAPI.getMainviewMQQm({})
+        if (response.data?.success) {
+          const rows = Array.isArray(response.data.data) ? response.data.data : []
+          if (rows.length === 0) {
+            setMessages(prev => [...prev, { text: 'MQ QM verisi bulunamadı.', sender: 'bot' }])
+            return
+          }
+          if (listAll) {
+            const summary = buildSummary(rows, 20)
+            setMessages(prev => [...prev, { text: `📦 MQ QM - Tüm Kolonlar (son değerler)\n${summary}`, sender: 'bot' }])
+            return
+          }
+          const keys = getAllKeys(rows)
+          const picked = pickColumnByMessage(lowerMessage, keys)
+          if (!picked) {
+            const preview = keys.slice(0, 10).join(', ')
+            setMessages(prev => [...prev, { text: `Aradığınız QM kolonu bulunamadı. Örnekler: ${preview}. Tümünü görmek için "qm tüm" yazabilirsiniz.`, sender: 'bot' }])
+            return
+          }
+          const row = rows.find(r => r?.[picked] !== null && r?.[picked] !== undefined) || rows[0]
+          const ts = row?.record_timestamp || row?.bmctime || row?.updated_at || row?.created_at
+          const reply = `📦 MQ QM - ${picked}\n• Değer: ${formatValue(row?.[picked])}\n• Zaman: ${formatTrDate(ts)}`
+          setMessages(prev => [...prev, { text: reply, sender: 'bot' }])
+        } else {
+          setMessages(prev => [...prev, { text: 'MQ QM verisi alınamadı.', sender: 'bot' }])
+        }
+      } catch (err) {
+        setMessages(prev => [...prev, { text: 'MQ QM verisi alınırken bir hata oluştu.', sender: 'bot' }])
       }
       return
     }
