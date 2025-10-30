@@ -28,11 +28,39 @@ const MQPage = () => {
   const [chartData, setChartData] = useState([]);
   const [infoModal, setInfoModal] = useState(null);
 
+  // Yardımcılar - okunabilir tekil fonksiyonlar
+  const getRowTime = (row) => (row?.record_timestamp || row?.bmctime || row?.updated_at || row?.created_at);
+  const getActiveRows = () => (
+    isFiltered
+      ? (activeModal==='mq_connz' ? filteredMqConnzData : activeModal==='mq_qm' ? filteredMqQmData : filteredMqW2overData)
+      : (activeModal==='mq_connz' ? mqConnzData : activeModal==='mq_qm' ? mqQmData : mqW2overData)
+  );
+  const getNumericKeys = (first) => (
+    Object.keys(first).filter((key) => {
+      if (key === 'index') return false;
+      const v = first[key]; if (v === null || v === undefined) return false;
+      const k = String(key).toLowerCase();
+      if (k.includes('name') || k.includes('system') || k.includes('host') || k.includes('ip') || k.includes('id') || k.includes('time') || k.includes('date') || k.includes('timestamp')) return false;
+      return !isNaN(Number(v)) && isFinite(Number(v));
+    })
+  );
+
   // MQ CONNZ özel kolon başlık eşlemesi
   const getConnzDisplayLabel = (rawKey) => {
     const key = String(rawKey || '').trim();
     if (!key) return '';
     const n = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    // Yeni: Kullanıcının verdiği CONNZ alanları için kesin eşleşmeler
+    if (n === 'connapltag') return 'Application Name';
+    if (n === 'conninfotyp') return 'Type Of Information (Hex) (Count)';
+    if (n === 'connasid') return 'Address Space Identifier';
+    if (n === 'connapltyx') return 'Application Type(Maximum)';
+    if (n === 'conntranid') return 'CICS Transaction Id';
+    if (n === 'conntaskno') return 'CICS Task number';
+    if (n === 'connpsbnm') return 'IMS PSB Name';
+    if (n === 'connobject') return 'Object Name(Maximum)';
+    if (n === 'connqmgr') return 'Queue Manager';
 
     // 1) Application Name Type Of Information
     if (n === 'applname' || n === 'applicationname' || n === 'appname' || n === 'applicationnametype' || n === 'applicationnametypeofinformation' || n === 'appnametype') {
@@ -79,7 +107,69 @@ const MQPage = () => {
   };
 
   const getDisplayLabelForActive = (rawKey) => {
-    return activeModal === 'mq_connz' ? getConnzDisplayLabel(rawKey) : rawKey;
+    if (activeModal === 'mq_connz') return getConnzDisplayLabel(rawKey);
+    if (activeModal === 'mq_qm') return getQmDisplayLabel(rawKey);
+    if (activeModal === 'mq_w2over') return getW2overDisplayLabel(rawKey);
+    return rawKey;
+  };
+
+  // MQ QM kolon başlık eşlemesi
+  const getQmDisplayLabel = (rawKey) => {
+    const key = String(rawKey || '').trim();
+    if (!key) return '';
+    const n = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    // Kesin eşleşmeler (kullanıcının verdiği anahtarlar)
+    if (n === 'qmnames') return 'Queue Manager Short Name';
+    if (n === 'jtarget') return 'Target Field'; // J@TARGET -> jtarget
+    if (n === 'qmplat') return 'Platform Type';
+    if (n === 'qmplatn') return 'Platform Name';
+    if (n === 'qmstat') return 'Status';
+    if (n === 'qmqstats') return 'MQE Stats Collection Status';
+    if (n === 'qmiputtr') return 'Interval Total Put Rate';
+    if (n === 'qmigetr') return 'Interval Get Rate';
+    if (n === 'qmnqmes') return 'Number of Normal Queue Messages';
+    if (n === 'qmxqmes') return 'Number of Transmission Queue Messages';
+    if (n === 'qmcomlv') return 'Queue Manager Version';
+
+    // Genel dönüştürme
+    return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  // MQ W2OVER kolon başlık eşlemesi
+  const getW2overDisplayLabel = (rawKey) => {
+    const key = String(rawKey || '').trim();
+    if (!key) return '';
+    const n = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    if (n === 'wzoqmgr') return 'Queue Manager Name';
+    if (n === 'wzoqmst') return 'Queue Manager Status';
+    if (n === 'wzonrchl') return 'Channels Retrying';
+    if (n === 'wzolqhi') return 'Local Queues at Max Depth High';
+    if (n === 'wzoxqhi') return 'Transmit Queues at Max Depth High';
+    if (n === 'wzodlmct') return 'Dead-Letter Message Count';
+    if (n === 'wzops0fp') return 'Free Pages in Page Set 0';
+    if (n === 'wzoevtc') return 'Queue Manager Events';
+    if (n === 'wzoevta') return 'Event Listener Status';
+    if (n === 'wzocmdsv') return 'Command Server Status';
+    if (n === 'wzocpf') return 'Command Prefix';
+    if (n === 'wzorqexc') return 'Reply Q Exceptions';
+
+    // Genel dönüştürme
+    return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  // QM tablo için yalnızca istenen kolonları sırayla döndür
+  const getQmOrderedKeys = (rows) => {
+    const first = rows?.[0] || {};
+    const allKeys = Object.keys(first);
+    const normalize = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const normToOrig = new Map();
+    allKeys.forEach(k => normToOrig.set(normalize(k), k));
+    const desiredOrder = ['qmcomlv','qmxqmes','qmnqmes','qmigetr','qmiputtr','qmqstats','qmstat','qmplatn','qmplat','jtarget','qmnames'];
+    const result = [];
+    desiredOrder.forEach(n => { const o = normToOrig.get(n); if (o) result.push(o); });
+    return result;
   };
 
   const tabs = [
@@ -278,80 +368,133 @@ const MQPage = () => {
     
     try {
       let rawHeaders = Object.keys(rows[0] || {});
-      
       // Index kolonunu çıkar
       rawHeaders = rawHeaders.filter(h => h !== 'index');
-      
-      // Header'ları temizle ve formatla
-      const cleanHeader = (header) => {
-        return header.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-      };
-      
-      const headers = rawHeaders.map((h) => {
-        const isConnz = String(filename || '').toUpperCase().includes('MQ_CONNZ');
-        return isConnz ? getConnzDisplayLabel(h) : cleanHeader(h);
+
+      const cleanHeader = (header) => header.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      const upperName = String(filename || '').toUpperCase();
+      const isConnz = upperName.includes('MQ_CONNZ');
+      const isQm = upperName.includes('MQ_QM');
+      const isW2 = upperName.includes('MQ_W2OVER');
+      if (isQm) {
+        const ordered = getQmOrderedKeys(rows);
+        // Sadece mevcut olanları kullan
+        rawHeaders = ordered.filter(k => rawHeaders.includes(k));
+      }
+      const headers = rawHeaders.map((h) => isConnz ? getConnzDisplayLabel(h) : isQm ? getQmDisplayLabel(h) : isW2 ? getW2overDisplayLabel(h) : cleanHeader(h));
+
+      // 1) Önce XLSX dene (kolon genişliği ayarı için)
+      const loadXlsx = () => new Promise((resolve, reject) => {
+        if (window.XLSX) { resolve(window.XLSX); return; }
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+        script.onload = () => resolve(window.XLSX);
+        script.onerror = () => reject(new Error('XLSX yüklenemedi'));
+        document.head.appendChild(script);
       });
-      
-      // CSV satırlarını oluştur - güvenli formatlama
-      const escapeCSV = (value) => {
-        if (value === null || value === undefined) return '';
-        const stringValue = String(value);
-        // Virgül, tırnak veya newline içeriyorsa tırnak içine al
-        if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
-          return `"${stringValue.replace(/"/g, '""')}"`;
+
+      loadXlsx().then((XLSX) => {
+        try {
+          // AOA verisi: başlık + satırlar (ham değerler)
+          const aoa = [headers, ...rows.map(row => rawHeaders.map(h => {
+            const v = row[h];
+            if (v === null || v === undefined) return '';
+            // Tarih stringlerini Date'e çevir (Excel tarih olarak algılar)
+            if (typeof v === 'string' && v.match(/\d{4}-\d{2}-\d{2}/)) {
+              const d = new Date(v);
+              return isNaN(d.getTime()) ? v : d;
+            }
+            return v;
+          }))];
+
+          const wb = XLSX.utils.book_new();
+          const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+          // Kolon genişliklerini içeriğe göre hesapla
+          const maxCols = rawHeaders.length;
+          const colWidths = Array.from({ length: maxCols }, (_, c) => {
+            let maxLen = String(headers[c] || '').length;
+            for (let r = 1; r < aoa.length; r++) {
+              const cell = aoa[r][c];
+              const len = cell instanceof Date ? 19 : String(cell ?? '').length;
+              if (len > maxLen) maxLen = len;
+            }
+            const wch = Math.min(60, Math.max(12, maxLen + 2));
+            return { wch };
+          });
+          ws['!cols'] = colWidths;
+
+          XLSX.utils.book_append_sheet(wb, ws, (filename || 'Export').slice(0,31));
+          const safeName = filename.replace(/[^a-zA-Z0-9_]/g, '_');
+          XLSX.writeFile(wb, `${safeName}_${new Date().toISOString().split('T')[0]}.xlsx`);
+          toast.success('Excel dosyası başarıyla indirildi');
+        } catch (xlsxErr) {
+          console.error('XLSX oluşturma hatası, CSV ye düşülüyor:', xlsxErr);
+          // XLSX başarısızsa CSV fallback
+          const escapeCSV = (value) => {
+            if (value === null || value === undefined) return '';
+            const stringValue = String(value);
+            if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+              return `"${stringValue.replace(/"/g, '""')}"`;
+            }
+            return stringValue;
+          };
+          const formatValue = (value) => {
+            if (value === null || value === undefined) return '';
+            if (value instanceof Date) return value.toLocaleString('tr-TR');
+            if (typeof value === 'string' && value.match(/\d{4}-\d{2}-\d{2}/)) {
+              try { return new Date(value).toLocaleString('tr-TR'); } catch { return value; }
+            }
+            if (typeof value === 'number') return value.toLocaleString('tr-TR');
+            return String(value);
+          };
+          const csvRows = rows.map(row => rawHeaders.map(h => escapeCSV(formatValue(row[h]))).join(','));
+          const csv = [headers.join(','), ...csvRows].join('\r\n');
+          const BOM = '\uFEFF';
+          const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${filename.replace(/[^a-zA-Z0-9_]/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          toast.success('CSV dosyası başarıyla indirildi');
         }
-        return stringValue;
-      };
-      
-      const formatValue = (value) => {
-        if (value === null || value === undefined) return '';
-        
-        // Date objesi ise
-        if (value instanceof Date) {
-          return value.toLocaleString('tr-TR');
-        }
-        
-        // String olarak tarih formatını kontrol et
-        if (typeof value === 'string' && value.match(/\d{4}-\d{2}-\d{2}/)) {
-          try {
-            return new Date(value).toLocaleString('tr-TR');
-          } catch {
-            return value;
+      }).catch(() => {
+        // XLSX yüklenemediyse doğrudan CSV fallback
+        const escapeCSV = (value) => {
+          if (value === null || value === undefined) return '';
+          const stringValue = String(value);
+          if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+            return `"${stringValue.replace(/"/g, '""')}"`;
           }
-        }
-        
-        // Number formatlama (binlik ayracı)
-        if (typeof value === 'number') {
-          return value.toLocaleString('tr-TR');
-        }
-        
-        return String(value);
-      };
-      
-      const csvRows = rows.map(row => 
-        rawHeaders.map(header => {
-          const value = row[header];
-          return escapeCSV(formatValue(value));
-        }).join(',')
-      );
-      
-      const csv = [headers.join(','), ...csvRows].join('\r\n');
-      
-      // UTF-8 BOM ile blob oluştur (Türkçe karakterler için)
-      const BOM = '\uFEFF';
-      const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
-      
-      // Dosyayı indir
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${filename.replace(/[^a-zA-Z0-9_]/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      toast.success('Excel dosyası başarıyla indirildi');
+          return stringValue;
+        };
+        const formatValue = (value) => {
+          if (value === null || value === undefined) return '';
+          if (value instanceof Date) return value.toLocaleString('tr-TR');
+          if (typeof value === 'string' && value.match(/\d{4}-\d{2}-\d{2}/)) {
+            try { return new Date(value).toLocaleString('tr-TR'); } catch { return value; }
+          }
+          if (typeof value === 'number') return value.toLocaleString('tr-TR');
+          return String(value);
+        };
+        const csvRows = rows.map(row => rawHeaders.map(h => escapeCSV(formatValue(row[h]))).join(','));
+        const csv = [headers.join(','), ...csvRows].join('\r\n');
+        const BOM = '\uFEFF';
+        const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filename.replace(/[^a-zA-Z0-9_]/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast.success('CSV dosyası başarıyla indirildi');
+      });
     } catch (error) {
       console.error('Excel export hatası:', error);
       toast.error('Excel oluşturulurken hata oluştu');
@@ -420,7 +563,10 @@ const MQPage = () => {
 
         // Yardımcılar
         const cleanHeader = (header) => header.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        const isConnz = String(filename || '').toUpperCase().includes('MQ_CONNZ');
+        const upperName = String(filename || '').toUpperCase();
+        const isConnz = upperName.includes('MQ_CONNZ');
+        const isQm = upperName.includes('MQ_QM');
+        const isW2 = upperName.includes('MQ_W2OVER');
         const formatDataValue = (value) => {
           if (value === null || value === undefined) return '-';
           if (value instanceof Date) return value.toLocaleString('tr-TR');
@@ -434,69 +580,87 @@ const MQPage = () => {
         };
 
         let rawHeaders = Object.keys(rows[0] || {}).filter(h => h !== 'index');
-        const colCount = rawHeaders.length;
+        if (upperName.includes('MQ_QM')) {
+          const ordered = getQmOrderedKeys(rows);
+          rawHeaders = ordered.filter(k => rawHeaders.includes(k));
+        }
         const currentDate = new Date().toLocaleString('tr-TR');
 
-        // Dinamik boyutlar (tüm sütunları tek tabloda sığdırmak için)
-        const fontSize = colCount > 24 ? 5 : colCount > 18 ? 6 : 7;
-        const headPad = 3;
-        const bodyPad = 2;
-        const minCellWidth = colCount > 24 ? 18 : colCount > 18 ? 22 : 28;
+        // Başlık ve tarih yazımı için yardımcı
+        const writeHeader = (partText = '') => {
+          doc.setFontSize(16);
+          doc.setFont(undefined, 'bold');
+          doc.text(`${filename} Raporu${partText}`, 40, 40);
+          doc.setFontSize(10);
+          doc.setFont(undefined, 'normal');
+          doc.text(`Oluşturulma Tarihi: ${currentDate}`, 40, 58);
+        };
 
-        // Başlık
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text(`${filename} Raporu`, 40, 40);
-        
-        // Tarih
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        doc.text(`Oluşturulma Tarihi: ${currentDate}`, 40, 58);
+        // Sütun genişliğini tahmini hesapla (başlık + ilk 50 kayıt)
+        const estimateWidths = (headersArr, keysArr) => {
+          const baseFontSize = 7;
+          const charW = baseFontSize * 0.6; // yaklaşık
+          return keysArr.map((k, idx) => {
+            let maxLen = String(headersArr[idx] || '').length;
+            const sample = Math.min(50, rows.length);
+            for (let r = 0; r < sample; r++) {
+              const v = rows[r]?.[k];
+              const len = v instanceof Date ? 19 : String(v ?? '').length;
+              if (len > maxLen) maxLen = len;
+            }
+            // Karakter bazlı sınırlar: min 12, max 60 karakter eşdeğeri
+            const minW = 12 * charW;
+            const maxW = 60 * charW;
+            const w = Math.min(maxW, Math.max(minW, maxLen * charW + 10));
+            return w;
+          });
+        };
 
-        const headers = rawHeaders.map(h => isConnz ? getConnzDisplayLabel(h) : cleanHeader(h));
-        const tableData = rows.map(row => rawHeaders.map(h => formatDataValue(row[h])));
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const left = 20, right = 20; // kenar boşlukları
+        const usable = pageWidth - left - right;
 
-        doc.autoTable({
-          head: [headers],
-          body: tableData,
-          startY: 70,
-          styles: {
-            fontSize,
-            cellPadding: bodyPad,
-            overflow: 'linebreak',
-            halign: 'left',
-            valign: 'middle',
-            lineWidth: 0.1,
-            lineColor: [220, 220, 220]
-          },
-          headStyles: {
-            fillColor: [59, 130, 246],
-            textColor: [255, 255, 255],
-            fontStyle: 'bold',
-            cellPadding: headPad,
-            overflow: 'linebreak',
-            minCellWidth
-          },
-          bodyStyles: {
-            overflow: 'linebreak',
-            cellPadding: bodyPad
-          },
-          alternateRowStyles: {
-            fillColor: [249, 250, 251]
-          },
-          columnStyles: {
-            ...(rawHeaders.reduce((acc, header, index) => {
-              const h = header.toLowerCase();
-              if (h.includes('timestamp') || h.includes('created_at') || h.includes('updated_at') || h.includes('time') || h.includes('date')) {
-                acc[index] = { fontSize: Math.max(4, fontSize - 1) };
-              } else if (h.includes('id')) {
-                acc[index] = { cellWidth: 'auto' };
-              }
-              return acc;
-            }, {}))
-          },
-          margin: { top: 40, left: 10, right: 10 },
-          tableWidth: 'wrap'
+        // Etiketler
+        const labelFor = (h) => (isConnz ? getConnzDisplayLabel(h) : isQm ? getQmDisplayLabel(h) : isW2 ? getW2overDisplayLabel(h) : cleanHeader(h));
+
+        // Kolonları sayfa genişliğine göre gruplara böl
+        const headersLabels = rawHeaders.map(labelFor);
+        const estWidths = estimateWidths(headersLabels, rawHeaders);
+        const groups = [];
+        let cur = [], curLbl = [], curW = 0, curWList = [];
+        for (let i = 0; i < rawHeaders.length; i++) {
+          const w = estWidths[i];
+          if (cur.length > 0 && curW + w > usable) {
+            groups.push({ keys: cur.slice(), labels: curLbl.slice(), widths: curWList.slice() });
+            cur = []; curLbl = []; curWList = []; curW = 0;
+          }
+          cur.push(rawHeaders[i]); curLbl.push(headersLabels[i]); curWList.push(w); curW += w;
+        }
+        if (cur.length) groups.push({ keys: cur, labels: curLbl, widths: curWList });
+
+        // Her grup için tablo oluştur
+        groups.forEach((g, i) => {
+          if (i > 0) doc.addPage('l');
+          const partText = groups.length > 1 ? ` - Bölüm ${i+1}/${groups.length}` : '';
+          writeHeader(partText);
+
+          const body = rows.map(row => g.keys.map(h => formatDataValue(row[h])));
+          const fontSize = 7;
+          const headPad = 3;
+          const bodyPad = 2;
+
+          doc.autoTable({
+            head: [g.labels],
+            body,
+            startY: 70,
+            styles: { fontSize, cellPadding: bodyPad, overflow: 'linebreak', halign: 'left', valign: 'middle', lineWidth: 0.1, lineColor: [220,220,220] },
+            headStyles: { fillColor: [59,130,246], textColor: [255,255,255], fontStyle: 'bold', cellPadding: headPad, overflow: 'linebreak' },
+            bodyStyles: { overflow: 'linebreak', cellPadding: bodyPad },
+            alternateRowStyles: { fillColor: [249,250,251] },
+            margin: { top: 40, left, right },
+            tableWidth: 'auto',
+            columnStyles: g.widths.reduce((acc, w, idx) => { acc[idx] = { cellWidth: w }; return acc; }, {})
+          });
         });
 
         const cleanFileName = filename.replace(/[^a-zA-Z0-9_]/g, '_');
@@ -563,13 +727,10 @@ const MQPage = () => {
   const openChart = (key) => {
     setSelectedChart(key);
     setChartTab('chart');
-    const rows = isFiltered
-      ? (activeModal==='mq_connz' ? filteredMqConnzData : activeModal==='mq_qm' ? filteredMqQmData : filteredMqW2overData)
-      : (activeModal==='mq_connz' ? mqConnzData : activeModal==='mq_qm' ? mqQmData : mqW2overData);
-    const points = rows.map((r) => ({
-      label: r.record_timestamp || r.bmctime || r.updated_at || r.created_at,
-      value: Number(r[key]) || 0,
-    })).filter(p => !isNaN(p.value));
+    const rows = getActiveRows();
+    const points = rows
+      .map((r) => ({ label: getRowTime(r), value: Number(r[key]) || 0 }))
+      .filter(p => !isNaN(p.value));
     setChartData(points);
   };
 
@@ -994,9 +1155,11 @@ const MQPage = () => {
                           <thead className="bg-gray-50">
                             <tr>
                               {(() => {
-                                const keys = Object.keys(((isFiltered ? (activeModal==='mq_connz'?filteredMqConnzData:activeModal==='mq_qm'?filteredMqQmData:filteredMqW2overData) : (activeModal==='mq_connz'?mqConnzData:activeModal==='mq_qm'?mqQmData:mqW2overData))[0] || {}));
-                                // Index'i en başa taşı
-                                const sortedKeys = ['index', ...keys.filter(k => k !== 'index')];
+                                const rows = getActiveRows();
+                                const first = rows?.[0] || {};
+                                const baseKeys = Object.keys(first).filter(k => k !== 'index');
+                                const qmKeys = activeModal === 'mq_qm' ? getQmOrderedKeys(rows) : baseKeys;
+                                const sortedKeys = ['index', ...qmKeys];
                                 return sortedKeys.map(k => (
                                   <th key={k} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     {k === 'index' ? '#' : getDisplayLabelForActive(k)}
@@ -1006,19 +1169,22 @@ const MQPage = () => {
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
-                            {(isFiltered ? (activeModal==='mq_connz'?filteredMqConnzData:activeModal==='mq_qm'?filteredMqQmData:filteredMqW2overData) : (activeModal==='mq_connz'?mqConnzData:activeModal==='mq_qm'?mqQmData:mqW2overData)).map((row, idx) => (
-                              <tr key={idx} className={idx%2===0?'bg-white':'bg-gray-50'}>
-                                {(() => {
-                                  const keys = Object.keys(row);
-                                  const sortedKeys = ['index', ...keys.filter(k => k !== 'index')];
-                                  return sortedKeys.map((k, i) => (
+                            {(() => {
+                              const rows = getActiveRows();
+                              const first = rows?.[0] || {};
+                              const baseKeys = Object.keys(first).filter(k => k !== 'index');
+                              const qmKeys = activeModal === 'mq_qm' ? getQmOrderedKeys(rows) : baseKeys;
+                              const sortedKeys = ['index', ...qmKeys];
+                              return rows.map((row, idx) => (
+                                <tr key={idx} className={idx%2===0?'bg-white':'bg-gray-50'}>
+                                  {sortedKeys.map((k, i) => (
                                     <td key={i} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                       {row[k] ?? '-'}
                                     </td>
-                                  ));
-                                })()}
-                              </tr>
-                            ))}
+                                  ))}
+                                </tr>
+                              ));
+                            })()}
                           </tbody>
                         </table>
                       </div>
@@ -1047,21 +1213,7 @@ const MQPage = () => {
                       // MQ CONNZ Grafik Kartları - Dinamik olarak veri tablosundaki alanları göster
                       if (activeModal === 'mq_connz') {
                         // Get all keys from the data
-                        const dataKeys = Object.keys(first);
-                        const numericKeys = dataKeys.filter(k => {
-                          const v = first[k];
-                          if (v === null || v === undefined) return false;
-                          // Exclude non-numeric fields
-                          if (k.toLowerCase().includes('name') || 
-                              k.toLowerCase().includes('system') || 
-                              k.toLowerCase().includes('host') || 
-                              k.toLowerCase().includes('ip') || 
-                              k.toLowerCase().includes('id') ||
-                              k.toLowerCase().includes('time') ||
-                              k.toLowerCase().includes('date') ||
-                              k.toLowerCase().includes('timestamp')) return false;
-                          return !isNaN(Number(v)) && isFinite(Number(v));
-                        });
+                        const numericKeys = getNumericKeys(first);
 
                         return (
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1079,13 +1231,13 @@ const MQPage = () => {
                                   </svg>
                                 </button>
                                 <div className="flex-grow flex flex-col items-center justify-center text-center">
-                                  <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-gray-200 transition-colors duration-300 flex-shrink-0">
-                                    {renderIconForKey(key, 'w-7 h-7 text-gray-700')}
+                                  <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-gray-200 transition-colors duration-300 flex-shrink-0">
+                                    {renderIconForKey(key, 'w-8 h-8 text-gray-700')}
                                   </div>
-                                  <h5 className="font-semibold text-gray-800 group-hover:text-gray-600 text-xs mb-3 line-clamp-2 px-2 min-h-[2rem]">{getConnzDisplayLabel(key)}</h5>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-base mb-3 line-clamp-2 px-2 min-h-[2rem]">{getConnzDisplayLabel(key)}</h5>
                                   <div className="mt-auto">
                                     {first[key] !== null && first[key] !== undefined ? (
-                                      <span className="inline-block px-3 py-1.5 rounded-full text-sm font-bold bg-cyan-100 text-cyan-800 border border-cyan-200">
+                                      <span className="inline-block px-3 py-1.5 rounded-full text-base font-semibold bg-cyan-100 text-cyan-800 border border-cyan-200">
                                         {typeof first[key] === 'number' ? first[key].toLocaleString() : first[key]}
                                       </span>
                                     ) : (
@@ -1131,20 +1283,7 @@ const MQPage = () => {
 
                       // MQ QM Grafik Kartları - Dinamik olarak veri tablosundaki alanları göster
                       if (activeModal === 'mq_qm') {
-                        const dataKeys = Object.keys(first);
-                        const numericKeys = dataKeys.filter(k => {
-                          const v = first[k];
-                          if (v === null || v === undefined) return false;
-                          if (k.toLowerCase().includes('name') || 
-                              k.toLowerCase().includes('system') || 
-                              k.toLowerCase().includes('host') || 
-                              k.toLowerCase().includes('ip') || 
-                              k.toLowerCase().includes('id') ||
-                              k.toLowerCase().includes('time') ||
-                              k.toLowerCase().includes('date') ||
-                              k.toLowerCase().includes('timestamp')) return false;
-                          return !isNaN(Number(v)) && isFinite(Number(v));
-                        });
+                        const numericKeys = getNumericKeys(first);
 
                         return (
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1162,13 +1301,13 @@ const MQPage = () => {
                                   </svg>
                                 </button>
                                 <div className="flex-grow flex flex-col items-center justify-center text-center">
-                                  <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-gray-200 transition-colors duration-300 flex-shrink-0">
-                                    {renderIconForKey(key, 'w-7 h-7 text-gray-700')}
+                                  <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-gray-200 transition-colors duration-300 flex-shrink-0">
+                                    {renderIconForKey(key, 'w-8 h-8 text-gray-700')}
                                   </div>
-                                  <h5 className="font-semibold text-gray-800 group-hover:text-gray-600 text-xs mb-3 line-clamp-2 px-2 min-h-[2rem]">{key}</h5>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-base mb-3 line-clamp-2 px-2 min-h-[2rem]">{getQmDisplayLabel(key)}</h5>
                                   <div className="mt-auto">
                                     {first[key] !== null && first[key] !== undefined ? (
-                                      <span className="inline-block px-3 py-1.5 rounded-full text-sm font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
+                                      <span className="inline-block px-3 py-1.5 rounded-full text-base font-semibold bg-indigo-100 text-indigo-800 border border-indigo-200">
                                         {typeof first[key] === 'number' ? first[key].toLocaleString() : first[key]}
                                       </span>
                                     ) : (
@@ -1214,20 +1353,7 @@ const MQPage = () => {
 
                       // MQ W2OVER Grafik Kartları - Dinamik olarak veri tablosundaki alanları göster
                       if (activeModal === 'mq_w2over') {
-                        const dataKeys = Object.keys(first);
-                        const numericKeys = dataKeys.filter(k => {
-                          const v = first[k];
-                          if (v === null || v === undefined) return false;
-                          if (k.toLowerCase().includes('name') || 
-                              k.toLowerCase().includes('system') || 
-                              k.toLowerCase().includes('host') || 
-                              k.toLowerCase().includes('ip') || 
-                              k.toLowerCase().includes('id') ||
-                              k.toLowerCase().includes('time') ||
-                              k.toLowerCase().includes('date') ||
-                              k.toLowerCase().includes('timestamp')) return false;
-                          return !isNaN(Number(v)) && isFinite(Number(v));
-                        });
+                        const numericKeys = getNumericKeys(first);
 
                         return (
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1245,13 +1371,13 @@ const MQPage = () => {
                                   </svg>
                                 </button>
                                 <div className="flex-grow flex flex-col items-center justify-center text-center">
-                                  <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-gray-200 transition-colors duration-300 flex-shrink-0">
-                                    {renderIconForKey(key, 'w-7 h-7 text-gray-700')}
+                                  <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-gray-200 transition-colors duration-300 flex-shrink-0">
+                                    {renderIconForKey(key, 'w-8 h-8 text-gray-700')}
                                   </div>
-                                  <h5 className="font-semibold text-gray-800 group-hover:text-gray-600 text-xs mb-3 line-clamp-2 px-2 min-h-[2rem]">{key}</h5>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-base mb-3 line-clamp-2 px-2 min-h-[2rem]">{getW2overDisplayLabel(key)}</h5>
                                   <div className="mt-auto">
                                     {first[key] !== null && first[key] !== undefined ? (
-                                      <span className="inline-block px-3 py-1.5 rounded-full text-sm font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                      <span className="inline-block px-3 py-1.5 rounded-full text-base font-semibold bg-rose-100 text-rose-800 border border-rose-200">
                                         {typeof first[key] === 'number' ? first[key].toLocaleString() : first[key]}
                                       </span>
                                     ) : (
