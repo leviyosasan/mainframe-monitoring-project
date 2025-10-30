@@ -99,7 +99,7 @@ const DashboardPage = () => {
     },
     {
       id: 'rmf',
-      title: 'RMF',
+      title: 'CMF',
       icon: '📋',
       path: '/rmf',
       bgColor: 'bg-slate-50',
