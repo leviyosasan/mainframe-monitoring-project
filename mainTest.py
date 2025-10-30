@@ -33,7 +33,7 @@ error_count_wmsplxz = 0
 
 # PostgreSQL connection information
 POSTGRES_CONFIG = {
-    'host': '192.168.60.145',
+    'host': '192.168.60.148',
     'port': 5432,
     'database': 'mainview',
     'user': 'postgres',

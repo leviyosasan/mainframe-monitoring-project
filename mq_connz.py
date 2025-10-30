@@ -15,7 +15,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Global Constants and PostgreSQL Connection Settings
 # -------------------
 POSTGRES_CONFIG = {
-    'host': '192.168.60.145',
+    'host': '192.168.60.148',
     'port': 5432,
     'database': 'mainview',
     'user': 'postgres',
