@@ -4829,10 +4829,23 @@ const NetworkPage = () => {
                           let vMax = Math.max(...vals);
                           if (!isFinite(vMin)) vMin = 0; if (!isFinite(vMax)) vMax = 100;
                           if (vMax === vMin) vMax = vMin + 10;
-                          
-                          // Y eksenini maksimum değere göre ayarla
-                          const maxVal = Math.max(vMax, 100);
+
+                          // Y ekseni için ölçek seçimi: yüzde mi, mutlak mı?
+                          const isPercentScale = vMax <= 100 && vMin >= 0;
+
+                          const getNiceMax = (value) => {
+                            const raw = Math.max(value, 1);
+                            const magnitude = Math.pow(10, Math.floor(Math.log10(raw)));
+                            const normalized = raw / magnitude;
+                            let niceNormalized = 1;
+                            if (normalized > 5) niceNormalized = 10;
+                            else if (normalized > 2) niceNormalized = 5;
+                            else if (normalized > 1) niceNormalized = 2;
+                            return niceNormalized * magnitude;
+                          };
+
                           const minVal = 0;
+                          const maxVal = isPercentScale ? 100 : getNiceMax(vMax);
                           const range = maxVal - minVal;
                           const step = range / 5;
                           
@@ -4847,13 +4860,17 @@ const NetworkPage = () => {
                             if (Math.abs(num) >= 1000) return (num/1000).toFixed(1)+'K';
                             return num.toFixed(1);
                           };
+                          const formatTickWithPercent = (n) => {
+                            const num = Number(n);
+                            return num.toFixed(0) + '%';
+                          };
                           
                           const areaD = `M ${xPos(0)},${yPos(chartData[0]?.value || 0)} ` + chartData.map((p,i)=>`L ${xPos(i)},${yPos(p.value)}`).join(' ') + ` L ${xPos(len-1)},${bottom} L ${xPos(0)},${bottom} Z`;
                           const lineD = `M ${xPos(0)},${yPos(chartData[0]?.value || 0)} ` + chartData.map((p,i)=>`L ${xPos(i)},${yPos(p.value)}`).join(' ');
                           
                           const criticalThreshold = 90;
                           const warningThreshold = 75;
-                          const showThresholds = vMax > 50;
+                          const showThresholds = isPercentScale;
                           
                           return (
                             <>
@@ -4879,7 +4896,7 @@ const NetworkPage = () => {
                                       <g key={i}>
                                         <line x1={left} y1={yPos(t)} x2={width-20} y2={yPos(t)} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4 4" />
                                         <text x="20" y={yPos(t) + 4} className="text-xs fill-gray-600 font-medium" textAnchor="end">
-                                          {formatTick(t)}
+                                          {isPercentScale ? formatTickWithPercent(t) : formatTick(t)}
                                         </text>
                                       </g>
                                     ))}
@@ -4897,13 +4914,13 @@ const NetworkPage = () => {
                                     {/* Threshold lines */}
                                     {showThresholds && (
                                       <>
-                                        <line x1={left} y1={yPos((criticalThreshold/100) * maxVal)} x2={width-20} y2={yPos((criticalThreshold/100) * maxVal)} stroke="#dc2626" strokeWidth="2" strokeDasharray="6 6" opacity="0.7" />
-                                        <text x={width-10} y={yPos((criticalThreshold/100) * maxVal) + 4} className="text-xs fill-red-600 font-medium" textAnchor="end">
+                                        <line x1={left} y1={yPos(criticalThreshold)} x2={width-20} y2={yPos(criticalThreshold)} stroke="#dc2626" strokeWidth="2" strokeDasharray="6 6" opacity="0.7" />
+                                        <text x={width-10} y={yPos(criticalThreshold) + 4} className="text-xs fill-red-600 font-medium" textAnchor="end">
                                           Kritik: {criticalThreshold}%
                                         </text>
                                         
-                                        <line x1={left} y1={yPos((warningThreshold/100) * maxVal)} x2={width-20} y2={yPos((warningThreshold/100) * maxVal)} stroke="#f59e0b" strokeWidth="2" strokeDasharray="6 6" opacity="0.7" />
-                                        <text x={width-10} y={yPos((warningThreshold/100) * maxVal) + 4} className="text-xs fill-amber-600 font-medium" textAnchor="end">
+                                        <line x1={left} y1={yPos(warningThreshold)} x2={width-20} y2={yPos(warningThreshold)} stroke="#f59e0b" strokeWidth="2" strokeDasharray="6 6" opacity="0.7" />
+                                        <text x={width-10} y={yPos(warningThreshold) + 4} className="text-xs fill-amber-600 font-medium" textAnchor="end">
                                           Uyarı: {warningThreshold}%
                                         </text>
                                       </>

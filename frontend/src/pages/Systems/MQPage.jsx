@@ -35,15 +35,24 @@ const MQPage = () => {
       ? (activeModal==='mq_connz' ? filteredMqConnzData : activeModal==='mq_qm' ? filteredMqQmData : filteredMqW2overData)
       : (activeModal==='mq_connz' ? mqConnzData : activeModal==='mq_qm' ? mqQmData : mqW2overData)
   );
-  const getNumericKeys = (first) => (
-    Object.keys(first).filter((key) => {
-      if (key === 'index') return false;
-      const v = first[key]; if (v === null || v === undefined) return false;
+  const getNumericKeys = (rowsOrFirst) => {
+    const rows = Array.isArray(rowsOrFirst) ? rowsOrFirst : [rowsOrFirst];
+    const candidateKeySet = new Set();
+    rows.forEach((r) => {
+      Object.keys(r || {}).forEach((k) => { if (k !== 'index') candidateKeySet.add(k); });
+    });
+    const candidateKeys = Array.from(candidateKeySet);
+    return candidateKeys.filter((key) => {
       const k = String(key).toLowerCase();
-      if (k.includes('name') || k.includes('system') || k.includes('host') || k.includes('ip') || k.includes('id') || k.includes('time') || k.includes('date') || k.includes('timestamp')) return false;
-      return !isNaN(Number(v)) && isFinite(Number(v));
-    })
-  );
+      const isIpField = (k === 'ip' || k === 'ipaddr' || k === 'ipaddress' || k.includes('ip_addr') || k.includes('ipaddress'));
+      if (k.includes('name') || k.includes('system') || k.includes('host') || isIpField || k === 'id' || k.includes('time') || k.includes('date') || k.includes('timestamp')) return false;
+      return rows.some((r) => {
+        const v = r?.[key];
+        const n = Number(v);
+        return v !== null && v !== undefined && isFinite(n) && !isNaN(n);
+      });
+    });
+  };
 
   // MQ CONNZ özel kolon başlık eşlemesi
   const getConnzDisplayLabel = (rawKey) => {
@@ -1194,7 +1203,8 @@ const MQPage = () => {
 
                 {activeTab === 'chart' && (
                   <div className="space-y-4">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-4">Performans Grafikleri</h4>
+                    <h4 className="text-lg font-semibold text-gray-800 mb-2">Performans Grafikleri</h4>
+                    {/* Kart listesi */}
                     {(() => {
                       const rows = isFiltered
                         ? (activeModal==='mq_connz' ? filteredMqConnzData : activeModal==='mq_qm' ? filteredMqQmData : filteredMqW2overData)
@@ -1210,10 +1220,12 @@ const MQPage = () => {
                         );
                       }
 
+                      // Hızlı Grafik toolbar aşağıda başlık üstünde render edilir
+
                       // MQ CONNZ Grafik Kartları - Dinamik olarak veri tablosundaki alanları göster
                       if (activeModal === 'mq_connz') {
-                        // Get all keys from the data
-                        const numericKeys = getNumericKeys(first);
+                        // Get all numeric keys across rows (not only first row)
+                        const numericKeys = getNumericKeys(rows);
 
                         return (
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1283,11 +1295,19 @@ const MQPage = () => {
 
                       // MQ QM Grafik Kartları - Dinamik olarak veri tablosundaki alanları göster
                       if (activeModal === 'mq_qm') {
-                        const numericKeys = getNumericKeys(first);
+                        const numericKeys = getNumericKeys(rows);
+                        const hasKeyInAnyRow = (k) => rows.some((r) => {
+                          const v = r?.[k];
+                          const n = Number(v);
+                          return v !== null && v !== undefined && isFinite(n) && !isNaN(n);
+                        });
+                        const preferredKeys = ['QMIPUTTR','QMIGETR','QMNQMES','QMXQMES'];
+                        const ensuredKeys = preferredKeys.filter(hasKeyInAnyRow);
+                        const keys = Array.from(new Set([...ensuredKeys, ...numericKeys]));
 
                         return (
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {numericKeys.length > 0 ? numericKeys.map((key) => (
+                            {keys.length > 0 ? keys.map((key) => (
                               <div key={key} onClick={() => openChart(key)} className="group relative bg-white rounded-2xl border border-gray-200 p-6 flex flex-col hover:shadow-lg transition-all duration-300 cursor-pointer">
                                 <button
                                   onClick={(e) => {
@@ -1353,7 +1373,7 @@ const MQPage = () => {
 
                       // MQ W2OVER Grafik Kartları - Dinamik olarak veri tablosundaki alanları göster
                       if (activeModal === 'mq_w2over') {
-                        const numericKeys = getNumericKeys(first);
+                        const numericKeys = getNumericKeys(rows);
 
                         return (
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1524,10 +1544,23 @@ const MQPage = () => {
                         let vMax = Math.max(...vals);
                         if (!isFinite(vMin)) vMin = 0; if (!isFinite(vMax)) vMax = 100;
                         if (vMax === vMin) vMax = vMin + 10;
-                        
-                        // Y eksenini maksimum değere göre ayarla
-                        const maxVal = Math.max(vMax, 100);
+
+                        // Y ekseni için ölçek seçimi: yüzde mi, mutlak mı?
+                        const isPercentScale = vMax <= 100 && vMin >= 0;
+
+                        const getNiceMax = (value) => {
+                          const raw = Math.max(value, 1);
+                          const magnitude = Math.pow(10, Math.floor(Math.log10(raw)));
+                          const normalized = raw / magnitude;
+                          let niceNormalized = 1;
+                          if (normalized > 5) niceNormalized = 10;
+                          else if (normalized > 2) niceNormalized = 5;
+                          else if (normalized > 1) niceNormalized = 2;
+                          return niceNormalized * magnitude;
+                        };
+
                         const minVal = 0;
+                        const maxVal = isPercentScale ? 100 : getNiceMax(vMax);
                         const range = maxVal - minVal;
                         const step = range / 5;
                         
@@ -1554,7 +1587,7 @@ const MQPage = () => {
                         // Threshold değerleri
                         const criticalThreshold = 90;
                         const warningThreshold = 75;
-                        const showThresholds = vMax > 50;
+                        const showThresholds = isPercentScale;
                         
                         return (
                           <>
@@ -1587,7 +1620,7 @@ const MQPage = () => {
                                     <g key={i}>
                                       <line x1={left} y1={yPos(t)} x2={width-20} y2={yPos(t)} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4 4" />
                                       <text x="20" y={yPos(t) + 4} className="text-xs fill-gray-600 font-medium" textAnchor="end">
-                                        {showThresholds ? formatTickWithPercent(t) : formatTick(t)}
+                                        {isPercentScale ? formatTickWithPercent(t) : formatTick(t)}
                                       </text>
                                     </g>
                                   ))}
