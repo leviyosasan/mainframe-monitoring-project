@@ -206,6 +206,142 @@ const RMFPage = () => {
       'mxircp': 'Transactions Completed',
       'bmctime': 'BMC Time',
       'time': 'Time'
+    },
+    rmf_asrm: {
+      'ASGNAME': 'Jobname',
+      'asgname': 'Jobname',
+      'ASGCNMC': 'Service Class Name',
+      'asgcnmc': 'Service Class Name',
+      'ASGPGP': 'Service Class Index or Performance Period',
+      'asgpgp': 'Service Class Index or Performance Period',
+      'ASSACTM': 'The TRANSACTION ACTIVE time',
+      'assactm': 'The TRANSACTION ACTIVE time',
+      'ASGRTM': 'Current Residency Time',
+      'asgrtm': 'Current Residency Time',
+      'ASSTRC': 'Session Transaction Count',
+      'asstrc': 'Session Transaction Count',
+      'ASSJSW': 'Swap Total',
+      'assjsw': 'Swap Total',
+      'ASSSCSCK': 'CPU Service Unit Count',
+      'assscsck': 'CPU Service Unit Count',
+      'ASSMSOCK': 'Service Units Consumed Using Real Storage',
+      'assmsock': 'Service Units Consumed Using Real Storage',
+      'ASSIOCCK': 'I/O Service Units Consumed by the Transaction',
+      'assiock': 'I/O Service Units Consumed by the Transaction',
+      'ASSIOCK': 'I/O Service Units Consumed by the Transaction',
+      'assiocck': 'I/O Service Units Consumed by the Transaction',
+      'ASSSRSCK': 'SRB Processor Service Consumed by Transaction',
+      'asssrsck': 'SRB Processor Service Consumed by Transaction',
+      'ASSWMCK': 'Total Service Units',
+      'asswmck': 'Total Service Units'
+    },
+    rmf_srcs: {
+      'SPLAFCAV': 'Available Frames',
+      'splafcav': 'Available Frames',
+      'SPLUICAV': 'Current UIC',
+      'spluicav': 'Current UIC',
+      'SPLSTFAV': 'SQA Frames Count',
+      'splstfav': 'SQA Frames Count',
+      'SPLLPFAV': 'LPA Frame Count',
+      'spllpfav': 'LPA Frame Count',
+      'SPLLFFAV': 'LPA Fixed Frame Count',
+      'spllffav': 'LPA Fixed Frame Count',
+      'SPLCPFAV': 'Pageable CSA and MLPA Frames Count',
+      'splcpfav': 'Pageable CSA and MLPA Frames Count',
+      'SPLCLFAV': 'Fixed LPA and CSA Frames Count',
+      'splclfav': 'Fixed LPA and CSA Frames Count',
+      'SPLRFFAV': 'Private Non-LSQA Fixed Frame Count',
+      'splrffav': 'Private Non-LSQA Fixed Frame Count',
+      'SPLQPCAV': 'Private Fixed Frames Count',
+      'splqpcav': 'Private Fixed Frames Count',
+      'SPLQPEAV': 'LSQA Frame Count',
+      'splqpeav': 'LSQA Frame Count',
+      'SCLINAV': 'Current IN Queue Length',
+      'sclinav': 'Current IN Queue Length',
+      'SCLLOTAV': 'Address Spaces Logically Swapped Out',
+      'scllotav': 'Address Spaces Logically Swapped Out',
+      'SCLOTRAV': 'Current Out Ready Queue Length',
+      'sclotrav': 'Current Out Ready Queue Length',
+      'SCLOTWAV': 'Current Out Wait Queue Length',
+      'sclotwav': 'Current Out Wait Queue Length'
+    }
+    ,
+    rmf_dspcz: {
+      'ONAM': 'Owner Name',
+      'onam': 'Owner Name',
+      'DSPNAME': 'Data Space Name (Count)',
+      'dspname': 'Data Space Name (Count)',
+      'ASID': 'ASID',
+      'asid': 'ASID',
+      'KEY': 'Storage Key',
+      'key': 'Storage Key',
+      'TYPX': 'Data Space Type',
+      'typx': 'Data Space Type',
+      'SCOX': 'Data Space Scope',
+      'scox': 'Data Space Scope',
+      'REFX': 'Storage Reference',
+      'refx': 'Storage Reference',
+      'PROX': 'Storage Protect',
+      'prox': 'Storage Protect',
+      'CSIZ': 'Current Size (Average)',
+      'csiz': 'Current Size (Average)',
+      'CSIZ_AVG': 'Current Size (Average)',
+      'csiz_avg': 'Current Size (Average)',
+      'CSIZ_SUM': 'Current Size (Sum)',
+      'csiz_sum': 'Current Size (Sum)',
+      'MSIZ': 'Maximum Size (Average)',
+      'msiz': 'Maximum Size (Average)',
+      'MSIZ_AVG': 'Maximum Size (Average)',
+      'msiz_avg': 'Maximum Size (Average)',
+      'MSIZ_SUM': 'Maximum Size (Sum)',
+      'msiz_sum': 'Maximum Size (Sum)'
+    },
+    cmf_dspcz: {
+      'ONAM': 'Owner Name',
+      'onam': 'Owner Name',
+      'DSPNAME': 'Data Space Name (Count)',
+      'dspname': 'Data Space Name (Count)',
+      'ASID': 'ASID',
+      'asid': 'ASID',
+      'KEY': 'Storage Key',
+      'key': 'Storage Key',
+      'TYPX': 'Data Space Type',
+      'typx': 'Data Space Type',
+      'SCOX': 'Data Space Scope',
+      'scox': 'Data Space Scope',
+      'REFX': 'Storage Reference',
+      'refx': 'Storage Reference',
+      'PROX': 'Storage Protect',
+      'prox': 'Storage Protect',
+      'CSIZ': 'Current Size (Average)',
+      'csiz': 'Current Size (Average)',
+      'CSIZ_AVG': 'Current Size (Average)',
+      'csiz_avg': 'Current Size (Average)',
+      'CSIZ_SUM': 'Current Size (Sum)',
+      'csiz_sum': 'Current Size (Sum)',
+      'MSIZ': 'Maximum Size (Average)',
+      'msiz': 'Maximum Size (Average)',
+      'MSIZ_AVG': 'Maximum Size (Average)',
+      'msiz_avg': 'Maximum Size (Average)',
+      'MSIZ_SUM': 'Maximum Size (Sum)',
+      'msiz_sum': 'Maximum Size (Sum)'
+    }
+    ,
+    cmf_syscpc: {
+      'SYGID': 'SMF ID',
+      'sygid': 'SMF ID',
+      'SYXSYSN': 'System name',
+      'syxsysn': 'System name',
+      'SYGHDNM': 'Hardware Name',
+      'syghdnm': 'Hardware Name',
+      'SYGMODEL2': 'CPU Model',
+      'sygmodel2': 'CPU Model',
+      'SYGMSU': 'CPC Capacity',
+      'sygmsu': 'CPC Capacity',
+      'SYGBMSU': 'Base CPC Capacity',
+      'sygbmsu': 'Base CPC Capacity',
+      'SYGOOCOD': 'Capacity on Demand',
+      'sygoocod': 'Capacity on Demand'
     }
   };
 
@@ -213,10 +349,31 @@ const RMFPage = () => {
   const hiddenColumns = {
     rmf_ard: ['id'],
     rmf_pgspp: [],
-    rmf_trx: ['id']
+    rmf_trx: ['id'],
+    rmf_asrm: ['id'],
+    rmf_asd: ['id'],
+    rmf_spag: ['id'],
+    rmf_srcs: ['id'],
+    rmf_dspcz: ['id'],
+    cmf_dspcz: ['id'],
+    cmf_jcsa: ['id'],
+    cmf_xcfmbr: ['id'],
+    cmf_syscpc: ['id']
   };
 
   const getDisplayName = (columnName, modalType) => {
+    const normalizeTurkish = (text) => {
+      if (!text || typeof text !== 'string') return text;
+      return text
+        .replace(/İ/g, 'I')
+        .replace(/İ/g, 'I')
+        .replace(/ı/g, 'i')
+        .replace(/Ş/g, 'S').replace(/ş/g, 's')
+        .replace(/Ğ/g, 'G').replace(/ğ/g, 'g')
+        .replace(/Ç/g, 'C').replace(/ç/g, 'c')
+        .replace(/Ö/g, 'O').replace(/ö/g, 'o')
+        .replace(/Ü/g, 'U').replace(/ü/g, 'u');
+    };
     // PDIBSYPC için kapsamlı kontrol - tüm olası formatlar
     if (columnName && typeof columnName === 'string') {
       const upperColumnName = columnName.toUpperCase();
@@ -225,18 +382,61 @@ const RMFPage = () => {
           upperColumnName.includes('PDIBSYPC') ||
           columnName === 'pdibsyPC' ||
           columnName.toLowerCase().includes('pdibsypc')) {
-        return 'In Use Percentage';
+        return normalizeTurkish('In Use Percentage');
       }
     }
     
     if (columnMapping[modalType] && columnMapping[modalType][columnName]) {
-      return columnMapping[modalType][columnName];
+      return normalizeTurkish(columnMapping[modalType][columnName]);
     }
-    return columnName;
+    // RMF ASD: remove underscores from unmapped column names
+    if (modalType === 'rmf_asd' && typeof columnName === 'string') {
+      return normalizeTurkish(columnName.replace(/_/g, ' '));
+    }
+    if (modalType === 'rmf_spag' && typeof columnName === 'string') {
+      return normalizeTurkish(columnName.replace(/_/g, ' '));
+    }
+    if (modalType === 'cmf_xcfsys' && typeof columnName === 'string') {
+      return normalizeTurkish(columnName.replace(/_/g, ' '));
+    }
+    if (modalType === 'cmf_jcsa' && typeof columnName === 'string') {
+      return normalizeTurkish(columnName.replace(/_/g, ' '));
+    }
+    if (modalType === 'cmf_syscpc' && typeof columnName === 'string') {
+      return normalizeTurkish(columnName.replace(/_/g, ' '));
+    }
+    if (modalType === 'cmf_xcfmbr' && typeof columnName === 'string') {
+      return normalizeTurkish(columnName.replace(/_/g, ' '));
+    }
+    return normalizeTurkish(columnName);
+  };
+
+  // Başlıkları düzenle: Title Case (ilk harf büyük, diğerleri küçük)
+  const toTitleCase = (text) => {
+    if (!text || typeof text !== 'string') return text;
+    return text
+      .replace(/_/g, ' ')
+      .split(' ')
+      .filter(Boolean)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ');
   };
 
   const getCurrentRawData = () => {
     return activeModal ? data[activeModal] || [] : [];
+  };
+
+  // Numeric column detector: only treat columns as sortable if numeric
+  const isNumericColumn = (column) => {
+    const rows = getCurrentRawData();
+    for (let i = 0; i < rows.length; i++) {
+      const value = rows[i]?.[column];
+      if (value !== null && value !== undefined && value !== '') {
+        const num = Number(value);
+        return !isNaN(num) && isFinite(num);
+      }
+    }
+    return false;
   };
 
   const getCurrentData = () => {
@@ -492,6 +692,10 @@ const RMFPage = () => {
   ];
 
   const handleSort = (column) => {
+    // Only allow sorting for numeric columns
+    if (!isNumericColumn(column)) {
+      return;
+    }
     // RMF ARD için özel kurallar
     if (activeModal === 'rmf_ard') {
       // Sıralanamaz kolonlar
@@ -714,8 +918,8 @@ const RMFPage = () => {
             column.includes('updated_at')) {
           return false;
         }
-        // Diğer kolonlar sayısal olduğu için sıralanabilir
-        return true;
+        // Diğer kolonlar sadece sayısalsa sıralanabilir
+        return isNumericColumn(column);
       }
       
       // RMF TRX için özel kurallar
@@ -729,14 +933,15 @@ const RMFPage = () => {
             column === 'time') {
           return false;
         }
-        // Diğer kolonlar sayısal olduğu için sıralanabilir
-        return true;
+        // Diğer kolonlar sadece sayısalsa sıralanabilir
+        return isNumericColumn(column);
       }
       
       // Diğer kartlar için genel kurallar
-      return !(column.includes('timestamp') || column.includes('time') || 
+      const passesGeneralRule = !(column.includes('timestamp') || column.includes('time') || 
                column === 'id' || column.includes('name') || column.includes('type') || 
                column.includes('status') || column.includes('serial'));
+      return passesGeneralRule && isNumericColumn(column);
     };
     
     return (
@@ -829,12 +1034,23 @@ const RMFPage = () => {
       
       const field = chartFieldMapping[chartType];
       if (field && trxData.length > 0) {
-        chartDataPoints = trxData.map((item, index) => ({
+        chartDataPoints = trxData
+          .map((item, index) => {
+            const dateVal = new Date(item.bmctime || item.timestamp || item.record_timestamp || item.time || Date.now());
+            const timeStr = isNaN(dateVal.getTime())
+              ? ''
+              : dateVal.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            return {
           x: index,
           y: parseFloat(item[field]) || 0,
           label: item.mxgcnm || '',
-          value: parseFloat(item[field]) || 0
-        }));
+              value: parseFloat(item[field]) || 0,
+              timeStr,
+              dateVal,
+            };
+          })
+          .sort((a, b) => (a.dateVal?.getTime?.() || 0) - (b.dateVal?.getTime?.() || 0))
+          .map((d, idx) => ({ ...d, x: idx }));
       }
     } 
     // ARD verisine göre grafik verisi oluştur
@@ -858,12 +1074,23 @@ const RMFPage = () => {
       
       const field = chartFieldMapping[chartType];
       if (field && ardData.length > 0) {
-        chartDataPoints = ardData.map((item, index) => ({
+        chartDataPoints = ardData
+          .map((item, index) => {
+            const dateVal = new Date(item.created_at || item.updated_at || item.timestamp || item.record_timestamp || Date.now());
+            const timeStr = isNaN(dateVal.getTime())
+              ? ''
+              : dateVal.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            return {
           x: index,
           y: parseFloat(item[field]) || 0,
           label: item.jobname || '',
-          value: parseFloat(item[field]) || 0
-        }));
+              value: parseFloat(item[field]) || 0,
+              timeStr,
+              dateVal,
+            };
+          })
+          .sort((a, b) => (a.dateVal?.getTime?.() || 0) - (b.dateVal?.getTime?.() || 0))
+          .map((d, idx) => ({ ...d, x: idx }));
       }
     }
     // PGSPP verisine göre grafik verisi oluştur
@@ -880,12 +1107,283 @@ const RMFPage = () => {
       
       const field = chartFieldMapping[chartType];
       if (field && pgsppData.length > 0) {
-        chartDataPoints = pgsppData.map((item, index) => ({
+        chartDataPoints = pgsppData
+          .map((item, index) => {
+            const dateVal = new Date(item.timestamp || item.record_timestamp || item.bmctime || item.time || Date.now());
+            const timeStr = isNaN(dateVal.getTime())
+              ? ''
+              : dateVal.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            return {
           x: index,
           y: parseFloat(item[field]) || 0,
           label: item.pdgdsn || '',
-          value: parseFloat(item[field]) || 0
-        }));
+              value: parseFloat(item[field]) || 0,
+              timeStr,
+              dateVal,
+            };
+          })
+          .sort((a, b) => (a.dateVal?.getTime?.() || 0) - (b.dateVal?.getTime?.() || 0))
+          .map((d, idx) => ({ ...d, x: idx }));
+      }
+    }
+    // SRCS verisine göre grafik verisi oluştur
+    else if (activeModal === 'rmf_srcs') {
+      const srcsData = data.rmf_srcs || [];
+      const chartFieldMapping = {
+        'splafcav': 'splafcav',
+        'spluicav': 'spluicav',
+        'splstfav': 'splstfav',
+        'spllpfav': 'spllpfav',
+        'spllffav': 'spllffav',
+        'splcpfav': 'splcpfav',
+        'splclfav': 'splclfav',
+        'splrffav': 'splrffav',
+        'splqpcav': 'splqpcav',
+        'splqpeav': 'splqpeav',
+        'sclinav': 'sclinav',
+        'scllotav': 'scllotav',
+        'sclotrav': 'sclotrav',
+        'sclotwav': 'sclotwav'
+      };
+      const field = chartFieldMapping[chartType];
+      if (field && srcsData.length > 0) {
+        chartDataPoints = srcsData
+          .map((item, index) => {
+            const dateVal = new Date(item.created_at || item.updated_at || item.timestamp || item.record_timestamp || item.time || Date.now());
+            const timeStr = isNaN(dateVal.getTime())
+              ? ''
+              : dateVal.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            const rawVal = item[field] ?? item[field.toUpperCase?.()] ?? item[field.toLowerCase?.()];
+            return {
+              x: index,
+              y: parseFloat(rawVal) || 0,
+              label: '',
+              value: parseFloat(rawVal) || 0,
+              timeStr,
+              dateVal,
+            };
+          })
+          .sort((a, b) => (a.dateVal?.getTime?.() || 0) - (b.dateVal?.getTime?.() || 0))
+          .map((d, idx) => ({ ...d, x: idx }));
+      }
+    }
+    // ASRM verisine göre grafik verisi oluştur
+    else if (activeModal === 'rmf_asrm') {
+      const asrmData = data.rmf_asrm || [];
+      const chartFieldMapping = {
+        'asgpgp': 'asgpgp',
+        'assactm': 'assactm',
+        'asgrtm': 'asgrtm',
+        'asstrc': 'asstrc',
+        'assjsw': 'assjsw',
+        'assscsck': 'assscsck',
+        'assmsock': 'assmsock',
+        'assiocck': 'assiocck',
+        'asssrsck': 'asssrsck',
+        'asswmck': 'asswmck'
+      };
+      const field = chartFieldMapping[chartType];
+      if (field && asrmData.length > 0) {
+        chartDataPoints = asrmData
+          .map((item, index) => {
+            const dateVal = new Date(item.created_at || item.updated_at || item.timestamp || item.record_timestamp || Date.now());
+            const timeStr = isNaN(dateVal.getTime())
+              ? ''
+              : dateVal.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            const rawVal = item[field] ?? item[field.toUpperCase?.()] ?? item[field.toLowerCase?.()];
+            return {
+              x: index,
+              y: parseFloat(rawVal) || 0,
+              label: item.asgname || item.ASGNAME || '',
+              value: parseFloat(rawVal) || 0,
+              timeStr,
+              dateVal,
+            };
+          })
+          .sort((a, b) => (a.dateVal?.getTime?.() || 0) - (b.dateVal?.getTime?.() || 0))
+          .map((d, idx) => ({ ...d, x: idx }));
+      }
+    }
+    // ASD verisine göre grafik verisi oluştur (dinamik kolonlar)
+    else if (activeModal === 'rmf_asd') {
+      const asdData = data.rmf_asd || [];
+      const field = chartType; // chartType doğrudan kolon adı olacak
+      if (field && asdData.length > 0) {
+        chartDataPoints = asdData
+          .map((item, index) => {
+            const dateVal = new Date(item.created_at || item.updated_at || item.timestamp || item.record_timestamp || item.time || Date.now());
+            const timeStr = isNaN(dateVal.getTime())
+              ? ''
+              : dateVal.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            const rawCandidate = item[field] ?? item[field?.toUpperCase?.()] ?? item[field?.toLowerCase?.()];
+            const numericValue = parseFloat(rawCandidate);
+            return {
+              x: index,
+              y: isNaN(numericValue) ? 0 : numericValue,
+              label: '',
+              value: isNaN(numericValue) ? 0 : numericValue,
+              timeStr,
+              dateVal,
+            };
+          })
+          .sort((a, b) => (a.dateVal?.getTime?.() || 0) - (b.dateVal?.getTime?.() || 0))
+          .map((d, idx) => ({ ...d, x: idx }));
+      }
+    }
+    // SPAG verisine göre grafik verisi oluştur (dinamik kolonlar)
+    else if (activeModal === 'rmf_spag') {
+      const spagData = data.rmf_spag || [];
+      const field = chartType;
+      if (field && spagData.length > 0) {
+        chartDataPoints = spagData
+          .map((item, index) => {
+            const dateVal = new Date(item.created_at || item.updated_at || item.timestamp || item.record_timestamp || item.time || Date.now());
+            const timeStr = isNaN(dateVal.getTime())
+              ? ''
+              : dateVal.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            const rawCandidate = item[field] ?? item[field?.toUpperCase?.()] ?? item[field?.toLowerCase?.()];
+            const numericValue = parseFloat(rawCandidate);
+            return {
+              x: index,
+              y: isNaN(numericValue) ? 0 : numericValue,
+              label: '',
+              value: isNaN(numericValue) ? 0 : numericValue,
+              timeStr,
+              dateVal,
+            };
+          })
+          .sort((a, b) => (a.dateVal?.getTime?.() || 0) - (b.dateVal?.getTime?.() || 0))
+          .map((d, idx) => ({ ...d, x: idx }));
+      }
+    }
+    // CMF DSPCZ verisine göre grafik verisi oluştur (dinamik kolonlar)
+    else if (activeModal === 'cmf_dspcz') {
+      const dspczData = data.cmf_dspcz || [];
+      const field = chartType;
+      if (field && dspczData.length > 0) {
+        chartDataPoints = dspczData
+          .map((item, index) => {
+            const dateVal = new Date(item.created_at || item.updated_at || item.timestamp || item.record_timestamp || item.time || Date.now());
+            const timeStr = isNaN(dateVal.getTime())
+              ? ''
+              : dateVal.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            const rawCandidate = item[field] ?? item[field?.toUpperCase?.()] ?? item[field?.toLowerCase?.()];
+            const numericValue = parseFloat(rawCandidate);
+            return {
+              x: index,
+              y: isNaN(numericValue) ? 0 : numericValue,
+              label: '',
+              value: isNaN(numericValue) ? 0 : numericValue,
+              timeStr,
+              dateVal,
+            };
+          })
+          .sort((a, b) => (a.dateVal?.getTime?.() || 0) - (b.dateVal?.getTime?.() || 0))
+          .map((d, idx) => ({ ...d, x: idx }));
+      }
+    }
+    // CMF XCFSYS verisine göre grafik verisi oluştur (dinamik kolonlar)
+    else if (activeModal === 'cmf_xcfsys') {
+      const xcfsysData = data.cmf_xcfsys || [];
+      const field = chartType;
+      if (field && xcfsysData.length > 0) {
+        chartDataPoints = xcfsysData
+          .map((item, index) => {
+            const dateVal = new Date(item.created_at || item.updated_at || item.timestamp || item.record_timestamp || item.time || Date.now());
+            const timeStr = isNaN(dateVal.getTime())
+              ? ''
+              : dateVal.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            const rawCandidate = item[field] ?? item[field?.toUpperCase?.()] ?? item[field?.toLowerCase?.()];
+            const numericValue = parseFloat(rawCandidate);
+            return {
+              x: index,
+              y: isNaN(numericValue) ? 0 : numericValue,
+              label: '',
+              value: isNaN(numericValue) ? 0 : numericValue,
+              timeStr,
+              dateVal,
+            };
+          })
+          .sort((a, b) => (a.dateVal?.getTime?.() || 0) - (b.dateVal?.getTime?.() || 0))
+          .map((d, idx) => ({ ...d, x: idx }));
+      }
+    }
+    // CMF JCSA verisine göre grafik verisi oluştur (dinamik kolonlar)
+    else if (activeModal === 'cmf_jcsa') {
+      const jcsaData = data.cmf_jcsa || [];
+      const field = chartType;
+      if (field && jcsaData.length > 0) {
+        chartDataPoints = jcsaData
+          .map((item, index) => {
+            const dateVal = new Date(item.created_at || item.updated_at || item.timestamp || item.record_timestamp || item.time || Date.now());
+            const timeStr = isNaN(dateVal.getTime())
+              ? ''
+              : dateVal.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            const rawCandidate = item[field] ?? item[field?.toUpperCase?.()] ?? item[field?.toLowerCase?.()];
+            const numericValue = parseFloat(rawCandidate);
+            return {
+              x: index,
+              y: isNaN(numericValue) ? 0 : numericValue,
+              label: '',
+              value: isNaN(numericValue) ? 0 : numericValue,
+              timeStr,
+              dateVal,
+            };
+          })
+          .sort((a, b) => (a.dateVal?.getTime?.() || 0) - (b.dateVal?.getTime?.() || 0))
+          .map((d, idx) => ({ ...d, x: idx }));
+      }
+    }
+    // CMF XCFMBR verisine göre grafik verisi oluştur (dinamik kolonlar)
+    else if (activeModal === 'cmf_xcfmbr') {
+      const xcfmbrData = data.cmf_xcfmbr || [];
+      const field = chartType;
+      if (field && xcfmbrData.length > 0) {
+        chartDataPoints = xcfmbrData
+          .map((item, index) => {
+            const dateVal = new Date(item.created_at || item.updated_at || item.timestamp || item.record_timestamp || item.time || Date.now());
+            const timeStr = isNaN(dateVal.getTime())
+              ? ''
+              : dateVal.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            const rawCandidate = item[field] ?? item[field?.toUpperCase?.()] ?? item[field?.toLowerCase?.()];
+            const numericValue = parseFloat(rawCandidate);
+            return {
+              x: index,
+              y: isNaN(numericValue) ? 0 : numericValue,
+              label: '',
+              value: isNaN(numericValue) ? 0 : numericValue,
+              timeStr,
+              dateVal,
+            };
+          })
+          .sort((a, b) => (a.dateVal?.getTime?.() || 0) - (b.dateVal?.getTime?.() || 0))
+          .map((d, idx) => ({ ...d, x: idx }));
+      }
+    }
+    // CMF SYSCPC verisine göre grafik verisi oluştur (dinamik kolonlar)
+    else if (activeModal === 'cmf_syscpc') {
+      const syscpcData = data.cmf_syscpc || [];
+      const field = chartType;
+      if (field && syscpcData.length > 0) {
+        chartDataPoints = syscpcData
+          .map((item, index) => {
+            const dateVal = new Date(item.created_at || item.updated_at || item.timestamp || item.record_timestamp || item.time || Date.now());
+            const timeStr = isNaN(dateVal.getTime())
+              ? ''
+              : dateVal.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            const rawCandidate = item[field] ?? item[field?.toUpperCase?.()] ?? item[field?.toLowerCase?.()];
+            const numericValue = parseFloat(rawCandidate);
+            return {
+              x: index,
+              y: isNaN(numericValue) ? 0 : numericValue,
+              label: '',
+              value: isNaN(numericValue) ? 0 : numericValue,
+              timeStr,
+              dateVal,
+            };
+          })
+          .sort((a, b) => (a.dateVal?.getTime?.() || 0) - (b.dateVal?.getTime?.() || 0))
+          .map((d, idx) => ({ ...d, x: idx }));
       }
     }
     
@@ -911,6 +1409,9 @@ const RMFPage = () => {
     // Kart değişince filtreyi sıfırla
     setIsFiltered(false);
     setFilteredData([]);
+    // Sıralama durumunu sıfırla
+    setSortColumn(null);
+    setSortDirection('asc');
   };
 
   useEffect(() => {
@@ -922,6 +1423,9 @@ const RMFPage = () => {
   const closeModal = () => {
     setActiveModal(null);
     setActiveTab('table');
+    // Sıralama durumunu sıfırla
+    setSortColumn(null);
+    setSortDirection('asc');
   };
 
   const openTimeFilter = () => {
@@ -963,7 +1467,9 @@ const RMFPage = () => {
         const toDate = new Date(customToDate);
         
         filtered = currentData.filter(item => {
-          const itemTime = new Date(item.timestamp || item.bmctime || item.record_timestamp || item.time);
+          const itemTime = new Date(
+            item.created_at || item.updated_at || item.timestamp || item.bmctime || item.record_timestamp || item.time
+          );
           return itemTime >= fromDate && itemTime <= toDate;
         });
       } else {
@@ -1004,7 +1510,9 @@ const RMFPage = () => {
         }
         
         filtered = currentData.filter(item => {
-          const itemTime = new Date(item.timestamp || item.bmctime || item.record_timestamp || item.time);
+          const itemTime = new Date(
+            item.created_at || item.updated_at || item.timestamp || item.bmctime || item.record_timestamp || item.time
+          );
           return itemTime >= fromDate;
         });
       }
@@ -1390,7 +1898,7 @@ const RMFPage = () => {
                             {/* Average Number of AS Counted */}
                           <div 
                             onClick={() => openChart('mxiasac')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
                           >
                             <button
                               onClick={(e) => {
@@ -1425,7 +1933,7 @@ const RMFPage = () => {
                           {/* Average Active Time */}
                           <div 
                             onClick={() => openChart('mxixavg')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
                           >
                             <button
                               onClick={(e) => {
@@ -1460,7 +1968,7 @@ const RMFPage = () => {
                           {/* Transaction Rate */}
                           <div 
                             onClick={() => openChart('mxirate')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
                           >
                             <button
                               onClick={(e) => {
@@ -1495,7 +2003,7 @@ const RMFPage = () => {
                           {/* Transactions Completed */}
                           <div 
                             onClick={() => openChart('mxircp')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
                           >
                             <button
                               onClick={(e) => {
@@ -1825,12 +2333,7 @@ const RMFPage = () => {
                               <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">Page Slot In Use Percentage</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_pgspp && data.rmf_pgspp.length > 0 ? (
-                                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                                    parseFloat(data.rmf_pgspp[0]?.pdislupc || 0) < 60 ? 'bg-green-100 text-green-800' :
-                                    parseFloat(data.rmf_pgspp[0]?.pdislupc || 0) < 75 ? 'bg-yellow-100 text-yellow-800' :
-                                    parseFloat(data.rmf_pgspp[0]?.pdislupc || 0) < 90 ? 'bg-orange-100 text-orange-800' :
-                                    'bg-red-100 text-red-800'
-                                  }`}>
+                                  <span className={`px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800`}>
                                     {formatNumber(data.rmf_pgspp[0]?.pdislupc || 0)}%
                                   </span>
                                 ) : (
@@ -2096,7 +2599,7 @@ const RMFPage = () => {
                           {/* Device Connection Time for the Job */}
                           <div 
                             onClick={() => openChart('device_connection_time_seconds')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
                           >
                             <button
                               onClick={(e) => {
@@ -2131,7 +2634,7 @@ const RMFPage = () => {
                           {/* CPU Seconds */}
                           <div 
                             onClick={() => openChart('cpu_seconds')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
                           >
                             <button
                               onClick={(e) => {
@@ -2166,7 +2669,7 @@ const RMFPage = () => {
                           {/* Current Fixed Frames < 16M */}
                           <div 
                             onClick={() => openChart('current_fixed_frames_16m')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
                           >
                             <button
                               onClick={(e) => {
@@ -2201,7 +2704,7 @@ const RMFPage = () => {
                           {/* Current Fixed Frame Count */}
                           <div 
                             onClick={() => openChart('current_fixed_frame_count')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
                           >
                             <button
                               onClick={(e) => {
@@ -2236,7 +2739,7 @@ const RMFPage = () => {
                           {/* Session SRM Service Absorption Rate */}
                           <div 
                             onClick={() => openChart('session_srm_service_absorption_rate')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
                           >
                             <button
                               onClick={(e) => {
@@ -2271,7 +2774,7 @@ const RMFPage = () => {
                           {/* Session CPU Seconds in TCB Mode */}
                           <div 
                             onClick={() => openChart('session_cpu_seconds_tcb_mode')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
                           >
                             <button
                               onClick={(e) => {
@@ -2306,7 +2809,7 @@ const RMFPage = () => {
                           {/* EXCP Rate Per Second */}
                           <div 
                             onClick={() => openChart('excp_rate_per_second')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
                           >
                             <button
                               onClick={(e) => {
@@ -2341,7 +2844,7 @@ const RMFPage = () => {
                           {/* Swap Page Rate Per Second */}
                           <div 
                             onClick={() => openChart('swap_page_rate_per_second')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
                           >
                             <button
                               onClick={(e) => {
@@ -2376,7 +2879,7 @@ const RMFPage = () => {
                           {/* Interval LPA Page Rate */}
                           <div 
                             onClick={() => openChart('interval_lpa_page_rate')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
                           >
                             <button
                               onClick={(e) => {
@@ -2411,7 +2914,7 @@ const RMFPage = () => {
                           {/* Interval CSA Page-In Rate */}
                           <div 
                             onClick={() => openChart('interval_csa_page_in_rate')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
                           >
                             <button
                               onClick={(e) => {
@@ -2446,7 +2949,7 @@ const RMFPage = () => {
                           {/* Realtime Non-VIO Page Rate */}
                           <div 
                             onClick={() => openChart('realtime_non_vio_page_rate')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
                           >
                             <button
                               onClick={(e) => {
@@ -2481,7 +2984,7 @@ const RMFPage = () => {
                           {/* Private VIO and Hiperspace Page Rate */}
                           <div 
                             onClick={() => openChart('private_vio_hiperspace_page_rate')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
                           >
                             <button
                               onClick={(e) => {
@@ -2547,6 +3050,745 @@ const RMFPage = () => {
                             </div>
                           </div>
                         </div>
+                      ) : activeModal === 'rmf_asrm' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {/* Info-only cards */}
+                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 text-lg mb-2">Jobname</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {data.rmf_asrm && data.rmf_asrm.length > 0 ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                    {data.rmf_asrm[0]?.asgname || data.rmf_asrm[0]?.ASGNAME || '-'}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-gray-800 text-lg mb-2">Service Class Name</h5>
+                              <div className="text-2xl font-bold text-gray-900">
+                                {data.rmf_asrm && data.rmf_asrm.length > 0 ? (
+                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                    {data.rmf_asrm[0]?.asgcnmc || data.rmf_asrm[0]?.ASGCNMC || '-'}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">-</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Clickable numeric cards */}
+                          {[
+                            { key: 'asgpgp', title: 'Service Class Index or Performance Period' },
+                            { key: 'assactm', title: 'The TRANSACTION ACTIVE time' },
+                            { key: 'asgrtm', title: 'Current Residency Time' },
+                            { key: 'asstrc', title: 'Session Transaction Count' },
+                            { key: 'assjsw', title: 'Swap Total' },
+                            { key: 'assscsck', title: 'CPU Service Unit Count' },
+                            { key: 'assmsock', title: 'Service Units Consumed Using Real Storage' },
+                            { key: 'assiocck', title: 'I/O Service Units Consumed by the Transaction' },
+                            { key: 'asssrsck', title: 'SRB Processor Service Consumed by Transaction' },
+                            { key: 'asswmck', title: 'Total Service Units' }
+                          ].map((itemCfg, idx) => (
+                            <div 
+                              key={idx}
+                              onClick={() => openChart(itemCfg.key)}
+                              className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02]"
+                            >
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
+                                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">{itemCfg.title}</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {data.rmf_asrm && data.rmf_asrm.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                      {formatNumber(data.rmf_asrm[0]?.[itemCfg.key] || data.rmf_asrm[0]?.[itemCfg.key.toUpperCase()] || 0)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+
+                          {/* Last Update */}
+                          <div className="relative bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-blue-800 text-lg mb-2">Last Update</h5>
+                              <div className="text-sm font-semibold text-blue-700">
+                                {data.rmf_asrm && data.rmf_asrm.length > 0 ? (
+                                  <div className="space-y-1">
+                                    <div className="text-lg font-bold text-blue-900">
+                                      {new Date(data.rmf_asrm[0]?.created_at || data.rmf_asrm[0]?.updated_at || new Date()).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                    </div>
+                                    <div className="text-sm text-blue-600">
+                                      {new Date(data.rmf_asrm[0]?.created_at || data.rmf_asrm[0]?.updated_at || new Date()).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <span className="text-blue-400">Veri yok</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : activeModal === 'rmf_srcs' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {[
+                            { key: 'splafcav', title: 'Available Frames' },
+                            { key: 'spluicav', title: 'Current UIC' },
+                            { key: 'splstfav', title: 'SQA Frames Count' },
+                            { key: 'spllpfav', title: 'LPA Frame Count' },
+                            { key: 'spllffav', title: 'LPA Fixed Frame Count' },
+                            { key: 'splcpfav', title: 'Pageable CSA and MLPA Frames Count' },
+                            { key: 'splclfav', title: 'Fixed LPA and CSA Frames Count' },
+                            { key: 'splrffav', title: 'Private Non-LSQA Fixed Frame Count' },
+                            { key: 'splqpcav', title: 'Private Fixed Frames Count' },
+                            { key: 'splqpeav', title: 'LSQA Frame Count' },
+                            { key: 'sclinav', title: 'Current IN Queue Length' },
+                            { key: 'scllotav', title: 'Address Spaces Logically Swapped Out' },
+                            { key: 'sclotrav', title: 'Current Out Ready Queue Length' },
+                            { key: 'sclotwav', title: 'Current Out Wait Queue Length' }
+                          ].map((itemCfg, idx) => (
+                            <div 
+                              key={idx}
+                              onClick={() => openChart(itemCfg.key)}
+                              className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02]"
+                            >
+                              <div className="text-center">
+                                <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
+                                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                  </svg>
+                                </div>
+                                <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">{itemCfg.title}</h5>
+                                <div className="text-2xl font-bold text-gray-900">
+                                  {data.rmf_srcs && data.rmf_srcs.length > 0 ? (
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                      {formatNumber(data.rmf_srcs[0]?.[itemCfg.key] || data.rmf_srcs[0]?.[itemCfg.key.toUpperCase()] || 0)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400">-</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+
+                          {/* Last Update */}
+                          <div className="relative bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-blue-800 text-lg mb-2">Last Update</h5>
+                              <div className="text-sm font-semibold text-blue-700">
+                                {data.rmf_srcs && data.rmf_srcs.length > 0 ? (
+                                  <div className="space-y-1">
+                                    <div className="text-lg font-bold text-blue-900">
+                                      {new Date(data.rmf_srcs[0]?.created_at || data.rmf_srcs[0]?.updated_at || new Date()).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                    </div>
+                                    <div className="text-sm text-blue-600">
+                                      {new Date(data.rmf_srcs[0]?.created_at || data.rmf_srcs[0]?.updated_at || new Date()).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <span className="text-blue-400">Veri yok</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : activeModal === 'rmf_asd' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {(() => {
+                            const rows = data.rmf_asd || [];
+                            const first = rows[0] || {};
+                            const timeLike = ['created_at','updated_at','timestamp','bmctime','record_timestamp','time'];
+                            const keys = Object.keys(first || {})
+                              .filter(k => k !== 'id')
+                              .filter(k => !timeLike.includes(String(k).toLowerCase()));
+                            const nonNumeric = keys.filter(k => !isNumericColumn(k));
+                            const numeric = keys.filter(k => isNumericColumn(k));
+                            const ordered = [...nonNumeric, ...numeric];
+                            return ordered.map((keyName, idx) => (
+                              <div 
+                                key={`${keyName}-${idx}`}
+                                onClick={() => {
+                                  if (isNumericColumn(keyName)) openChart(keyName);
+                                }}
+                                className={`group relative bg-white rounded-2xl transition-all duration-500 p-6 ${
+                                  isNumericColumn(keyName)
+                                    ? 'border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02]'
+                                    : 'border border-gray-200'
+                                }`}
+                              >
+                                <div className="text-center">
+                                  <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
+                                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                  </div>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">{toTitleCase(getDisplayName(keyName, 'rmf_asd'))}</h5>
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {rows.length > 0 ? (
+                                      (() => {
+                                        const rawVal = rows[0]?.[keyName] ?? rows[0]?.[keyName?.toUpperCase?.()];
+                                        const display = isNumericColumn(keyName)
+                                          ? formatNumber(Number(rawVal) || 0)
+                                          : (rawVal === null || rawVal === undefined || rawVal === ''
+                                              ? '-'
+                                              : String(rawVal));
+                                        return (
+                                          <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                            {display}
+                                          </span>
+                                        );
+                                      })()
+                                    ) : (
+                                      <span className="text-gray-400">-</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ));
+                          })()}
+
+                          {/* Last Update */}
+                          <div className="relative bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-blue-800 text-lg mb-2">Last Update</h5>
+                              <div className="text-sm font-semibold text-blue-700">
+                                {data.rmf_asd && data.rmf_asd.length > 0 ? (
+                                  <div className="space-y-1">
+                                    <div className="text-lg font-bold text-blue-900">
+                                      {new Date(data.rmf_asd[0]?.created_at || data.rmf_asd[0]?.updated_at || new Date()).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                    </div>
+                                    <div className="text-sm text-blue-600">
+                                      {new Date(data.rmf_asd[0]?.created_at || data.rmf_asd[0]?.updated_at || new Date()).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <span className="text-blue-400">Veri yok</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : activeModal === 'rmf_spag' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {(() => {
+                            const rows = data.rmf_spag || [];
+                            const first = rows[0] || {};
+                            const timeLike = ['created_at','updated_at','timestamp','bmctime','record_timestamp','time'];
+                            const keys = Object.keys(first || {})
+                              .filter(k => k !== 'id')
+                              .filter(k => !timeLike.includes(String(k).toLowerCase()));
+                            const nonNumeric = keys.filter(k => !isNumericColumn(k));
+                            const numeric = keys.filter(k => isNumericColumn(k));
+                            const ordered = [...nonNumeric, ...numeric];
+                            return ordered.map((keyName, idx) => (
+                              <div 
+                                key={`${keyName}-${idx}`}
+                                onClick={() => {
+                                  if (isNumericColumn(keyName)) openChart(keyName);
+                                }}
+                                className={`group relative bg-white rounded-2xl transition-all duration-500 p-6 ${
+                                  isNumericColumn(keyName)
+                                    ? 'border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02]'
+                                    : 'border border-gray-200'
+                                }`}
+                              >
+                                <div className="text-center">
+                                  <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
+                                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                  </div>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">{toTitleCase(getDisplayName(keyName, 'rmf_spag'))}</h5>
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {rows.length > 0 ? (
+                                      (() => {
+                                        const rawVal = rows[0]?.[keyName] ?? rows[0]?.[keyName?.toUpperCase?.()];
+                                        const display = isNumericColumn(keyName)
+                                          ? formatNumber(Number(rawVal) || 0)
+                                          : (rawVal === null || rawVal === undefined || rawVal === ''
+                                              ? '-'
+                                              : String(rawVal));
+                                        return (
+                                          <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                            {display}
+                                          </span>
+                                        );
+                                      })()
+                                    ) : (
+                                      <span className="text-gray-400">-</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ));
+                          })()}
+
+                          {/* Last Update */}
+                          <div className="relative bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-blue-800 text-lg mb-2">Last Update</h5>
+                              <div className="text-sm font-semibold text-blue-700">
+                                {data.rmf_spag && data.rmf_spag.length > 0 ? (
+                                  <div className="space-y-1">
+                                    <div className="text-lg font-bold text-blue-900">
+                                      {new Date(data.rmf_spag[0]?.created_at || data.rmf_spag[0]?.updated_at || new Date()).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                    </div>
+                                    <div className="text-sm text-blue-600">
+                                      {new Date(data.rmf_spag[0]?.created_at || data.rmf_spag[0]?.updated_at || new Date()).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <span className="text-blue-400">Veri yok</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : activeModal === 'cmf_dspcz' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {(() => {
+                            const rows = data.cmf_dspcz || [];
+                            const first = rows[0] || {};
+                            const timeLike = ['created_at','updated_at','timestamp','bmctime','record_timestamp','time'];
+                            const keys = Object.keys(first || {})
+                              .filter(k => k !== 'id')
+                              .filter(k => !timeLike.includes(String(k).toLowerCase()));
+                            const nonNumeric = keys.filter(k => !isNumericColumn(k));
+                            const numeric = keys.filter(k => isNumericColumn(k));
+                            const ordered = [...nonNumeric, ...numeric];
+                            return ordered.map((keyName, idx) => (
+                              <div 
+                                key={`${keyName}-${idx}`}
+                                onClick={() => {
+                                  if (isNumericColumn(keyName)) openChart(keyName);
+                                }}
+                                className={`group relative bg-white rounded-2xl transition-all duration-500 p-6 ${
+                                  isNumericColumn(keyName)
+                                    ? 'border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02]'
+                                    : 'border border-gray-200'
+                                }`}
+                              >
+                                <div className="text-center">
+                                  <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
+                                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                  </div>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">{toTitleCase(getDisplayName(keyName, 'cmf_dspcz'))}</h5>
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {rows.length > 0 ? (
+                                      (() => {
+                                        const rawVal = rows[0]?.[keyName] ?? rows[0]?.[keyName?.toUpperCase?.()];
+                                        const display = isNumericColumn(keyName)
+                                          ? formatNumber(Number(rawVal) || 0)
+                                          : (rawVal === null || rawVal === undefined || rawVal === ''
+                                              ? '-'
+                                              : String(rawVal));
+                                        return (
+                                          <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                            {display}
+                                          </span>
+                                        );
+                                      })()
+                                    ) : (
+                                      <span className="text-gray-400">-</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ));
+                          })()}
+
+                          {/* Last Update */}
+                          <div className="relative bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-blue-800 text-lg mb-2">Last Update</h5>
+                              <div className="text-sm font-semibold text-blue-700">
+                                {data.cmf_dspcz && data.cmf_dspcz.length > 0 ? (
+                                  <div className="space-y-1">
+                                    <div className="text-lg font-bold text-blue-900">
+                                      {new Date(data.cmf_dspcz[0]?.created_at || data.cmf_dspcz[0]?.updated_at || new Date()).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                    </div>
+                                    <div className="text-sm text-blue-600">
+                                      {new Date(data.cmf_dspcz[0]?.created_at || data.cmf_dspcz[0]?.updated_at || new Date()).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <span className="text-blue-400">Veri yok</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : activeModal === 'cmf_xcfsys' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {(() => {
+                            const rows = data.cmf_xcfsys || [];
+                            const first = rows[0] || {};
+                            const timeLike = ['created_at','updated_at','timestamp','bmctime','record_timestamp','time'];
+                            const keys = Object.keys(first || {})
+                              .filter(k => k !== 'id')
+                              .filter(k => !timeLike.includes(String(k).toLowerCase()));
+                            const nonNumeric = keys.filter(k => !isNumericColumn(k));
+                            const numeric = keys.filter(k => isNumericColumn(k));
+                            const ordered = [...nonNumeric, ...numeric];
+                            return ordered.map((keyName, idx) => (
+                              <div 
+                                key={`${keyName}-${idx}`}
+                                onClick={() => {
+                                  if (isNumericColumn(keyName)) openChart(keyName);
+                                }}
+                                className={`group relative bg-white rounded-2xl transition-all duration-500 p-6 ${
+                                  isNumericColumn(keyName)
+                                    ? 'border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02]'
+                                    : 'border border-gray-200'
+                                }`}
+                              >
+                                <div className="text-center">
+                                  <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
+                                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                  </div>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">{toTitleCase(getDisplayName(keyName, 'cmf_xcfsys'))}</h5>
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {rows.length > 0 ? (
+                                      (() => {
+                                        const rawVal = rows[0]?.[keyName] ?? rows[0]?.[keyName?.toUpperCase?.()];
+                                        const display = isNumericColumn(keyName)
+                                          ? formatNumber(Number(rawVal) || 0)
+                                          : (rawVal === null || rawVal === undefined || rawVal === ''
+                                              ? '-'
+                                              : String(rawVal));
+                                        return (
+                                          <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                            {display}
+                                          </span>
+                                        );
+                                      })()
+                                    ) : (
+                                      <span className="text-gray-400">-</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ));
+                          })()}
+
+                          {/* Last Update */}
+                          <div className="relative bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-blue-800 text-lg mb-2">Last Update</h5>
+                              <div className="text-sm font-semibold text-blue-700">
+                                {data.cmf_xcfsys && data.cmf_xcfsys.length > 0 ? (
+                                  <div className="space-y-1">
+                                    <div className="text-lg font-bold text-blue-900">
+                                      {new Date(data.cmf_xcfsys[0]?.created_at || data.cmf_xcfsys[0]?.updated_at || new Date()).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                    </div>
+                                    <div className="text-sm text-blue-600">
+                                      {new Date(data.cmf_xcfsys[0]?.created_at || data.cmf_xcfsys[0]?.updated_at || new Date()).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <span className="text-blue-400">Veri yok</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : activeModal === 'cmf_jcsa' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {(() => {
+                            const rows = data.cmf_jcsa || [];
+                            const first = rows[0] || {};
+                            const keys = Object.keys(first || {})
+                              .filter(k => k !== 'id');
+                            const nonNumeric = keys.filter(k => !isNumericColumn(k));
+                            const numeric = keys.filter(k => isNumericColumn(k));
+                            const ordered = [...nonNumeric, ...numeric];
+                            return ordered.map((keyName, idx) => (
+                              <div 
+                                key={`${keyName}-${idx}`}
+                                onClick={() => {
+                                  if (isNumericColumn(keyName)) openChart(keyName);
+                                }}
+                                className={`group relative bg-white rounded-2xl transition-all duration-500 p-6 ${
+                                  isNumericColumn(keyName)
+                                    ? 'border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02]'
+                                    : 'border border-gray-200'
+                                }`}
+                              >
+                                <div className="text-center">
+                                  <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
+                                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                  </div>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">{toTitleCase(getDisplayName(keyName, 'cmf_jcsa'))}</h5>
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {rows.length > 0 ? (
+                                      (() => {
+                                        const rawVal = rows[0]?.[keyName] ?? rows[0]?.[keyName?.toUpperCase?.()];
+                                        const display = isNumericColumn(keyName)
+                                          ? formatNumber(Number(rawVal) || 0)
+                                          : (rawVal === null || rawVal === undefined || rawVal === ''
+                                              ? '-'
+                                              : String(rawVal));
+                                        return (
+                                          <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                            {display}
+                                          </span>
+                                        );
+                                      })()
+                                    ) : (
+                                      <span className="text-gray-400">-</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ));
+                          })()}
+
+                          {/* Last Update */}
+                          <div className="relative bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-blue-800 text-lg mb-2">Last Update</h5>
+                              <div className="text-sm font-semibold text-blue-700">
+                                {data.cmf_jcsa && data.cmf_jcsa.length > 0 ? (
+                                  <div className="space-y-1">
+                                    <div className="text-lg font-bold text-blue-900">
+                                      {new Date(data.cmf_jcsa[0]?.created_at || data.cmf_jcsa[0]?.updated_at || new Date()).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                    </div>
+                                    <div className="text-sm text-blue-600">
+                                      {new Date(data.cmf_jcsa[0]?.created_at || data.cmf_jcsa[0]?.updated_at || new Date()).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <span className="text-blue-400">Veri yok</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : activeModal === 'cmf_xcfmbr' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {(() => {
+                            const rows = data.cmf_xcfmbr || [];
+                            const first = rows[0] || {};
+                            const keys = Object.keys(first || {})
+                              .filter(k => !['id','created_at','updated_at','timestamp','bmctime','record_timestamp','time'].includes(k));
+                            const nonNumeric = keys.filter(k => !isNumericColumn(k));
+                            const numeric = keys.filter(k => isNumericColumn(k));
+                            const ordered = [...nonNumeric, ...numeric];
+                            return ordered.map((keyName, idx) => (
+                              <div 
+                                key={`${keyName}-${idx}`}
+                                onClick={() => {
+                                  if (isNumericColumn(keyName)) openChart(keyName);
+                                }}
+                                className={`group relative bg-white rounded-2xl transition-all duration-500 p-6 ${
+                                  isNumericColumn(keyName)
+                                    ? 'border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02]'
+                                    : 'border border-gray-200'
+                                }`}
+                              >
+                                <div className="text-center">
+                                  <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
+                                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                  </div>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">{toTitleCase(getDisplayName(keyName, 'cmf_xcfmbr'))}</h5>
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {rows.length > 0 ? (
+                                      (() => {
+                                        const rawVal = rows[0]?.[keyName] ?? rows[0]?.[keyName?.toUpperCase?.()];
+                                        const display = isNumericColumn(keyName)
+                                          ? formatNumber(Number(rawVal) || 0)
+                                          : (rawVal === null || rawVal === undefined || rawVal === ''
+                                              ? '-'
+                                              : String(rawVal));
+                                        return (
+                                          <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                            {display}
+                                          </span>
+                                        );
+                                      })()
+                                    ) : (
+                                      <span className="text-gray-400">-</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ));
+                          })()}
+
+                          {/* Last Update */}
+                          <div className="relative bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-blue-800 text-lg mb-2">Last Update</h5>
+                              <div className="text-sm font-semibold text-blue-700">
+                                {data.cmf_xcfmbr && data.cmf_xcfmbr.length > 0 ? (
+                                  <div className="space-y-1">
+                                    <div className="text-lg font-bold text-blue-900">
+                                      {new Date(data.cmf_xcfmbr[0]?.created_at || data.cmf_xcfmbr[0]?.updated_at || new Date()).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                    </div>
+                                    <div className="text-sm text-blue-600">
+                                      {new Date(data.cmf_xcfmbr[0]?.created_at || data.cmf_xcfmbr[0]?.updated_at || new Date()).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <span className="text-blue-400">Veri yok</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : activeModal === 'cmf_syscpc' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {(() => {
+                            const rows = data.cmf_syscpc || [];
+                            const first = rows[0] || {};
+                            const timeLike = ['created_at','updated_at','timestamp','bmctime','record_timestamp','time'];
+                            const keys = Object.keys(first || {})
+                              .filter(k => k !== 'id')
+                              .filter(k => !timeLike.includes(String(k).toLowerCase()));
+                            const nonNumeric = keys.filter(k => !isNumericColumn(k));
+                            const numeric = keys.filter(k => isNumericColumn(k));
+                            const ordered = [...nonNumeric, ...numeric];
+                            return ordered.map((keyName, idx) => (
+                              <div 
+                                key={`${keyName}-${idx}`}
+                                onClick={() => {
+                                  if (isNumericColumn(keyName)) openChart(keyName);
+                                }}
+                                className={`group relative bg-white rounded-2xl transition-all duration-500 p-6 ${
+                                  isNumericColumn(keyName)
+                                    ? 'border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02]'
+                                    : 'border border-gray-200'
+                                }`}
+                              >
+                                <div className="text-center">
+                                  <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
+                                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                  </div>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">{toTitleCase(getDisplayName(keyName, 'cmf_syscpc'))}</h5>
+                                  <div className="text-2xl font-bold text-gray-900">
+                                    {rows.length > 0 ? (
+                                      (() => {
+                                        const rawVal = rows[0]?.[keyName] ?? rows[0]?.[keyName?.toUpperCase?.()];
+                                        const display = isNumericColumn(keyName)
+                                          ? formatNumber(Number(rawVal) || 0)
+                                          : (rawVal === null || rawVal === undefined || rawVal === ''
+                                              ? '-'
+                                              : String(rawVal));
+                                        return (
+                                          <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                            {display}
+                                          </span>
+                                        );
+                                      })()
+                                    ) : (
+                                      <span className="text-gray-400">-</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ));
+                          })()}
+
+                          {/* Last Update */}
+                          <div className="relative bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200 p-6">
+                            <div className="text-center">
+                              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                              <h5 className="font-bold text-blue-800 text-lg mb-2">Last Update</h5>
+                              <div className="text-sm font-semibold text-blue-700">
+                                {data.cmf_syscpc && data.cmf_syscpc.length > 0 ? (
+                                  <div className="space-y-1">
+                                    <div className="text-lg font-bold text-blue-900">
+                                      {new Date(data.cmf_syscpc[0]?.created_at || data.cmf_syscpc[0]?.updated_at || new Date()).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                    </div>
+                                    <div className="text-sm text-blue-600">
+                                      {new Date(data.cmf_syscpc[0]?.created_at || data.cmf_syscpc[0]?.updated_at || new Date()).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <span className="text-blue-400">Veri yok</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       ) : (
                         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                           <div className="p-8 text-center">
@@ -2575,7 +3817,7 @@ const RMFPage = () => {
         )}
 
         {/* Grafik Modalı - Tüm RMF kartları için */}
-        {selectedChart && ['rmf_trx', 'rmf_pgspp', 'rmf_ard'].includes(activeModal) && (
+        {selectedChart && ['rmf_trx', 'rmf_pgspp', 'rmf_ard', 'rmf_asrm', 'rmf_srcs', 'rmf_asd', 'rmf_spag', 'cmf_dspcz', 'cmf_xcfsys', 'cmf_jcsa', 'cmf_xcfmbr', 'cmf_syscpc'].includes(activeModal) && (
           <div 
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]"
             onClick={closeChart}
@@ -2611,6 +3853,41 @@ const RMFPage = () => {
                     {selectedChart === 'interval_csa_page_in_rate' && 'Interval CSA Page-In Rate'}
                     {selectedChart === 'realtime_non_vio_page_rate' && 'Realtime Non-VIO Page Rate'}
                     {selectedChart === 'private_vio_hiperspace_page_rate' && 'Private VIO and Hiperspace Page Rate'}
+                    {/* RMF ASRM */}
+                    {selectedChart === 'asgpgp' && 'Service Class Index or Performance Period'}
+                    {selectedChart === 'assactm' && 'The TRANSACTION ACTIVE time'}
+                    {selectedChart === 'asgrtm' && 'Current Residency Time'}
+                    {selectedChart === 'asstrc' && 'Session Transaction Count'}
+                    {selectedChart === 'assjsw' && 'Swap Total'}
+                    {selectedChart === 'assscsck' && 'CPU Service Unit Count'}
+                    {selectedChart === 'assmsock' && 'Service Units Consumed Using Real Storage'}
+                    {selectedChart === 'assiocck' && 'I/O Service Units Consumed by the Transaction'}
+                    {selectedChart === 'asssrsck' && 'SRB Processor Service Consumed by Transaction'}
+                    {selectedChart === 'asswmck' && 'Total Service Units'}
+                    {/* RMF SRCS */}
+                    {selectedChart === 'splafcav' && 'Available Frames'}
+                    {selectedChart === 'spluicav' && 'Current UIC'}
+                    {selectedChart === 'splstfav' && 'SQA Frames Count'}
+                    {selectedChart === 'spllpfav' && 'LPA Frame Count'}
+                    {selectedChart === 'spllffav' && 'LPA Fixed Frame Count'}
+                    {selectedChart === 'splcpfav' && 'Pageable CSA and MLPA Frames Count'}
+                    {selectedChart === 'splclfav' && 'Fixed LPA and CSA Frames Count'}
+                    {selectedChart === 'splrffav' && 'Private Non-LSQA Fixed Frame Count'}
+                    {selectedChart === 'splqpcav' && 'Private Fixed Frames Count'}
+                    {selectedChart === 'splqpeav' && 'LSQA Frame Count'}
+                    {selectedChart === 'sclinav' && 'Current IN Queue Length'}
+                    {selectedChart === 'scllotav' && 'Address Spaces Logically Swapped Out'}
+                    {selectedChart === 'sclotrav' && 'Current Out Ready Queue Length'}
+                    {selectedChart === 'sclotwav' && 'Current Out Wait Queue Length'}
+                    {/* RMF ASD - Dinamik başlık */}
+                    {activeModal === 'rmf_asd' && selectedChart && getDisplayName(selectedChart, 'rmf_asd')}
+                    {/* RMF SPAG - Dinamik başlık */}
+                    {activeModal === 'rmf_spag' && selectedChart && getDisplayName(selectedChart, 'rmf_spag')}
+                    {activeModal === 'cmf_dspcz' && selectedChart && getDisplayName(selectedChart, 'cmf_dspcz')}
+                    {activeModal === 'cmf_xcfsys' && selectedChart && getDisplayName(selectedChart, 'cmf_xcfsys')}
+                    {activeModal === 'cmf_jcsa' && selectedChart && getDisplayName(selectedChart, 'cmf_jcsa')}
+                    {activeModal === 'cmf_xcfmbr' && selectedChart && getDisplayName(selectedChart, 'cmf_xcfmbr')}
+                    {activeModal === 'cmf_syscpc' && selectedChart && getDisplayName(selectedChart, 'cmf_syscpc')}
                   </h3>
                   <button 
                     onClick={closeChart}
@@ -2696,10 +3973,35 @@ const RMFPage = () => {
                               );
                             }
                             
+                            // X-axis with time labels (when available)
+                            const axisY = margin.top + height;
+                            const xAxis = (
+                              <g>
+                                <line x1={margin.left} y1={axisY} x2={width + margin.left} y2={axisY} stroke="#e5e7eb" strokeWidth="1" />
+                                {(() => {
+                                  const maxTicks = 8;
+                                  const n = chartData.length;
+                                  const step = Math.max(1, Math.floor(n / maxTicks));
+                                  const tickIndices = [];
+                                  for (let i = 0; i < n; i += step) tickIndices.push(i);
+                                  if (tickIndices[tickIndices.length - 1] !== n - 1) tickIndices.push(n - 1);
+                                  return tickIndices.map((ti, idx) => (
+                                    <g key={`xtick-${idx}`}>
+                                      <line x1={xPos(ti)} y1={axisY} x2={xPos(ti)} y2={axisY + 4} stroke="#9ca3af" strokeWidth="1" />
+                                      <text x={xPos(ti)} y={axisY + 16} textAnchor="middle" fontSize="10" fill="#6b7280">
+                                        {chartData[ti]?.timeStr || `${ti + 1}`}
+                                      </text>
+                                    </g>
+                                  ));
+                                })()}
+                              </g>
+                            );
+                            
                             return (
                               <>
                                 <rect width="800" height="300" fill="#f9fafb" />
                                 {gridLines}
+                                {xAxis}
                                 <defs>
                                   <linearGradient id="areaGradientRMF" x1="0%" y1="0%" x2="0%" y2="100%">
                                     <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3"/>
