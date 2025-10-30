@@ -51,7 +51,7 @@ const Chatbot = () => {
     return null
   }
 
-  // MQ CONNZ sorgu çözücü (örnek metrikler)
+  // MQ CONNZ sorgusu 
   const parseConnzQuery = (lowerMessage) => {
     const candidates = [
       { col: 'connapltag', label: 'Application Name', keys: ['connapltag', 'application name', 'app name'] },
@@ -75,7 +75,7 @@ const Chatbot = () => {
     return null
   }
 
-  // MQ W2OVER sorgu çözücü (örnek metrikler)
+  // MQ W2OVER sorgu 
   const parseW2overQuery = (lowerMessage) => {
     const candidates = [
       { col: 'wzonrchl', label: 'Channels Retrying', keys: ['wzonrchl', 'channels retrying', 'retrying channels', 'kanallar yeniden deneme', 'kanal retry'] },
