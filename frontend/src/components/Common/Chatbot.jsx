@@ -114,10 +114,16 @@ const Chatbot = () => {
     rows.forEach(r => Object.keys(r || {}).forEach(k => { if (k !== 'index') set.add(k) }))
     return Array.from(set)
   }
-  const pickColumnByMessage = (lowerMessage, keys) => {
+  const pickColumnByMessage = (lowerMessage, keys, labeler) => {
     const msgNorm = normalizeKey(lowerMessage)
     // exact contains
     for (const k of keys) { if (msgNorm.includes(normalizeKey(k))) return k }
+    if (labeler) {
+      for (const k of keys) {
+        const label = labeler(k)
+        if (label && msgNorm.includes(normalizeKey(label))) return k
+      }
+    }
     return null
   }
   const formatValue = (v) => {
@@ -136,6 +142,55 @@ const Chatbot = () => {
       if (pairs.length >= maxPairs) break
     }
     return pairs.join('\n')
+  }
+
+  // Display label eşlemleri (MQPage.jsx ile uyumlu sade kopya)
+  const getQmDisplayLabelLocal = (rawKey) => {
+    const key = String(rawKey || '').trim(); if (!key) return ''
+    const n = key.toLowerCase().replace(/[^a-z0-9]/g, '')
+    if (n === 'qmnames') return 'Queue Manager Short Name'
+    if (n === 'jtarget') return 'Target Field'
+    if (n === 'qmplat') return 'Platform Type'
+    if (n === 'qmplatn') return 'Platform Name'
+    if (n === 'qmstat') return 'Status'
+    if (n === 'qmqstats') return 'MQE Stats Collection Status'
+    if (n === 'qmiputtr') return 'Interval Total Put Rate'
+    if (n === 'qmigetr') return 'Interval Get Rate'
+    if (n === 'qmnqmes') return 'Number of Normal Queue Messages'
+    if (n === 'qmxqmes') return 'Number of Transmission Queue Messages'
+    if (n === 'qmcomlv') return 'Queue Manager Version'
+    return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  }
+  const getConnzDisplayLabelLocal = (rawKey) => {
+    const key = String(rawKey || '').trim(); if (!key) return ''
+    const n = key.toLowerCase().replace(/[^a-z0-9]/g, '')
+    if (n === 'connapltag') return 'Application Name'
+    if (n === 'conninfotyp') return 'Type Of Information (Hex) (Count)'
+    if (n === 'connasid') return 'Address Space Identifier'
+    if (n === 'connapltyx') return 'Application Type(Maximum)'
+    if (n === 'conntranid') return 'CICS Transaction Id'
+    if (n === 'conntaskno') return 'CICS Task number'
+    if (n === 'connpsbnm') return 'IMS PSB Name'
+    if (n === 'connobject') return 'Object Name(Maximum)'
+    if (n === 'connqmgr') return 'Queue Manager'
+    return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  }
+  const getW2overDisplayLabelLocal = (rawKey) => {
+    const key = String(rawKey || '').trim(); if (!key) return ''
+    const n = key.toLowerCase().replace(/[^a-z0-9]/g, '')
+    if (n === 'wzoqmgr') return 'Queue Manager Name'
+    if (n === 'wzoqmst') return 'Queue Manager Status'
+    if (n === 'wzonrchl') return 'Channels Retrying'
+    if (n === 'wzolqhi') return 'Local Queues at Max Depth High'
+    if (n === 'wzoxqhi') return 'Transmit Queues at Max Depth High'
+    if (n === 'wzodlmct') return 'Dead-Letter Message Count'
+    if (n === 'wzops0fp') return 'Free Pages in Page Set 0'
+    if (n === 'wzoevtc') return 'Queue Manager Events'
+    if (n === 'wzoevta') return 'Event Listener Status'
+    if (n === 'wzocmdsv') return 'Command Server Status'
+    if (n === 'wzocpf') return 'Command Prefix'
+    if (n === 'wzorqexc') return 'Reply Q Exceptions'
+    return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
   }
 
   const handleSendMessage = async () => {
@@ -193,9 +248,19 @@ const Chatbot = () => {
     // MQ CONNZ data query
     if (lowerMessage.includes('connz')) {
       const listAll = lowerMessage.includes('tüm') || lowerMessage.includes('hepsi') || lowerMessage.includes('kolon') || lowerMessage.includes('columns') || lowerMessage.includes('liste')
-      const target = parseConnzQuery(lowerMessage)
+      let target = parseConnzQuery(lowerMessage)
+      // display label/kolon adıyla dinamik eşleşme
+      if (!target || !target.col) {
+        try {
+          const resp = await databaseAPI.getMainviewMQConnz({})
+          const rows = Array.isArray(resp.data?.data) ? resp.data.data : []
+          const keys = getAllKeys(rows)
+          const picked = pickColumnByMessage(lowerMessage, keys, getConnzDisplayLabelLocal)
+          if (picked) target = { col: picked, label: getConnzDisplayLabelLocal(picked) }
+        } catch {}
+      }
       if (!target && !listAll) {
-        setMessages(prev => [...prev, { text: 'CONNZ için örnek sorgular: conntranid, conntaskno, connasid, conninfotyp, connapltyx. Tüm kolonlar için: "connz tüm" yazabilirsiniz.', sender: 'bot' }])
+        setMessages(prev => [...prev, { text: 'CONNZ için örnek sorgular: Application Name, Type Of Information (Hex) (Count), Address Space Identifier, Application Type(Maximum), CICS Transaction Id. Tüm kolonlar için: "connz tüm" yazabilirsiniz.', sender: 'bot' }])
       } else {
         setMessages(prev => [...prev, { text: `MQ CONNZ ${target ? target.label : 'tüm kolonlar'} verisini çekiyorum...`, sender: 'bot' }])
         try {
@@ -206,7 +271,10 @@ const Chatbot = () => {
               const summary = buildSummary(rows, 20)
               setMessages(prev => [...prev, { text: `📦 MQ CONNZ - Tüm Kolonlar (son değerler)\n${summary}`, sender: 'bot' }])
             } else {
-              const row = rows.find(r => Number.isFinite(Number(r?.[target.col]))) || rows[0]
+              const row = rows.find(r => {
+                const v = r?.[target.col]
+                return v !== null && v !== undefined && String(v).trim() !== ''
+              }) || rows[0]
               const valueRaw = row?.[target.col]
               const ts = row?.record_timestamp || row?.bmctime || row?.updated_at || row?.created_at
               const formattedVal = formatValue(valueRaw)
@@ -228,9 +296,18 @@ const Chatbot = () => {
     // MQ W2OVER data query
     if (lowerMessage.includes('w2over') || lowerMessage.includes('w2 over')) {
       const listAll = lowerMessage.includes('tüm') || lowerMessage.includes('hepsi') || lowerMessage.includes('kolon') || lowerMessage.includes('columns') || lowerMessage.includes('liste')
-      const target = parseW2overQuery(lowerMessage)
+      let target = parseW2overQuery(lowerMessage)
+      if (!target || !target.col) {
+        try {
+          const resp = await databaseAPI.getMainviewMQW2over({})
+          const rows = Array.isArray(resp.data?.data) ? resp.data.data : []
+          const keys = getAllKeys(rows)
+          const picked = pickColumnByMessage(lowerMessage, keys, getW2overDisplayLabelLocal)
+          if (picked) target = { col: picked, label: getW2overDisplayLabelLocal(picked) }
+        } catch {}
+      }
       if (!target && !listAll) {
-        setMessages(prev => [...prev, { text: 'W2OVER için örnek sorgular: wzonrchl, wzolqhi, wzoxqhi, wzodlmct, wzoevtc. Tüm kolonlar için: "w2over tüm" yazabilirsiniz.', sender: 'bot' }])
+        setMessages(prev => [...prev, { text: 'W2OVER için örnek sorgular: Channels Retrying, Local Queues at Max Depth High, Transmit Queues at Max Depth High, Dead-Letter Message Count, Queue Manager Events. Tüm kolonlar için: "w2over tüm" yazabilirsiniz.', sender: 'bot' }])
       } else {
         setMessages(prev => [...prev, { text: `MQ W2OVER ${target ? target.label : 'tüm kolonlar'} verisini çekiyorum...`, sender: 'bot' }])
         try {
@@ -267,9 +344,9 @@ const Chatbot = () => {
       lowerMessage.includes('queue manager') ||
       lowerMessage.includes('qm')
     ) {
-      const mqTarget = parseMqQuery(lowerMessage)
+      let mqTarget = parseMqQuery(lowerMessage)
 
-      if (mqTarget) {
+      if (mqTarget && mqTarget.col) {
         setMessages(prev => [...prev, { text: `MQ QM ${mqTarget.label} verisini çekiyorum...`, sender: 'bot' }])
         try {
           const response = await databaseAPI.getMainviewMQQm({})
@@ -310,7 +387,7 @@ const Chatbot = () => {
             return
           }
           const keys = getAllKeys(rows)
-          const picked = pickColumnByMessage(lowerMessage, keys)
+          const picked = pickColumnByMessage(lowerMessage, keys, getQmDisplayLabelLocal)
           if (!picked) {
             const preview = keys.slice(0, 10).join(', ')
             setMessages(prev => [...prev, { text: `Aradığınız QM kolonu bulunamadı. Örnekler: ${preview}. Tümünü görmek için "qm tüm" yazabilirsiniz.`, sender: 'bot' }])
