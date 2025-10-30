@@ -86,6 +86,7 @@ const RMFPage = () => {
   const [chartTab, setChartTab] = useState('chart');
   const [chartData, setChartData] = useState([]);
   const [infoModal, setInfoModal] = useState(null);
+  const [prevActiveTab, setPrevActiveTab] = useState('table');
   
   // Optimized: Single object to store all data states
   const [data, setData] = useState({
@@ -1396,6 +1397,7 @@ const RMFPage = () => {
   };
 
   const openInfo = (chartType) => {
+    setPrevActiveTab(activeTab);
     setInfoModal(chartType);
   };
 
@@ -1691,6 +1693,18 @@ const RMFPage = () => {
                 {/* Modal Header - Sticky */}
                 <div className="flex justify-between items-center mb-6 sticky top-0 bg-white z-10 pb-4 border-b border-gray-200">
                   <h3 className="text-2xl font-bold text-gray-800">
+                    {infoModal === 'asgname' && 'ASGNAME Hakkında'}
+                    {infoModal === 'asgcnmc' && 'ASGCNMC Hakkında'}
+                    {infoModal === 'asgpgp' && 'ASGPGP Hakkında'}
+                    {infoModal === 'assactm' && 'ASSACTM Hakkında'}
+                    {infoModal === 'asgrtm' && 'ASGRTM Hakkında'}
+                    {infoModal === 'asstrc' && 'ASSTRC Hakkında'}
+                    {infoModal === 'assjsw' && 'ASSJSW Hakkında'}
+                    {infoModal === 'assscsck' && 'ASSSCSCK Hakkında'}
+                    {infoModal === 'assmsock' && 'ASSMSOCK Hakkında'}
+                    {infoModal === 'assiocck' && 'ASSIOCCK Hakkında'}
+                    {infoModal === 'asssrsck' && 'ASSSRSCK Hakkında'}
+                    {infoModal === 'asswmck' && 'ASSWMCK Hakkında'}
                     {cardData.find(card => card.id === activeModal)?.title} Detayları
                   </h3>
                   <button 
@@ -1812,6 +1826,7 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                        
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1911,6 +1926,8 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1927,6 +1944,11 @@ const RMFPage = () => {
                                   <span className="text-gray-400">-</span>
                                 )}
                               </div>
+                            </div>
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
                             </div>
                           </div>
 
@@ -1946,6 +1968,8 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1962,6 +1986,11 @@ const RMFPage = () => {
                                   <span className="text-gray-400">-</span>
                                 )}
                               </div>
+                            </div>
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
                             </div>
                           </div>
 
@@ -1981,6 +2010,8 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1997,6 +2028,11 @@ const RMFPage = () => {
                                   <span className="text-gray-400">-</span>
                                 )}
                               </div>
+                            </div>
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
                             </div>
                           </div>
 
@@ -2016,6 +2052,8 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2032,6 +2070,11 @@ const RMFPage = () => {
                                   <span className="text-gray-400">-</span>
                                 )}
                               </div>
+                            </div>
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
                             </div>
                           </div>
 
@@ -2085,6 +2128,7 @@ const RMFPage = () => {
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
+                              
                             </button>
                             <div className="text-center">
                               <div className="w-12 h-12 rmf-primary-100 rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -2103,7 +2147,9 @@ const RMFPage = () => {
                                 )}
                               </div>
                             </div>
+                            
                           </div>
+                          
 
                           {/* Page Data Set Type - Info Only */}
                           <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
@@ -2298,7 +2344,7 @@ const RMFPage = () => {
                           {/* Page Slot In Use Percentage */}
                           <div 
                             onClick={() => openChart('pdislupc')}
-                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                           >
                             {/* Info Icon */}
                             <button
@@ -2312,18 +2358,9 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
-                            {/* Grafik Butonu */}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openChart('pdislupc');
-                              }}
-                              className="absolute top-3 left-3 w-6 h-6 bg-green-100 hover:bg-green-200 text-green-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                              </svg>
-                            </button>
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
+                            
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2340,6 +2377,11 @@ const RMFPage = () => {
                                   <span className="text-gray-400">-</span>
                                 )}
                               </div>
+                            </div>
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
                             </div>
                           </div>
 
@@ -2599,7 +2641,7 @@ const RMFPage = () => {
                           {/* Device Connection Time for the Job */}
                           <div 
                             onClick={() => openChart('device_connection_time_seconds')}
-                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                           >
                             <button
                               onClick={(e) => {
@@ -2612,13 +2654,15 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Device Connection Time</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">Device Connection Time</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_ard && data.rmf_ard.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
@@ -2629,12 +2673,17 @@ const RMFPage = () => {
                                 )}
                               </div>
                             </div>
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                            </div>
                           </div>
 
                           {/* CPU Seconds */}
                           <div 
                             onClick={() => openChart('cpu_seconds')}
-                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                           >
                             <button
                               onClick={(e) => {
@@ -2647,13 +2696,15 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CPU Seconds</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">CPU Seconds</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_ard && data.rmf_ard.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
@@ -2664,12 +2715,17 @@ const RMFPage = () => {
                                 )}
                               </div>
                             </div>
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                            </div>
                           </div>
 
                           {/* Current Fixed Frames < 16M */}
                           <div 
                             onClick={() => openChart('current_fixed_frames_16m')}
-                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                           >
                             <button
                               onClick={(e) => {
@@ -2682,13 +2738,15 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Fixed Frames &lt; 16M</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">Fixed Frames &lt; 16M</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_ard && data.rmf_ard.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
@@ -2699,12 +2757,17 @@ const RMFPage = () => {
                                 )}
                               </div>
                             </div>
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                            </div>
                           </div>
 
                           {/* Current Fixed Frame Count */}
                           <div 
                             onClick={() => openChart('current_fixed_frame_count')}
-                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                           >
                             <button
                               onClick={(e) => {
@@ -2717,13 +2780,15 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Fixed Frame Count</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">Fixed Frame Count</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_ard && data.rmf_ard.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
@@ -2734,12 +2799,17 @@ const RMFPage = () => {
                                 )}
                               </div>
                             </div>
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                            </div>
                           </div>
 
                           {/* Session SRM Service Absorption Rate */}
                           <div 
                             onClick={() => openChart('session_srm_service_absorption_rate')}
-                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                           >
                             <button
                               onClick={(e) => {
@@ -2752,13 +2822,15 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SRM Absorption Rate</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">SRM Absorption Rate</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_ard && data.rmf_ard.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
@@ -2769,12 +2841,17 @@ const RMFPage = () => {
                                 )}
                               </div>
                             </div>
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                            </div>
                           </div>
 
                           {/* Session CPU Seconds in TCB Mode */}
                           <div 
                             onClick={() => openChart('session_cpu_seconds_tcb_mode')}
-                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                           >
                             <button
                               onClick={(e) => {
@@ -2787,13 +2864,15 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Session CPU (TCB)</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">Session CPU (TCB)</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_ard && data.rmf_ard.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
@@ -2804,12 +2883,17 @@ const RMFPage = () => {
                                 )}
                               </div>
                             </div>
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                            </div>
                           </div>
 
                           {/* EXCP Rate Per Second */}
                           <div 
                             onClick={() => openChart('excp_rate_per_second')}
-                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                           >
                             <button
                               onClick={(e) => {
@@ -2822,13 +2906,15 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">EXCP Rate/Sec</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">EXCP Rate/Sec</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_ard && data.rmf_ard.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
@@ -2839,12 +2925,17 @@ const RMFPage = () => {
                                 )}
                               </div>
                             </div>
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                            </div>
                           </div>
 
                           {/* Swap Page Rate Per Second */}
                           <div 
                             onClick={() => openChart('swap_page_rate_per_second')}
-                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                           >
                             <button
                               onClick={(e) => {
@@ -2857,13 +2948,15 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Swap Page Rate/Sec</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">Swap Page Rate/Sec</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_ard && data.rmf_ard.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
@@ -2874,12 +2967,17 @@ const RMFPage = () => {
                                 )}
                               </div>
                             </div>
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                            </div>
                           </div>
 
                           {/* Interval LPA Page Rate */}
                           <div 
                             onClick={() => openChart('interval_lpa_page_rate')}
-                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                           >
                             <button
                               onClick={(e) => {
@@ -2892,13 +2990,15 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">LPA Page Rate</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">LPA Page Rate</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_ard && data.rmf_ard.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
@@ -2909,12 +3009,17 @@ const RMFPage = () => {
                                 )}
                               </div>
                             </div>
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                            </div>
                           </div>
 
                           {/* Interval CSA Page-In Rate */}
                           <div 
                             onClick={() => openChart('interval_csa_page_in_rate')}
-                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                           >
                             <button
                               onClick={(e) => {
@@ -2927,13 +3032,15 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CSA Page-In Rate</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">CSA Page-In Rate</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_ard && data.rmf_ard.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
@@ -2944,12 +3051,17 @@ const RMFPage = () => {
                                 )}
                               </div>
                             </div>
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                            </div>
                           </div>
 
                           {/* Realtime Non-VIO Page Rate */}
                           <div 
                             onClick={() => openChart('realtime_non_vio_page_rate')}
-                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                           >
                             <button
                               onClick={(e) => {
@@ -2962,13 +3074,15 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Realtime Non-VIO Rate</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">Realtime Non-VIO Rate</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_ard && data.rmf_ard.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
@@ -2979,12 +3093,17 @@ const RMFPage = () => {
                                 )}
                               </div>
                             </div>
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                            </div>
                           </div>
 
                           {/* Private VIO and Hiperspace Page Rate */}
                           <div 
                             onClick={() => openChart('private_vio_hiperspace_page_rate')}
-                            className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                            className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                           >
                             <button
                               onClick={(e) => {
@@ -2997,13 +3116,15 @@ const RMFPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                            {/* Tıklanabilir göstergesi */}
+                            <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">VIO Hiperspace Rate</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-blue-700 text-lg mb-2 transition-colors duration-300">VIO Hiperspace Rate</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_ard && data.rmf_ard.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
@@ -3013,6 +3134,11 @@ const RMFPage = () => {
                                   <span className="text-gray-400">-</span>
                                 )}
                               </div>
+                            </div>
+                            <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
                             </div>
                           </div>
 
@@ -3054,6 +3180,17 @@ const RMFPage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                           {/* Info-only cards */}
                           <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openInfo('asgname');
+                              }}
+                              className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                            >
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                              </svg>
+                            </button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3074,6 +3211,17 @@ const RMFPage = () => {
                           </div>
 
                           <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openInfo('asgcnmc');
+                              }}
+                              className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                            >
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                              </svg>
+                            </button>
                             <div className="text-center">
                               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3109,8 +3257,21 @@ const RMFPage = () => {
                             <div 
                               key={idx}
                               onClick={() => openChart(itemCfg.key)}
-                              className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02]"
+                              className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                             >
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openInfo(itemCfg.key);
+                                }}
+                                className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                              >
+                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                </svg>
+                              </button>
+                              {/* Tıklanabilir göstergesi */}
+                              <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                               <div className="text-center">
                                 <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
                                   <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3127,6 +3288,11 @@ const RMFPage = () => {
                                     <span className="text-gray-400">-</span>
                                   )}
                                 </div>
+                              </div>
+                              <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
                               </div>
                             </div>
                           ))}
@@ -3178,8 +3344,21 @@ const RMFPage = () => {
                             <div 
                               key={idx}
                               onClick={() => openChart(itemCfg.key)}
-                              className="group relative bg-white rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02]"
+                              className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                             >
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openInfo(itemCfg.key);
+                                }}
+                                className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                              >
+                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                </svg>
+                              </button>
+                              {/* Tıklanabilir göstergesi */}
+                              <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                               <div className="text-center">
                                 <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
                                   <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3196,6 +3375,11 @@ const RMFPage = () => {
                                     <span className="text-gray-400">-</span>
                                   )}
                                 </div>
+                              </div>
+                              <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
                               </div>
                             </div>
                           ))}
@@ -3244,12 +3428,28 @@ const RMFPage = () => {
                                 onClick={() => {
                                   if (isNumericColumn(keyName)) openChart(keyName);
                                 }}
-                                className={`group relative bg-white rounded-2xl transition-all duration-500 p-6 ${
+                                className={`group relative rounded-2xl transition-all duration-500 p-6 ${
                                   isNumericColumn(keyName)
-                                    ? 'border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02]'
-                                    : 'border border-gray-200'
+                                    ? 'bg-gradient-to-br from-white to-blue-50/30 border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02] pulse-subtle'
+                                    : 'bg-white border border-gray-200'
                                 }`}
                               >
+                                {isNumericColumn(keyName) && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openInfo(keyName);
+                                    }}
+                                    className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                                  >
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                    </svg>
+                                  </button>
+                                )}
+                                {isNumericColumn(keyName) && (
+                                  <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
+                                )}
                                 <div className="text-center">
                                   <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
                                     <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3277,6 +3477,13 @@ const RMFPage = () => {
                                     )}
                                   </div>
                                 </div>
+                                {isNumericColumn(keyName) && (
+                                  <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                  </div>
+                                )}
                               </div>
                             ));
                           })()}
@@ -3325,12 +3532,28 @@ const RMFPage = () => {
                                 onClick={() => {
                                   if (isNumericColumn(keyName)) openChart(keyName);
                                 }}
-                                className={`group relative bg-white rounded-2xl transition-all duration-500 p-6 ${
+                                className={`group relative rounded-2xl transition-all duration-500 p-6 ${
                                   isNumericColumn(keyName)
-                                    ? 'border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02]'
-                                    : 'border border-gray-200'
+                                    ? 'bg-gradient-to-br from-white to-blue-50/30 border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02] pulse-subtle'
+                                    : 'bg-white border border-gray-200'
                                 }`}
                               >
+                                {isNumericColumn(keyName) && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openInfo(keyName);
+                                    }}
+                                    className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                                  >
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                    </svg>
+                                  </button>
+                                )}
+                                {isNumericColumn(keyName) && (
+                                  <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
+                                )}
                                 <div className="text-center">
                                   <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
                                     <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3358,6 +3581,13 @@ const RMFPage = () => {
                                     )}
                                   </div>
                                 </div>
+                                {isNumericColumn(keyName) && (
+                                  <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                  </div>
+                                )}
                               </div>
                             ));
                           })()}
@@ -3406,12 +3636,28 @@ const RMFPage = () => {
                                 onClick={() => {
                                   if (isNumericColumn(keyName)) openChart(keyName);
                                 }}
-                                className={`group relative bg-white rounded-2xl transition-all duration-500 p-6 ${
+                                className={`group relative rounded-2xl transition-all duration-500 p-6 ${
                                   isNumericColumn(keyName)
-                                    ? 'border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02]'
-                                    : 'border border-gray-200'
+                                    ? 'bg-gradient-to-br from-white to-blue-50/30 border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02] pulse-subtle'
+                                    : 'bg-white border border-gray-200'
                                 }`}
                               >
+                                {isNumericColumn(keyName) && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openInfo(keyName);
+                                    }}
+                                    className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                                  >
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                    </svg>
+                                  </button>
+                                )}
+                                {isNumericColumn(keyName) && (
+                                  <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
+                                )}
                                 <div className="text-center">
                                   <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
                                     <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3439,6 +3685,13 @@ const RMFPage = () => {
                                     )}
                                   </div>
                                 </div>
+                                {isNumericColumn(keyName) && (
+                                  <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                  </div>
+                                )}
                               </div>
                             ));
                           })()}
@@ -3487,12 +3740,28 @@ const RMFPage = () => {
                                 onClick={() => {
                                   if (isNumericColumn(keyName)) openChart(keyName);
                                 }}
-                                className={`group relative bg-white rounded-2xl transition-all duration-500 p-6 ${
+                                className={`group relative rounded-2xl transition-all duration-500 p-6 ${
                                   isNumericColumn(keyName)
-                                    ? 'border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02]'
-                                    : 'border border-gray-200'
+                                    ? 'bg-gradient-to-br from-white to-blue-50/30 border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02] pulse-subtle'
+                                    : 'bg-white border border-gray-200'
                                 }`}
                               >
+                                {isNumericColumn(keyName) && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openInfo(keyName);
+                                    }}
+                                    className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                                  >
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                    </svg>
+                                  </button>
+                                )}
+                                {isNumericColumn(keyName) && (
+                                  <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
+                                )}
                                 <div className="text-center">
                                   <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
                                     <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3520,6 +3789,13 @@ const RMFPage = () => {
                                     )}
                                   </div>
                                 </div>
+                                {isNumericColumn(keyName) && (
+                                  <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                  </div>
+                                )}
                               </div>
                             ));
                           })()}
@@ -3566,12 +3842,28 @@ const RMFPage = () => {
                                 onClick={() => {
                                   if (isNumericColumn(keyName)) openChart(keyName);
                                 }}
-                                className={`group relative bg-white rounded-2xl transition-all duration-500 p-6 ${
+                                className={`group relative rounded-2xl transition-all duration-500 p-6 ${
                                   isNumericColumn(keyName)
-                                    ? 'border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02]'
-                                    : 'border border-gray-200'
+                                    ? 'bg-gradient-to-br from-white to-blue-50/30 border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02] pulse-subtle'
+                                    : 'bg-white border border-gray-200'
                                 }`}
                               >
+                                {isNumericColumn(keyName) && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openInfo(keyName);
+                                    }}
+                                    className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                                  >
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                    </svg>
+                                  </button>
+                                )}
+                                {isNumericColumn(keyName) && (
+                                  <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
+                                )}
                                 <div className="text-center">
                                   <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
                                     <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3599,6 +3891,13 @@ const RMFPage = () => {
                                     )}
                                   </div>
                                 </div>
+                                {isNumericColumn(keyName) && (
+                                  <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                  </div>
+                                )}
                               </div>
                             ));
                           })()}
@@ -3645,12 +3944,28 @@ const RMFPage = () => {
                                 onClick={() => {
                                   if (isNumericColumn(keyName)) openChart(keyName);
                                 }}
-                                className={`group relative bg-white rounded-2xl transition-all duration-500 p-6 ${
+                                className={`group relative rounded-2xl transition-all duration-500 p-6 ${
                                   isNumericColumn(keyName)
-                                    ? 'border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02]'
-                                    : 'border border-gray-200'
+                                    ? 'bg-gradient-to-br from-white to-blue-50/30 border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02] pulse-subtle'
+                                    : 'bg-white border border-gray-200'
                                 }`}
                               >
+                                {isNumericColumn(keyName) && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openInfo(keyName);
+                                    }}
+                                    className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                                  >
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                    </svg>
+                                  </button>
+                                )}
+                                {isNumericColumn(keyName) && (
+                                  <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
+                                )}
                                 <div className="text-center">
                                   <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
                                     <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3678,6 +3993,13 @@ const RMFPage = () => {
                                     )}
                                   </div>
                                 </div>
+                                {isNumericColumn(keyName) && (
+                                  <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                  </div>
+                                )}
                               </div>
                             ));
                           })()}
@@ -3726,12 +4048,28 @@ const RMFPage = () => {
                                 onClick={() => {
                                   if (isNumericColumn(keyName)) openChart(keyName);
                                 }}
-                                className={`group relative bg-white rounded-2xl transition-all duration-500 p-6 ${
+                                className={`group relative rounded-2xl transition-all duration-500 p-6 ${
                                   isNumericColumn(keyName)
-                                    ? 'border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02]'
-                                    : 'border border-gray-200'
+                                    ? 'bg-gradient-to-br from-white to-blue-50/30 border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02] pulse-subtle'
+                                    : 'bg-white border border-gray-200'
                                 }`}
                               >
+                                {isNumericColumn(keyName) && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openInfo(keyName);
+                                    }}
+                                    className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                                  >
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                    </svg>
+                                  </button>
+                                )}
+                                {isNumericColumn(keyName) && (
+                                  <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
+                                )}
                                 <div className="text-center">
                                   <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:from-blue-200 group-hover:to-blue-300 group-hover:shadow-lg transition-all duration-300">
                                     <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3759,6 +4097,13 @@ const RMFPage = () => {
                                     )}
                                   </div>
                                 </div>
+                                {isNumericColumn(keyName) && (
+                                  <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                  </div>
+                                )}
                               </div>
                             ));
                           })()}
@@ -4239,6 +4584,302 @@ const RMFPage = () => {
                 </div>
 
                 <div className="space-y-6">
+                  {/* RMF ASRM Info Cards */}
+                  {infoModal === 'asgname' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Jobname (ASGNAME), adres uzayını kullanan iş biriminin kullanıcı kimliğini (userid), iş adını (job name)
+                          veya prosedür adını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Değer, sistemdeki address space’e ait tanımlayıcıdır ve diğer metriklerle korelasyon için anahtar rol oynar.
+                          Z/OS alt sistemleri ve WLM raporları ile çapraz referans yapılırken kullanılır.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Performans sorunlarını belirli bir iş veya kullanıcıyla ilişkilendirmek, kök neden analizi ve kapasite
+                          planlaması için gereklidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'asgcnmc' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Service Class Name (ASGCNMC), işlemin/işin atandığı servis sınıfının adını gösterir.
+                          Yetkiniz varsa (BMC AMI Ops UI hariç), mevcut değer üzerine yeni servis sınıfı adı (veya QUIESCE/RESUME)
+                          yazılarak değiştirilebilir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          WLM, servis sınıfları üzerinden hedefleri (response time, velocity vb.) ve kaynak paylaştırmayı uygular.
+                          Bu alan, WLM politikası ile performans verilerinin eşleştirilmesi için kullanılır.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Yanlış sınıf ataması veya uygunsuz hedefler, performans düşüşüne yol açabilir. 
+                          Sınıf adını bilmek, tuning ve SLA takibi için kritiktir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'asgpgp' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Service Class Index / Performance Period (ASGPGP), z/OS WLM’in aktif servis politikasında
+                          transaction’ın servis hedeflerini bulmak için kullandığı dönem/sınıf indeksini gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Dönemler, yük arttıkça farklı hedeflerin uygulanmasını sağlar. Bu alan, dönem bazlı hedeflerin
+                          hangi aşamada devrede olduğunu saptamak için kullanılır.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Darboğazların hangi periodda oluştuğunu belirlemek, eşik ve hedef ayarlarını doğru yapmak için gereklidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'assactm' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Transaction Active Time (ASSACTM), cari işlemin başladığından bu yana geçen süreyi hh.mm.ss formatında gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Değer, işlem yaşam döngüsü boyunca yürütme/aktif fazdaki sürenin göstergesidir ve bekleme durumlarıyla
+                          birlikte yorumlanmalıdır.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Aktif süredeki anormallikler uygulama verimsizliği, rekabet veya I/O gecikmesi gösterebilir; SLA takibi için kritiktir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'asgrtm' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Current Residency Time (ASGRTM), address space’in en son swap-out edildiğinden beri geçen süreyi gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Yük altında bellek baskısı ve çalışma kümeleri (working set) davranışlarını anlamak için kullanılır.
+                          Uzun süreli residency, swap aktivitesinin düşük olduğunu gösterebilir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Sık swap, performansı olumsuz etkiler. Residency süresi, bellek tuning ve kapasite planlaması için önemli bir sinyaldir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'asstrc' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Session Transaction Count (ASSTRC), oturum süresince iş için gerçekleşen transaction sayısını gösterir.
+                          Değer yalnızca iş şu anda bellekte olduğunda verilir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Hacim (volume) göstergesidir ve throughput ölçümleriyle birlikte değerlendirilmelidir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Anormal düşüşler, kuyruk birikmeleri veya bağımlılık sorunlarına işaret edebilir; operasyonel sağlık için kritiktir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'assjsw' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Swap Total (ASSJSW), oturum başladığından beri address space’in kaç kez swap-in/out edildiğini gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Yüksek swap sayısı, bellek baskısı ve sayfa hatalarıyla ilişkili olabilir. 
+                          Sistem konfigürasyonu ve WLM politikalarıyla birlikte analiz edilmelidir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Fazla swap, latency artışı ve throughput düşüşü yaratır; kapasite ve bellek tuning kararları için temel göstergedir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'assscsck' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          CPU Service Unit Count (ASSSCSCK), oturum süresince tüketilen CPU servis birimlerinin (binler) sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Servis birimleri, z/OS kaynak tüketiminin normalize edilmiş ölçüsüdür. İş yükleri arasında adil karşılaştırma sağlar.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          CPU tüketiminin izlenmesi, maliyetlendirme, kapasite planlaması ve performans ayarlamaları için gereklidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'assmsock' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Service Units Consumed Using Real Storage (ASSMSOCK), transaction’ın gerçek bellek kullanımı için
+                          tükettiği servis birimlerini gösterir; son swap-in döneminde biriken birimler dahildir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Gerçek bellek tüketimi, paging/swap davranışıyla birlikte değerlendirilmelidir. Yüksek değerler
+                          çalışma kümesi büyüklüğüne işaret edebilir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Bellek baskısı ve performans ilişkisini anlamaya yardımcı olur; bellek ayarlamaları ve kapasite kararlarını bilgilendirir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'assiocck' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          I/O Service Units Consumed by the Transaction (ASSIOCCK), transaction’ın I/O işlemleri için 
+                          tükettiği servis birimlerini gösterir; son swap-in döneminde biriken birimler dahildir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          I/O servis birimleri, disk/cihaz gecikmeleri ve throughput ile birlikte değerlendirilmelidir.
+                          Yüksek değerler I/O-bound davranışa işaret edebilir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          I/O darboğazları toplam yanıt süresini artırır. Sorunlu cihaz/volume tespiti ve iyileştirme için kritik önemdedir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'asssrsck' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          SRB Processor Service Consumed by Transaction (ASSSRSCK), transaction’ın SRB işlemleri için
+                          CPU tarafından tüketilen toplam servis birimlerini gösterir; son swap-in dönemindeki birimler dahildir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          SRB (Supervisor Request Block) işlemleri, çekirdek seviyesinde yürütmeler içerir ve CPU tüketim profilini etkiler.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Yüksek SRB tüketimi, sistem seviyesinde optimizasyon gerektirebilir; CPU planlaması ve kapasite için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'asswmck' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Total Service Units (ASSWMCK), oturum süresince address space tarafından tüketilen toplam SRM servis birimlerinin
+                          (binler) sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          SRM servis birimleri, farklı kaynak tüketimlerini (CPU, I/O, bellek) ortak bir ölçekte ifade eder; maliyetlendirme 
+                          ve adil karşılaştırma için kullanılır.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Toplam tüketim, işin sistem üzerindeki genel etkisini gösterir; kapasite, maliyet ve SLA değerlendirmeleri için esastır.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                   {/* Hızlı Zaman Aralıkları */}
                   <div>
                     <h4 className="text-lg font-semibold text-gray-800 mb-4">Hızlı Zaman Aralıkları</h4>
@@ -4346,12 +4987,19 @@ const RMFPage = () => {
 
         {/* Info Modal */}
         {infoModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[110]">
-            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[110]" onClick={() => { setActiveTab(prevActiveTab || 'table'); closeInfo(); }}>
+            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
               <div className="p-6">
                 {/* Info Modal Header */}
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-2xl font-bold text-gray-800">
+                    {infoModal === 'mxgcnm' && 'MXGCNM Hakkında'}
+                    {infoModal === 'mxgcpn' && 'MXGCPN Hakkında'}
+                    {infoModal === 'mxgtypc' && 'MXGTYPC Hakkında'}
+                    {infoModal === 'mxiasac' && 'MXIASAC Hakkında'}
+                    {infoModal === 'mxixavg' && 'MXIXAVG Hakkında'}
+                    {infoModal === 'mxirate' && 'MXIRATE Hakkında'}
+                    {infoModal === 'mxircp' && 'MXIRCP Hakkında'}
                     {infoModal === 'pdgnum' && 'PDGNUM Hakkında'}
                     {infoModal === 'pdgtypc' && 'PDGTYPC Hakkında'}
                     {infoModal === 'pdgser' && 'PDGSER Hakkında'}
@@ -4375,6 +5023,183 @@ const RMFPage = () => {
 
                 {/* Info Content */}
                 <div className="space-y-6">
+                  {/* RMF TRX Info Cards */}
+                  {infoModal === 'mxgcnm' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Service Class Name (MXGCNM), işlemlerin atandığı servis sınıfı, rapor sınıfı veya performans grubunun adını belirtir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          WLM (Workload Manager) yapısında, servis sınıfı iş yüklerinin hedeflerini (response time, velocity vb.) tanımlar. 
+                          Rapor sınıfları ve performans grupları, tarihi uyumluluk ve raporlama için kullanılır. MXGCNM, TRX kayıtlarında 
+                          bu sınıflandırmayı metin olarak taşır ve korelasyon için anahtar bir alandır.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Performans analizinde belirli bir servis sınıfının hedeflerini tutturup tutturmadığını ve hangi iş yüklerinin 
+                          sınıfı zorladığını görmenizi sağlar. Kapasite planlama ve WLM politikası iyileştirmeleri için kritik önemdedir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'mxgcpn' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Period Number (MXGCPN), servis/rapor sınıfı veya performans grubundaki dönem numarasını belirtir. 
+                          Her sınıf en fazla sekiz döneme sahip olabilir. Veri onaltılık (hex) formatta tutulabilir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Dönemler, iş yükü yoğunlaştıkça farklı hedef ve paylaştırma politikalarının uygulanmasını sağlar (ör. period 1 öncelikli). 
+                          MXGCPN, dönem bazlı performans eğrilerini ve WLM geçiş davranışını analiz etmek için kullanılır.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Hangi dönemde darboğaz oluştuğunu, hedef sapmalarının hangi aşamada başladığını görmenizi sağlar. 
+                          Dönem eşiklerinin ve hedeflerinin doğru ayarlanması için gereklidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'mxgtypc' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          WLM Type (MXGTYPC), raporlanan servis sınıfının türünü (ör. service class, report class, performance group) metin olarak belirtir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Değer, WLM raporlama/denetim bağlamını ayırt etmek için kullanılır. Analizde aynı isimli fakat farklı türde 
+                          sınıfların karışmasını engeller ve veri modelinde doğru birleştirmeyi sağlar.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Yanlış sınıf türü üzerinden yorum, hatalı tuning’e yol açabilir. MXGTYPC, doğru bağlamda karşılaştırma ve 
+                          trend analizi yapılmasına yardımcı olur.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'mxiasac' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Average Number of AS Counted (MXIASAC), gecikme yaşayan veya CPU kullanan adres alanlarının ortalama sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Örnekleme periyodunda delay veya kullanım sinyali bulunan address space sayısı üzerinden hesaplanır. 
+                          Yük yoğunluğu ve eşzamanlılık seviyesini yansıtan bir metriktir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Aynı anda aktif/engellenmiş adres alanı sayısındaki artış, CPU, I/O veya bellek rekabetine işaret eder. 
+                          Kapasite artışı veya WLM hedef ayarı gereksinimini erkenden gösterir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'mxixavg' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Average Active Time (MXIXAVG), işlemlerin yürütme (execution) fazındaki ortalama süreyi saniye cinsinden gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          TRX kayıtları bazında, transaction’ın aktif CPU kullanımı ve bekleme dışı çalışma zamanının ortalaması alınır. 
+                          CPU bound/delay bound ayrımı için yardımcı bir göstergedir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Yürütme süresindeki artış, uygulama verimsizliği, CPU rekabeti veya I/O beklemeleri ile ilişkili olabilir. 
+                          Tuning önceliklendirmesi ve SLA takibi için ana metriktir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'mxirate' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Transaction Rate (MXIRATE), birim zamanda tamamlanan işlem (transaction) hızını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Ölçüm penceresi boyunca sonlanan transaction sayısı üzerinden oran hesaplanır. 
+                          Trafik yoğunluğu ve throughput trendlerini analiz etmek için kullanılır.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Throughput düşüşü, altyapı darboğazı, WLM kısıtı veya uygulama yavaşlamasına işaret edebilir. 
+                          Kapasite planlaması ve ölçeklendirme kararlarında temel bir göstergedir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'mxircp' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Transactions Completed (MXIRCP), tamamlanan toplam işlem sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Belirli zaman aralığında "ended" durumuna gelen transaction’ların sayımıdır. 
+                          Hacim (volume) ölçüsü olup hata/başarı oranı analizine temel oluşturur.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Tamamlanan işlem sayısındaki ani düşüşler üretim kesintilerini, sıra birikmelerini veya 
+                          back-end bağımlılık problemlerini gösterebilir. Operasyonel sağlık takibi için kritiktir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                   {/* Page Data Set Number Info Card */}
                   {infoModal === 'pdgnum' && (
                     <div className="space-y-4">
@@ -4753,6 +5578,329 @@ const RMFPage = () => {
                           sistem yöneticileri ile iletişimde doğru veri setini belirtebilir ve sayfa veri setlerinin 
                           organizasyonunu anlayabilirsiniz. Ayrıca kapasité planlaması ve bakım işlemleri için gereklidir.
                         </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ============== RMF ARD INFO CARDS ============== */}
+                  {infoModal === 'jobname' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Jobname alanı, adres alanını kullanan iş biriminin kullanıcı kimliğini (userid), iş adını veya prosedür adını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>Kaynak: SMF/RMF kayıtlarından alınır</li>
+                          <li>Format: 1-8 karakterlik isim/prosedür</li>
+                          <li>Bağlam: Adres alanı/iş birimi tanımlaması</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">Performans veya kaynak kullanım sorunlarını doğrudan ilgili iş veya kullanıcı ile ilişkilendirmenizi sağlar.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'device_connection_time_seconds' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Job için Aygıt Bağlantı Süresi, iş için herhangi bir aygıtın aktif olduğu toplam süreyi saniye cinsinden gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>Birim: saniye</li>
+                          <li>Kapsam: interval boyunca aktif cihaz süresi toplamı</li>
+                          <li>Kaynak: RMF I/O metrikleri</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">Yoğun I/O bağlılıklarını ortaya çıkarır; cihaz darboğazlarını ve iş-odaklı I/O etkisini belirlemede kritiktir.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'current_fixed_frames_16m' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Current Fixed Frames &lt; 16M alanı, adres alanı en son örneklendiğinde 16M çizgisinin altındaki sabit depolama çerçevelerinin anlık sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>Kapsam: 16MB altı alan</li>
+                          <li>Örnekleme: interval başı/sırasında örnek</li>
+                          <li>Tür: sabitlenmiş (fixed) çerçeve sayısı</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">Eski mimari bağımlılıkları ve alt-16MB baskısını saptamada yardımcı olur; sanal depolama baskısını azaltmak için ipucu verir.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'current_fixed_frame_count' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Current Fixed Frame Count, adres alanı tarafından şu anda tutulan toplam sabit depolama çerçevesi sayısını gösterir (paylaşılan sayfalar hariç).
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>Kapsam: tüm adres alanı</li>
+                          <li>Dahil değil: paylaşılan sayfalar</li>
+                          <li>Ölçüm: anlık sayım</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">Aşırı sabitleme bellek esnekliğini düşürür; sistemin sayfalama/verimliliğini olumsuz etkileyebilir.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'cross_memory_register' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Cross Memory Register, işin başka bir adres alanı ile iletişim kurmak için cross memory talimatlarını kullanıp kullanmadığını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>Değer: Gösterge (X/boş)</li>
+                          <li>Kapsam: adres alanları arası erişim</li>
+                          <li>Etkiler: güvenlik ve performans</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">Çapraz bellek kullanımı, bağımlılıkları ve muhtemel kaynak çekişmelerini anlamaya yardımcı olur.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'session_srm_service_absorption_rate' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Session SRM Service Absorption Rate, oturum başladığından beri işlemin sistem kaynaklarını tüketme hızını gösteren bir sayıdır.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>Birim: SRM servis birimi/süre</li>
+                          <li>Kapsam: oturum başlangıcından itibaren</li>
+                          <li>Kaynak: WLM/SRM ölçümleri</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">İşlem yükünün sistem kaynak tüketim oranını yansıtır; kapasite planlama ve önceliklemeye temel oluşturur.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'session_cpu_seconds_tcb_mode' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Session CPU Seconds in TCB Mode, oturum başladığından beri TCB modunda iş tarafından tüketilen CPU saniyesi sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>Birim: saniye</li>
+                          <li>Bağlam: TCB (Task Control Block) modu</li>
+                          <li>Kapsam: oturum bazlı kümülatif</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">İşin CPU tüketimini ve TCB yükünü değerlendirerek işlem verimliliğini analiz etmeye yardımcı olur.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'cpu_seconds' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          CPU Seconds, oturum başlangıcından bu yana adres alanı tarafından tüketilen toplam CPU süresini (saniye) gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>Birim: saniye</li>
+                          <li>Kapsam: oturum başlangıcından itibaren kümülatif</li>
+                          <li>Kaynak: CPU muhasebe ölçümleri</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">CPU tüketiminin eğilimini izleyerek kapasite, maliyet ve performans etkilerini değerlendirmeyi sağlar.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'excp_rate_per_second' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          EXCP Rate Per Second, bu aralıkta adres alanı tarafından saniye başına gerçekleştirilen EXCP sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>Birim: işlem/saniye</li>
+                          <li>Kapsam: interval bazlı</li>
+                          <li>Kaynak: I/O istek ölçümleri</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">EXCP yoğunluğu, I/O baskısını ve potansiyel darboğazları ortaya koyar; iş akışlarını optimize etmeyi sağlar.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'swap_page_rate_per_second' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Swap Page Rate Per Second, adres alanının swap işlemi nedeniyle saniye başına gerçekleşen page-in veya page-out sayısını gösterir. Değer bu aralıktaki aktiviteyi yansıtır.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>Birim: sayfa/saniye</li>
+                          <li>Kapsam: swap kaynaklı sayfalama</li>
+                          <li>Zaman: interval boyunca</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">Yüksek swap sayfalaması yanıt süresini olumsuz etkiler; bellek kapasitesi ve yerleşimi için sinyal verir.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'interval_lpa_page_rate' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Interval LPA Page Rate, bu aralıkta link pack area (LPA) sayfa veri setinden saniye başına sayfa çekme (page-in) sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>Birim: sayfa/saniye</li>
+                          <li>Kaynak: LPA veri seti</li>
+                          <li>Zaman: interval</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">LPA erişim yoğunluğu, ortak kod ve modül kullanımındaki baskıyı gösterir; LPA optimizasyonu için girdidir.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'interval_csa_page_in_rate' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Interval CSA Page-In Rate, aralık başında gerçekleşen CSA page-in olaylarının sayısını gösterir. Bu değer, ortak alandaki (common area) sayfa hataları nedeniyle sayfalama sorunlarına yol açabilecek adres alanlarını belirlemenize yardımcı olabilir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>Birim: sayfa</li>
+                          <li>Zaman: interval başlangıcı</li>
+                          <li>Kapsam: CSA (Common Service Area)</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">CSA tarafındaki sayfa hataları, ortak alan baskısını ve olası yapılandırma sorunlarını işaret eder.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'realtime_non_vio_page_rate' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Realtime Non-VIO Page Rate, son 15 saniyede adres alanı için gerçekleşen VIO olmayan page-in ve page-out işlemlerinin saniye başına sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>Pencere: ~15 saniyelik yakın gerçek zaman</li>
+                          <li>Kapsam: Non-VIO sayfalama</li>
+                          <li>Birim: işlem/saniye</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">Kısa dönemli sayfalama baskısını gösterir; ani yük sıçramalarını ve bellek baskısını yakalamaya yardımcı olur.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'private_vio_hiperspace_page_rate' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Private VIO and Hiperspace Page Rate, işlem için gerçekleşen özel VIO ve hiperspace page-in/page-out sayısını gösterir. Şu anda swap dışı olan işler için bu değer raporlanmaz.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>Kapsam: Özel VIO + Hiperspace</li>
+                          <li>Zaman: interval/gerçek zaman penceresi</li>
+                          <li>Koşul: Swap dışı işlerde raporlanmaz</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">Uygulamaların VIO/hiperspace kullanımını göstererek I/O ve bellek stratejilerini optimize etmenizi sağlar.</p>
                       </div>
                     </div>
                   )}
