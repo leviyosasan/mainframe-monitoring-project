@@ -9,6 +9,14 @@ const StoragePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedChart, setSelectedChart] = useState(null);
   const [chartTab, setChartTab] = useState('chart');
+  const [thWarning, setThWarning] = useState(75);
+  const [thCritical, setThCritical] = useState(90);
+  const [thresholds, setThresholds] = useState(() => {
+    try {
+      const saved = localStorage.getItem('thresholds');
+      return saved ? JSON.parse(saved) : {};
+    } catch { return {}; }
+  });
   const [infoModal, setInfoModal] = useState(null);
   const [timeFilterModal, setTimeFilterModal] = useState(false);
   const [selectedTimeRange, setSelectedTimeRange] = useState('last6h');
@@ -16,9 +24,12 @@ const StoragePage = () => {
   const [customToDate, setCustomToDate] = useState('');
   const [filteredData, setFilteredData] = useState([]);
   const [isFiltered, setIsFiltered] = useState(false);
+  const [filteredForModal, setFilteredForModal] = useState(null);
   const [chartData, setChartData] = useState([]);
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState('asc');
+  const [dbHealthy, setDbHealthy] = useState(null);
+  const [dbLastCheckedAt, setDbLastCheckedAt] = useState(null);
   
   // Storage data states
   const [csasumData, setCsasumData] = useState([]);
@@ -46,6 +57,163 @@ const StoragePage = () => {
     if (!name) return '';
     // Replace underscores with spaces for readability on all tables
     return String(name).replace(/_/g, ' ');
+  };
+
+  // Database health check
+  const checkDatabaseHealth = async () => {
+    try {
+      const res = await databaseAPI.checkTableExistsCsasum({});
+      const ok = Boolean(res?.data);
+      setDbHealthy(ok);
+      setDbLastCheckedAt(new Date());
+    } catch (e) {
+      setDbHealthy(false);
+      setDbLastCheckedAt(new Date());
+    }
+  };
+
+  useEffect(() => {
+    checkDatabaseHealth();
+    const id = setInterval(checkDatabaseHealth, 60000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Display label overrides for FRMINFO_FIXED
+  const FRMINFO_FIXED_LABELS = {
+    sqa_avg: 'Average SQA Frames',
+    sqa_min: 'Minimum SQA Frames',
+    sqa_max: 'Maximum SQA Frames',
+    lpa_avg: 'Average LPA Frames',
+    lpa_min: 'Minimum LPA Frames',
+    lpa_max: 'Maximum LPA Frames',
+    csa_avg: 'Average CSA Frames',
+    lsqa_avg: 'Average LSQA Frames',
+    lsqa_min: 'Minimum LSQA Frames',
+    lsqa_max: 'Maximum LSQA Frames',
+    private_avg: 'Average Private Frames',
+    private_min: 'Minimum Private Frames',
+    private_max: 'Maximum Private Frames',
+    fixed_below_16m_avg: 'Average Fixed <16M',
+    fixed_below_16m_min: 'Minimum Fixed <16M',
+    fixed_below_16m_max: 'Maximum Fixed <16M',
+    fixed_total_avg: 'Average Fixed Total',
+    fixed_total_min: 'Minimum Fixed Total',
+    fixed_total_max: 'Maximum Fixed Total',
+    fixed_percentage: 'Fixed Frames Average Percentage'
+  };
+
+  // Display label overrides for FRMINFO_HIGH_VIRTUAL
+  const FRMINFO_HIGH_VIRTUAL_LABELS = {
+    hv_common_avg: 'Ortalama High Virtual Common Çerçeveleri',
+    hv_common_min: 'Minimum High Virtual Common Çerçeveleri',
+    hv_common_max: 'Maksimum High Virtual Common Çerçeveleri',
+    hv_shared_avg: 'Ortalama High Virtual Shared Çerçeveleri',
+    hv_shared_min: 'Minimum High Virtual Shared Çerçeveleri',
+    hv_shared_max: 'Maksimum High Virtual Shared Çerçeveleri'
+  };
+
+  // Display label overrides for FRMINFO_CENTER
+  const FRMINFO_CENTER_LABELS = {
+    // SQA
+    spispcav: 'Average SQA Frames',
+    spispcmn: 'Minimum SQA Frames',
+    spispcmx: 'Maximum SQA Frames',
+    // LPA
+    spilpfav: 'Average LPA Frames',
+    spilpfmn: 'Minimum LPA Frames',
+    spilpfmx: 'Maximum LPA Frames',
+    // CSA
+    spicpfav: 'Average CSA Frames',
+    spicpfmn: 'Minimum CSA Frames',
+    spicpfmx: 'Maximum CSA Frames',
+    // LSQA
+    spiqpcav: 'Average LSQA Frames',
+    spiqpcmn: 'Minimum LSQA Frames',
+    spiqpcmx: 'Maximum LSQA Frames',
+    // Private
+    spiapfav: 'Average Private Frames',
+    spiapfmn: 'Minimum Private Frames',
+    spiapfmx: 'Maximum Private Frames',
+    // Available frames
+    spiafcav: 'Available Frames (Average)',
+    spiafcmn: 'Available Frames (Minimum)',
+    // Central Total
+    spitfuav: 'Average Central Total',
+    spiafumn: 'Minimum Central Total',
+    spiafumx: 'Maximum Central Total',
+    // Percentage
+    spitcpct: 'Central Frames Average Percentage'
+  };
+
+  // Display label overrides for SYSFRMIZ
+  const SYSFRMIZ_LABELS = {
+    spgid: 'SMF ID',
+    spiuonlf: 'LPAR Online Storage (Average)',
+    spluicav: 'Current UIC',
+    spifinav: 'Average Nucleus Frames (Average)',
+    sprefncp: '% Nucleus Frames (Average)',
+    spispcav: 'Average SQA Frames (Average)',
+    spreasrp: '% SQA Frames (Average)',
+    spilpfav: 'Average LPA Frames (Average)',
+    sprealpp: '% LPA Frames (Average)',
+    spicpfav: 'Average CSA Frames (Average)',
+    spreavpp: '% CSA Frames (Average)',
+    spiqpcav: 'Average LSQA Frames (Average)',
+    sprelsqp: '% LSQA Frames (Average)',
+    spiapfav: 'Average Private Frames (Average)',
+    spreprvp: '% Private Frames (Average)',
+    spiafcav: 'Available Frames (Average)',
+    spreavlp: '% Available Frames (Average)',
+    spihvcav: 'Average High Virtual Common Frames',
+    sprecmnp: '% High Virtual Common Frames',
+    spihvsav: 'Average High Virtual Shared Frames',
+    spreshrp: '% High Virtual Shared Frames'
+  };
+
+  // Context-aware display name
+  const getDisplayName = (columnName) => {
+    const raw = String(columnName || '').trim();
+    const key = raw.toLowerCase();
+    const norm = key.replace(/[^a-z0-9]/g, '');
+    if (activeModal === 'FRMINFO_FIXED') {
+      return FRMINFO_FIXED_LABELS[norm] || FRMINFO_FIXED_LABELS[key] || formatHeaderName(columnName);
+    }
+    if (activeModal === 'FRMINFO_HIGH_VIRTUAL') {
+      return FRMINFO_HIGH_VIRTUAL_LABELS[norm] || FRMINFO_HIGH_VIRTUAL_LABELS[key] || formatHeaderName(columnName);
+    }
+    if (activeModal === 'FRMINFO_CENTER') {
+      return FRMINFO_CENTER_LABELS[norm] || FRMINFO_CENTER_LABELS[key] || formatHeaderName(columnName);
+    }
+    if (activeModal === 'SYSFRMIZ') {
+      return SYSFRMIZ_LABELS[norm] || SYSFRMIZ_LABELS[key] || formatHeaderName(columnName);
+    }
+    return formatHeaderName(columnName);
+  };
+
+  // Threshold helpers
+  const getThresholdKey = (metric, modal = activeModal) => {
+    const m = String(metric || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const scope = String(modal || '').toLowerCase();
+    return `${scope}:${m}`;
+  };
+
+  const getThreshold = (metric, modal = activeModal) => {
+    const key = getThresholdKey(metric, modal);
+    const local = thresholds[key];
+    if (local) return local;
+    try {
+      const saved = JSON.parse(localStorage.getItem('thresholds') || '{}');
+      return saved[key] || { warning: 75, critical: 90 };
+    } catch { return { warning: 75, critical: 90 }; }
+  };
+
+  const setThresholdForMetric = (metric, valueObj, modal = activeModal) => {
+    const key = getThresholdKey(metric, modal);
+    setThresholds((prev) => {
+      const next = { ...prev, [key]: valueObj };
+      try { localStorage.setItem('thresholds', JSON.stringify(next)); } catch {}
+      return next;
+    });
   };
 
   const formatValue = (value, columnName) => {
@@ -136,6 +304,10 @@ const StoragePage = () => {
   };
 
   const getCurrentData = () => {
+    // Aktif modal için uygulanmış filtre varsa onu döndür
+    if (isFiltered && filteredForModal === activeModal) {
+      return filteredData;
+    }
     switch (activeModal) {
       case 'CSASUM': return csasumData;
       case 'FRMINFO_CENTER': return frminfoCenterData;
@@ -346,77 +518,86 @@ const StoragePage = () => {
       return;
     }
 
-    // jsPDF kütüphanesini dinamik olarak yükle
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-    script.onload = () => {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF('l', 'mm', 'a4'); // Landscape orientation
-      
-      // Başlık
-      doc.setFontSize(16);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`${filename} - Veri Raporu`, 14, 20);
-      
-      // Tarih
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Oluşturulma Tarihi: ${new Date().toLocaleDateString('tr-TR')} ${new Date().toLocaleTimeString('tr-TR')}`, 14, 30);
-      
-      // Tablo başlıkları
-      const headers = Object.keys(data[0]);
-      const pageWidth = doc.internal.pageSize.width;
-      const pageHeight = doc.internal.pageSize.height;
-      const margin = 14;
-      const tableWidth = pageWidth - (margin * 2);
-      const colWidth = tableWidth / headers.length;
-      
-      let yPosition = 40;
-      const rowHeight = 8;
-      
-      // Başlık satırı
-      doc.setFillColor(240, 240, 240);
-      doc.rect(margin, yPosition - 2, tableWidth, rowHeight, 'F');
-      
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'bold');
-      headers.forEach((header, index) => {
-        const xPosition = margin + (index * colWidth);
-        doc.text(header, xPosition + 2, yPosition + 4);
-      });
-      
-      yPosition += rowHeight + 2;
-      
-      // Veri satırları
-      doc.setFont('helvetica', 'normal');
-      data.forEach((row, rowIndex) => {
-        // Sayfa sonu kontrolü
-        if (yPosition > pageHeight - 20) {
-          doc.addPage();
-          yPosition = 20;
-        }
-        
-        // Satır arka planı (zebra striping)
-        if (rowIndex % 2 === 0) {
-          doc.setFillColor(250, 250, 250);
-          doc.rect(margin, yPosition - 2, tableWidth, rowHeight, 'F');
-        }
-        
-        headers.forEach((header, colIndex) => {
-          const xPosition = margin + (colIndex * colWidth);
-          const cellValue = String(row[header] || '').substring(0, 20); // Maksimum 20 karakter
-          doc.text(cellValue, xPosition + 2, yPosition + 4);
+    // jsPDF ve AutoTable eklentisini dinamik yükle ve tabloyu düzgün biçimle
+    const ensureJsPDF = () => new Promise((resolve) => {
+      if (window.jspdf?.jsPDF) return resolve();
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      s.onload = () => resolve();
+      document.head.appendChild(s);
+    });
+
+    const ensureAutoTable = () => new Promise((resolve) => {
+      if (window.jspdf?.jsPDF && typeof window.jspdf.jsPDF === 'function' && typeof window.jspdf.jsPDF.API?.autoTable === 'function') {
+        return resolve();
+      }
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js';
+      s.onload = () => resolve();
+      document.head.appendChild(s);
+    });
+
+    Promise.resolve()
+      .then(ensureJsPDF)
+      .then(ensureAutoTable)
+      .then(() => {
+        const { jsPDF } = window.jspdf;
+        const headers = Object.keys(data[0]);
+        // İstek gereği tüm PDF'ler A4 yatay
+        const doc = new jsPDF('l', 'mm', 'a4');
+
+        // Başlık ve tarih
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${filename} - Veri Raporu`, 14, 16);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Oluşturulma Tarihi: ${new Date().toLocaleDateString('tr-TR')} ${new Date().toLocaleTimeString('tr-TR')}`, 14, 24);
+
+        const body = data.map((row) => headers.map((h) => String(row[h] ?? '')));
+
+        // AutoTable ile düzgün hücre genişliği ve satır kaydırma
+        doc.autoTable({
+          head: [headers],
+          body,
+          startY: 30,
+          theme: 'grid',
+          styles: {
+            font: 'helvetica',
+            fontSize: headers.length > 12 ? 6 : headers.length > 8 ? 7 : 8,
+            cellPadding: 1.5,
+            overflow: 'linebreak', // uzun metinlerde satır kaydırma
+            valign: 'middle',
+          },
+          headStyles: {
+            fillColor: [240, 240, 240],
+            textColor: 20,
+            halign: 'left',
+            fontStyle: 'bold',
+          },
+          alternateRowStyles: { fillColor: [249, 250, 251] },
+          tableWidth: 'wrap',
+          horizontalPageBreak: true, // sütunlar çoksa yatay sayfa kırımı
+          columnStyles: headers.reduce((acc, h, i) => {
+            acc[i] = { cellWidth: 'wrap', minCellWidth: headers.length > 12 ? 14 : headers.length > 8 ? 18 : 24, halign: 'left' };
+            return acc;
+          }, {}),
+          didDrawPage: (dataArg) => {
+            // Sayfa numarası
+            const pageCount = doc.internal.getNumberOfPages();
+            const str = `${doc.internal.getCurrentPageInfo().pageNumber} / ${pageCount}`;
+            doc.setFontSize(8);
+            doc.text(str, doc.internal.pageSize.width - 14, doc.internal.pageSize.height - 8, { align: 'right' });
+          },
         });
-        
-        yPosition += rowHeight;
-      });
-      
-      // Dosyayı indir
-      doc.save(`${filename}.pdf`);
-      toast.success('Veriler PDF formatında indirildi');
-    };
-    
-    document.head.appendChild(script);
+
+        const now = new Date();
+        const two = (n) => String(n).padStart(2, '0');
+        const stamp = `${now.getFullYear()}-${two(now.getMonth()+1)}-${two(now.getDate())}_${two(now.getHours())}-${two(now.getMinutes())}-${two(now.getSeconds())}`;
+        doc.save(`${filename}_${stamp}.pdf`);
+        toast.success('Veriler PDF formatında indirildi');
+      })
+      .catch(() => toast.error('PDF oluşturulurken bir hata oluştu'));
   };
 
   // Tabs configuration
@@ -475,6 +656,10 @@ const StoragePage = () => {
         value: Number(r[chartType]) || 0 
       })));
     }
+    // Yüklü eşikleri getir
+    const t = getThreshold(chartType);
+    setThWarning(Number(t.warning || 75));
+    setThCritical(Number(t.critical || 90));
   };
 
   const closeChart = () => {
@@ -500,11 +685,61 @@ const StoragePage = () => {
   const clearTimeFilter = () => {
     setIsFiltered(false);
     setFilteredData([]);
+    setFilteredForModal(null);
     toast.success('Zaman filtresi temizlendi');
   };
 
   const applyTimeFilter = () => {
-    // Time filter logic here
+    // Aktif modalın verisi üzerinden zaman filtresi uygula
+    let baseData = [];
+    switch (activeModal) {
+      case 'CSASUM': baseData = csasumData || []; break;
+      case 'FRMINFO_CENTER': baseData = frminfoCenterData || []; break;
+      case 'FRMINFO_FIXED': baseData = frminfoFixedData || []; break;
+      case 'FRMINFO_HIGH_VIRTUAL': baseData = frminfoHighVirtualData || []; break;
+      case 'SYSFRMIZ': baseData = sysfrmizData || []; break;
+      default: baseData = []; break;
+    }
+
+    const getRecordDate = (row) => {
+      const raw = row?.bmctime || row?.timestamp || row?.record_timestamp || row?.created_at || row?.updated_at;
+      const d = new Date(raw);
+      return isNaN(d.getTime()) ? null : d;
+    };
+
+    const now = new Date();
+    let from = null;
+    let to = now;
+
+    switch (selectedTimeRange) {
+      case 'last5m': from = new Date(now.getTime() - 5 * 60 * 1000); break;
+      case 'last15m': from = new Date(now.getTime() - 15 * 60 * 1000); break;
+      case 'last30m': from = new Date(now.getTime() - 30 * 60 * 1000); break;
+      case 'last1h': from = new Date(now.getTime() - 1 * 60 * 60 * 1000); break;
+      case 'last3h': from = new Date(now.getTime() - 3 * 60 * 60 * 1000); break;
+      case 'last6h': from = new Date(now.getTime() - 6 * 60 * 60 * 1000); break;
+      case 'last12h': from = new Date(now.getTime() - 12 * 60 * 60 * 1000); break;
+      case 'last24h': from = new Date(now.getTime() - 24 * 60 * 60 * 1000); break;
+      case 'last2d': from = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000); break;
+      case 'custom':
+        from = customFromDate ? new Date(customFromDate) : null;
+        to = customToDate ? new Date(customToDate) : now;
+        break;
+      default:
+        from = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+    }
+
+    const next = baseData.filter((row) => {
+      const d = getRecordDate(row);
+      if (!d) return false;
+      if (from && d < from) return false;
+      if (to && d > to) return false;
+      return true;
+    });
+
+    setFilteredData(next);
+    setFilteredForModal(activeModal);
+    setIsFiltered(true);
     toast.success('Zaman filtresi uygulandı');
     setTimeFilterModal(false);
   };
@@ -543,11 +778,58 @@ const StoragePage = () => {
       why: 'Aşırı kullanım, tahsis gecikmelerine ve servis bozulmalarına yol açabilir.'
     },
 
-    // FRMINFO_FIXED (örnek başlıklar)
-    sqa_avg: { title: 'SQA Ortalama', what: 'SQA kullanımının ortalaması.', why: 'Trendin izlenmesi kapasite planlamasını kolaylaştırır.' },
-    sqa_min: { title: 'SQA Minimum', what: 'SQA kullanımının minimum değeri.', why: 'Düşük taban, piklerin göreli etkisini gösterir.' },
-    sqa_max: { title: 'SQA Maksimum', what: 'SQA kullanımının en yüksek değeri.', why: 'Piklerde eşik aşımları tespit edilir.' },
-    fixed_percentage: { title: 'Fixed %', what: 'Toplam çerçevelerin sabit yüzdesi.', why: 'Fazla sabit çerçeve, esnekliği düşürür.' },
+    // FRMINFO_FIXED (Türkçe başlıklar)
+    sqa_avg: { title: 'Sabit SQA Çerçeveleri (Ortalama)', what: 'Aralık boyunca SQA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+    sqa_min: { title: 'Sabit SQA Çerçeveleri (Minimum)', what: 'Aralık boyunca SQA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+    sqa_max: { title: 'Sabit SQA Çerçeveleri (Maksimum)', what: 'Aralık boyunca SQA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+    lpa_avg: { title: 'Sabit LPA Çerçeveleri (Ortalama)', what: 'Aralık boyunca LPA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+    lpa_min: { title: 'Sabit LPA Çerçeveleri (Minimum)', what: 'Aralık boyunca LPA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+    lpa_max: { title: 'Sabit LPA Çerçeveleri (Maksimum)', what: 'Aralık boyunca LPA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+    csa_avg: { title: 'Sabit CSA Çerçeveleri (Ortalama)', what: 'Aralık boyunca CSA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+    lsqa_avg: { title: 'Sabit LSQA Çerçeveleri (Ortalama)', what: 'Aralık boyunca LSQA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+    lsqa_min: { title: 'Sabit LSQA Çerçeveleri (Minimum)', what: 'Aralık boyunca LSQA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+    lsqa_max: { title: 'Sabit LSQA Çerçeveleri (Maksimum)', what: 'Aralık boyunca LSQA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+    private_avg: { title: 'Sabit Private Çerçeveler (Ortalama)', what: 'Aralık boyunca Private Area adres alanı sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+    private_min: { title: 'Sabit Private Çerçeveler (Minimum)', what: 'Aralık boyunca Private Area adres alanı sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+    private_max: { title: 'Sabit Private Çerçeveler (Maksimum)', what: 'Aralık boyunca Private Area adres alanı sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+    fixed_below_16m_avg: { title: '16MB Altı Sabit Çerçeveler (Ortalama)', what: 'Aralık boyunca 16MB altında kalan sabit merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+    fixed_below_16m_min: { title: '16MB Altı Sabit Çerçeveler (Minimum)', what: 'Aralık boyunca 16MB altında kalan sabit merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+    fixed_below_16m_max: { title: '16MB Altı Sabit Çerçeveler (Maksimum)', what: 'Aralık boyunca 16MB altında kalan sabit merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+    fixed_total_avg: { title: 'Toplam Sabit Çerçeveler (Ortalama)', what: 'Aralık boyunca sabitlenen tüm merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+    fixed_total_min: { title: 'Toplam Sabit Çerçeveler (Minimum)', what: 'Aralık boyunca sabitlenen tüm merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+    fixed_total_max: { title: 'Toplam Sabit Çerçeveler (Maksimum)', what: 'Aralık boyunca sabitlenen tüm merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+    fixed_percentage: { title: 'Sabit Çerçeveler Ortalama Yüzdesi', what: 'Aralık boyunca kullanılan kullanılabilir depolama çerçeveleri içindeki sabit çerçevelerin ortalama yüzdesidir.' },
+
+    // FRMINFO_CENTER (Türkçe başlıklar)
+    spispcav: { title: 'Ortalama SQA Çerçeveleri', what: 'Aralık boyunca SQA sayfalarının işgal ettiği merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+    spispcmn: { title: 'Minimum SQA Çerçeveleri', what: 'Aralık boyunca SQA sayfalarının işgal ettiği merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+    spispcmx: { title: 'Maksimum SQA Çerçeveleri', what: 'Aralık boyunca SQA sayfalarının işgal ettiği merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+    spilpfav: { title: 'Ortalama LPA Çerçeveleri', what: 'Aralık boyunca LPA sayfalarının işgal ettiği merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+    spilpfmn: { title: 'Minimum LPA Çerçeveleri', what: 'Aralık boyunca LPA sayfalarının işgal ettiği merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+    spilpfmx: { title: 'Maksimum LPA Çerçeveleri', what: 'Aralık boyunca LPA sayfalarının işgal ettiği merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+    spicpfav: { title: 'Ortalama CSA Çerçeveleri', what: 'Aralık boyunca CSA sayfalarının işgal ettiği merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+    spicpfmn: { title: 'Minimum CSA Çerçeveleri', what: 'Aralık boyunca CSA sayfalarının işgal ettiği merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+    spicpfmx: { title: 'Maksimum CSA Çerçeveleri', what: 'Aralık boyunca CSA sayfalarının işgal ettiği merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+    spiqpcav: { title: 'Ortalama LSQA Çerçeveleri', what: 'Aralık boyunca LSQA sayfalarının işgal ettiği merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+    spiqpcmn: { title: 'Minimum LSQA Çerçeveleri', what: 'Aralık boyunca LSQA sayfalarının işgal ettiği merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+    spiqpcmx: { title: 'Maksimum LSQA Çerçeveleri', what: 'Aralık boyunca LSQA sayfalarının işgal ettiği merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+    spiapfav: { title: 'Ortalama Private Çerçeveler', what: 'Aralık boyunca Private Area adres alanı sayfalarının işgal ettiği merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+    spiapfmn: { title: 'Minimum Private Çerçeveler', what: 'Aralık boyunca Private Area adres alanı sayfalarının işgal ettiği merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+    spiapfmx: { title: 'Maksimum Private Çerçeveler', what: 'Aralık boyunca Private Area adres alanı sayfalarının işgal ettiği merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+    spiafcav: { title: 'Kullanılabilir Çerçeveler (Ortalama)', what: 'Aralık boyunca kullanılabilir merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+    spiafcmn: { title: 'Kullanılabilir Çerçeveler (Minimum)', what: 'Aralık boyunca kullanılabilir merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+    spitfuav: { title: 'Ortalama Merkezi Toplam', what: 'Aralık boyunca kullanılan tüm merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+    spiafumn: { title: 'Minimum Merkezi Toplam', what: 'Aralık boyunca kullanılan tüm merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+    spiafumx: { title: 'Maksimum Merkezi Toplam', what: 'Aralık boyunca kullanılan tüm merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+    spitcpct: { title: 'Merkezi Çerçeveler Ortalama Yüzdesi', what: 'Aralık boyunca kullanılan merkezi depolama çerçevelerinin ortalama yüzde oranıdır.' },
+
+    // FRMINFO_HIGH_VIRTUAL (Türkçe başlıklar)
+    hv_common_avg: { title: 'Ortalama High Virtual Common Çerçeveleri', what: 'Aralık boyunca High Virtual Common depolamanın işgal ettiği merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+    hv_common_min: { title: 'Minimum High Virtual Common Çerçeveleri', what: 'Aralık boyunca High Virtual Common depolamanın işgal ettiği merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+    hv_common_max: { title: 'Maksimum High Virtual Common Çerçeveleri', what: 'Aralık boyunca High Virtual Common depolamanın işgal ettiği merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+    hv_shared_avg: { title: 'Ortalama High Virtual Shared Çerçeveleri', what: 'Aralık boyunca High Virtual Paylaşılan Bellek Nesnelerinin işgal ettiği merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+    hv_shared_min: { title: 'Minimum High Virtual Shared Çerçeveleri', what: 'Aralık boyunca High Virtual Paylaşılan Bellek Nesnelerinin işgal ettiği merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+    hv_shared_max: { title: 'Maksimum High Virtual Shared Çerçeveleri', what: 'Aralık boyunca High Virtual Paylaşılan Bellek Nesnelerinin işgal ettiği merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
 
     // SYSFRMIZ (örnek)
     spl: { title: 'SPL', what: 'System Private Lines kapasitesi/ayar metriği.', why: 'Kaynak sınırlamaları performansı etkileyebilir.' },
@@ -577,7 +859,7 @@ const StoragePage = () => {
             className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
           >
             <div className="flex items-center space-x-1">
-              <span>{formatHeaderName(header)}</span>
+              <span>{getDisplayName(header)}</span>
               {sortColumn === header && (
                 <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
               )}
@@ -686,7 +968,7 @@ const StoragePage = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">CSASUM</h2>
                 <p className="text-gray-500 text-sm font-medium">Common Storage Area Summary</p>
                 <div className="mt-4 flex items-center justify-center">
-                  {csasumData.length > 0 ? (
+                  {dbHealthy ? (
                     <div className="flex items-center space-x-2 bg-green-100 rounded-full px-3 py-1">
                       <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                       <span className="text-xs font-medium text-green-800">Aktif</span>
@@ -714,7 +996,7 @@ const StoragePage = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">FRMINFO Central</h2>
                 <p className="text-gray-500 text-sm font-medium">Frame Information Central</p>
                 <div className="mt-4 flex items-center justify-center">
-                  {frminfoCenterData.length > 0 ? (
+                  {dbHealthy ? (
                     <div className="flex items-center space-x-2 bg-green-100 rounded-full px-3 py-1">
                       <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                       <span className="text-xs font-medium text-green-800">Aktif</span>
@@ -742,7 +1024,7 @@ const StoragePage = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">FRMINFO Fixed</h2>
                 <p className="text-gray-500 text-sm font-medium">Frame Information Fixed</p>
                 <div className="mt-4 flex items-center justify-center">
-                  {frminfoFixedData.length > 0 ? (
+                  {dbHealthy ? (
                     <div className="flex items-center space-x-2 bg-green-100 rounded-full px-3 py-1">
                       <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                       <span className="text-xs font-medium text-green-800">Aktif</span>
@@ -770,7 +1052,7 @@ const StoragePage = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">FRMINFO High Virtual</h2>
                 <p className="text-gray-500 text-sm font-medium">Frame Information High Virtual</p>
                 <div className="mt-4 flex items-center justify-center">
-                  {frminfoHighVirtualData.length > 0 ? (
+                  {dbHealthy ? (
                     <div className="flex items-center space-x-2 bg-green-100 rounded-full px-3 py-1">
                       <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                       <span className="text-xs font-medium text-green-800">Aktif</span>
@@ -798,7 +1080,7 @@ const StoragePage = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">SYSFRMIZ</h2>
                 <p className="text-gray-500 text-sm font-medium">System Frame Information</p>
                 <div className="mt-4 flex items-center justify-center">
-                  {sysfrmizData.length > 0 ? (
+                  {dbHealthy ? (
                     <div className="flex items-center space-x-2 bg-green-100 rounded-full px-3 py-1">
                       <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                       <span className="text-xs font-medium text-green-800">Aktif</span>
@@ -882,12 +1164,13 @@ const StoragePage = () => {
                           </button>
                           <button
                             onClick={openTimeFilter}
-                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors duration-200 flex items-center"
+                            className="pl-3 pr-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors duration-200 inline-flex items-center space-x-2 shadow-sm"
                           >
-                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            <svg className="w-4 h-4 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                              <circle cx="12" cy="12" r="9" strokeWidth="1.6"/>
+                              <path d="M12 7v4.5l2.8 2.8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
-                            Zaman Filtresi
+                            <span>Zaman Filtresi</span>
                           </button>
                           <button
                             onClick={loadDataForActiveTab}
@@ -942,7 +1225,7 @@ const StoragePage = () => {
                             const isAlert = Number(value) > 80;
                             return (
                               <div key={colKey} onClick={isNumeric ? () => openChart(colKey) : undefined} className={`group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 p-6 ${isNumeric ? 'cursor-pointer hover:-translate-y-2' : 'cursor-default'}`}>
-                                <div className={`absolute top-3 left-3 w-3 h-3 ${dotColor} rounded-sm`}></div>
+                                
                                 <button onClick={(e) => { e.stopPropagation(); openInfo(colKey); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                                 </button>
@@ -952,7 +1235,7 @@ const StoragePage = () => {
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                     </svg>
                                   </div>
-                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{formatHeaderName(colKey)}</h5>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName(colKey)}</h5>
                                   <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${isAlert ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
                                     {value !== undefined && value !== null && value !== '' ? formatValue(value, colKey) : '-'}
                                   </div>
@@ -999,7 +1282,7 @@ const StoragePage = () => {
                             const isAlert = Number(value) > 80;
                             return (
                               <div key={colKey} onClick={isNumeric ? () => openChart(colKey) : undefined} className={`group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 p-6 ${isNumeric ? 'cursor-pointer hover:-translate-y-2' : 'cursor-default'}`}>
-                                <div className={`absolute top-3 left-3 w-3 h-3 ${dotColor} rounded-sm`}></div>
+                                
                                 <button onClick={(e) => { e.stopPropagation(); openInfo(colKey); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                                 </button>
@@ -1009,7 +1292,7 @@ const StoragePage = () => {
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                     </svg>
                                   </div>
-                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{formatHeaderName(colKey)}</h5>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName(colKey)}</h5>
                                   <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${isAlert ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
                                     {value !== undefined && value !== null && value !== '' ? formatValue(value, colKey) : '-'}
                                   </div>
@@ -1057,7 +1340,7 @@ const StoragePage = () => {
                             const isAlert = Number(value) > 80;
                             return (
                               <div key={colKey} onClick={isNumeric ? () => openChart(colKey) : undefined} className={`group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 p-6 ${isNumeric ? 'cursor-pointer hover:-translate-y-2' : 'cursor-default'}`}>
-                                <div className={`absolute top-3 left-3 w-3 h-3 ${dotColor} rounded-sm`}></div>
+                                
                                 <button onClick={(e) => { e.stopPropagation(); openInfo(colKey); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                                 </button>
@@ -1067,7 +1350,7 @@ const StoragePage = () => {
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                     </svg>
                                   </div>
-                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{formatHeaderName(colKey)}</h5>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName(colKey)}</h5>
                                   <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${isAlert ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
                                     {value !== undefined && value !== null && value !== '' ? `${formatValue(value, colKey)}${isPercent ? '' : ''}` : '-'}
                                   </div>
@@ -1077,7 +1360,7 @@ const StoragePage = () => {
                           })}
                           {/* SQA Average */}
                           <div onClick={() => openChart('sqa_avg')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('sqa_avg'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1087,7 +1370,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SQA Avg</h5>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('sqa_avg')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.sqa_avg > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1098,7 +1381,7 @@ const StoragePage = () => {
 
                           {/* SQA Min */}
                           <div onClick={() => openChart('sqa_min')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-blue-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('sqa_min'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1108,7 +1391,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SQA Min</h5>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('sqa_min')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.sqa_min > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1119,7 +1402,7 @@ const StoragePage = () => {
 
                           {/* SQA Max */}
                           <div onClick={() => openChart('sqa_max')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-purple-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('sqa_max'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1129,7 +1412,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SQA Max</h5>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('sqa_max')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.sqa_max > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1140,7 +1423,7 @@ const StoragePage = () => {
 
                           {/* LPA Average */}
                           <div onClick={() => openChart('lpa_avg')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-orange-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('lpa_avg'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1150,7 +1433,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">LPA Avg</h5>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('lpa_avg')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.lpa_avg > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1161,7 +1444,7 @@ const StoragePage = () => {
 
                           {/* LPA Min */}
                           <div onClick={() => openChart('lpa_min')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-red-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('lpa_min'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1171,7 +1454,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">LPA Min</h5>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('lpa_min')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.lpa_min > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1182,7 +1465,7 @@ const StoragePage = () => {
 
                           {/* LPA Max */}
                           <div onClick={() => openChart('lpa_max')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-indigo-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('lpa_max'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1192,7 +1475,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">LPA Max</h5>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('lpa_max')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.lpa_max > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1203,7 +1486,7 @@ const StoragePage = () => {
 
                           {/* CSA Average */}
                           <div onClick={() => openChart('csa_avg')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-yellow-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('csa_avg'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1213,7 +1496,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CSA Avg</h5>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('csa_avg')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.csa_avg > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1224,7 +1507,7 @@ const StoragePage = () => {
 
                           {/* CSA Min */}
                           <div onClick={() => openChart('csa_min')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-pink-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('csa_min'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1234,7 +1517,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CSA Min</h5>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('csa_min')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.csa_min > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1245,7 +1528,7 @@ const StoragePage = () => {
 
                           {/* CSA Max */}
                           <div onClick={() => openChart('csa_max')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-teal-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('csa_max'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1255,7 +1538,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CSA Max</h5>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('csa_max')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.csa_max > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1266,7 +1549,7 @@ const StoragePage = () => {
 
                           {/* Fixed Percentage */}
                           <div onClick={() => openChart('fixed_percentage')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-cyan-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('fixed_percentage'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1276,7 +1559,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Fixed %</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('fixed_percentage')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.fixed_percentage > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1317,7 +1600,7 @@ const StoragePage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           {/* HV Common Average */}
                           <div onClick={() => openChart('hv_common_avg')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('hv_common_avg'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1327,7 +1610,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{formatHeaderName('hv_common_avg')}</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('hv_common_avg')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.hv_common_avg > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1338,7 +1621,7 @@ const StoragePage = () => {
 
                           {/* HV Common Min */}
                           <div onClick={() => openChart('hv_common_min')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-blue-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('hv_common_min'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1348,7 +1631,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{formatHeaderName('hv_common_min')}</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('hv_common_min')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.hv_common_min > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1359,7 +1642,7 @@ const StoragePage = () => {
 
                           {/* HV Common Max */}
                           <div onClick={() => openChart('hv_common_max')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-purple-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('hv_common_max'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1369,7 +1652,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{formatHeaderName('hv_common_max')}</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('hv_common_max')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.hv_common_max > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1380,7 +1663,7 @@ const StoragePage = () => {
 
                           {/* HV Shared Average */}
                           <div onClick={() => openChart('hv_shared_avg')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-orange-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('hv_shared_avg'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1390,7 +1673,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{formatHeaderName('hv_shared_avg')}</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('hv_shared_avg')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.hv_shared_avg > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1401,7 +1684,7 @@ const StoragePage = () => {
 
                           {/* HV Shared Min */}
                           <div onClick={() => openChart('hv_shared_min')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-red-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('hv_shared_min'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1411,7 +1694,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{formatHeaderName('hv_shared_min')}</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('hv_shared_min')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.hv_shared_min > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1422,7 +1705,7 @@ const StoragePage = () => {
 
                           {/* HV Shared Max */}
                           <div onClick={() => openChart('hv_shared_max')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-indigo-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('hv_shared_max'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1432,7 +1715,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{formatHeaderName('hv_shared_max')}</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('hv_shared_max')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.hv_shared_max > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1479,7 +1762,7 @@ const StoragePage = () => {
                             const isAlert = Number(value) > 80;
                             return (
                               <div key={colKey} onClick={isNumeric ? () => openChart(colKey) : undefined} className={`group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 p-6 ${isNumeric ? 'cursor-pointer hover:-translate-y-2' : 'cursor-default'}`}>
-                                <div className={`absolute top-3 left-3 w-3 h-3 ${dotColor} rounded-sm`}></div>
+                                
                                 <button onClick={(e) => { e.stopPropagation(); openInfo(colKey); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                                 </button>
@@ -1489,7 +1772,7 @@ const StoragePage = () => {
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                     </svg>
                                   </div>
-                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{formatHeaderName(colKey).toUpperCase()}</h5>
+                                  <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName(colKey)}</h5>
                                   <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${isAlert ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
                                     {value !== undefined && value !== null && value !== '' ? formatValue(value, colKey) : '-'}
                                   </div>
@@ -1499,7 +1782,7 @@ const StoragePage = () => {
                           })}
                           {/* SPL */}
                           <div onClick={() => openChart('spl')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-green-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('spl'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1520,7 +1803,7 @@ const StoragePage = () => {
 
                           {/* SPIUONLF */}
                           <div onClick={() => openChart('spiuonlf')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-blue-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('spiuonlf'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1530,7 +1813,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPIUONLF</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('spiuonlf')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.spiuonlf > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1541,7 +1824,7 @@ const StoragePage = () => {
 
                           {/* SPIFINAV */}
                           <div onClick={() => openChart('spifinav')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-purple-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('spifinav'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1551,7 +1834,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPIFINAV</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('spifinav')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.spifinav > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1562,7 +1845,7 @@ const StoragePage = () => {
 
                           {/* SPREFNCP */}
                           <div onClick={() => openChart('sprefncp')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-orange-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('sprefncp'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1572,7 +1855,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPREFNCP</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('sprefncp')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.sprefncp > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1583,7 +1866,7 @@ const StoragePage = () => {
 
                           {/* SPISPCav */}
                           <div onClick={() => openChart('spispcav')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-red-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('spispcav'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1593,7 +1876,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPISPCav</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('spispcav')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.spispcav > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1604,7 +1887,7 @@ const StoragePage = () => {
 
                           {/* SPREASRP */}
                           <div onClick={() => openChart('spreasrp')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-indigo-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('spreasrp'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1614,7 +1897,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPREASRP</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('spreasrp')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.spreasrp > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1625,7 +1908,7 @@ const StoragePage = () => {
 
                           {/* SPILPFAV */}
                           <div onClick={() => openChart('spilpfav')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-yellow-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('spilpfav'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1635,7 +1918,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPILPFAV</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('spilpfav')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.spilpfav > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1646,7 +1929,7 @@ const StoragePage = () => {
 
                           {/* SPREALPP */}
                           <div onClick={() => openChart('sprealpp')} className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2">
-                            <div className="absolute top-3 left-3 w-3 h-3 bg-pink-400 rounded-sm"></div>
+                            
                             <button onClick={(e) => { e.stopPropagation(); openInfo('sprealpp'); }} className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10">
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
                             </button>
@@ -1656,7 +1939,7 @@ const StoragePage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">SPREALPP</h5>
+                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName('sprealpp')}</h5>
                               <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                                 getCurrentData()?.[0]?.sprealpp > 80 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
                               }`}>
@@ -1719,7 +2002,7 @@ const StoragePage = () => {
             <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-xl shadow-2xl max-w-6xl w-full mx-4 max-h-[85vh] overflow-y-auto">
               <div className="sticky top-0 z-50 bg-white shadow-sm">
                 <div className="p-6 pb-3 flex items-center justify-between">
-                  <h3 className="text-2xl font-bold text-gray-900">{selectedChart} Grafiği</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">{getDisplayName(selectedChart)} Grafiği</h3>
                   <button onClick={closeChart} className="text-gray-500 hover:text-gray-700 text-2xl" title="Kapat">×</button>
                 </div>
                 <div className="px-6 border-b border-gray-200">
@@ -1745,7 +2028,7 @@ const StoragePage = () => {
                   {chartTab === 'chart' && (
                     <div className="bg-white rounded-lg border border-gray-200 p-6">
                       <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-sm md:text-lg font-semibold text-gray-800">{selectedChart} - Zaman Serisi Grafiği</h4>
+                        <h4 className="text-sm md:text-lg font-semibold text-gray-800">{getDisplayName(selectedChart)} - Zaman Serisi Grafiği</h4>
                         <button
                           onClick={() => openChart(selectedChart)}
                           className="text-blue-600 hover:text-blue-700 text-sm font-medium"
@@ -1772,19 +2055,34 @@ const StoragePage = () => {
                           if (!isFinite(vMin)) vMin = 0; if (!isFinite(vMax)) vMax = 100;
                           if (vMax === vMin) vMax = vMin + 10;
 
-                          const isPercentMetric = /(percent|pct|percentage|busy|util|^hv_)/i.test(String(selectedChart || ''));
-                          const maxVal = isPercentMetric ? 100 : Math.max(vMax, 100);
-                          const minVal = 0;
-                          const range = maxVal - minVal;
+                          const isPercentMetric = /(percent|pct|percentage|busy|util)/i.test(String(selectedChart || ''));
+                          // Dynamic y-scale so all points are visible
+                          let maxVal = isPercentMetric ? Math.max(100, vMax) : Math.max(vMax, 100);
+                          let minVal = Math.min(0, vMin);
+                          // Add 10% headroom
+                          const pad = Math.max(1, (maxVal - minVal) * 0.1);
+                          maxVal += pad;
+                          if (!isPercentMetric) {
+                            minVal -= pad;
+                          } else {
+                            minVal = Math.max(0, minVal);
+                          }
+                          const range = Math.max(1e-6, maxVal - minVal);
                           const step = range / 5;
 
                           const yPos = (v) => bottom - ((v - minVal) / range) * (bottom - top);
                           const stepX = 1100 / Math.max(1, len - 1);
                           const xPos = (i) => left + i * stepX;
 
-                          const ticks = isPercentMetric
-                            ? [0, 20, 40, 60, 80, 100]
-                            : Array.from({ length: 6 }, (_, i) => minVal + (i * step));
+                          const ticks = (() => {
+                            if (isPercentMetric) {
+                              const upper = Math.ceil(maxVal / 20) * 20;
+                              const arr = [];
+                              for (let t = 0; t <= upper; t += 20) arr.push(t);
+                              return arr;
+                            }
+                            return Array.from({ length: 6 }, (_, i) => minVal + (i * step));
+                          })();
                           const formatTick = (n) => {
                             const num = Number(n);
                             if (isPercentMetric) return `${num.toFixed(0)}%`;
@@ -1796,8 +2094,7 @@ const StoragePage = () => {
                           const areaD = `M ${xPos(0)},${yPos(chartData[0]?.value || 0)} ` + chartData.map((p,i)=>`L ${xPos(i)},${yPos(p.value)}`).join(' ') + ` L ${xPos(len-1)},${bottom} L ${xPos(0)},${bottom} Z`;
                           const lineD = `M ${xPos(0)},${yPos(chartData[0]?.value || 0)} ` + chartData.map((p,i)=>`L ${xPos(i)},${yPos(p.value)}`).join(' ');
 
-                          const criticalThreshold = 90;
-                          const warningThreshold = 75;
+                          const { warning: warningThreshold, critical: criticalThreshold } = getThreshold(selectedChart);
                           const showThresholds = isPercentMetric || vMax > 50;
 
                           const lineColor = isPercentMetric ? '#10b981' : '#3b82f6';
@@ -1909,18 +2206,18 @@ const StoragePage = () => {
                   )}
                   {chartTab === 'threshold' && (
                     <div className="space-y-6">
-                      <h4 className="text-lg font-semibold text-gray-800">{selectedChart} için Threshold Ayarları</h4>
+                      <h4 className="text-lg font-semibold text-gray-800">{getDisplayName(selectedChart)} için Threshold Ayarları</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-gray-50 rounded-lg p-6">
                           <h5 className="font-semibold text-gray-800 mb-4">Uyarı Eşikleri</h5>
                           <div className="space-y-3">
                             <div className="flex justify-between items-center">
                               <span className="text-sm text-gray-600">Kritik Eşik</span>
-                              <input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" defaultValue="90"/>
+                              <input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" value={thCritical} onChange={(e)=> setThCritical(Number(e.target.value))}/>
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-sm text-gray-600">Uyarı Eşiği</span>
-                              <input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" defaultValue="75"/>
+                              <input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" value={thWarning} onChange={(e)=> setThWarning(Number(e.target.value))}/>
                             </div>
                           </div>
                         </div>
@@ -1939,8 +2236,8 @@ const StoragePage = () => {
                         </div>
                       </div>
                       <div className="flex justify-end space-x-3 mt-6">
-                        <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">İptal</button>
-                        <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">Kaydet</button>
+                        <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200" onClick={()=> { const t = getThreshold(selectedChart); setThWarning(Number(t.warning||75)); setThCritical(Number(t.critical||90)); }}>İptal</button>
+                        <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700" onClick={()=> { setThresholdForMetric(selectedChart, { warning: Number(thWarning), critical: Number(thCritical) }); toast.success('Threshold kaydedildi'); }}>Kaydet</button>
                       </div>
                     </div>
                   )}
@@ -1975,6 +2272,87 @@ const StoragePage = () => {
                     <p className="text-amber-900 text-sm">
                       {(INFO_TEXTS[infoModal]?.why) || INFO_TEXTS.default.why}
                     </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Zaman Filtresi Modalı */}
+        {timeFilterModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[120]" onClick={closeTimeFilter}>
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto" onClick={(e)=>e.stopPropagation()}>
+              <div className="p-6 pb-3 flex justify-between items-center border-b border-gray-200">
+                <h3 className="text-xl font-bold text-gray-900">Zaman ve Tarih Filtresi</h3>
+                <button onClick={closeTimeFilter} className="text-2xl text-gray-500 hover:text-gray-700">×</button>
+              </div>
+              <div className="p-6 space-y-6">
+                <div>
+                  <div className="text-sm font-semibold text-gray-800 mb-3">Hızlı Zaman Aralıkları</div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-3">
+                    {[
+                      { id:'last5m', label:'Son 5 dakika' },
+                      { id:'last15m', label:'Son 15 dakika' },
+                      { id:'last30m', label:'Son 30 dakika' },
+                      { id:'last1h', label:'Son 1 saat' },
+                      { id:'last3h', label:'Son 3 saat' },
+                      { id:'last6h', label:'Son 6 saat' },
+                      { id:'last12h', label:'Son 12 saat' },
+                      { id:'last24h', label:'Son 24 saat' },
+                      { id:'last2d', label:'Son 2 gün' },
+                      { id:'custom', label:'Özel Aralık' }
+                    ].map((opt)=> (
+                      <button
+                        key={opt.id}
+                        onClick={()=> setSelectedTimeRange(opt.id)}
+                        className={`${selectedTimeRange===opt.id ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'} border rounded-lg px-4 py-3 text-sm font-medium`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {selectedTimeRange === 'custom' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm text-gray-600 mb-1">Başlangıç</div>
+                      <input
+                        type="datetime-local"
+                        value={customFromDate}
+                        onChange={(e)=> setCustomFromDate(e.target.value)}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600 mb-1">Bitiş</div>
+                      <input
+                        type="datetime-local"
+                        value={customToDate}
+                        onChange={(e)=> setCustomToDate(e.target.value)}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <div className="text-sm font-semibold text-gray-800 mb-2">Zaman Dilimi</div>
+                  <div className="flex items-center justify-between border border-gray-200 rounded-lg p-4 text-sm text-gray-700">
+                    <div>
+                      <div className="font-medium">Tarayıcı Zamanı</div>
+                      <div>{Intl.DateTimeFormat().resolvedOptions().timeZone} (UTC{(new Date().getTimezoneOffset()/ -60).toString().padStart(2,'0')}:00)</div>
+                    </div>
+                    <div className="text-blue-600 font-medium">Zaman Ayarlarını Değiştir</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <button onClick={clearTimeFilter} className="text-sm text-gray-500 hover:text-gray-700">Temizle</button>
+                  <div className="space-x-3">
+                    <button onClick={closeTimeFilter} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">İptal</button>
+                    <button onClick={applyTimeFilter} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">Zaman Aralığını Uygula</button>
                   </div>
                 </div>
               </div>
