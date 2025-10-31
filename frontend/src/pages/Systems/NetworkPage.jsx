@@ -72,6 +72,167 @@ const NetworkPage = () => {
     return num % 1 === 0 ? num.toString() : num.toFixed(2);
   };
 
+  // Başlıkları düzenle: Title Case (ilk harf büyük, diğerleri küçük)
+  const toTitleCase = (text) => {
+    if (!text || typeof text !== 'string') return text;
+    return text
+      .replace(/_/g, ' ')
+      .split(' ')
+      .filter(Boolean)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ');
+  };
+
+  // STACKS için özel kolon adı mapping fonksiyonu
+  const getStacksColumnDisplayName = (columnName) => {
+    const columnMapping = {
+      'jtarget': 'Target Field',
+      'J_TARGET': 'Target Field',
+      'j_target': 'Target Field',
+      'asid8': 'Stack ASID',
+      'ASID': 'Stack ASID',
+      'asid': 'Stack ASID',
+      'ver_rel': 'Stack Version',
+      'Version': 'Stack Version',
+      'version': 'Stack Version',
+      'jobnam8': 'Job Name',
+      'JOBNAM8': 'Job Name',
+      'job_name': 'Job Name',
+      'stepnam8': 'Step Name',
+      'STEPNAM8': 'Step Name',
+      'step_name': 'Step Name',
+      'mvslvlx8': 'MVS Level',
+      'MVSLVLX8': 'MVS Level',
+      'mvs_level': 'MVS Level',
+      'startc8': 'Start Time of Stack',
+      'STARTC8': 'Start Time of Stack',
+      'start_time': 'Start Time of Stack',
+      'ipaddrc8': 'Stack IP ADDRESS',
+      'IPADDRC8': 'Stack IP ADDRESS',
+      'ip_address': 'Stack IP ADDRESS',
+      'status18': 'Stack Status',
+      'STATUS18': 'Stack Status',
+      'status': 'Stack Status',
+    };
+    
+    // Önce tam eşleşme kontrolü
+    if (columnMapping[columnName]) {
+      return columnMapping[columnName];
+    }
+    
+    // Büyük/küçük harf duyarsız kontrol
+    const lowerColumnName = columnName.toLowerCase();
+    for (const [key, value] of Object.entries(columnMapping)) {
+      if (key.toLowerCase() === lowerColumnName) {
+        return value;
+      }
+    }
+    
+    // Eşleşme yoksa toTitleCase kullan
+    return toTitleCase(columnName);
+  };
+
+  // STACKCPU için özel kolon adı mapping fonksiyonu
+  const getStackCpuColumnDisplayName = (columnName) => {
+    const columnMapping = {
+      'statstks': 'TCPIP Stack Name',
+      'STATSTKS': 'TCPIP Stack Name',
+      'ippktrcd': 'Interval Packets Received',
+      'IPPKTRCD': 'Interval Packets Received',
+      'ippktrtr': 'Packets Received per Second',
+      'IPPKTRTR': 'Packets Received per Second',
+      'ipoutred': 'Current Output Requests',
+      'IPOUTRED': 'Current Output Requests',
+      'ipoutrtr': 'Output Requests per Second',
+      'IPOUTRTR': 'Output Requests per Second',
+    };
+    
+    // Önce tam eşleşme kontrolü
+    if (columnMapping[columnName]) {
+      return columnMapping[columnName];
+    }
+    
+    // Büyük/küçük harf duyarsız kontrol
+    const lowerColumnName = columnName.toLowerCase();
+    for (const [key, value] of Object.entries(columnMapping)) {
+      if (key.toLowerCase() === lowerColumnName) {
+        return value;
+      }
+    }
+    
+    // Eşleşme yoksa toTitleCase kullan
+    return toTitleCase(columnName);
+  };
+
+  const getVtamcsaColumnDisplayName = (columnName) => {
+    const columnMapping = {
+      'j_system': 'System Field',
+      'J_SYSTEM': 'System Field',
+      'j system': 'System Field',
+      'J System': 'System Field',
+      'csacur': 'Current ECSA Usage',
+      'CSACUR': 'Current ECSA Usage',
+      'csamax': 'Maximum ECSA Usage',
+      'CSAMAX': 'Maximum ECSA Usage',
+      'csalim': 'CSA Limit',
+      'CSALIM': 'CSA Limit',
+      'csausage': 'ECSA Storage Usage',
+      'CSAUSAGE': 'ECSA Storage Usage',
+      'c24cur': 'Current CSA24 Usage',
+      'C24CUR': 'Current CSA24 Usage',
+      'c24max': 'Maximum CSA24 Usage',
+      'C24MAX': 'Maximum CSA24 Usage',
+      'vtmcur': 'Current Private Usage',
+      'VTMCUR': 'Current Private Usage',
+      'vtmmax': 'Maximum Private Usage',
+      'VTMMAX': 'Maximum Private Usage',
+    };
+    
+    // Önce tam eşleşme kontrolü
+    if (columnMapping[columnName]) {
+      return columnMapping[columnName];
+    }
+    
+    // Büyük/küçük harf duyarsız kontrol
+    const lowerColumnName = columnName.toLowerCase();
+    for (const [key, value] of Object.entries(columnMapping)) {
+      if (key.toLowerCase() === lowerColumnName) {
+        return value;
+      }
+    }
+    
+    // Eşleşme yoksa toTitleCase kullan
+    return toTitleCase(columnName);
+  };
+
+  // Modal'a göre ham veriyi al
+  const getCurrentRawData = (modalType) => {
+    switch(modalType || activeModal) {
+      case 'STACKS':
+        return isFiltered ? filteredStacksData : stacksData;
+      case 'STACKCPU':
+        return isFiltered ? filteredStackCpuData : stackCpuData;
+      case 'vtamcsa':
+        return isFiltered ? filteredVtamcsaData : vtamcsaData;
+      default:
+        return [];
+    }
+  };
+
+  // Numeric column detector: kolonun sayısal olup olmadığını kontrol et
+  const isNumericColumn = (column, modalType) => {
+    const rows = getCurrentRawData(modalType);
+    if (!rows || rows.length === 0) return false;
+    for (let i = 0; i < rows.length; i++) {
+      const value = rows[i]?.[column] ?? rows[i]?.[column?.toUpperCase?.()] ?? rows[i]?.[column?.toLowerCase?.()];
+      if (value !== null && value !== undefined && value !== '') {
+        const num = Number(value);
+        return !isNaN(num) && isFinite(num);
+      }
+    }
+    return false;
+  };
+
   // STACKS için IP Address filtreleme fonksiyonu
   const filterStacksByIpAddress = (data) => {
     if (!ipAddressFilter) return data;
@@ -81,8 +242,8 @@ const NetworkPage = () => {
   };
 
   // STACKS için BMC Time filtreleme fonksiyonu (zaman aralığına göre)
-  const filterStacksByBmcTime = (data) => {
-    if (!bmcTimeFilter) {
+  const filterStacksByBmcTime = (data, timeFilter = bmcTimeFilter) => {
+    if (!timeFilter) {
       console.log('BMC Time filtresi yok, tüm veri döndürülüyor:', data.length);
       return data;
     }
@@ -91,17 +252,41 @@ const NetworkPage = () => {
     let startDate, endDate;
     
     // Seçilen zaman aralığına göre tarih hesaplama
-    switch (bmcTimeFilter) {
+    switch (timeFilter) {
+      case 'last5m':
+        startDate = new Date(now.getTime() - 5 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'last15m':
+        startDate = new Date(now.getTime() - 15 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'last30m':
+        startDate = new Date(now.getTime() - 30 * 60 * 1000);
+        endDate = now;
+        break;
       case 'last1h':
         startDate = new Date(now.getTime() - 1 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'last3h':
+        startDate = new Date(now.getTime() - 3 * 60 * 60 * 1000);
         endDate = now;
         break;
       case 'last6h':
         startDate = new Date(now.getTime() - 6 * 60 * 60 * 1000);
         endDate = now;
         break;
+      case 'last12h':
+        startDate = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+        endDate = now;
+        break;
       case 'last24h':
         startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'last2d':
+        startDate = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
         endDate = now;
         break;
       case 'last7d':
@@ -122,31 +307,28 @@ const NetworkPage = () => {
         }
         break;
       default:
-        console.log('Bilinmeyen zaman aralığı:', bmcTimeFilter);
+        console.log('Bilinmeyen zaman aralığı:', timeFilter);
         return data;
     }
     
     console.log('BMC Time filtresi uygulanıyor:', {
-      filter: bmcTimeFilter,
+      filter: timeFilter,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
       dataLength: data.length
     });
     
     const filteredData = data.filter(row => {
-      if (!row.bmctime) {
-        console.log('BMC Time eksik satır:', row);
+      // bmctime, created_at, updated_at veya time alanlarını kontrol et
+      const timeValue = row.bmctime || row.created_at || row.updated_at || row.time;
+      if (!timeValue) {
         return false;
       }
-      const bmcTime = new Date(row.bmctime);
-      const isInRange = bmcTime >= startDate && bmcTime <= endDate;
-      if (!isInRange) {
-        console.log('Tarih aralığı dışında:', {
-          bmcTime: bmcTime.toISOString(),
-          startDate: startDate.toISOString(),
-          endDate: endDate.toISOString()
-        });
+      const rowTime = new Date(timeValue);
+      if (isNaN(rowTime.getTime())) {
+        return false;
       }
+      const isInRange = rowTime >= startDate && rowTime <= endDate;
       return isInRange;
     });
     
@@ -283,7 +465,15 @@ const NetworkPage = () => {
           row.asid8 || '',
           row.mvslvlx8 || '',
           row.ver_rel || '',
-          row.startc8 || '',
+            row.startc8 ? (() => {
+              try {
+                const date = new Date(row.startc8);
+                if (!isNaN(date.getTime())) {
+                  return date.toLocaleString('tr-TR');
+                }
+              } catch (e) {}
+              return row.startc8 || '';
+            })() : '',
           row.ipaddrc8 || '',
           row.status18 || '',
           row.bmctime ? new Date(row.bmctime).toLocaleString('tr-TR') : '',
@@ -305,7 +495,7 @@ const NetworkPage = () => {
         ].join(','))
       ].join('\n');
     } else if (activeModal === 'vtamcsa') {
-      headers = ['J System', 'CSA Cur', 'CSA Max', 'CSA Lim', 'CSA Usage', 'C24 Cur', 'C24 Max', 'VTM Cur', 'VTM Max', 'BMC Time', 'Time'];
+      headers = ['System Field', 'Current ECSA Usage', 'Maximum ECSA Usage', 'CSA Limit', 'ECSA Storage Usage', 'Current CSA24 Usage', 'Maximum CSA24 Usage', 'Current Private Usage', 'Maximum Private Usage', 'BMC Time', 'Time'];
       csvData = [
         headers.join(','),
         ...data.map(row => [
@@ -513,14 +703,22 @@ const NetworkPage = () => {
             row.asid8 || '-',
             row.mvslvlx8 || '-',
             row.ver_rel || '-',
-            row.startc8 || '-',
+            row.startc8 ? (() => {
+              try {
+                const date = new Date(row.startc8);
+                if (!isNaN(date.getTime())) {
+                  return date.toLocaleString('tr-TR');
+                }
+              } catch (e) {}
+              return row.startc8 || '-';
+            })() : '-',
             row.ipaddrc8 || '-',
             row.status18 || '-',
             row.bmctime ? new Date(row.bmctime).toLocaleString('tr-TR') : '-',
             row.time || '-'
           ]);
         } else if (activeModal === 'STACKCPU') {
-          headers = ['TCPIP Stack Name', 'Packets In', 'Packets In per Second', 'Packets Out', 'Packets Out per Second', 'BMC Time', 'Time'];
+          headers = ['TCPIP Stack Name', 'Interval Packets Received', 'Packets Received per Second', 'Current Output Requests', 'Output Requests per Second', 'BMC Time', 'Time'];
           tableData = data.map(row => [
             row.statstks || '-',
             formatNumber(row.ippktrcd),
@@ -531,7 +729,7 @@ const NetworkPage = () => {
             row.time || '-'
           ]);
         } else if (activeModal === 'vtamcsa') {
-          headers = ['J System', 'CSA Cur', 'CSA Max', 'CSA Lim', 'CSA Usage', 'C24 Cur', 'C24 Max', 'VTM Cur', 'VTM Max', 'BMC Time', 'Time'];
+          headers = ['System Field', 'Current ECSA Usage', 'Maximum ECSA Usage', 'CSA Limit', 'ECSA Storage Usage', 'Current CSA24 Usage', 'Maximum CSA24 Usage', 'Current Private Usage', 'Maximum Private Usage', 'BMC Time', 'Time'];
           tableData = data.map(row => [
             row.j_system || '-',
             formatVtamcsaNumber(row.csacur),
@@ -1364,29 +1562,91 @@ const NetworkPage = () => {
   const openChart = (chartType) => {
     setSelectedChart(chartType);
     setChartTab('chart');
-    // Grafik veri setini seçilen karta göre hazırla
-    // VTMBUFF
-    if (chartType === 'vtmbuffIOBufSize') setChartData((isFiltered ? filteredVtmbuffData : vtmbuffData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.iobuf_size) || 0 })));
-    if (chartType === 'vtmbuffLPBufSize') setChartData((isFiltered ? filteredVtmbuffData : vtmbuffData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.lpbuf_size) || 0 })));
-    if (chartType === 'vtmbuffLFBufSize') setChartData((isFiltered ? filteredVtmbuffData : vtmbuffData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.lfbuf_size) || 0 })));
-    if (chartType === 'vtmbuffIOBufTimesExpanded') setChartData((isFiltered ? filteredVtmbuffData : vtmbuffData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.iobuf_times_expanded) || 0 })));
-    if (chartType === 'vtmbuffLPBufTimesExpanded') setChartData((isFiltered ? filteredVtmbuffData : vtmbuffData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.lpbuf_times_expanded) || 0 })));
-    if (chartType === 'vtmbuffLFBufTimesExpanded') setChartData((isFiltered ? filteredVtmbuffData : vtmbuffData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.lfbuf_times_expanded) || 0 })));
+    
+    let chartDataPoints = [];
+    
+    // STACKCPU verisine göre grafik verisi oluştur
+    if (activeModal === 'STACKCPU') {
+      const stackCpuDataToUse = isFiltered ? filteredStackCpuData : stackCpuData;
+      const field = chartType;
+      if (field && stackCpuDataToUse.length > 0) {
+        chartDataPoints = stackCpuDataToUse
+          .map((item, index) => {
+            const dateVal = new Date(item.bmctime || item.created_at || item.updated_at || item.time || Date.now());
+            const timeStr = isNaN(dateVal.getTime())
+              ? ''
+              : dateVal.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            const rawCandidate = item[field] ?? item[field?.toUpperCase?.()] ?? item[field?.toLowerCase?.()];
+            const numericValue = parseFloat(rawCandidate);
+            return {
+              x: index,
+              y: isNaN(numericValue) ? 0 : numericValue,
+              label: '',
+              value: isNaN(numericValue) ? 0 : numericValue,
+              timeStr,
+              dateVal,
+            };
+          })
+          .sort((a, b) => (a.dateVal?.getTime?.() || 0) - (b.dateVal?.getTime?.() || 0))
+          .map((d, idx) => ({ ...d, x: idx }));
+      }
+    }
+    // VTAMCSA verisine göre grafik verisi oluştur
+    else if (activeModal === 'vtamcsa') {
+      const vtamcsaDataToUse = isFiltered ? filteredVtamcsaData : vtamcsaData;
+      const field = chartType;
+      if (field && vtamcsaDataToUse.length > 0) {
+        chartDataPoints = vtamcsaDataToUse
+          .map((item, index) => {
+            const dateVal = new Date(item.bmctime || item.created_at || item.updated_at || item.time || Date.now());
+            const timeStr = isNaN(dateVal.getTime())
+              ? ''
+              : dateVal.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            const rawCandidate = item[field] ?? item[field?.toUpperCase?.()] ?? item[field?.toLowerCase?.()];
+            const numericValue = parseFloat(rawCandidate);
+            return {
+              x: index,
+              y: isNaN(numericValue) ? 0 : numericValue,
+              label: '',
+              value: isNaN(numericValue) ? 0 : numericValue,
+              timeStr,
+              dateVal,
+            };
+          })
+          .sort((a, b) => (a.dateVal?.getTime?.() || 0) - (b.dateVal?.getTime?.() || 0))
+          .map((d, idx) => ({ ...d, x: idx }));
+      }
+    }
+    // Diğer kartlar için mevcut yapı
+    else {
+      // VTMBUFF
+      if (chartType === 'vtmbuffIOBufSize') setChartData((isFiltered ? filteredVtmbuffData : vtmbuffData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.iobuf_size) || 0 })));
+      if (chartType === 'vtmbuffLPBufSize') setChartData((isFiltered ? filteredVtmbuffData : vtmbuffData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.lpbuf_size) || 0 })));
+      if (chartType === 'vtmbuffLFBufSize') setChartData((isFiltered ? filteredVtmbuffData : vtmbuffData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.lfbuf_size) || 0 })));
+      if (chartType === 'vtmbuffIOBufTimesExpanded') setChartData((isFiltered ? filteredVtmbuffData : vtmbuffData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.iobuf_times_expanded) || 0 })));
+      if (chartType === 'vtmbuffLPBufTimesExpanded') setChartData((isFiltered ? filteredVtmbuffData : vtmbuffData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.lpbuf_times_expanded) || 0 })));
+      if (chartType === 'vtmbuffLFBufTimesExpanded') setChartData((isFiltered ? filteredVtmbuffData : vtmbuffData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.lfbuf_times_expanded) || 0 })));
 
-    // TCPSTOR
-    if (chartType === 'tcpstorEcsaCurrent') setChartData((isFiltered ? filteredTcpstorData : tcpstorData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.ecsa_current) || 0 })));
-    if (chartType === 'tcpstorEcsaMax') setChartData((isFiltered ? filteredTcpstorData : tcpstorData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.ecsa_max) || 0 })));
-    if (chartType === 'tcpstorEcsaLimit') setChartData((isFiltered ? filteredTcpstorData : tcpstorData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.ecsa_limit) || 0 })));
-    if (chartType === 'tcpstorEcsaFree') setChartData((isFiltered ? filteredTcpstorData : tcpstorData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.ecsa_free) || 0 })));
-    if (chartType === 'tcpstorPrivateCurrent') setChartData((isFiltered ? filteredTcpstorData : tcpstorData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.private_current) || 0 })));
-    if (chartType === 'tcpstorPrivateMax') setChartData((isFiltered ? filteredTcpstorData : tcpstorData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.private_max) || 0 })));
+      // TCPSTOR
+      if (chartType === 'tcpstorEcsaCurrent') setChartData((isFiltered ? filteredTcpstorData : tcpstorData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.ecsa_current) || 0 })));
+      if (chartType === 'tcpstorEcsaMax') setChartData((isFiltered ? filteredTcpstorData : tcpstorData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.ecsa_max) || 0 })));
+      if (chartType === 'tcpstorEcsaLimit') setChartData((isFiltered ? filteredTcpstorData : tcpstorData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.ecsa_limit) || 0 })));
+      if (chartType === 'tcpstorEcsaFree') setChartData((isFiltered ? filteredTcpstorData : tcpstorData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.ecsa_free) || 0 })));
+      if (chartType === 'tcpstorPrivateCurrent') setChartData((isFiltered ? filteredTcpstorData : tcpstorData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.private_current) || 0 })));
+      if (chartType === 'tcpstorPrivateMax') setChartData((isFiltered ? filteredTcpstorData : tcpstorData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.private_max) || 0 })));
 
-    // CONNSRPZ
-    if (chartType === 'connsrpzActiveConns') setChartData((isFiltered ? filteredConnsrpzData : connsrpzData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.active_conns) || 0 })));
-    if (chartType === 'connsrpzAvgRtt') setChartData((isFiltered ? filteredConnsrpzData : connsrpzData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.average_rtt_ms) || 0 })));
-    if (chartType === 'connsrpzMaxRtt') setChartData((isFiltered ? filteredConnsrpzData : connsrpzData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.max_rtt_ms) || 0 })));
-    if (chartType === 'connsrpzBytesIn') setChartData((isFiltered ? filteredConnsrpzData : connsrpzData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.interval_bytes_in_sum) || 0 })));
-    if (chartType === 'connsrpzBytesOut') setChartData((isFiltered ? filteredConnsrpzData : connsrpzData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.interval_bytes_out_sum) || 0 })));
+      // CONNSRPZ
+      if (chartType === 'connsrpzActiveConns') setChartData((isFiltered ? filteredConnsrpzData : connsrpzData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.active_conns) || 0 })));
+      if (chartType === 'connsrpzAvgRtt') setChartData((isFiltered ? filteredConnsrpzData : connsrpzData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.average_rtt_ms) || 0 })));
+      if (chartType === 'connsrpzMaxRtt') setChartData((isFiltered ? filteredConnsrpzData : connsrpzData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.max_rtt_ms) || 0 })));
+      if (chartType === 'connsrpzBytesIn') setChartData((isFiltered ? filteredConnsrpzData : connsrpzData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.interval_bytes_in_sum) || 0 })));
+      if (chartType === 'connsrpzBytesOut') setChartData((isFiltered ? filteredConnsrpzData : connsrpzData).map(r => ({ label: r.record_timestamp || r.created_at || r.updated_at, value: Number(r.interval_bytes_out_sum) || 0 })));
+    }
+    
+    // STACKCPU ve VTAMCSA için chartDataPoints'i set et
+    if (chartDataPoints.length > 0) {
+      setChartData(chartDataPoints);
+    }
   };
 
   const closeChart = () => {
@@ -1408,10 +1668,44 @@ const NetworkPage = () => {
 
   // STACKS için zaman filtresi uygulama
   const applyStacksTimeFilter = () => {
+    try {
+      // Özel tarih aralığı kontrolü
+      if (selectedTimeRange === 'custom') {
+        if (!customFromDate || !customToDate) {
+          toast.error('Lütfen başlangıç ve bitiş tarihlerini seçin');
+          return;
+        }
+      }
+      
+      // Zaman filtresini uygula
+      setBmcTimeFilter(selectedTimeRange);
+      
+      // Filtrelenmiş veriyi hesapla ve state'e kaydet
+      let filtered = [...stacksData];
+      
+      // IP adresi filtresi varsa uygula
+      if (ipAddressFilter) {
+        filtered = filterStacksByIpAddress(filtered);
+      }
+      
+      // Zaman filtresini uygula
+      filtered = filterStacksByBmcTime(filtered, selectedTimeRange);
+      
+      // Filtrelenmiş veriyi kaydet
+      setFilteredStacksData(filtered);
+      setIsFiltered(true);
+      
+      // Zaman aralığı etiketini belirle
     const timeRangeLabels = {
+        'last5m': 'Son 5 Dakika',
+        'last15m': 'Son 15 Dakika',
+        'last30m': 'Son 30 Dakika',
       'last1h': 'Son 1 Saat',
+        'last3h': 'Son 3 Saat',
       'last6h': 'Son 6 Saat', 
+        'last12h': 'Son 12 Saat',
       'last24h': 'Son 24 Saat',
+        'last2d': 'Son 2 Gün',
       'last7d': 'Son 7 Gün',
       'last30d': 'Son 30 Gün',
       'custom': customFromDate && customToDate ? 
@@ -1419,13 +1713,19 @@ const NetworkPage = () => {
         'Özel Tarih Aralığı'
     };
     
-    setBmcTimeFilter(selectedTimeRange);
-    setTimeFilterModal(false);
-    
-    const label = timeRangeLabels[selectedTimeRange];
-    toast.success(`BMC Time filtresi uygulandı: ${label}`);
-    
-    console.log('BMC Time filtresi uygulandı:', selectedTimeRange);
+      const label = timeRangeLabels[selectedTimeRange] || 'Zaman Filtresi';
+      toast.success(`Zaman filtresi uygulandı: ${label} (${filtered.length} kayıt)`);
+      
+      setTimeFilterModal(false);
+      console.log('STACKS zaman filtresi uygulandı:', {
+        selectedTimeRange,
+        filteredCount: filtered.length,
+        originalCount: stacksData.length
+      });
+    } catch (error) {
+      console.error('Zaman filtresi uygulanırken hata:', error);
+      toast.error('Zaman filtresi uygulanırken bir hata oluştu');
+    }
   };
 
   const closeTimeFilter = () => {
@@ -1435,8 +1735,153 @@ const NetworkPage = () => {
   // STACKS için BMC Time filtresini temizleme
   const clearStacksTimeFilter = () => {
     setBmcTimeFilter('');
-    console.log('BMC Time filtresi temizlendi');
-    toast.success('BMC Time filtresi temizlendi');
+    setFilteredStacksData([]);
+    setIsFiltered(false);
+    console.log('STACKS zaman filtresi temizlendi');
+    toast.success('Zaman filtresi temizlendi');
+  };
+
+  // STACKCPU için zaman filtreleme fonksiyonu
+  const filterStackCpuByTime = (data, timeFilter) => {
+    if (!timeFilter) {
+      return data;
+    }
+    
+    const now = new Date();
+    let startDate, endDate;
+    
+    // Seçilen zaman aralığına göre tarih hesaplama
+    switch (timeFilter) {
+      case 'last5m':
+        startDate = new Date(now.getTime() - 5 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'last15m':
+        startDate = new Date(now.getTime() - 15 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'last30m':
+        startDate = new Date(now.getTime() - 30 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'last1h':
+        startDate = new Date(now.getTime() - 1 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'last3h':
+        startDate = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'last6h':
+        startDate = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'last12h':
+        startDate = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'last24h':
+        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'last2d':
+        startDate = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'last7d':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'last30d':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case 'custom':
+        if (customFromDate && customToDate) {
+          startDate = new Date(customFromDate);
+          endDate = new Date(customToDate);
+        } else {
+          return data;
+        }
+        break;
+      default:
+        return data;
+    }
+    
+    const filteredData = data.filter(row => {
+      // bmctime, created_at, updated_at veya time alanlarını kontrol et
+      const timeValue = row.bmctime || row.created_at || row.updated_at || row.time;
+      if (!timeValue) {
+        return false;
+      }
+      const rowTime = new Date(timeValue);
+      if (isNaN(rowTime.getTime())) {
+        return false;
+      }
+      const isInRange = rowTime >= startDate && rowTime <= endDate;
+      return isInRange;
+    });
+    
+    return filteredData;
+  };
+
+  // STACKCPU için zaman filtresi uygulama
+  const applyStackCpuTimeFilter = () => {
+    try {
+      // Özel tarih aralığı kontrolü
+      if (selectedTimeRange === 'custom') {
+        if (!customFromDate || !customToDate) {
+          toast.error('Lütfen başlangıç ve bitiş tarihlerini seçin');
+          return;
+        }
+      }
+      
+      // Filtrelenmiş veriyi hesapla ve state'e kaydet
+      let filtered = filterStackCpuByTime(stackCpuData, selectedTimeRange);
+      
+      // Filtrelenmiş veriyi kaydet
+      setFilteredStackCpuData(filtered);
+      setIsFiltered(true);
+      
+      // Zaman aralığı etiketini belirle
+      const timeRangeLabels = {
+        'last5m': 'Son 5 Dakika',
+        'last15m': 'Son 15 Dakika',
+        'last30m': 'Son 30 Dakika',
+        'last1h': 'Son 1 Saat',
+        'last3h': 'Son 3 Saat',
+        'last6h': 'Son 6 Saat',
+        'last12h': 'Son 12 Saat',
+        'last24h': 'Son 24 Saat',
+        'last2d': 'Son 2 Gün',
+        'last7d': 'Son 7 Gün',
+        'last30d': 'Son 30 Gün',
+        'custom': customFromDate && customToDate ? 
+          `${new Date(customFromDate).toLocaleDateString('tr-TR')} - ${new Date(customToDate).toLocaleDateString('tr-TR')}` : 
+          'Özel Tarih Aralığı'
+      };
+      
+      const label = timeRangeLabels[selectedTimeRange] || 'Zaman Filtresi';
+      toast.success(`STACKCPU zaman filtresi uygulandı: ${label} (${filtered.length} kayıt)`);
+      
+      setTimeFilterModal(false);
+      console.log('STACKCPU zaman filtresi uygulandı:', {
+        selectedTimeRange,
+        filteredCount: filtered.length,
+        originalCount: stackCpuData.length
+      });
+    } catch (error) {
+      console.error('STACKCPU zaman filtresi uygulanırken hata:', error);
+      toast.error('Zaman filtresi uygulanırken bir hata oluştu');
+    }
+  };
+
+  // STACKCPU için zaman filtresini temizleme
+  const clearStackCpuTimeFilter = () => {
+    setFilteredStackCpuData([]);
+    setIsFiltered(false);
+    console.log('STACKCPU zaman filtresi temizlendi');
+    toast.success('Zaman filtresi temizlendi');
   };
 
   const clearTimeFilter = () => {
@@ -1593,8 +2038,7 @@ const NetworkPage = () => {
 
   const tabs = [
     { id: 'table', name: 'Tablo', icon: '📊' },
-    { id: 'chart', name: 'Grafik', icon: '📈' },
-    { id: 'threshold', name: 'Threshold', icon: '⚙️' }
+    { id: 'chart', name: 'Grafik', icon: '📈' }
   ];
 
     // Aktif moda göre renk belirleme (Örnek)
@@ -1895,6 +2339,17 @@ const NetworkPage = () => {
                               </svg>
                               Zaman Filtresi
                             </button>
+                            {isFiltered && filteredStackCpuData.length > 0 && (
+                              <button
+                                onClick={clearStackCpuTimeFilter}
+                                className="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors duration-200 flex items-center"
+                              >
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Temizle
+                              </button>
+                            )}
                             <button
                               onClick={fetchStackCpuData}
                               disabled={dataLoading}
@@ -2259,8 +2714,8 @@ const NetworkPage = () => {
                                   <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Name</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Step Name</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">J Target</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ASID</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target Field</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stack ASID</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MVS Level</th>
                                     <th 
                                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
@@ -2268,7 +2723,7 @@ const NetworkPage = () => {
                                     >
                                       <div className="space-y-1">
                                         <div className="flex items-center space-x-1">
-                                          <span>Version</span>
+                                          <span>Stack Vers</span>
                                           {stacksSortColumn === 'ver_rel' ? (
                                             <span className="text-blue-600 font-bold">
                                               {stacksSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
@@ -2298,7 +2753,26 @@ const NetworkPage = () => {
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.asid8 || '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.mvslvlx8 || '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.ver_rel || '-'}</td>
-                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.startc8 || '-'}</td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {row.startc8 ? (() => {
+                                          try {
+                                            const date = new Date(row.startc8);
+                                            if (!isNaN(date.getTime())) {
+                                              return date.toLocaleString('tr-TR', {
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                second: '2-digit'
+                                              });
+                                            }
+                                          } catch (e) {
+                                            // Date parse edilemezse ham değeri göster
+                                          }
+                                          return row.startc8;
+                                        })() : '-'}
+                                      </td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{row.ipaddrc8 || '-'}</td>
                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
@@ -2339,14 +2813,14 @@ const NetworkPage = () => {
                               <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                   <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATSTKS</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getStackCpuColumnDisplayName('STATSTKS')}</th>
                                     <th 
                                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
                                       onClick={() => handleStackCpuSort('ippktrcd')}
                                     >
                                       <div className="space-y-1">
                                         <div className="flex items-center space-x-1">
-                                          <span>IPPKTRCD</span>
+                                          <span>{getStackCpuColumnDisplayName('IPPKTRCD')}</span>
                                           {stackCpuSortColumn === 'ippktrcd' ? (
                                             <span className="text-blue-600 font-bold">
                                               {stackCpuSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
@@ -2366,7 +2840,7 @@ const NetworkPage = () => {
                                     >
                                       <div className="space-y-1">
                                         <div className="flex items-center space-x-1">
-                                          <span>IPPKTRTR</span>
+                                          <span>{getStackCpuColumnDisplayName('IPPKTRTR')}</span>
                                           {stackCpuSortColumn === 'ippktrtr' ? (
                                             <span className="text-blue-600 font-bold">
                                               {stackCpuSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
@@ -2386,7 +2860,7 @@ const NetworkPage = () => {
                                     >
                                       <div className="space-y-1">
                                         <div className="flex items-center space-x-1">
-                                          <span>IPOUTRED</span>
+                                          <span>{getStackCpuColumnDisplayName('IPOUTRED')}</span>
                                           {stackCpuSortColumn === 'ipoutred' ? (
                                             <span className="text-blue-600 font-bold">
                                               {stackCpuSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
@@ -2406,7 +2880,7 @@ const NetworkPage = () => {
                                     >
                                       <div className="space-y-1">
                                         <div className="flex items-center space-x-1">
-                                          <span>IPOUTRTR</span>
+                                          <span>{getStackCpuColumnDisplayName('IPOUTRTR')}</span>
                                           {stackCpuSortColumn === 'ipoutrtr' ? (
                                             <span className="text-blue-600 font-bold">
                                               {stackCpuSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
@@ -2461,14 +2935,14 @@ const NetworkPage = () => {
                               <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                   <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">J System</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">System Field</th>
                                     <th 
                                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
                                       onClick={() => handleVtamcsaSort('csacur')}
                                     >
                                       <div className="space-y-1">
                                         <div className="flex items-center space-x-1">
-                                          <span>CSA Cur</span>
+                                          <span>Current ECSA Usage</span>
                                           {vtamcsaSortColumn === 'csacur' ? (
                                             <span className="text-blue-600 font-bold">
                                               {vtamcsaSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
@@ -2488,7 +2962,7 @@ const NetworkPage = () => {
                                     >
                                       <div className="space-y-1">
                                         <div className="flex items-center space-x-1">
-                                          <span>CSA Max</span>
+                                          <span>Maximum ECSA Usage</span>
                                           {vtamcsaSortColumn === 'csamax' ? (
                                             <span className="text-blue-600 font-bold">
                                               {vtamcsaSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
@@ -2508,7 +2982,7 @@ const NetworkPage = () => {
                                     >
                                       <div className="space-y-1">
                                         <div className="flex items-center space-x-1">
-                                          <span>CSA Lim</span>
+                                          <span>CSA Limit</span>
                                           {vtamcsaSortColumn === 'csalim' ? (
                                             <span className="text-blue-600 font-bold">
                                               {vtamcsaSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
@@ -2528,7 +3002,7 @@ const NetworkPage = () => {
                                     >
                                       <div className="space-y-1">
                                         <div className="flex items-center space-x-1">
-                                          <span>CSA Usage</span>
+                                          <span>ECSA Storage Usage</span>
                                           {vtamcsaSortColumn === 'csausage' ? (
                                             <span className="text-blue-600 font-bold">
                                               {vtamcsaSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
@@ -2548,7 +3022,7 @@ const NetworkPage = () => {
                                     >
                                       <div className="space-y-1">
                                         <div className="flex items-center space-x-1">
-                                          <span>C24 Cur</span>
+                                          <span>Current CSA24 Usage</span>
                                           {vtamcsaSortColumn === 'c24cur' ? (
                                             <span className="text-blue-600 font-bold">
                                               {vtamcsaSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
@@ -2568,7 +3042,7 @@ const NetworkPage = () => {
                                     >
                                       <div className="space-y-1">
                                         <div className="flex items-center space-x-1">
-                                          <span>C24 Max</span>
+                                          <span>Maximum CSA24 Usage</span>
                                           {vtamcsaSortColumn === 'c24max' ? (
                                             <span className="text-blue-600 font-bold">
                                               {vtamcsaSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
@@ -2588,7 +3062,7 @@ const NetworkPage = () => {
                                     >
                                       <div className="space-y-1">
                                         <div className="flex items-center space-x-1">
-                                          <span>VTM Cur</span>
+                                          <span>Current Private Usage</span>
                                           {vtamcsaSortColumn === 'vtmcur' ? (
                                             <span className="text-blue-600 font-bold">
                                               {vtamcsaSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
@@ -2608,7 +3082,7 @@ const NetworkPage = () => {
                                     >
                                       <div className="space-y-1">
                                         <div className="flex items-center space-x-1">
-                                          <span>VTM Max</span>
+                                          <span>Maximum Private Usage</span>
                                           {vtamcsaSortColumn === 'vtmmax' ? (
                                             <span className="text-blue-600 font-bold">
                                               {vtamcsaSortDirection === 'asc' ? '↑ Küçükten Büyüğe' : '↓ Büyükten Küçüğe'}
@@ -3807,88 +4281,195 @@ const NetworkPage = () => {
                         </div>
                       )}
 
-                      {/* STACKCPU Grafik Kartları */}
-                      {activeModal === 'STACKCPU' && (
+                      {/* STACKS Grafik Kartları */}
+                      {activeModal === 'STACKS' && (() => {
+                        const rows = getCurrentRawData('STACKS');
+                        if (!rows || rows.length === 0) {
+                          return (
+                            <div className="bg-gray-50 rounded-lg p-8 text-center">
+                              <div className="text-4xl mb-4">📊</div>
+                              <p className="text-gray-600 text-lg">Veri bulunamadı</p>
+                              <p className="text-gray-500 text-sm mt-2">Önce STACKS tablosundan veri yükleyin</p>
+                            </div>
+                          );
+                        }
+                        const keys = Object.keys(rows[0] || {})
+                          .filter(k => k !== 'id' && k !== 'created_at' && k !== 'updated_at' && k !== 'record_timestamp' && k !== 'index')
+                          .filter(k => {
+                            const lower = String(k).toLowerCase();
+                            return !lower.includes('time') && !lower.includes('timestamp') && !lower.includes('date');
+                          });
+                        const nonNumeric = keys.filter(k => !isNumericColumn(k, 'STACKS'));
+                        const numeric = keys.filter(k => isNumericColumn(k, 'STACKS'));
+                        const ordered = [...nonNumeric, ...numeric];
+                        return (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {/* STATSTKS */}
+                            {ordered.map((keyName, idx) => (
                           <div 
-                            onClick={() => openChart('statstks')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
+                                key={`${keyName}-${idx}`}
+                                className="group relative rounded-2xl transition-all duration-500 p-6 bg-gradient-to-br from-white to-blue-50/30 border border-gray-200"
                           >
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                openInfo('statstks');
+                                    openInfo(keyName);
                               }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-green-100 hover:bg-green-200 text-green-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                                  className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
                             >
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 transition-all duration-300 bg-gradient-to-br from-blue-100 to-blue-200">
+                                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">TCPIP Stack Name</h5>
+                                  <h5 className="font-bold text-lg mb-2 transition-colors duration-300 text-gray-800">
+                                    {getStacksColumnDisplayName(keyName)}
+                                  </h5>
                               <div className="text-2xl font-bold text-gray-900">
-                                {stackCpuData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
-                                    {stackCpuData[0]?.statstks || '-'}
+                                    {rows.length > 0 ? (
+                                      (() => {
+                                        const rawVal = rows[0]?.[keyName] ?? rows[0]?.[keyName?.toUpperCase?.()] ?? rows[0]?.[keyName?.toLowerCase?.()];
+                                        let display;
+                                        
+                                        // startc8 alanı için özel tarih formatı
+                                        if ((keyName === 'startc8' || keyName === 'STARTC8' || keyName?.toLowerCase() === 'startc8') && rawVal) {
+                                          try {
+                                            const date = new Date(rawVal);
+                                            if (!isNaN(date.getTime())) {
+                                              display = date.toLocaleString('tr-TR', {
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                second: '2-digit'
+                                              });
+                                            } else {
+                                              display = String(rawVal);
+                                            }
+                                          } catch {
+                                            display = String(rawVal);
+                                          }
+                                        } else {
+                                          display = isNumericColumn(keyName, 'STACKS')
+                                            ? formatNumber(Number(rawVal) || 0)
+                                            : (rawVal === null || rawVal === undefined || rawVal === ''
+                                                ? '-'
+                                                : String(rawVal));
+                                        }
+                                        
+                                        return (
+                                          <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                                            {display}
                                   </span>
+                                        );
+                                      })()
                                 ) : (
                                   <span className="text-gray-400">-</span>
                                 )}
                               </div>
                             </div>
                           </div>
-
-                          {/* IPPKTRCD */}
-                          <div 
-                            onClick={() => openChart('ippktrcd')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('ippktrcd');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-green-100 hover:bg-green-200 text-green-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
+                            ))}
+                            {/* LAST UPDATE */}
+                            <div className="relative bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200 p-6">
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Interval Packets Received</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {stackCpuData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
-                                    {formatNumber(stackCpuData[0]?.ippktrcd)}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
+                                <h5 className="font-bold text-blue-800 text-lg mb-2">Last Update</h5>
+                                {rows.length > 0 && (() => {
+                                  // En son tarihli kaydı bul
+                                  let latestDate = null;
+                                  let latestDateValue = null;
+                                  
+                                  rows.forEach(row => {
+                                    const dates = [
+                                      row.created_at,
+                                      row.updated_at,
+                                      row.bmctime,
+                                      row.time
+                                    ].filter(d => d != null && d !== '');
+                                    
+                                    dates.forEach(dateStr => {
+                                      const date = new Date(dateStr);
+                                      if (!isNaN(date.getTime()) && (!latestDate || date > latestDate)) {
+                                        latestDate = date;
+                                        latestDateValue = dateStr;
+                                      }
+                                    });
+                                  });
+                                  
+                                  return (
+                                    <div className="text-sm text-blue-700 space-y-1">
+                                      <div className="font-medium">
+                                        {latestDateValue 
+                                          ? new Date(latestDateValue).toLocaleString('tr-TR', {
+                                              day: '2-digit',
+                                              month: '2-digit',
+                                              year: 'numeric',
+                                              hour: '2-digit',
+                                              minute: '2-digit',
+                                              second: '2-digit'
+                                            })
+                                          : '-'
+                                        }
                               </div>
+                              </div>
+                                  );
+                                })()}
                             </div>
                           </div>
+                          </div>
+                        );
+                      })()}
 
-                          {/* IPPKTRTR */}
-                          <div 
-                            onClick={() => openChart('ippktrtr')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
+                      {/* STACKCPU Grafik Kartları */}
+                      {activeModal === 'STACKCPU' && (() => {
+                        const rows = getCurrentRawData('STACKCPU');
+                        if (!rows || rows.length === 0) {
+                          return (
+                            <div className="bg-gray-50 rounded-lg p-8 text-center">
+                              <div className="text-4xl mb-4">📊</div>
+                              <p className="text-gray-600 text-lg">Veri bulunamadı</p>
+                              <p className="text-gray-500 text-sm mt-2">Önce STACKCPU tablosundan veri yükleyin</p>
+                            </div>
+                          );
+                        }
+                        const keys = Object.keys(rows[0] || {})
+                          .filter(k => k !== 'id' && k !== 'created_at' && k !== 'updated_at' && k !== 'record_timestamp' && k !== 'index')
+                          .filter(k => {
+                            const lower = String(k).toLowerCase();
+                            return !lower.includes('time') && !lower.includes('timestamp') && !lower.includes('date');
+                          });
+                        const nonNumeric = keys.filter(k => !isNumericColumn(k, 'STACKCPU'));
+                        const numeric = keys.filter(k => isNumericColumn(k, 'STACKCPU'));
+                        const ordered = [...nonNumeric, ...numeric];
+                        return (
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {ordered.map((keyName, idx) => (
+                              <div 
+                                key={`${keyName}-${idx}`}
+                                onClick={() => {
+                                  if (isNumericColumn(keyName, 'STACKCPU')) openChart(keyName);
+                                }}
+                                className={`group relative rounded-2xl transition-all duration-500 p-6 ${
+                                  isNumericColumn(keyName, 'STACKCPU')
+                                    ? 'bg-gradient-to-br from-white to-green-50/30 border-2 border-green-200 hover:border-green-400 hover:shadow-2xl hover:shadow-green-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02] pulse-subtle'
+                                    : 'bg-gradient-to-br from-white to-green-50/30 border border-gray-200'
+                                }`}
+                              >
+                                {(isNumericColumn(keyName, 'STACKCPU') || keyName === 'statstks' || keyName === 'STATSTKS') && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                openInfo('ippktrtr');
+                                      openInfo(keyName);
                               }}
                               className="absolute top-3 right-3 w-6 h-6 bg-green-100 hover:bg-green-200 text-green-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
                             >
@@ -3896,118 +4477,96 @@ const NetworkPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                </svg>
-                              </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Packets Received per Second</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {stackCpuData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
-                                    {stackCpuData[0]?.ippktrtr || '-'}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
                                 )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* IPOUTRED */}
-                          <div 
-                            onClick={() => openChart('ipoutred')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('ipoutred');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-green-100 hover:bg-green-200 text-green-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
+                                {isNumericColumn(keyName, 'STACKCPU') && (
+                                  <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
+                                )}
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 transition-all duration-300 ${
+                                    isNumericColumn(keyName, 'STACKCPU')
+                                      ? 'bg-gradient-to-br from-green-100 to-green-200 group-hover:from-green-200 group-hover:to-green-300 group-hover:shadow-lg'
+                                      : 'bg-gradient-to-br from-green-100 to-green-200'
+                                  }`}>
+                                    <svg className={`w-6 h-6 text-green-600`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Current Output Requests</h5>
+                                  <h5 className={`font-bold text-lg mb-2 transition-colors duration-300 ${
+                                    isNumericColumn(keyName, 'STACKCPU')
+                                      ? 'text-gray-800 group-hover:text-green-700'
+                                      : 'text-gray-800 group-hover:text-gray-600'
+                                  }`}>
+                                    {getStackCpuColumnDisplayName(keyName)}
+                                  </h5>
                               <div className="text-2xl font-bold text-gray-900">
-                                {stackCpuData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
-                                    {formatNumber(stackCpuData[0]?.ipoutred)}
+                                    {rows.length > 0 ? (
+                                      (() => {
+                                        const rawVal = rows[0]?.[keyName] ?? rows[0]?.[keyName?.toUpperCase?.()] ?? rows[0]?.[keyName?.toLowerCase?.()];
+                                        const display = isNumericColumn(keyName, 'STACKCPU')
+                                          ? formatNumber(Number(rawVal) || 0)
+                                          : (rawVal === null || rawVal === undefined || rawVal === ''
+                                              ? '-'
+                                              : String(rawVal));
+                                        return (
+                                          <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                            isNumericColumn(keyName, 'STACKCPU')
+                                              ? 'bg-green-100 text-green-800'
+                                              : 'bg-green-100 text-green-800'
+                                          }`}>
+                                            {display}
                                   </span>
+                                        );
+                                      })()
                                 ) : (
                                   <span className="text-gray-400">-</span>
                                 )}
                               </div>
                             </div>
-                          </div>
-
-                          {/* IPOUTRTR */}
-                          <div 
-                            onClick={() => openChart('ipoutrtr')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('ipoutrtr');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-green-100 hover:bg-green-200 text-green-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h-4m-2 0H7" />
+                                {isNumericColumn(keyName, 'STACKCPU') && (
+                                  <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                                    <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Output Requests per Second</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {stackCpuData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
-                                    {stackCpuData[0]?.ipoutrtr || '-'}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
                                 )}
                               </div>
-                            </div>
-                          </div>
-
-                          {/* LAST UPDATE - Tıklanamaz */}
-                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
+                            ))}
+                            {/* LAST UPDATE */}
+                            <div className="relative bg-gradient-to-br from-green-50 to-green-100 rounded-2xl border border-green-200 p-6">
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-500 text-lg mb-2">LAST UPDATE</h5>
-                              {stackCpuData.length > 0 && (
-                                <div className="text-sm text-gray-600 space-y-1">
+                                <h5 className="font-bold text-green-800 text-lg mb-2">Last Update</h5>
+                                {rows.length > 0 && (() => {
+                                  // En son tarihli kaydı bul
+                                  let latestDate = null;
+                                  let latestDateValue = null;
+                                  
+                                  rows.forEach(row => {
+                                    const dates = [
+                                      row.created_at,
+                                      row.updated_at,
+                                      row.bmctime,
+                                      row.time
+                                    ].filter(d => d != null && d !== '');
+                                    
+                                    dates.forEach(dateStr => {
+                                      const date = new Date(dateStr);
+                                      if (!isNaN(date.getTime()) && (!latestDate || date > latestDate)) {
+                                        latestDate = date;
+                                        latestDateValue = dateStr;
+                                      }
+                                    });
+                                  });
+                                  
+                                  return (
+                                    <div className="text-sm text-green-700 space-y-1">
                                   <div className="font-medium">
-                                    {stackCpuData[stackCpuData.length - 1]?.created_at 
-                                      ? new Date(stackCpuData[stackCpuData.length - 1].created_at).toLocaleString('tr-TR', {
-                                          day: '2-digit',
-                                          month: '2-digit',
-                                          year: 'numeric',
-                                          hour: '2-digit',
-                                          minute: '2-digit',
-                                          second: '2-digit'
-                                        })
-                                      : stackCpuData[stackCpuData.length - 1]?.updated_at
-                                        ? new Date(stackCpuData[stackCpuData.length - 1].updated_at).toLocaleString('tr-TR', {
+                                        {latestDateValue 
+                                          ? new Date(latestDateValue).toLocaleString('tr-TR', {
                                             day: '2-digit',
                                             month: '2-digit',
                                             year: 'numeric',
@@ -4019,24 +4578,55 @@ const NetworkPage = () => {
                                     }
                                   </div>
                                 </div>
-                              )}
+                                  );
+                                })()}
                             </div>
                           </div>
                         </div>
-                      )}
+                        );
+                      })()}
 
                       {/* VTAMCSA Grafik Kartları */}
-                      {activeModal === 'vtamcsa' && (
+                      {activeModal === 'vtamcsa' && (() => {
+                        const rows = getCurrentRawData('vtamcsa');
+                        if (!rows || rows.length === 0) {
+                          return (
+                            <div className="bg-gray-50 rounded-lg p-8 text-center">
+                              <div className="text-4xl mb-4">📊</div>
+                              <p className="text-gray-600 text-lg">Veri bulunamadı</p>
+                              <p className="text-gray-500 text-sm mt-2">Önce VTAMCSA tablosundan veri yükleyin</p>
+                            </div>
+                          );
+                        }
+                        const keys = Object.keys(rows[0] || {})
+                          .filter(k => k !== 'id' && k !== 'created_at' && k !== 'updated_at' && k !== 'record_timestamp' && k !== 'index')
+                          .filter(k => {
+                            const lower = String(k).toLowerCase();
+                            return !lower.includes('time') && !lower.includes('timestamp') && !lower.includes('date');
+                          });
+                        const nonNumeric = keys.filter(k => !isNumericColumn(k, 'vtamcsa'));
+                        const numeric = keys.filter(k => isNumericColumn(k, 'vtamcsa'));
+                        const ordered = [...nonNumeric, ...numeric];
+                        return (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {/* CSA Cur */}
-                          <div 
-                            onClick={() => openChart('csacur')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
+                            {ordered.map((keyName, idx) => (
+                              <div 
+                                key={`${keyName}-${idx}`}
+                                onClick={() => {
+                                  if (isNumericColumn(keyName, 'vtamcsa')) openChart(keyName);
+                                }}
+                                className={`group relative rounded-2xl transition-all duration-500 p-6 ${
+                                  isNumericColumn(keyName, 'vtamcsa')
+                                    ? 'bg-gradient-to-br from-white to-purple-50/30 border-2 border-purple-200 hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-200/40 cursor-pointer hover:-translate-y-3 hover:scale-[1.02] pulse-subtle'
+                                    : 'bg-gradient-to-br from-white to-purple-50/30 border border-gray-200'
+                                }`}
+                              >
+                                {(isNumericColumn(keyName, 'vtamcsa') || keyName.toLowerCase() === 'j_system') && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                openInfo('csacur');
+                                const infoKey = keyName.toLowerCase() === 'j_system' ? 'j_system' : keyName;
+                                      openInfo(infoKey);
                               }}
                               className="absolute top-3 right-3 w-6 h-6 bg-purple-100 hover:bg-purple-200 text-purple-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
                             >
@@ -4044,328 +4634,96 @@ const NetworkPage = () => {
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                             </button>
+                                )}
+                                {isNumericColumn(keyName, 'vtamcsa') && (
+                                  <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
+                                )}
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 transition-all duration-300 ${
+                                    isNumericColumn(keyName, 'vtamcsa')
+                                      ? 'bg-gradient-to-br from-purple-100 to-purple-200 group-hover:from-purple-200 group-hover:to-purple-300 group-hover:shadow-lg'
+                                      : 'bg-gradient-to-br from-purple-100 to-purple-200'
+                                  }`}>
+                                    <svg className={`w-6 h-6 text-purple-600`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Current ECSA Usage</h5>
+                                  <h5 className={`font-bold text-lg mb-2 transition-colors duration-300 ${
+                                    isNumericColumn(keyName, 'vtamcsa')
+                                      ? 'text-gray-800 group-hover:text-purple-700'
+                                      : 'text-gray-800 group-hover:text-gray-600'
+                                  }`}>
+                                    {getVtamcsaColumnDisplayName(keyName)}
+                                  </h5>
                               <div className="text-2xl font-bold text-gray-900">
-                                {vtamcsaData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
-                                    {formatVtamcsaNumber(vtamcsaData[0]?.csacur)}
+                                    {rows.length > 0 ? (
+                                      (() => {
+                                        const rawVal = rows[0]?.[keyName] ?? rows[0]?.[keyName?.toUpperCase?.()] ?? rows[0]?.[keyName?.toLowerCase?.()];
+                                        const display = isNumericColumn(keyName, 'vtamcsa')
+                                          ? formatVtamcsaNumber(Number(rawVal) || 0)
+                                          : (rawVal === null || rawVal === undefined || rawVal === ''
+                                              ? '-'
+                                              : String(rawVal));
+                                        return (
+                                          <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                            isNumericColumn(keyName, 'vtamcsa')
+                                              ? 'bg-purple-100 text-purple-800'
+                                              : 'bg-purple-100 text-purple-800'
+                                          }`}>
+                                            {display}
                                   </span>
+                                        );
+                                      })()
                                 ) : (
                                   <span className="text-gray-400">-</span>
                                 )}
                               </div>
                             </div>
-                          </div>
-
-                          {/* System Field */}
-                          <div 
-                            onClick={() => openChart('systemField')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('systemField');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-purple-100 hover:bg-purple-200 text-purple-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                                </svg>
-                              </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">System Field</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {vtamcsaData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
-                                    {vtamcsaData[0]?.j_system || '-'}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* CSA Max */}
-                          <div 
-                            onClick={() => openChart('csamax')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('csamax');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-purple-100 hover:bg-purple-200 text-purple-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                              </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Maximum ECSA Usage</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {vtamcsaData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
-                                    {formatVtamcsaNumber(vtamcsaData[0]?.csamax)}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* CSA Lim */}
-                          <div 
-                            onClick={() => openChart('csalim')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('csalim');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-purple-100 hover:bg-purple-200 text-purple-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                </svg>
-                              </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">CSA Limit</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {vtamcsaData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
-                                    {formatVtamcsaNumber(vtamcsaData[0]?.csalim)}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* CSA Usage */}
-                          <div 
-                            onClick={() => openChart('csausage')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('csausage');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-purple-100 hover:bg-purple-200 text-purple-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                {isNumericColumn(keyName, 'vtamcsa') && (
+                                  <div className="absolute bottom-2 right-2 opacity-30 group-hover:opacity-60 transition-opacity duration-300">
+                                    <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">ECSA Storage Usage</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {vtamcsaData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
-                                    {formatVtamcsaNumber(vtamcsaData[0]?.csausage)}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
                                 )}
                               </div>
-                            </div>
-                          </div>
-
-                          {/* C24 Cur */}
-                          <div 
-                            onClick={() => openChart('c24cur')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('c24cur');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-purple-100 hover:bg-purple-200 text-purple-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
+                            ))}
+                            {/* LAST UPDATE */}
+                            <div className="relative bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl border border-purple-200 p-6">
                             <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h-4m-2 0H7" />
+                                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Current CSA24 Usage</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {vtamcsaData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
-                                    {formatVtamcsaNumber(vtamcsaData[0]?.c24cur)}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* C24 Max */}
-                          <div 
-                            onClick={() => openChart('c24max')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('c24max');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-purple-100 hover:bg-purple-200 text-purple-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                                </svg>
-                              </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Maximum CSA24 Usage</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {vtamcsaData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
-                                    {formatVtamcsaNumber(vtamcsaData[0]?.c24max)}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* VTM Cur */}
-                          <div 
-                            onClick={() => openChart('vtmcur')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('vtmcur');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-purple-100 hover:bg-purple-200 text-purple-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                </svg>
-                              </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Current Private Usage</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {vtamcsaData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
-                                    {formatVtamcsaNumber(vtamcsaData[0]?.vtmcur)}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* CTM Max */}
-                          <div 
-                            onClick={() => openChart('vtmmax')}
-                            className="group relative bg-white rounded-2xl border border-gray-200 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 cursor-pointer p-6 hover:-translate-y-2"
-                          >
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('vtmmax');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-purple-100 hover:bg-purple-200 text-purple-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                              </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Maximum Private Usage</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {vtamcsaData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800">
-                                    {formatVtamcsaNumber(vtamcsaData[0]?.vtmmax)}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* LAST UPDATE - Tıklanamaz */}
-                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                              </div>
-                              <h5 className="font-bold text-gray-500 text-lg mb-2">LAST UPDATE</h5>
-                              {vtamcsaData.length > 0 && (
-                                <div className="text-sm text-gray-600 space-y-1">
+                                <h5 className="font-bold text-purple-800 text-lg mb-2">Last Update</h5>
+                                {rows.length > 0 && (() => {
+                                  // En son tarihli kaydı bul
+                                  let latestDate = null;
+                                  let latestDateValue = null;
+                                  
+                                  rows.forEach(row => {
+                                    const dates = [
+                                      row.created_at,
+                                      row.updated_at,
+                                      row.bmctime,
+                                      row.time
+                                    ].filter(d => d != null && d !== '');
+                                    
+                                    dates.forEach(dateStr => {
+                                      const date = new Date(dateStr);
+                                      if (!isNaN(date.getTime()) && (!latestDate || date > latestDate)) {
+                                        latestDate = date;
+                                        latestDateValue = dateStr;
+                                      }
+                                    });
+                                  });
+                                  
+                                  return (
+                                    <div className="text-sm text-purple-700 space-y-1">
                                   <div className="font-medium">
-                                    {vtamcsaData[vtamcsaData.length - 1]?.created_at 
-                                      ? new Date(vtamcsaData[vtamcsaData.length - 1].created_at).toLocaleString('tr-TR', {
-                                          day: '2-digit',
-                                          month: '2-digit',
-                                          year: 'numeric',
-                                          hour: '2-digit',
-                                          minute: '2-digit',
-                                          second: '2-digit'
-                                        })
-                                      : vtamcsaData[vtamcsaData.length - 1]?.updated_at
-                                        ? new Date(vtamcsaData[vtamcsaData.length - 1].updated_at).toLocaleString('tr-TR', {
+                                        {latestDateValue 
+                                          ? new Date(latestDateValue).toLocaleString('tr-TR', {
                                             day: '2-digit',
                                             month: '2-digit',
                                             year: 'numeric',
@@ -4377,348 +4735,13 @@ const NetworkPage = () => {
                                     }
                                   </div>
                                 </div>
-                              )}
+                                  );
+                                })()}
                             </div>
                           </div>
                         </div>
-                      )}
-
-                      {/* STACKS Grafik Kartları */}
-                      {activeModal === 'STACKS' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {/* Job Name */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('jobName');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                              </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Job Name</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {stacksData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
-                                    {stacksData[0]?.jobnam8 || '-'}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Step Name */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('stepName');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-                                </svg>
-                              </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Step Name</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {stacksData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
-                                    {stacksData[0]?.stepnam8 || '-'}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-
-                          {/* ASID - Grafik */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('asid');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                                </svg>
-                              </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Stack ASID</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {stacksData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
-                                    {stacksData[0]?.asid8 || '-'}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* MVS Level - Grafik */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('mvsLevel');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                                </svg>
-                              </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">MVS Level</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {stacksData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
-                                    {stacksData[0]?.mvslvlx8 || '-'}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Version - Grafik */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('version');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                                </svg>
-                              </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Stack Vers</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {stacksData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
-                                    {stacksData[0]?.ver_rel || '-'}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* IP Address - Grafik */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('ipAddress');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                                </svg>
-                              </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Stack IPaddr</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {stacksData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
-                                    {stacksData[0]?.ipaddrc8 || '-'}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Status - Grafik */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('status');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                              </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Stack Status</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {stacksData.length > 0 ? (
-                                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                                    stacksData[0]?.status18?.toLowerCase() === 'active' ? 'bg-green-100 text-green-800' :
-                                    stacksData[0]?.status18?.toLowerCase() === 'inactive' ? 'bg-red-100 text-red-800' :
-                                    stacksData[0]?.status18?.toLowerCase() === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                    'bg-gray-100 text-gray-800'
-                                  }`}>
-                                    {stacksData[0]?.status18 || '-'}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Start Time - Grafik */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('startTime');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                              </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Start time of Stack</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {stacksData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
-                                    {stacksData[0]?.startc8 || '-'}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Target Field */}
-                          <div className="group relative bg-white rounded-2xl border border-gray-200 p-6">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openInfo('targetField');
-                              }}
-                              className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                            >
-                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                              </svg>
-                            </button>
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-200 transition-colors duration-300">
-                                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                              </div>
-                              <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">Target Field</h5>
-                              <div className="text-2xl font-bold text-gray-900">
-                                {stacksData.length > 0 ? (
-                                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
-                                    {stacksData[0]?.jtarget || '-'}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* LAST UPDATE - Tıklanamaz */}
-                          <div className="relative bg-gray-50 rounded-2xl border border-gray-200 p-6">
-                            <div className="text-center">
-                              <div className="w-12 h-12 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4">
-                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                              </div>
-                              <h5 className="font-bold text-gray-500 text-lg mb-2">LAST UPDATE</h5>
-                              {stacksData.length > 0 && (
-                                <div className="text-sm text-gray-600 space-y-1">
-                                  <div className="font-medium">
-                                    {stacksData[stacksData.length - 1]?.created_at 
-                                      ? new Date(stacksData[stacksData.length - 1].created_at).toLocaleString('tr-TR', {
-                                          day: '2-digit',
-                                          month: '2-digit',
-                                          year: 'numeric',
-                                          hour: '2-digit',
-                                          minute: '2-digit',
-                                          second: '2-digit'
-                                        })
-                                      : stacksData[stacksData.length - 1]?.updated_at
-                                        ? new Date(stacksData[stacksData.length - 1].updated_at).toLocaleString('tr-TR', {
-                                            day: '2-digit',
-                                            month: '2-digit',
-                                            year: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                            second: '2-digit'
-                                          })
-                                        : '-'
-                                    }
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                        );
+                      })()}
 
                       {/* Diğer modal tipleri için placeholder - artık VTMBUFF, tcpstor ve connsrpz eklendi */}
                       {activeModal !== 'tcpconf' && activeModal !== 'actcons' && activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && activeModal !== 'tcpcons' && activeModal !== 'udpconf' && activeModal !== 'VTMBUFF' && activeModal !== 'tcpstor' && activeModal !== 'connsrpz' && (
@@ -4726,15 +4749,365 @@ const NetworkPage = () => {
                             <div className="text-4xl mb-4">📈</div>
                             <p className="text-gray-600 text-lg">Grafik kartları buraya eklenecek</p>
                             <p className="text-gray-500 text-sm mt-2">{activeModal} grafikleri</p>
-                          </div>
-                      )}
-                    </div>
+                              </div>
+                                )}
+                              </div>
                   )}
 
-                  {/* Threshold Sekmesi (Basit Placeholder) */}
-                  {activeTab === 'threshold' && (
-                    <div className="space-y-4">
-                      <h4 className="text-lg font-semibold text-gray-800 mb-4">Threshold Ayarları</h4>
+                              </div>
+                              </div>
+                            </div>
+                          </div>
+        )}
+
+        {/* Grafik Detay Modalı - ZOS sayfasındaki çizim şablonu ile benzer basit çizim */}
+        {selectedChart && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+            <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-2xl font-bold text-gray-800">
+                    {(() => {
+                      if (!selectedChart) return 'Grafik Detayı';
+                      
+                      if (activeModal === 'STACKS') {
+                        return getStacksColumnDisplayName(selectedChart) || toTitleCase(selectedChart);
+                      }
+                      
+                      if (activeModal === 'STACKCPU') {
+                        return getStackCpuColumnDisplayName(selectedChart) || toTitleCase(selectedChart);
+                      }
+                      
+                      if (activeModal === 'vtamcsa') {
+                        return getVtamcsaColumnDisplayName(selectedChart) || toTitleCase(selectedChart);
+                      }
+                      
+                      return toTitleCase(selectedChart);
+                    })()}
+                  </h3>
+                  <button onClick={closeChart} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+                              </div>
+                 <div className="border-b border-gray-200 mb-6">
+                   <nav className="-mb-px flex space-x-8">
+                      <button onClick={() => setChartTab('chart')} className={`py-2 px-1 border-b-2 font-medium text-sm ${ chartTab === 'chart' ? `border-${modalColor}-500 text-${modalColor}-600` : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }`}><span className="mr-2">📈</span>Grafik</button>
+                      {activeModal !== 'STACKS' && (
+                        <button onClick={() => setChartTab('threshold')} className={`py-2 px-1 border-b-2 font-medium text-sm ${ chartTab === 'threshold' ? `border-${modalColor}-500 text-${modalColor}-600` : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }`}><span className="mr-2">⚙️</span>Threshold</button>
+                      )}
+                   </nav>
+                              </div>
+                <div className="min-h-[400px]">
+                  {chartTab === 'chart' && (
+                    <div className="bg-white rounded-lg p-6">
+                      {(activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa') && (
+                        <div className="flex justify-between items-center mb-6">
+                          <h4 className="text-lg font-semibold text-gray-800">Zaman Serisi Grafiği</h4>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => openChart(selectedChart)}
+                              className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                            >
+                              Yenile
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {chartData.length === 0 ? (
+                        <div className="h-96 flex items-center justify-center bg-gray-50 rounded-lg">
+                            <div className="text-center">
+                            <div className="text-4xl mb-4">📊</div>
+                            <p className="text-gray-600 text-lg mb-2">Veri bulunamadı</p>
+                            <p className="text-gray-500 text-sm">Önce ilgili tablodan veri yükleyin</p>
+                              </div>
+                              </div>
+                      ) : (
+                        (() => {
+                          // STACKCPU ve VTAMCSA için RMFPage.jsx'deki gibi grafik
+                          if (activeModal === 'STACKCPU' || activeModal === 'vtamcsa') {
+                            return (
+                              <div>
+                                {chartData && chartData.length > 0 && (
+                                  <>
+                                    {/* Grafik başlığı */}
+                                    <div className="mb-4">
+                                      <h4 className="text-lg font-semibold text-gray-800 mb-4">Grafik</h4>
+                                    </div>
+                                    {/* Grafik container - sadece grafiğin etrafında border */}
+                                    <div className="bg-white rounded-lg border border-gray-200 p-6 mb-4">
+                                      <div className="h-96 bg-gray-50 rounded-lg relative overflow-hidden p-4">
+                                        <svg width="100%" height="100%" viewBox="0 0 800 300" preserveAspectRatio="none">
+                                          {(() => {
+                                            const margin = { top: 20, right: 40, bottom: 40, left: 50 };
+                                            const width = 800 - margin.left - margin.right;
+                                            const height = 300 - margin.top - margin.bottom;
+                                            const values = chartData.map(d => d.y || d.value || 0);
+                                            const minY = Math.min(...values);
+                                            const maxY = Math.max(...values);
+                                            const range = maxY - minY || 1;
+                                            
+                                            const xPos = (i) => margin.left + (i / Math.max(chartData.length - 1, 1)) * width;
+                                            const yPos = (value) => margin.top + height - ((value - minY) / range) * height;
+                                            
+                                            let lineD = chartData.map((d, i) => 
+                                              `${i === 0 ? 'M' : 'L'} ${xPos(i)} ${yPos(d.y || d.value || 0)}`
+                                            ).join(' ');
+                                            
+                                            const firstX = xPos(0);
+                                            const lastX = xPos(chartData.length - 1);
+                                            let areaD = `${lineD} L ${lastX} ${height + margin.top} L ${firstX} ${height + margin.top} Z`;
+                                            
+                                            const gridLines = [];
+                                            for (let i = 0; i <= 5; i++) {
+                                              const y = margin.top + (height / 5) * i;
+                                              const value = maxY - (range / 5) * i;
+                                              gridLines.push(
+                                                <g key={i}>
+                                                  <line x1={margin.left} y1={y} x2={width + margin.left} y2={y} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="3,3" />
+                                                  <text x={margin.left - 10} y={y} textAnchor="end" dominantBaseline="middle" fontSize="10" fill="#6b7280">
+                                                    {activeModal === 'vtamcsa' ? formatVtamcsaNumber(value) : formatNumber(value)}
+                                                  </text>
+                                                </g>
+                                              );
+                                            }
+                                            
+                                            // X-axis with time labels
+                                            const axisY = margin.top + height;
+                                            const xAxis = (
+                                              <g>
+                                                <line x1={margin.left} y1={axisY} x2={width + margin.left} y2={axisY} stroke="#e5e7eb" strokeWidth="1" />
+                                                {(() => {
+                                                  const maxTicks = 8;
+                                                  const n = chartData.length;
+                                                  const step = Math.max(1, Math.floor(n / maxTicks));
+                                                  const tickIndices = [];
+                                                  for (let i = 0; i < n; i += step) tickIndices.push(i);
+                                                  if (tickIndices[tickIndices.length - 1] !== n - 1) tickIndices.push(n - 1);
+                                                  return tickIndices.map((ti, idx) => (
+                                                    <g key={`xtick-${idx}`}>
+                                                      <line x1={xPos(ti)} y1={axisY} x2={xPos(ti)} y2={axisY + 4} stroke="#9ca3af" strokeWidth="1" />
+                                                      <text x={xPos(ti)} y={axisY + 16} textAnchor="middle" fontSize="10" fill="#6b7280">
+                                                        {chartData[ti]?.timeStr || `${ti + 1}`}
+                                                      </text>
+                                                    </g>
+                                                  ));
+                                                })()}
+                                              </g>
+                                            );
+                                            
+                                            return (
+                                              <>
+                                                <rect width="800" height="300" fill="#f9fafb" />
+                                                {gridLines}
+                                                {xAxis}
+                                                <defs>
+                                                  <linearGradient id="areaGradientRMFStyle" x1="0%" y1="0%" x2="0%" y2="100%">
+                                                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3"/>
+                                                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.05"/>
+                                                  </linearGradient>
+                                                </defs>
+                                                <path d={areaD} fill="url(#areaGradientRMFStyle)" />
+                                                <path d={lineD} fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                                {chartData.map((d, i) => (
+                                                  <circle key={i} cx={xPos(i)} cy={yPos(d.y || d.value || 0)} r="5" fill="#3b82f6" stroke="white" strokeWidth="2">
+                                                    <title>{`Nokta ${i + 1}: ${d.label || ''} - Değer: ${activeModal === 'vtamcsa' ? formatVtamcsaNumber(d.y || d.value || 0) : formatNumber(d.y || d.value || 0)}`}</title>
+                                                  </circle>
+                                                ))}
+                                              </>
+                                            );
+                                          })()}
+                                        </svg>
+                                      </div>
+                                    </div>
+                                  </>
+                                )}
+
+                                {/* İstatistikler - Grafik verilerinin özet istatistikleri */}
+                                {/* Responsive grid: mobilde 1, desktop'ta 4 sütun, 4 birim boşluk */}
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                  {/* Ortalama kartı: mavi arka plan, yuvarlatılmış köşeler, 4 birim padding */}
+                                  <div className="bg-blue-50 rounded-lg p-4">
+                                    {/* Kart başlığı: küçük font, gri renk, alt margin */}
+                                    <div className="text-sm text-gray-600 mb-1">Ortalama</div>
+                                    {/* Ortalama değeri: büyük font, kalın, mavi renk */}
+                                    <div className="text-2xl font-bold text-blue-600">
+                                      {/* Veri varsa istatistik hesapla, yoksa '-' göster */}
+                                      {chartData.length > 0 
+                                        ? (
+                                          /* VTAMCSA modalı için özel formatlama kontrolü */
+                                          activeModal === 'vtamcsa' 
+                                            ? formatVtamcsaNumber(chartData.reduce((sum, d) => sum + (d.y || d.value || 0), 0) / chartData.length) /* VTAMCSA için: tüm değerlerin toplamını veri sayısına böl (ortalama), formatVtamcsaNumber ile formatla */
+                                            : formatNumber(chartData.reduce((sum, d) => sum + (d.y || d.value || 0), 0) / chartData.length) /* Diğer modaller için: tüm değerlerin toplamını veri sayısına böl (ortalama), formatNumber ile formatla */
+                                        )
+                                        : '-'  /* Veri yoksa tire karakteri göster */
+                                      }
+                                    </div>
+                                  </div>
+                                  {/* Minimum değer kartı: yeşil arka plan, yuvarlatılmış köşeler, 4 birim padding */}
+                                  <div className="bg-green-50 rounded-lg p-4">
+                                    {/* Kart başlığı: küçük font, gri renk, alt margin */}
+                                    <div className="text-sm text-gray-600 mb-1">Min</div>
+                                    {/* Minimum değeri: büyük font, kalın, yeşil renk */}
+                                    <div className="text-2xl font-bold text-green-600">
+                                      {/* Veri varsa minimum hesapla, yoksa '-' göster */}
+                                      {chartData.length > 0 
+                                        ? (
+                                          /* VTAMCSA modalı için özel formatlama kontrolü */
+                                          activeModal === 'vtamcsa'
+                                            ? formatVtamcsaNumber(Math.min(...chartData.map(d => d.y || d.value || 0)))  /* VTAMCSA için: tüm değerlerden en küçüğünü bul, formatVtamcsaNumber ile formatla */
+                                            : formatNumber(Math.min(...chartData.map(d => d.y || d.value || 0)))  /* Diğer modaller için: tüm değerlerden en küçüğünü bul, formatNumber ile formatla */
+                                        )
+                                        : '-'  /* Veri yoksa tire karakteri göster */
+                                      }
+                                    </div>
+                                  </div>
+                                  {/* Maksimum değer kartı: kırmızı arka plan, yuvarlatılmış köşeler, 4 birim padding */}
+                                  <div className="bg-red-50 rounded-lg p-4">
+                                    {/* Kart başlığı: küçük font, gri renk, alt margin */}
+                                    <div className="text-sm text-gray-600 mb-1">Max</div>
+                                    {/* Maksimum değeri: büyük font, kalın, kırmızı renk */}
+                                    <div className="text-2xl font-bold text-red-600">
+                                      {/* Veri varsa maksimum hesapla, yoksa '-' göster */}
+                                      {chartData.length > 0 
+                                        ? (
+                                          /* VTAMCSA modalı için özel formatlama kontrolü */
+                                          activeModal === 'vtamcsa'
+                                            ? formatVtamcsaNumber(Math.max(...chartData.map(d => d.y || d.value || 0)))  /* VTAMCSA için: tüm değerlerden en büyüğünü bul, formatVtamcsaNumber ile formatla */
+                                            : formatNumber(Math.max(...chartData.map(d => d.y || d.value || 0)))  /* Diğer modaller için: tüm değerlerden en büyüğünü bul, formatNumber ile formatla */
+                                        )
+                                        : '-'  /* Veri yoksa tire karakteri göster */
+                                      }
+                                    </div>
+                                  </div>
+                                  {/* Veri noktası sayısı kartı: mor arka plan, yuvarlatılmış köşeler, 4 birim padding */}
+                                  <div className="bg-purple-50 rounded-lg p-4">
+                                    {/* Kart başlığı: küçük font, gri renk, alt margin */}
+                                    <div className="text-sm text-gray-600 mb-1">Veri Noktası</div>
+                                    {/* Veri noktası sayısı: büyük font, kalın, mor renk */}
+                                    <div className="text-2xl font-bold text-purple-600">
+                                      {/* ChartData dizisinin uzunluğunu göster (toplam veri noktası sayısı) */}
+                                      {chartData.length}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          }
+                          
+                          // Diğer kartlar için mevcut grafik yapısı
+                          const width = 1200; const height = 350; const left = 80; const bottom = 320; const top = 40;
+                          const len = chartData.length;
+                          const vals = chartData.map(d => Number(d.value) || 0);
+                          let vMin = Math.min(...vals);
+                          let vMax = Math.max(...vals);
+                          if (!isFinite(vMin)) vMin = 0; if (!isFinite(vMax)) vMax = 100;
+                          if (vMax === vMin) vMax = vMin + 10;
+
+                          // Y ekseni için ölçek seçimi: yüzde mi, mutlak mı?
+                          const isPercentScale = vMax <= 100 && vMin >= 0;
+
+                          const getNiceMax = (value) => {
+                            const raw = Math.max(value, 1);
+                            const magnitude = Math.pow(10, Math.floor(Math.log10(raw)));
+                            const normalized = raw / magnitude;
+                            let niceNormalized = 1;
+                            if (normalized > 5) niceNormalized = 10;
+                            else if (normalized > 2) niceNormalized = 5;
+                            else if (normalized > 1) niceNormalized = 2;
+                            return niceNormalized * magnitude;
+                          };
+
+                          const minVal = 0;
+                          const maxVal = getNiceMax(vMax);
+                          const range = maxVal - minVal;
+                          const step = range / 5;
+                          
+                          const yPos = (v) => bottom - ((v - minVal) / range) * (bottom - top);
+                          const stepX = 1100 / Math.max(1, len - 1);
+                          const xPos = (i) => left + i * stepX;
+                          
+                          const ticks = Array.from({ length: 6 }, (_, i) => minVal + (i * step));
+                          const formatTick = (n) => {
+                            if (isPercentScale) return `${n.toFixed(0)}%`;
+                            return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n.toFixed(0);
+                          };
+
+                          const formatTickWithPercent = (n) => {
+                            if (isPercentScale) return `${n.toFixed(0)}%`;
+                            return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : n.toFixed(0);
+                          };
+
+                          const lineD = chartData.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xPos(i)} ${yPos(p.value)}`).join(' ');
+                          const areaD = `${lineD} L ${xPos(len - 1)} ${bottom} L ${xPos(0)} ${bottom} Z`;
+
+                          return (
+                            <div className="h-96 bg-gray-50 rounded-lg border border-gray-200 relative overflow-hidden p-4">
+                              <svg width="100%" height="100%" viewBox="0 0 1200 350" preserveAspectRatio="none">
+                                {/* Grid lines */}
+                                {ticks.map((t, i) => (
+                                  <g key={i}>
+                                    <line x1={left} y1={yPos(t)} x2={left + 1100} y2={yPos(t)} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4 4" />
+                                    <text x={left - 10} y={yPos(t) + 5} textAnchor="end" className="text-xs fill-gray-600">{formatTick(t)}</text>
+                                  </g>
+                                ))}
+                                
+                                {/* X axis */}
+                                <line x1={left} y1={bottom} x2={left + 1100} y2={bottom} stroke="#9ca3af" strokeWidth="2" />
+                                
+                                {/* Y axis */}
+                                <line x1={left} y1={top} x2={left} y2={bottom} stroke="#9ca3af" strokeWidth="2" />
+                                
+                                <defs>
+                                  <linearGradient id="areaGradientNetwork" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3"/>
+                                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.05"/>
+                                  </linearGradient>
+                                </defs>
+                                
+                                <path d={areaD} fill="url(#areaGradientNetwork)" />
+                                <path d={lineD} fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                
+                                {/* Data points */}
+                                {chartData.map((p,i)=> (
+                                  <g key={i}>
+                                    <circle cx={xPos(i)} cy={yPos(p.value)} r="5" fill="#3b82f6" stroke="white" strokeWidth="2">
+                                      <title>{`${new Date(p.label).toLocaleString('tr-TR')}: ${p.value}`}</title>
+                                    </circle>
+                                  </g>
+                                ))}
+                                </svg>
+                              </div>
+                          );
+                        })()
+                      )}
+
+                      {/* Statistics - Sadece diğer kartlar için */}
+                      {activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && (
+                        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-5 text-center shadow-sm">
+                            <div className="text-3xl font-bold text-blue-900">{chartData.length > 0 ? Math.max(...chartData.map(d => d.value || 0)).toFixed(1) : '0'}</div>
+                            <div className="text-sm text-blue-700 font-semibold mt-1">Maksimum</div>
+                          </div>
+                          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-5 text-center shadow-sm">
+                            <div className="text-3xl font-bold text-green-900">{chartData.length > 0 ? Math.min(...chartData.map(d => d.value || 0)).toFixed(1) : '0'}</div>
+                            <div className="text-sm text-green-700 font-semibold mt-1">Minimum</div>
+                          </div>
+                          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-5 text-center shadow-sm">
+                            <div className="text-3xl font-bold text-purple-900">{chartData.length > 0 ? (chartData.reduce((s, d) => s + (d.value || 0), 0) / chartData.length).toFixed(1) : '0'}</div>
+                            <div className="text-sm text-purple-700 font-semibold mt-1">Ortalama</div>
+                          </div>
+                          <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-5 text-center shadow-sm">
+                            <div className="text-3xl font-bold text-orange-900">{chartData.length}</div>
+                            <div className="text-sm text-orange-700 font-semibold mt-1">Veri Noktası</div>
+                          </div>
+                        </div>
+                      )}
+                        </div>
+                      )}
+
+                  {chartTab === 'threshold' && activeModal !== 'STACKS' && (
+                    <div className="space-y-6">
+                      <h4 className="text-lg font-semibold text-gray-800">{selectedChart} için Threshold Ayarları</h4>
+                      {/* Basit Threshold içeriği */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-gray-50 rounded-lg p-6">
                           <h5 className="font-semibold text-gray-800 mb-4">Uyarı Eşikleri</h5>
@@ -4794,23 +5167,27 @@ const NetworkPage = () => {
                  <div className="border-b border-gray-200 mb-6">
                    <nav className="-mb-px flex space-x-8">
                       <button onClick={() => setChartTab('chart')} className={`py-2 px-1 border-b-2 font-medium text-sm ${ chartTab === 'chart' ? `border-${modalColor}-500 text-${modalColor}-600` : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }`}><span className="mr-2">📈</span>Grafik</button>
+                      {activeModal !== 'STACKS' && (
                       <button onClick={() => setChartTab('threshold')} className={`py-2 px-1 border-b-2 font-medium text-sm ${ chartTab === 'threshold' ? `border-${modalColor}-500 text-${modalColor}-600` : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }`}><span className="mr-2">⚙️</span>Threshold</button>
+                      )}
                    </nav>
                  </div>
                 <div className="min-h-[400px]">
                   {chartTab === 'chart' && (
                     <div className="bg-white rounded-lg border border-gray-200 p-6">
-                      <div className="flex justify-between items-center mb-6">
-                        <h4 className="text-lg font-semibold text-gray-800">Zaman Serisi Grafiği</h4>
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => openChart(selectedChart)}
-                            className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
-                          >
-                            Yenile
-                          </button>
+                      {(activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa') && (
+                        <div className="flex justify-between items-center mb-6">
+                          <h4 className="text-lg font-semibold text-gray-800">Zaman Serisi Grafiği</h4>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => openChart(selectedChart)}
+                              className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                            >
+                              Yenile
+                            </button>
+                          </div>
                         </div>
-                      </div>
+                      )}
 
                       {chartData.length === 0 ? (
                         <div className="h-96 flex items-center justify-center bg-gray-50 rounded-lg">
@@ -4875,12 +5252,14 @@ const NetworkPage = () => {
                           return (
                             <>
                               <div className="bg-white rounded-lg border border-gray-200 p-6">
-                                <div className="flex justify-between items-center mb-4">
-                                  <h4 className="text-lg font-semibold text-gray-800">{selectedChart}</h4>
-                                  <button onClick={() => {
-                                    openChart(selectedChart);
-                                  }} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">Yenile</button>
-                                </div>
+                                {(activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa') && (
+                                  <div className="flex justify-between items-center mb-4">
+                                    <h4 className="text-lg font-semibold text-gray-800">{selectedChart}</h4>
+                                    <button onClick={() => {
+                                      openChart(selectedChart);
+                                    }} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">Yenile</button>
+                                  </div>
+                                )}
                                 <div className="h-96 w-full">
                                   <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
                                     {/* Grid pattern */}
@@ -4974,7 +5353,7 @@ const NetworkPage = () => {
                       )}
                     </div>
                   )}
-                  {chartTab === 'threshold' && ( <div className="space-y-6"><h4 className="text-lg font-semibold text-gray-800">{selectedChart} için Threshold Ayarları</h4> {/* Basit Threshold içeriği */} <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div className="bg-gray-50 rounded-lg p-6"><h5 className="font-semibold text-gray-800 mb-4">Uyarı Eşikleri</h5><div className="space-y-3"><div className="flex justify-between items-center"><span className="text-sm text-gray-600">Kritik Eşik</span><input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" defaultValue="90"/></div><div className="flex justify-between items-center"><span className="text-sm text-gray-600">Uyarı Eşiği</span><input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" defaultValue="75"/></div></div></div><div className="bg-gray-50 rounded-lg p-6"><h5 className="font-semibold text-gray-800 mb-4">Bildirim Ayarları</h5><div className="space-y-3"><label className="flex items-center"><input type="checkbox" className="mr-2" defaultChecked /><span className="text-sm text-gray-600">E-posta</span></label><label className="flex items-center"><input type="checkbox" className="mr-2" /><span className="text-sm text-gray-600">SMS</span></label></div></div></div><div className="flex justify-end space-x-3 mt-6"><button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">İptal</button><button className={`px-4 py-2 text-sm font-medium text-white bg-${modalColor}-600 border border-transparent rounded-md hover:bg-${modalColor}-700`}>Kaydet</button></div></div> )}
+                  {chartTab === 'threshold' && activeModal !== 'STACKS' && ( <div className="space-y-6"><h4 className="text-lg font-semibold text-gray-800">{selectedChart} için Threshold Ayarları</h4> {/* Basit Threshold içeriği */} <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div className="bg-gray-50 rounded-lg p-6"><h5 className="font-semibold text-gray-800 mb-4">Uyarı Eşikleri</h5><div className="space-y-3"><div className="flex justify-between items-center"><span className="text-sm text-gray-600">Kritik Eşik</span><input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" defaultValue="90"/></div><div className="flex justify-between items-center"><span className="text-sm text-gray-600">Uyarı Eşiği</span><input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" defaultValue="75"/></div></div></div><div className="bg-gray-50 rounded-lg p-6"><h5 className="font-semibold text-gray-800 mb-4">Bildirim Ayarları</h5><div className="space-y-3"><label className="flex items-center"><input type="checkbox" className="mr-2" defaultChecked /><span className="text-sm text-gray-600">E-posta</span></label><label className="flex items-center"><input type="checkbox" className="mr-2" /><span className="text-sm text-gray-600">SMS</span></label></div></div></div><div className="flex justify-end space-x-3 mt-6"><button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">İptal</button><button className={`px-4 py-2 text-sm font-medium text-white bg-${modalColor}-600 border border-transparent rounded-md hover:bg-${modalColor}-700`}>Kaydet</button></div></div> )}
                 </div>
               </div>
             </div>
@@ -4988,35 +5367,28 @@ const NetworkPage = () => {
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-2xl font-bold text-gray-800">
-                     {infoModal === 'connectionCount' && 'Connection Count Hakkında'}
-                     {infoModal === 'activeConnections' && 'Active Connections Hakkında'}
-                     {infoModal === 'networkThroughput' && 'Network Throughput Hakkında'}
-                     {infoModal === 'sessionCount' && 'Session Count Hakkında'}
-                     {infoModal === 'activeSessions' && 'Active Sessions Hakkında'}
-                     {infoModal === 'sessionUtilization' && 'Session Utilization Hakkında'}
-                     {infoModal === 'jobName' && 'Job Name Hakkında'}
-                     {infoModal === 'stepName' && 'Step Name Hakkında'}
-                     {infoModal === 'targetField' && 'Target Field Hakkında'}
-                     {infoModal === 'asid' && 'Stack ASID Hakkında'}
-                     {infoModal === 'mvsLevel' && 'MVS Level Hakkında'}
-                     {infoModal === 'version' && 'Stack Vers Hakkında'}
-                     {infoModal === 'ipAddress' && 'Stack IPaddr Hakkında'}
-                     {infoModal === 'status' && 'Stack Status Hakkında'}
-                     {infoModal === 'startTime' && 'Start time of Stack Hakkında'}
-                     {infoModal === 'statstks' && 'TCPIP Stack Name Hakkında'}
-                     {infoModal === 'ippktrcd' && 'Interval Packets Received Hakkında'}
-                     {infoModal === 'ippktrtr' && 'Packets Received per Second Hakkında'}
-                     {infoModal === 'ipoutred' && 'Current Output Requests Hakkında'}
-                     {infoModal === 'ipoutrtr' && 'Output Requests per Second Hakkında'}
-                     {infoModal === 'csacur' && 'Current ECSA Usage Hakkında'}
-                     {infoModal === 'systemField' && 'System Field Hakkında'}
-                     {infoModal === 'csamax' && 'Maximum ECSA Usage Hakkında'}
-                     {infoModal === 'csalim' && 'CSA Limit Hakkında'}
-                     {infoModal === 'csausage' && 'ECSA Storage Usage Hakkında'}
-                     {infoModal === 'c24cur' && 'Current CSA24 Usage Hakkında'}
-                     {infoModal === 'c24max' && 'Maximum CSA24 Usage Hakkında'}
-                     {infoModal === 'vtmcur' && 'Current Private Usage Hakkında'}
-                     {infoModal === 'vtmmax' && 'Maximum Private Usage Hakkında'}
+                     {activeModal === 'STACKS' && getStacksColumnDisplayName(infoModal) + ' Hakkında'}
+                     {activeModal === 'STACKCPU' && getStackCpuColumnDisplayName(infoModal) + ' Hakkında'}
+                     {activeModal === 'vtamcsa' && getVtamcsaColumnDisplayName(infoModal) + ' Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'connectionCount' && 'Connection Count Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'activeConnections' && 'Active Connections Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'networkThroughput' && 'Network Throughput Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'sessionCount' && 'Session Count Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'activeSessions' && 'Active Sessions Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'sessionUtilization' && 'Session Utilization Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'jobName' && 'Job Name Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'stepName' && 'Step Name Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'targetField' && 'Target Field Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'asid' && 'Stack ASID Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'mvsLevel' && 'MVS Level Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'version' && 'Stack Vers Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'ipAddress' && 'Stack IPaddr Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'status' && 'Stack Status Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'startTime' && 'Start time of Stack Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'ippktrcd' && 'Interval Packets Received Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'ippktrtr' && 'Packets Received per Second Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'ipoutred' && 'Current Output Requests Hakkında'}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa' && infoModal === 'ipoutrtr' && 'Output Requests per Second Hakkında'}
                      {infoModal === 'tcpConfig' && 'TCP Config Hakkında'}
                      {infoModal === 'tcpSettings' && 'TCP Settings Hakkında'}
                      {infoModal === 'tcpConnections' && 'TCP Connections Hakkında'}
@@ -5045,13 +5417,248 @@ const NetworkPage = () => {
                      {infoModal === 'connsrpzBytesOut' && 'Bytes Out Hakkında'}
                      {infoModal === 'connsrpzStack' && 'Stack Hakkında'}
                      {infoModal === 'connsrpzRemoteHost' && 'Remote Host Hakkında'}
-                     {!['connectionCount', 'activeConnections', 'networkThroughput', 'sessionCount', 'activeSessions', 'sessionUtilization', 'jobName', 'stepName', 'targetField', 'asid', 'mvsLevel', 'version', 'ipAddress', 'status', 'startTime', 'statstks', 'ippktrcd', 'ippktrtr', 'ipoutred', 'ipoutrtr', 'csacur', 'systemField', 'csamax', 'csalim', 'csausage', 'c24cur', 'c24max', 'vtmcur', 'vtmmax', 'tcpConfig', 'tcpSettings', 'tcpConnections', 'connectionStates', 'udpConfig', 'udpSettings', 'vtmbuffSystem', 'vtmbuffIobufSize', 'vtmbuffIobufTimes', 'vtmbuffLpbufSize', 'vtmbuffLpbufTimes', 'vtmbuffLfbufSize', 'vtmbuffLfbufTimes', 'tcpstorStep', 'tcpstorSystem', 'tcpstorEcsaCurrent', 'tcpstorEcsaMax', 'tcpstorEcsaLimit', 'tcpstorEcsaFree', 'tcpstorPrivateCurrent', 'tcpstorPrivateMax', 'connsrpzForeignIp', 'connsrpzActiveConns', 'connsrpzRtt', 'connsrpzBytesIn', 'connsrpzBytesOut', 'connsrpzStack', 'connsrpzRemoteHost'].includes(infoModal) && `${infoModal} Hakkında`}
+                     {activeModal !== 'STACKS' && activeModal !== 'STACKCPU' && !['connectionCount', 'activeConnections', 'networkThroughput', 'sessionCount', 'activeSessions', 'sessionUtilization', 'jobName', 'stepName', 'targetField', 'asid', 'mvsLevel', 'version', 'ipAddress', 'status', 'startTime', 'statstks', 'ippktrcd', 'ippktrtr', 'ipoutred', 'ipoutrtr', 'csacur', 'systemField', 'csamax', 'csalim', 'csausage', 'c24cur', 'c24max', 'vtmcur', 'vtmmax', 'tcpConfig', 'tcpSettings', 'tcpConnections', 'connectionStates', 'udpConfig', 'udpSettings', 'vtmbuffSystem', 'vtmbuffIobufSize', 'vtmbuffIobufTimes', 'vtmbuffLpbufSize', 'vtmbuffLpbufTimes', 'vtmbuffLfbufSize', 'vtmbuffLfbufTimes', 'tcpstorStep', 'tcpstorSystem', 'tcpstorEcsaCurrent', 'tcpstorEcsaMax', 'tcpstorEcsaLimit', 'tcpstorEcsaFree', 'tcpstorPrivateCurrent', 'tcpstorPrivateMax', 'connsrpzForeignIp', 'connsrpzActiveConns', 'connsrpzRtt', 'connsrpzBytesIn', 'connsrpzBytesOut', 'connsrpzStack', 'connsrpzRemoteHost'].includes(infoModal) && `${toTitleCase(infoModal)} Hakkında`}
                   </h3>
                   <button onClick={closeInfo} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
                 </div>
                 <div className="space-y-6">
-                    {/* Job Name Info */}
-                    {infoModal === 'jobName' && (
+                    {/* STACKS Info Cards */}
+                    {activeModal === 'STACKS' && infoModal === 'jobnam8' && (
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
+                            Job Name alanı, bu TCP/IP instance'ının Multiple Virtual Storage (MVS) jobname'ini gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: JOBNAM8</li>
+                            <li>Format: 1-8 karakterlik MVS jobname</li>
+                            <li>Kaynak: TCP/IP instance bilgileri</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            TCP/IP instance'ını belirli bir iş birimiyle ilişkilendirmek, sistem yönetimi ve performans izleme için kritiktir.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeModal === 'STACKS' && infoModal === 'stepnam8' && (
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
+                            Step Name alanı, bu TCP/IP instance'ının Multiple Virtual Storage (MVS) stepname'ini gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: STEPNAM8</li>
+                            <li>Format: 1-8 karakterlik MVS stepname</li>
+                            <li>Kaynak: TCP/IP instance bilgileri</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Step name, TCP/IP instance'ının çalıştığı adımı tanımlar ve JCL/JOB akışındaki konumunu belirler.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeModal === 'STACKS' && (infoModal === 'jtarget' || infoModal === 'J_TARGET' || infoModal.toLowerCase() === 'jtarget') && (
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
+                            Target alanı, SSI context verilerini gösteren bir görünümde görünen satır verisi için hedefin adını gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: J@TARGET</li>
+                            <li>Format: Target ismi</li>
+                            <li>Kaynak: SSI context data görünümü</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Target field, SSI (Sysplex System Image) bağlamında veri ilişkilendirmesi için kullanılır ve sistem topolojisi anlayışı sağlar.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeModal === 'STACKS' && (infoModal === 'asid8' || infoModal === 'ASID' || infoModal.toLowerCase() === 'asid8' || infoModal.toLowerCase() === 'asid') && (
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
+                            Stack ASID alanı, bu TCP/IP instance'ının Multiple Virtual Storage (MVS) address space ID'sini gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: ASID8</li>
+                            <li>Format: Address Space ID (numeric)</li>
+                            <li>Kaynak: MVS address space bilgileri</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            ASID, TCP/IP instance'ının sistemdeki benzersiz tanımlayıcısıdır ve diğer sistem metrikleriyle korelasyon için kritiktir.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeModal === 'STACKS' && (infoModal === 'mvslvlx8' || infoModal === 'MVSLVLX8' || infoModal.toLowerCase() === 'mvslvlx8') && (
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
+                            TCP/IP stack'in çalıştığı LPAR'daki işletim sistemi seviyesi.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: MVSLVLX8</li>
+                            <li>Format: İşletim sistemi versiyonu/level bilgisi</li>
+                            <li>Kaynak: LPAR sistem bilgileri</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            MVS Level, TCP/IP stack'in çalıştığı sistemin versiyonunu gösterir ve uyumluluk, güvenlik güncellemeleri ve özellik kullanılabilirliği için kritiktir.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeModal === 'STACKS' && (infoModal === 'ver_rel' || infoModal === 'Version' || infoModal.toLowerCase() === 'ver_rel' || infoModal.toLowerCase() === 'version') && (
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
+                            Stack Vers alanı, TCP/IP stack'in versiyonunu ve release'ini gösterir. Bu değer TSEB control block'tan çıkarılır.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: VER_REL</li>
+                            <li>Format: Versiyon ve release bilgisi</li>
+                            <li>Kaynak: TSEB (TCP/IP Stack Environment Block) control block</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Stack versiyonu, özellik kullanılabilirliği, güvenlik düzeltmeleri ve uyumluluk için kritik bilgidir.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeModal === 'STACKS' && (infoModal === 'startc8' || infoModal === 'STARTC8' || infoModal.toLowerCase() === 'startc8') && (
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
+                            Start time of Stack alanı, bu TCP/IP instance'ının başlatıldığı tarih ve saati gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: STARTC8</li>
+                            <li>Format: Tarih ve saat bilgisi</li>
+                            <li>Kaynak: TCP/IP instance başlatma zamanı</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Başlatma zamanı, uptime hesaplamaları, yeniden başlatma takibi ve sistem kararlılığı değerlendirmesi için kritiktir.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeModal === 'STACKS' && (infoModal === 'ipaddrc8' || infoModal === 'IPADDRC8' || infoModal.toLowerCase() === 'ipaddrc8') && (
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
+                            Bu stack için birincil IP adresi.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: IPADDRC8</li>
+                            <li>Format: IPv4 veya IPv6 adresi</li>
+                            <li>Kaynak: TCP/IP stack konfigürasyonu</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Primary IP adresi, ağ bağlantısı, routing ve firewall kuralları için temel bilgidir. Stack'in ağ kimliğini belirler.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeModal === 'STACKS' && (infoModal === 'status18' || infoModal === 'STATUS18' || infoModal.toLowerCase() === 'status18' || infoModal.toLowerCase() === 'status') && (
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
+                            Stack Status alanı, IP stack'in durumunu gösterir. Geçerli durumlar şunlardır:
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: STATUS18</li>
+                            <li>Format: Status string (Active, Inactive, Quiescing, Terminating)</li>
+                            <li>Kaynak: TCP/IP stack durum bilgisi</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm mb-3">
+                            Stack durumu, sistem sağlığı ve operasyonel durumun anlaşılması için kritiktir.
+                          </p>
+                          <div className="mt-3">
+                            <h5 className="font-semibold text-yellow-900 mb-2">Geçerli Durumlar:</h5>
+                            <ul className="text-yellow-800 text-sm space-y-1 list-disc list-inside">
+                              <li><strong>Active:</strong> Stack aktif ve çalışıyor</li>
+                              <li><strong>Inactive:</strong> Stack pasif veya durdurulmuş</li>
+                              <li><strong>Quiescing:</strong> Stack kapatılmaya hazırlanıyor</li>
+                              <li><strong>Terminating:</strong> Stack sonlandırılıyor</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Diğer Modal Info Cards (STACKS olmayanlar) */}
+                    {activeModal !== 'STACKS' && infoModal === 'jobName' && (
                       <div className="space-y-4">
                         <div className="bg-blue-50 rounded-lg p-4">
                           <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
@@ -5062,8 +5669,7 @@ const NetworkPage = () => {
                       </div>
                     )}
 
-                    {/* Step Name Info */}
-                    {infoModal === 'stepName' && (
+                    {activeModal !== 'STACKS' && infoModal === 'stepName' && (
                       <div className="space-y-4">
                         <div className="bg-blue-50 rounded-lg p-4">
                           <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
@@ -5074,8 +5680,7 @@ const NetworkPage = () => {
                       </div>
                     )}
 
-                    {/* Target Field Info */}
-                    {infoModal === 'targetField' && (
+                    {activeModal !== 'STACKS' && infoModal === 'targetField' && (
                       <div className="space-y-4">
                         <div className="bg-blue-50 rounded-lg p-4">
                           <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
@@ -5086,8 +5691,7 @@ const NetworkPage = () => {
                       </div>
                     )}
 
-                    {/* Stack ASID Info */}
-                    {infoModal === 'asid' && (
+                    {activeModal !== 'STACKS' && infoModal === 'asid' && (
                       <div className="space-y-4">
                         <div className="bg-blue-50 rounded-lg p-4">
                           <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
@@ -5098,8 +5702,7 @@ const NetworkPage = () => {
                       </div>
                     )}
 
-                    {/* MVS Level Info */}
-                    {infoModal === 'mvsLevel' && (
+                    {activeModal !== 'STACKS' && infoModal === 'mvsLevel' && (
                       <div className="space-y-4">
                         <div className="bg-blue-50 rounded-lg p-4">
                           <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
@@ -5110,8 +5713,7 @@ const NetworkPage = () => {
                       </div>
                     )}
 
-                    {/* Stack Vers Info */}
-                    {infoModal === 'version' && (
+                    {activeModal !== 'STACKS' && infoModal === 'version' && (
                       <div className="space-y-4">
                         <div className="bg-blue-50 rounded-lg p-4">
                           <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
@@ -5122,8 +5724,7 @@ const NetworkPage = () => {
                       </div>
                     )}
 
-                    {/* Stack IPaddr Info */}
-                    {infoModal === 'ipAddress' && (
+                    {activeModal !== 'STACKS' && infoModal === 'ipAddress' && (
                       <div className="space-y-4">
                         <div className="bg-blue-50 rounded-lg p-4">
                           <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
@@ -5134,8 +5735,7 @@ const NetworkPage = () => {
                       </div>
                     )}
 
-                    {/* Stack Status Info */}
-                    {infoModal === 'status' && (
+                    {activeModal !== 'STACKS' && infoModal === 'status' && (
                       <div className="space-y-4">
                         <div className="bg-blue-50 rounded-lg p-4">
                           <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
@@ -5155,8 +5755,7 @@ const NetworkPage = () => {
                       </div>
                     )}
 
-                    {/* Start time of Stack Info */}
-                    {infoModal === 'startTime' && (
+                    {activeModal !== 'STACKS' && infoModal === 'startTime' && (
                       <div className="space-y-4">
                         <div className="bg-blue-50 rounded-lg p-4">
                           <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
@@ -5167,169 +5766,365 @@ const NetworkPage = () => {
                       </div>
                     )}
 
-                    {/* TCPIP Stack Name Info */}
-                    {infoModal === 'statstks' && (
+                    {/* STACKCPU Info Cards */}
+                    {activeModal === 'STACKCPU' && (infoModal === 'statstks' || infoModal === 'STATSTKS' || infoModal?.toLowerCase() === 'statstks') && (
                       <div className="space-y-4">
                         <div className="bg-green-50 rounded-lg p-4">
                           <h4 className="font-semibold text-green-900 mb-2">Ne Ölçer?</h4>
                           <p className="text-green-800 text-sm">
-                            The TCPIP stack name.
+                            TCPIP Stack Name alanı, bu TCP/IP stack'inin adını gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-blue-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: STATSTKS</li>
+                            <li>Format: TCP/IP stack adı (string)</li>
+                            <li>Kaynak: TCP/IP stack konfigürasyonu</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Stack adı, TCP/IP stack'ini benzersiz bir şekilde tanımlar ve ağ yönetimi, izleme ve troubleshooting için kritik bir bilgidir. Birden fazla stack olduğunda hangi stack'in hangi kayıtları temsil ettiğini anlamak için kullanılır.
                           </p>
                         </div>
                       </div>
                     )}
 
-                    {/* Interval Packets Received Info */}
-                    {infoModal === 'ippktrcd' && (
+                    {/* STACKCPU Info Cards - Interval Packets Received */}
+                    {activeModal === 'STACKCPU' && (infoModal === 'ippktrcd' || infoModal === 'IPPKTRCD' || infoModal?.toLowerCase() === 'ippktrcd') && (
                       <div className="space-y-4">
                         <div className="bg-green-50 rounded-lg p-4">
                           <h4 className="font-semibold text-green-900 mb-2">Ne Ölçer?</h4>
                           <p className="text-green-800 text-sm">
-                            This field represents the number of v4 Packets Received on this stack since the start of the current interval.
+                            Interval Packets Received alanı, mevcut interval'ın başlangıcından itibaren bu stack üzerinde alınan v4 paketlerinin sayısını gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-blue-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: IPPKTRCD</li>
+                            <li>Format: Numeric (integer)</li>
+                            <li>Kaynak: TCP/IP stack paket istatistikleri</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Bu metrik, ağ trafiği analizi, performans izleme ve ağ kapasitesi planlaması için kritiktir. Yüksek paket alma oranları yüksek ağ kullanımını gösterir.
                           </p>
                         </div>
                       </div>
                     )}
 
-                    {/* Packets Received per Second Info */}
-                    {infoModal === 'ippktrtr' && (
+                    {/* STACKCPU Info Cards - Packets Received per Second */}
+                    {activeModal === 'STACKCPU' && (infoModal === 'ippktrtr' || infoModal === 'IPPKTRTR' || infoModal?.toLowerCase() === 'ippktrtr') && (
                       <div className="space-y-4">
                         <div className="bg-green-50 rounded-lg p-4">
                           <h4 className="font-semibold text-green-900 mb-2">Ne Ölçer?</h4>
                           <p className="text-green-800 text-sm">
-                            This field represents the rate of v4 Packets Received on this stack since the start of the current interval. It is presented as Packets Received per second, and is the number of packets received in this interval divided by the number of seconds since the start of the current interval.
+                            Packets Received per Second alanı, mevcut interval'ın başlangıcından itibaren bu stack üzerinde alınan v4 paketlerinin saniye başına oranını gösterir. Bu değer, interval içinde alınan paket sayısının interval başlangıcından itibaren geçen saniye sayısına bölünmesiyle hesaplanır.
+                          </p>
+                        </div>
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-blue-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: IPPKTRTR</li>
+                            <li>Format: Numeric (double precision - paket/saniye)</li>
+                            <li>Kaynak: TCP/IP stack paket istatistikleri (hesaplanmış değer)</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Saniye başına paket alma oranı, ağ performansını ve bant genişliği kullanımını değerlendirmek için kritik bir metrikdir. Yüksek oranlar yoğun ağ trafiğini gösterir ve sistem optimizasyonu gerektirebilir.
                           </p>
                         </div>
                       </div>
                     )}
 
-                    {/* Current Output Requests Info */}
-                    {infoModal === 'ipoutred' && (
+                    {/* STACKCPU Info Cards - Current Output Requests */}
+                    {activeModal === 'STACKCPU' && (infoModal === 'ipoutred' || infoModal === 'IPOUTRED' || infoModal?.toLowerCase() === 'ipoutred') && (
                       <div className="space-y-4">
                         <div className="bg-green-50 rounded-lg p-4">
                           <h4 className="font-semibold text-green-900 mb-2">Ne Ölçer?</h4>
                           <p className="text-green-800 text-sm">
-                            This field represents the number of v4 Outputs Requested on this stack since the start of the current interval.
+                            Current Output Requests alanı, mevcut interval'ın başlangıcından itibaren bu stack üzerinde istenen v4 çıktı isteklerinin sayısını gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-blue-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: IPOUTRED</li>
+                            <li>Format: Numeric (integer)</li>
+                            <li>Kaynak: TCP/IP stack çıktı istek istatistikleri</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Çıktı istek sayısı, sistemin ağ üzerinden veri gönderme aktivitesini ölçer. Bu metrik, outbound trafik analizi ve ağ yük dengesini anlamak için önemlidir.
                           </p>
                         </div>
                       </div>
                     )}
 
-                    {/* Output Requests per Second Info */}
-                    {infoModal === 'ipoutrtr' && (
+                    {/* STACKCPU Info Cards - Output Requests per Second */}
+                    {activeModal === 'STACKCPU' && (infoModal === 'ipoutrtr' || infoModal === 'IPOUTRTR' || infoModal?.toLowerCase() === 'ipoutrtr') && (
                       <div className="space-y-4">
                         <div className="bg-green-50 rounded-lg p-4">
                           <h4 className="font-semibold text-green-900 mb-2">Ne Ölçer?</h4>
                           <p className="text-green-800 text-sm">
-                            This field represents the rate of v4 Output Request on this stack since the start of the current interval. It is presented as Output Requests per second, and is the number of Output Requests in this interval divided by the number of seconds since the start of the current interval.
+                            Output Requests per Second alanı, mevcut interval'ın başlangıcından itibaren bu stack üzerinde yapılan v4 çıktı isteklerinin saniye başına oranını gösterir. Bu değer, interval içindeki çıktı istek sayısının interval başlangıcından itibaren geçen saniye sayısına bölünmesiyle hesaplanır.
+                          </p>
+                        </div>
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-blue-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: IPOUTRTR</li>
+                            <li>Format: Numeric (double precision - istek/saniye)</li>
+                            <li>Kaynak: TCP/IP stack çıktı istek istatistikleri (hesaplanmış değer)</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Saniye başına çıktı istek oranı, sistemin veri gönderme kapasitesini ve performansını değerlendirmek için kritik bir metrikdir. Yüksek oranlar yoğun outbound trafiğini gösterir.
                           </p>
                         </div>
                       </div>
                     )}
 
-                    {/* Current ECSA Usage Info */}
-                    {infoModal === 'csacur' && (
+                    {/* VTAMCSA Info Cards - Current ECSA Usage */}
+                    {activeModal === 'vtamcsa' && (infoModal === 'csacur' || infoModal === 'csacur' || infoModal?.toLowerCase() === 'csacur') && (
                       <div className="space-y-4">
                         <div className="bg-purple-50 rounded-lg p-4">
                           <h4 className="font-semibold text-purple-900 mb-2">Ne Ölçer?</h4>
                           <p className="text-purple-800 text-sm">
-                            The Current ECSA Usage field displays the VTAM common storage area (CSA) allocation for buffers.
+                            Mevcut ECSA Kullanımı alanı, VTAM ortak depolama alanı (CSA) buffer ayırımını gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-blue-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: CSACUR</li>
+                            <li>Format: Numeric (double precision)</li>
+                            <li>Kaynak: VTAM buffer yönetimi</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            ECSA kullanımı, VTAM'ın bellek yönetimi ve performansı için kritiktir. Yüksek kullanım bellek baskısını gösterir ve sistem optimizasyonu gerektirebilir.
                           </p>
                         </div>
                       </div>
                     )}
 
-                    {/* System Field Info */}
-                    {infoModal === 'systemField' && (
+                    {/* VTAMCSA Info Cards - System Field */}
+                    {activeModal === 'vtamcsa' && (infoModal === 'systemField' || infoModal === 'j_system' || infoModal?.toLowerCase() === 'systemfield' || infoModal?.toLowerCase() === 'j_system') && (
                       <div className="space-y-4">
                         <div className="bg-purple-50 rounded-lg p-4">
                           <h4 className="font-semibold text-purple-900 mb-2">Ne Ölçer?</h4>
                           <p className="text-purple-800 text-sm">
-                            The System field shows the name of the MVS system Afor a resource that appears in a view displaying SSI context data.
+                            System alanı, SSI context verilerini gösteren bir görünümde görünen bir kaynak için MVS sistem adını gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-blue-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: J_SYSTEM</li>
+                            <li>Format: MVS sistem adı (string)</li>
+                            <li>Kaynak: SSI context data görünümü</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Sistem adı, kaynağın hangi MVS sisteminde bulunduğunu belirler ve sysplex ortamında veri ilişkilendirmesi için kritiktir.
                           </p>
                         </div>
                       </div>
                     )}
 
-                    {/* Maximum ECSA Usage Info */}
-                    {infoModal === 'csamax' && (
+                    {/* VTAMCSA Info Cards - Maximum ECSA Usage */}
+                    {activeModal === 'vtamcsa' && (infoModal === 'csamax' || infoModal?.toLowerCase() === 'csamax') && (
                       <div className="space-y-4">
                         <div className="bg-purple-50 rounded-lg p-4">
                           <h4 className="font-semibold text-purple-900 mb-2">Ne Ölçer?</h4>
                           <p className="text-purple-800 text-sm">
-                            The Maximum ECSA Usage field displays the largest common storage area (CSA) allocation level for buffers since the last DISPLAY BFRUSE command.
+                            Maksimum ECSA Kullanımı alanı, son DISPLAY BFRUSE komutundan bu yana buffer'lar için ayrılmış en büyük ortak depolama alanı (CSA) ayırım seviyesini gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-blue-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: CSAMAX</li>
+                            <li>Format: Numeric (double precision)</li>
+                            <li>Kaynak: VTAM buffer yönetimi (DISPLAY BFRUSE komutu)</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Maksimum ECSA kullanımı, sistemin geçmişteki bellek kullanım tepe noktalarını gösterir ve bellek kapasitesi planlaması için kritiktir.
                           </p>
                         </div>
                       </div>
                     )}
 
-                    {/* CSA Limit Info */}
-                    {infoModal === 'csalim' && (
+                    {/* VTAMCSA Info Cards - CSA Limit */}
+                    {activeModal === 'vtamcsa' && (infoModal === 'csalim' || infoModal?.toLowerCase() === 'csalim') && (
                       <div className="space-y-4">
                         <div className="bg-purple-50 rounded-lg p-4">
                           <h4 className="font-semibold text-purple-900 mb-2">Ne Ölçer?</h4>
                           <p className="text-purple-800 text-sm">
-                            The CSA Limit field displays the maximum amount of common storage area (CSA) that VTAM can use for buffers. Limits are enforced on the requested amount of storage, but CSA can be NO LIMIT (which means that VTAM can request as much CSA as is available). The CSA Limit field is set to the CSA LIMIT for 31-bit and 24-bit addressable common storage.
+                            CSA Limiti alanı, VTAM'ın buffer'lar için kullanabileceği maksimum ortak depolama alanı (CSA) miktarını gösterir. Limitler talep edilen depolama miktarına göre uygulanır, ancak CSA SINIR YOK olabilir (bu, VTAM'ın mevcut olduğu kadar CSA talep edebileceği anlamına gelir). CSA Limiti alanı, 31-bit ve 24-bit adreslenebilir ortak depolama için CSA LIMIT değerine ayarlanır.
+                          </p>
+                        </div>
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-blue-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: CSALIM</li>
+                            <li>Format: Numeric (double precision) veya NO LIMIT</li>
+                            <li>Kaynak: VTAM buffer yönetimi konfigürasyonu</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            CSA limiti, sistem kaynaklarının korunması ve bellek yönetimi için kritiktir. Limit aşımı sistem performansını etkileyebilir ve optimizasyon gerektirebilir.
                           </p>
                         </div>
                       </div>
                     )}
 
-                    {/* ECSA Storage Usage Info */}
-                    {infoModal === 'csausage' && (
+                    {/* VTAMCSA Info Cards - ECSA Storage Usage */}
+                    {activeModal === 'vtamcsa' && (infoModal === 'csausage' || infoModal?.toLowerCase() === 'csausage') && (
                       <div className="space-y-4">
                         <div className="bg-purple-50 rounded-lg p-4">
                           <h4 className="font-semibold text-purple-900 mb-2">Ne Ölçer?</h4>
                           <p className="text-purple-800 text-sm">
-                            The current percentage of ECSA Storage being used. This is the Current ECSA Storage divided by the Maximum ECSA Storage. storage area (CSA) allocation level for buffers since the last DISPLAY BFRUSE command.
+                            ECSA Depolama Kullanımı, kullanılmakta olan ECSA Depolama'nın mevcut yüzdesini gösterir. Bu değer, Mevcut ECSA Depolama'nın Maksimum ECSA Depolama'ya bölünmesiyle hesaplanır.
+                          </p>
+                        </div>
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-blue-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: CSAUSAGE</li>
+                            <li>Format: Numeric (yüzde - double precision)</li>
+                            <li>Kaynak: VTAM buffer yönetimi (hesaplanmış değer)</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            ECSA kullanım yüzdesi, bellek kullanımının maksimuma ne kadar yaklaştığını gösterir. Yüksek yüzdeler bellek baskısını işaret eder ve sistem performansını etkileyebilir.
                           </p>
                         </div>
                       </div>
                     )}
 
-                    {/* Current CSA24 Usage Info */}
-                    {infoModal === 'c24cur' && (
+                    {/* VTAMCSA Info Cards - Current CSA24 Usage */}
+                    {activeModal === 'vtamcsa' && (infoModal === 'c24cur' || infoModal?.toLowerCase() === 'c24cur') && (
                       <div className="space-y-4">
                         <div className="bg-purple-50 rounded-lg p-4">
                           <h4 className="font-semibold text-purple-900 mb-2">Ne Ölçer?</h4>
                           <p className="text-purple-800 text-sm">
-                            The Current CSA24 Usage field displays the amount of 24-bit addressable common storage (CSA24) that is allocated for VTAM buffers.
+                            Mevcut CSA24 Kullanımı alanı, VTAM buffer'ları için ayrılmış 24-bit adreslenebilir ortak depolama (CSA24) miktarını gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-blue-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: C24CUR</li>
+                            <li>Format: Numeric (double precision)</li>
+                            <li>Kaynak: VTAM buffer yönetimi (24-bit adres alanı)</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            CSA24 kullanımı, 24-bit adres alanında bellek yönetimi için kritiktir. Eski sistem uyumluluğu ve bellek optimizasyonu için önemlidir.
                           </p>
                         </div>
                       </div>
                     )}
 
-                    {/* Maximum CSA24 Usage Info */}
-                    {infoModal === 'c24max' && (
+                    {/* VTAMCSA Info Cards - Maximum CSA24 Usage */}
+                    {activeModal === 'vtamcsa' && (infoModal === 'c24max' || infoModal?.toLowerCase() === 'c24max') && (
                       <div className="space-y-4">
                         <div className="bg-purple-50 rounded-lg p-4">
                           <h4 className="font-semibold text-purple-900 mb-2">Ne Ölçer?</h4>
                           <p className="text-purple-800 text-sm">
-                            The Maximum CSA24 Usage field displays the largest amount of 24-bit addressable common storage (CSA24) that has been allocated for buffers since the last DISPLAY BFRUSE command.
+                            Maksimum CSA24 Kullanımı alanı, son DISPLAY BFRUSE komutundan bu yana buffer'lar için ayrılmış en büyük 24-bit adreslenebilir ortak depolama (CSA24) miktarını gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-blue-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: C24MAX</li>
+                            <li>Format: Numeric (double precision)</li>
+                            <li>Kaynak: VTAM buffer yönetimi (DISPLAY BFRUSE komutu)</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Maksimum CSA24 kullanımı, 24-bit adres alanındaki geçmiş bellek kullanım tepe noktalarını gösterir ve eski sistem uyumluluğu planlaması için önemlidir.
                           </p>
                         </div>
                       </div>
                     )}
 
-                    {/* Current Private Usage Info */}
-                    {infoModal === 'vtmcur' && (
+                    {/* VTAMCSA Info Cards - Current Private Usage */}
+                    {activeModal === 'vtamcsa' && (infoModal === 'vtmcur' || infoModal?.toLowerCase() === 'vtmcur') && (
                       <div className="space-y-4">
                         <div className="bg-purple-50 rounded-lg p-4">
                           <h4 className="font-semibold text-purple-900 mb-2">Ne Ölçer?</h4>
                           <p className="text-purple-800 text-sm">
-                            The Current Private Usage field displays the amount of VTAM private storage that is in use. This display does not include the amount of private storage that is required to load the VTAM modules.
+                            Mevcut Özel Kullanım alanı, kullanımda olan VTAM özel depolama miktarını gösterir. Bu gösterim, VTAM modüllerini yüklemek için gerekli özel depolama miktarını içermez.
+                          </p>
+                        </div>
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-blue-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: VTMCUR</li>
+                            <li>Format: Numeric (double precision)</li>
+                            <li>Kaynak: VTAM private storage yönetimi</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Private storage kullanımı, VTAM'ın özel bellek gereksinimlerini gösterir ve sistem kaynak yönetimi için kritiktir. Yüksek kullanım bellek optimizasyonu gerektirebilir.
                           </p>
                         </div>
                       </div>
                     )}
 
-                    {/* Maximum Private Usage Info */}
-                    {infoModal === 'vtmmax' && (
+                    {/* VTAMCSA Info Cards - Maximum Private Usage */}
+                    {activeModal === 'vtamcsa' && (infoModal === 'vtmmax' || infoModal?.toLowerCase() === 'vtmmax') && (
                       <div className="space-y-4">
                         <div className="bg-purple-50 rounded-lg p-4">
                           <h4 className="font-semibold text-purple-900 mb-2">Ne Ölçer?</h4>
                           <p className="text-purple-800 text-sm">
-                            The Maximum Private Usage field displays the largest amount of VTAM primate storage that was in use since VTAM was started.
+                            Maksimum Özel Kullanım alanı, VTAM başlatıldığından bu yana kullanılmış olan en büyük VTAM özel depolama miktarını gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Teknik Detaylar</h4>
+                          <ul className="text-blue-800 text-sm space-y-1 list-disc list-inside">
+                            <li>Kolon Adı: VTMMAX</li>
+                            <li>Format: Numeric (double precision)</li>
+                            <li>Kaynak: VTAM private storage yönetimi</li>
+                          </ul>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Maksimum private storage kullanımı, VTAM'ın geçmişteki bellek kullanım tepe noktalarını gösterir ve bellek kapasitesi planlaması için kritiktir.
                           </p>
                         </div>
                       </div>
@@ -5580,15 +6375,6 @@ const NetworkPage = () => {
                       </div>
                     )}
 
-                    {/* Diğer info modal tipleri için placeholder */}
-                    {!['jobName', 'stepName', 'targetField', 'asid', 'mvsLevel', 'version', 'ipAddress', 'status', 'startTime', 'statstks', 'ippktrcd', 'ippktrtr', 'ipoutred', 'ipoutrtr', 'csacur', 'systemField', 'csamax', 'csalim', 'csausage', 'c24cur', 'c24max', 'vtmcur', 'vtmmax', 'vtmbuffSystem', 'vtmbuffIobufSize', 'vtmbuffIobufTimes', 'vtmbuffLpbufSize', 'vtmbuffLpbufTimes', 'vtmbuffLfbufSize', 'vtmbuffLfbufTimes', 'tcpstorStep', 'tcpstorSystem', 'tcpstorEcsaCurrent', 'tcpstorEcsaMax', 'tcpstorEcsaLimit', 'tcpstorEcsaFree', 'tcpstorPrivateCurrent', 'tcpstorPrivateMax', 'connsrpzForeignIp', 'connsrpzActiveConns', 'connsrpzRtt', 'connsrpzBytesIn', 'connsrpzBytesOut', 'connsrpzStack', 'connsrpzRemoteHost'].includes(infoModal) && (
-                    <div className={`bg-${modalColor}-50 rounded-lg p-4`}>
-                      <h4 className={`font-semibold text-${modalColor}-900 mb-2`}>Açıklama</h4>
-                      <p className={`text-${modalColor}-800 text-sm`}>
-                         {infoModal} metriği ile ilgili detaylı açıklama buraya eklenecektir.
-                      </p>
-                  </div>
-                    )}
                 </div>
               </div>
             </div>
@@ -5702,6 +6488,13 @@ const NetworkPage = () => {
                     {activeModal === 'STACKS' ? (
                       <button
                         onClick={applyStacksTimeFilter}
+                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors duration-200"
+                      >
+                        Zaman Filtresini Uygula
+                      </button>
+                    ) : activeModal === 'STACKCPU' ? (
+                      <button
+                        onClick={applyStackCpuTimeFilter}
                         className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors duration-200"
                       >
                         Zaman Filtresini Uygula
