@@ -227,8 +227,6 @@ def extract_numeric_from_api_list(raw_list):
 
 def create_zfs_table():
     """mainview_zfs_file_systems tablosunu oluşturur"""
-    # Önce mevcut tabloyu sil (eğer varsa)
-    drop_table_query = "DROP TABLE IF EXISTS mainview_zfs_file_systems;"
     
     create_table_query = """
     CREATE TABLE mainview_zfs_file_systems (
@@ -251,7 +249,7 @@ def create_zfs_table():
             return False
         
         cursor = connection.cursor()
-        cursor.execute(drop_table_query)
+        
         cursor.execute(create_table_query)
         connection.commit()
         cursor.close()
@@ -358,8 +356,6 @@ def ensure_table_schema():
 
 def create_ard_table():
     """mainview_ard_performance table is created - SYSOVER fields"""
-    # Önce mevcut tabloyu sil (eğer varsa)
-    drop_table_query = "DROP TABLE IF EXISTS mainview_rmf_ard;"
     
     create_table_query = """
     CREATE TABLE mainview_rmf_ard (
@@ -390,7 +386,6 @@ def create_ard_table():
             return False
         
         cursor = connection.cursor()
-        cursor.execute(drop_table_query)
         cursor.execute(create_table_query)
         connection.commit()
         cursor.close()
@@ -664,6 +659,32 @@ def create_xcfmbr_table():
         logger.error("Failed to create XCFMBR table")
         return False
 
+def create_w2over_table():
+    """Creates the mainview_mq_w2over table (W2OVER - MQ Overview)"""
+    create_query = """
+        CREATE TABLE IF NOT EXISTS mainview_mq_w2over (
+            queue_manager_name VARCHAR(50) UNIQUE,
+            queue_manager_status VARCHAR(20),
+            channels_retrying INTEGER,
+            local_queues_max_depth_high INTEGER,
+            transmit_queues_max_depth_high INTEGER,
+            dead_letter_message_count INTEGER,
+            free_pages_page_set_0_percent DECIMAL(5,2),
+            queue_manager_events_count INTEGER,
+            event_listener_status VARCHAR(20),
+            command_server_status VARCHAR(20),
+            command_prefix VARCHAR(50),
+            reply_q_exceptions INTEGER,
+            record_timestamp TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP(0)
+        );
+    """
+    if execute_query(create_query):
+        logger.info("✅ mainview_mq_w2over table ready")
+        return True
+    else:
+        logger.error("❌ Table could not be created")
+        return False
+
 def create_udpconf_table():
     """Creates the mainview_udpconf table for UDP configuration monitoring"""
     create_table_query = """
@@ -849,9 +870,7 @@ def create_jdelay_table():
 
 def create_fixed_table():
     """Creates FRMINFO Fixed table - Organized Structure"""
-    # First drop table (if exists)
-    drop_table_query = "DROP TABLE IF EXISTS mainview_frminfo_fixed;"
-    execute_query(drop_table_query)
+    
     
     create_table_query = """
     CREATE TABLE mainview_frminfo_fixed (
@@ -908,9 +927,7 @@ def create_fixed_table():
 
 def create_high_virtual_table():
     """Creates FRMINFO High Virtual table - Organized Structure"""
-    # First drop table (if exists)
-    drop_table_query = "DROP TABLE IF EXISTS mainview_frminfo_high_virtual;"
-    execute_query(drop_table_query)
+    
     
     create_table_query = """
     CREATE TABLE mainview_frminfo_high_virtual (
@@ -1374,6 +1391,11 @@ def create_all_tables():
     create_xcfmbr_table()
     print("✅ XCFMBR table created")
     
+    # Create W2OVER table
+    print("📊 Creating W2OVER table...")
+    create_w2over_table()
+    print("✅ W2OVER table created")
+    
     # Create UDPCONF table
     print("📊 Creating UDPCONF table...")
     create_udpconf_table()
@@ -1560,6 +1582,7 @@ def main():
     print("  • mainview_mvs_jespool - JESPOOL monitoring data")
     print("  • mainview_mvs_wmsplxz - WMSPLXZ monitoring data")
     print("  • mainview_xcfmbr - XCFMBR monitoring data")
+    print("  • mainview_mq_w2over - W2OVER MQ overview data")
     print("  • mainview_udpconf - UDPCONF monitoring data")
     print("  • mainview_tcpcons - TCPCONS monitoring data")
     print("  • mainview_tcpconf - TCPCONF monitoring data")
