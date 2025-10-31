@@ -104,12 +104,12 @@ const StoragePage = () => {
 
   // Display label overrides for FRMINFO_HIGH_VIRTUAL
   const FRMINFO_HIGH_VIRTUAL_LABELS = {
-    hv_common_avg: 'Ortalama High Virtual Common Çerçeveleri',
-    hv_common_min: 'Minimum High Virtual Common Çerçeveleri',
-    hv_common_max: 'Maksimum High Virtual Common Çerçeveleri',
-    hv_shared_avg: 'Ortalama High Virtual Shared Çerçeveleri',
-    hv_shared_min: 'Minimum High Virtual Shared Çerçeveleri',
-    hv_shared_max: 'Maksimum High Virtual Shared Çerçeveleri'
+    hv_common_avg: 'Average High Virtual Common Frames',
+    hv_common_min: 'Minimum High Virtual Common Frames',
+    hv_common_max: 'Maximum High Virtual Common Frames',
+    hv_shared_avg: 'Average High Virtual Shared Frames',
+    hv_shared_min: 'Minimum High Virtual Shared Frames',
+    hv_shared_max: 'Maximum High Virtual Shared Frames'
   };
 
   // Display label overrides for FRMINFO_CENTER
@@ -603,8 +603,7 @@ const StoragePage = () => {
   // Tabs configuration
   const tabs = [
     { id: 'table', name: 'Tablo', icon: '📊' },
-    { id: 'chart', name: 'Grafik', icon: '📈' },
-    { id: 'threshold', name: 'Threshold', icon: '⚙️' }
+    { id: 'chart', name: 'Grafik', icon: '📈' }
   ];
 
   // Modal color system
@@ -823,13 +822,13 @@ const StoragePage = () => {
     spiafumx: { title: 'Maksimum Merkezi Toplam', what: 'Aralık boyunca kullanılan tüm merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
     spitcpct: { title: 'Merkezi Çerçeveler Ortalama Yüzdesi', what: 'Aralık boyunca kullanılan merkezi depolama çerçevelerinin ortalama yüzde oranıdır.' },
 
-    // FRMINFO_HIGH_VIRTUAL (Türkçe başlıklar)
-    hv_common_avg: { title: 'Ortalama High Virtual Common Çerçeveleri', what: 'Aralık boyunca High Virtual Common depolamanın işgal ettiği merkezi depolama çerçevelerinin ortalama sayısıdır.' },
-    hv_common_min: { title: 'Minimum High Virtual Common Çerçeveleri', what: 'Aralık boyunca High Virtual Common depolamanın işgal ettiği merkezi depolama çerçevelerinin en düşük sayısıdır.' },
-    hv_common_max: { title: 'Maksimum High Virtual Common Çerçeveleri', what: 'Aralık boyunca High Virtual Common depolamanın işgal ettiği merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
-    hv_shared_avg: { title: 'Ortalama High Virtual Shared Çerçeveleri', what: 'Aralık boyunca High Virtual Paylaşılan Bellek Nesnelerinin işgal ettiği merkezi depolama çerçevelerinin ortalama sayısıdır.' },
-    hv_shared_min: { title: 'Minimum High Virtual Shared Çerçeveleri', what: 'Aralık boyunca High Virtual Paylaşılan Bellek Nesnelerinin işgal ettiği merkezi depolama çerçevelerinin en düşük sayısıdır.' },
-    hv_shared_max: { title: 'Maksimum High Virtual Shared Çerçeveleri', what: 'Aralık boyunca High Virtual Paylaşılan Bellek Nesnelerinin işgal ettiği merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+    // FRMINFO_HIGH_VIRTUAL
+    hv_common_avg: { title: 'Average High Virtual Common Frames – SPIHVCAV', what: 'The Average High Virtual Common Frames field contains the average number of central storage frames that were occupied by High Virtual Common storage during the interval.' },
+    hv_common_min: { title: 'Minimum High Virtual Common Frames – SPIHVCMN', what: 'The Minimum High Virtual Common Frames field contains the minimum number of central storage frames that were occupied by High Virtual Common storage during the interval.' },
+    hv_common_max: { title: 'Maximum High Virtual Common Frames – SPIHVCMX', what: 'The Maximum High Virtual Common Frames field contains the maximum number of central storage frames that were occupied by High Virtual Common storage during the interval.' },
+    hv_shared_avg: { title: 'Average High Virtual Shared Frames – SPIHVSAV', what: 'The Average High Virtual Shared Frames field contains the average number of central storage frames that were occupied by High Virtual Shared Memory Objects during the interval.' },
+    hv_shared_min: { title: 'Minimum High Virtual Shared Frames – SPIHVSMN', what: 'The Minimum High Virtual Shared Frames field contains the minimum number of central storage frames that were occupied by High Virtual Shared Memory Objects during the interval.' },
+    hv_shared_max: { title: 'Maximum High Virtual Shared Frames – SPIHVSMX', what: 'The Maximum High Virtual Shared Frames field contains the maximum number of central storage frames that were occupied by High Virtual Shared Memory Objects during the interval.' },
 
     // SYSFRMIZ (örnek)
     spl: { title: 'SPL', what: 'System Private Lines kapasitesi/ayar metriği.', why: 'Kaynak sınırlamaları performansı etkileyebilir.' },
@@ -1974,20 +1973,6 @@ const StoragePage = () => {
                           </div>
                         </div>
                       )}
-                    </div>
-                  )}
-
-                  {/* Threshold Sekmesi */}
-                  {activeTab === 'threshold' && (
-                    <div className="space-y-4">
-                      <h4 className="text-lg font-semibold text-gray-800">Threshold Ayarları</h4>
-                      <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
-                        <div className="text-6xl mb-4">⚙️</div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">Threshold Ayarları</h3>
-                        <p className="text-gray-600">
-                          {activeModal} için threshold ayarları burada yapılacak
-                        </p>
-                      </div>
                     </div>
                   )}
                 </div>
