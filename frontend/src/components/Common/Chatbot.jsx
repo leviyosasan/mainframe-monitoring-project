@@ -9,6 +9,17 @@ const Chatbot = () => {
   ])
   const [inputMessage, setInputMessage] = useState('')
   const messagesEndRef = useRef(null)
+  const [suggestions, setSuggestions] = useState([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
+  const [columnsCache, setColumnsCache] = useState({})
+  const [userClosedSuggestions, setUserClosedSuggestions] = useState(false)
+
+  // Tunables
+  const SUGGESTION_LIMIT = 8
+  const COLUMN_SUGGEST_MIN = 2
+  const ALIAS_INCLUDE_MIN = 3
+  const LIST_ALL_KEYWORDS = ['tüm', 'hepsi', 'kolon', 'columns', 'liste']
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -222,6 +233,259 @@ const Chatbot = () => {
     return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
   }
 
+  // Dataset metadata (aliases + API hooks + popular columns)
+  const datasetConfigs = {
+    stacks: {
+      title: 'Network Stacks',
+      aliases: ['stacks', 'stack', 'tcpip stack', 'tcp/ip stack', 'ip stack'],
+      primaryAliases: ['stacks', 'stack'],
+      fetch: databaseAPI.getMainviewNetworkStacks,
+      check: databaseAPI.checkTableExistsStacks,
+      staticColumns: ['jobnam8', 'stepnam8', 'jtarget', 'asid8', 'mvslvlx8', 'ver_rel', 'startc8', 'ipaddrc8', 'status18']
+    },
+    stackcpu: {
+      title: 'Network StackCPU',
+      aliases: ['stackcpu', 'stack cpu', 'tcpip cpu', 'stack cpu usage'],
+      primaryAliases: ['stackcpu'],
+      fetch: databaseAPI.getMainviewNetworkStackCPU,
+      check: databaseAPI.checkTableExistsStackCPU,
+      staticColumns: ['statstks', 'ippktrcd', 'ippktrtr', 'ipoutred', 'ipoutrtr']
+    },
+    vtamcsa: {
+      title: 'Network VTAMCSA',
+      aliases: ['vtamcsa', 'vtam csa', 'csa vtam'],
+      primaryAliases: ['vtamcsa'],
+      fetch: databaseAPI.getMainviewNetworkVtamcsa,
+      check: databaseAPI.checkTableExistsVtamcsa,
+      staticColumns: ['csacur', 'csamax', 'csalim', 'csausage', 'c24cur', 'c24max', 'vtmcur', 'vtmmax']
+    },
+    tcpconf: {
+      title: 'Network TCPCONF',
+      aliases: ['tcpconf', 'tcp conf', 'tcp configuration', 'tcp ayar', 'tcp config'],
+      primaryAliases: ['tcpconf'],
+      fetch: databaseAPI.getMainviewNetworkTcpconf,
+      check: databaseAPI.checkTableExiststcpconf,
+      staticColumns: ['job_name', 'stack_name', 'def_receive_bufsize', 'def_send_bufsize', 'def_max_receive_bufsize', 'maximum_queue_depth', 'default_keepalive', 'delay_ack', 'finwait2time', 'ttls']
+    },
+    tcpcons: {
+      title: 'Network TCPCONS',
+      aliases: ['tcpcons', 'tcp cons', 'tcp connections', 'tcp bağlantı', 'connections'],
+      primaryAliases: ['tcpcons'],
+      fetch: databaseAPI.getMainviewNetworktcpcons,
+      check: databaseAPI.checkTableExiststcpcons,
+      staticColumns: ['foreign_ip_address', 'remote_port', 'local_port', 'application_name', 'type_of_open', 'interval_bytes_in', 'interval_bytes_out', 'connection_status', 'remote_host_name', 'system_name']
+    },
+    udpconf: {
+      title: 'Network UDPCONF',
+      aliases: ['udpconf', 'udp conf', 'udp configuration', 'udp ayar'],
+      primaryAliases: ['udpconf'],
+      fetch: databaseAPI.getMainviewNetworkUdpconf,
+      check: databaseAPI.checkTableExistsudpconf,
+      staticColumns: ['job_name', 'stack_name', 'def_recv_bufsize', 'def_send_bufsize', 'check_summing', 'restrict_low_port', 'udp_queue_limit']
+    },
+    actcons: {
+      title: 'Network ACTCONS',
+      aliases: ['actcons', 'act cons', 'active connections', 'aktif bağlantı'],
+      primaryAliases: ['actcons'],
+      fetch: databaseAPI.getMainviewNetworkactcons,
+      check: databaseAPI.checkTableExistsactcons,
+      staticColumns: ['foreign_ip_address', 'remote_port', 'local_ip_address', 'local_port', 'application_name', 'type_of_open', 'interval_bytes_in', 'interval_bytes_out', 'connection_status', 'remote_host_name', 'system_name']
+    },
+    vtmbuff: {
+      title: 'Network VTMBUFF',
+      aliases: ['vtmbuff', 'vtm buff'],
+      primaryAliases: ['vtmbuff'],
+      fetch: databaseAPI.getMainviewNetworkVtmbuff,
+      check: databaseAPI.checkTableExistsVtmbuff,
+      staticColumns: []
+    },
+    tcpstor: {
+      title: 'Network TCPSTOR',
+      aliases: ['tcpstor', 'tcp stor', 'tcp storage'],
+      primaryAliases: ['tcpstor'],
+      fetch: databaseAPI.getMainviewNetworkTcpstor,
+      check: databaseAPI.checkTableExistsTcpstor,
+      staticColumns: []
+    },
+    connsrpz: {
+      title: 'Network CONNSRPZ',
+      aliases: ['connsrpz', 'conn srpz', 'connsprz'],
+      primaryAliases: ['connsrpz'],
+      fetch: databaseAPI.getMainviewNetworkConnsrpz,
+      check: databaseAPI.checkTableExistsConnsrpz,
+      staticColumns: []
+    }
+  }
+
+  const ensureColumnsLoaded = async (datasetKey) => {
+    if (!datasetKey || columnsCache[datasetKey]) return
+    const cfg = datasetConfigs[datasetKey]
+    if (!cfg) return
+    try {
+      if (typeof cfg.check === 'function') {
+        const resp = await cfg.check({})
+        const cols = resp?.data?.tableInfo?.columns?.map?.(c => c.column_name) || []
+        if (cols.length > 0) {
+          setColumnsCache(prev => ({ ...prev, [datasetKey]: cols }))
+          return
+        }
+      }
+      if (Array.isArray(cfg.staticColumns) && cfg.staticColumns.length > 0) {
+        setColumnsCache(prev => ({ ...prev, [datasetKey]: cfg.staticColumns }))
+      }
+    } catch {
+      if (Array.isArray(cfg.staticColumns) && cfg.staticColumns.length > 0) {
+        setColumnsCache(prev => ({ ...prev, [datasetKey]: cfg.staticColumns }))
+      }
+    }
+  }
+
+  // Generic table query helper for network datasets
+  const queryDataset = async (lowerMessage, fetchFunction, title, datasetKey) => {
+    const listAll = LIST_ALL_KEYWORDS.some(k => lowerMessage.includes(k))
+
+    try {
+      const response = await fetchFunction({})
+      if (!response?.data?.success) {
+        setMessages(prev => [...prev, { text: `${title} verisi alınamadı.`, sender: 'bot' }])
+        return
+      }
+
+      const rows = Array.isArray(response.data.data) ? response.data.data : []
+      if (rows.length === 0) {
+        setMessages(prev => [...prev, { text: `${title} için veri bulunamadı.`, sender: 'bot' }])
+        return
+      }
+
+      if (listAll) {
+        const summary = buildSummary(rows, 20)
+        setMessages(prev => [...prev, { text: `📦 ${title} - Tüm Kolonlar (son değerler)\n${summary}`, sender: 'bot' }])
+        return
+      }
+
+      const keys = getAllKeys(rows)
+      const picked = pickColumnByMessage(lowerMessage, keys)
+      if (!picked) {
+        let examples = keys
+        if ((!examples || examples.length === 0) && datasetKey) {
+          await ensureColumnsLoaded(datasetKey)
+          examples = columnsCache[datasetKey] || datasetConfigs[datasetKey]?.staticColumns || []
+        }
+        const preview = (examples || []).slice(0, 12).join(', ')
+        setMessages(prev => [...prev, { text: `${title} için aradığınız kolon bulunamadı. Örnek kolonlar: ${preview}. Tümü için "${(datasetKey || title).split(' ')[0].toLowerCase()} tüm" yazabilirsiniz.`, sender: 'bot' }])
+        return
+      }
+
+      const row = rows.find(r => r?.[picked] !== null && r?.[picked] !== undefined && String(r?.[picked]).trim() !== '') || rows[0]
+      const ts = row?.record_timestamp || row?.bmctime || row?.updated_at || row?.created_at || row?.time || row?.timestamp
+      const reply = `📦 ${title} - ${picked}\n• Değer: ${formatValue(row?.[picked])}\n• Zaman: ${formatTrDate(ts)}`
+      setMessages(prev => [...prev, { text: reply, sender: 'bot' }])
+    } catch (err) {
+      setMessages(prev => [...prev, { text: `${title} verisi alınırken bir hata oluştu.`, sender: 'bot' }])
+    }
+  }
+
+  // Autocomplete suggestions
+  const updateHintList = async (value) => {
+    const v = String(value || '')
+    const lower = v.toLowerCase()
+    const tokens = lower.split(/\s+/).filter(Boolean)
+    const sugs = []
+
+    if (tokens.length <= 1) {
+      // Dataset name suggestions 
+      const needle = normalizeKey(lower)
+      const allowIncludes = needle.length >= ALIAS_INCLUDE_MIN
+      if (needle.length > 0) {
+        Object.entries(datasetConfigs).forEach(([key, cfg]) => {
+          const baseList = needle.length <= ALIAS_INCLUDE_MIN - 1 ? (cfg.primaryAliases || cfg.aliases) : cfg.aliases
+          const hit = baseList.some(a => {
+            const an = normalizeKey(a)
+            return allowIncludes ? an.includes(needle) : an.startsWith(needle)
+          })
+          if (hit) sugs.push({ type: 'dataset', datasetKey: key, display: cfg.title, insertText: key })
+        })
+      }
+    }
+
+    // Column suggestions when a dataset token is present
+    let matchedDatasetKey = null
+    outer: for (const [key, cfg] of Object.entries(datasetConfigs)) {
+      for (const a of cfg.aliases) {
+        // Accept variations like "tcpcons u", "tcpcons'", etc.
+        if (lower.includes(a)) { matchedDatasetKey = key; break outer }
+      }
+    }
+
+    if (matchedDatasetKey) {
+      await ensureColumnsLoaded(matchedDatasetKey)
+      const cols = columnsCache[matchedDatasetKey] || datasetConfigs[matchedDatasetKey].staticColumns || []
+      const lastToken = tokens[tokens.length - 1] || ''
+      cols
+        .filter(c => c && c.toLowerCase().includes(lastToken))
+        .slice(0, 10)
+        .forEach(c => sugs.push({ type: 'column', datasetKey: matchedDatasetKey, display: c, insertText: `${matchedDatasetKey} ${c}` }))
+    }
+
+    // If no dataset matched, still suggest global columns
+    if (!matchedDatasetKey) {
+      const lastToken = tokens[tokens.length - 1] || ''
+      const all = []
+      for (const [k, cfg] of Object.entries(datasetConfigs)) {
+        const cols = (columnsCache[k] || cfg.staticColumns || []).slice(0, 20)
+        cols.forEach(c => all.push({ datasetKey: k, column: c }))
+      }
+      all
+        .filter(it => it.column && it.column.toLowerCase().includes(lastToken) && lastToken.length >= COLUMN_SUGGEST_MIN)
+        .slice(0, SUGGESTION_LIMIT)
+        .forEach(it => sugs.push({ type: 'column', datasetKey: it.datasetKey, display: `${it.column}`, insertText: `${it.datasetKey} ${it.column}` }))
+    }
+
+    // keep panel compact
+    const limited = sugs.slice(0, SUGGESTION_LIMIT)
+    setSuggestions(limited)
+    if (!userClosedSuggestions) setShowSuggestions(limited.length > 0)
+    setSelectedSuggestionIndex(limited.length > 0 ? 0 : -1)
+  }
+
+  const applySuggestion = (sug) => {
+    if (!sug) return
+    setInputMessage(sug.insertText + (sug.type === 'dataset' ? ' ' : ''))
+    setShowSuggestions(false)
+    setSelectedSuggestionIndex(-1)
+  }
+
+  // Try to infer dataset from a column name when user doesn't type dataset
+  const guessDatasetByColumn = async (lowerMessage) => {
+    const msgNorm = normalizeKey(lowerMessage)
+    const candidates = []
+    for (const [key, cfg] of Object.entries(datasetConfigs)) {
+      await ensureColumnsLoaded(key)
+      const cols = columnsCache[key] || cfg.staticColumns || []
+      const hit = cols.some(c => msgNorm.includes(normalizeKey(c)))
+      if (hit) candidates.push(key)
+    }
+    if (candidates.length === 1) return candidates[0]
+    return null
+  }
+
+  const findDatasetsByColumn = async (rawTerm) => {
+    const term = normalizeKey(rawTerm)
+    const results = []
+    if (!term) return results
+    for (const [key, cfg] of Object.entries(datasetConfigs)) {
+      await ensureColumnsLoaded(key)
+      const cols = columnsCache[key] || cfg.staticColumns || []
+      for (const c of cols) {
+        if (normalizeKey(c).includes(term)) {
+          results.push({ datasetKey: key, title: cfg.title, column: c })
+          break
+        }
+      }
+    }
+    return results
+  }
+
   const handleSendMessage = async () => {
     if (inputMessage.trim() === '') return
 
@@ -232,6 +496,8 @@ const Chatbot = () => {
     const userMessage = { text: message, sender: 'user' }
     setMessages(prev => [...prev, userMessage])
     setInputMessage('')
+    setShowSuggestions(false)
+    setSelectedSuggestionIndex(-1)
 
     // CPU datası isteğini kontrol et
     if (lowerMessage.includes('son cpu') || lowerMessage.includes('cpu getir') || lowerMessage.includes('cpu verisi')) {
@@ -272,6 +538,41 @@ const Chatbot = () => {
         setMessages(prev => [...prev, { text: 'CPU verisi alınırken bir hata oluştu.', sender: 'bot' }])
       }
       return
+    }
+
+    // Network datasets (alias-aware)
+    for (const [key, cfg] of Object.entries(datasetConfigs)) {
+      if (cfg.aliases.some(a => lowerMessage.includes(a))) {
+        setMessages(prev => [...prev, { text: `${cfg.title} verisini çekiyorum...`, sender: 'bot' }])
+        await queryDataset(lowerMessage, cfg.fetch, cfg.title, key)
+        return
+      }
+    }
+
+    // explicit keyword fallbacks removed (aliases already cover cases)
+
+    // Column-only queries: infer dataset if possible
+    const inferred = await guessDatasetByColumn(lowerMessage)
+    if (inferred) {
+      const cfg = datasetConfigs[inferred]
+      setMessages(prev => [...prev, { text: `${cfg.title} verisini çekiyorum...`, sender: 'bot' }])
+      await queryDataset(lowerMessage, cfg.fetch, cfg.title, inferred)
+      return
+    }
+
+    // If message looks like a column name, surface suggestions instead of generic fallback
+    if (/^[a-zA-Z0-9_]+$/.test(lowerMessage) && lowerMessage.length >= COLUMN_SUGGEST_MIN) {
+      const matches = await findDatasetsByColumn(lowerMessage)
+      if (matches.length > 0) {
+        const sugs = matches.slice(0, SUGGESTION_LIMIT).map(m => ({
+          type: 'column', datasetKey: m.datasetKey, display: `${m.column}`, insertText: `${m.datasetKey} ${m.column}`
+        }))
+        setInputMessage(message)
+        setSuggestions(sugs)
+        setShowSuggestions(true)
+        setSelectedSuggestionIndex(0)
+        return
+      }
     }
 
     // MQ CONNZ data query
@@ -444,8 +745,25 @@ const Chatbot = () => {
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
+      if (showSuggestions && selectedSuggestionIndex >= 0) return
       e.preventDefault()
       handleSendMessage()
+    }
+  }
+
+  const handleKeyDown = (e) => {
+    if (!showSuggestions || suggestions.length === 0) return
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setSelectedSuggestionIndex(prev => (prev + 1) % suggestions.length)
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setSelectedSuggestionIndex(prev => (prev - 1 + suggestions.length) % suggestions.length)
+    } else if (e.key === 'Tab' || e.key === 'Enter') {
+      e.preventDefault()
+      applySuggestion(suggestions[selectedSuggestionIndex] || suggestions[0])
+    } else if (e.key === 'Escape') {
+      setShowSuggestions(false)
     }
   }
 
@@ -479,7 +797,7 @@ const Chatbot = () => {
 
       {/* Chatbot Window */}
       {isOpen && !isFullscreen && (
-        <div className="fixed bottom-6 right-6 w-96 h-[520px] bg-gray-800 rounded-2xl shadow-2xl flex flex-col z-50 border border-gray-700 animate-slide-up backdrop-blur-xl" style={{ animation: 'slideUp 0.3s ease-out' }}>
+        <div className="fixed bottom-6 right-6 w-[380px] sm:w-96 h-[520px] max-h-[85vh] bg-gray-800 rounded-2xl shadow-2xl flex flex-col z-50 border border-gray-700 animate-slide-up backdrop-blur-xl overflow-hidden" style={{ animation: 'slideUp 0.3s ease-out' }}>
           {/* Header */}
           <div className="bg-gray-900 text-white px-5 py-4 rounded-t-2xl flex justify-between items-center shadow-lg border-b border-gray-700">
             <div className="flex items-center gap-3">
@@ -522,7 +840,30 @@ const Chatbot = () => {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gray-800">
+          <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gray-800 relative">
+            {/* Suggestions overlay (compact window) */}
+            {showSuggestions && suggestions.length > 0 && !isFullscreen && (
+              <div className="absolute left-3 top-3 max-w-[360px] w-[85%] bg-gray-800/95 border border-gray-700 rounded-xl shadow-2xl z-50">
+                <div className="flex items-center justify-between px-3 py-2 border-b border-gray-700">
+                  <span className="text-xs text-gray-300">Öneriler</span>
+                  <button onClick={() => { setShowSuggestions(false); setUserClosedSuggestions(true) }} className="text-gray-400 hover:text-gray-200">
+                    ×
+                  </button>
+                </div>
+                <div className="max-h-56 overflow-auto">
+                  {suggestions.map((s, i) => (
+                    <div
+                      key={i}
+                      onMouseDown={(e) => { e.preventDefault(); applySuggestion(s) }}
+                      className={`px-3 py-2 text-sm cursor-pointer ${i === selectedSuggestionIndex ? 'bg-gray-700' : 'bg-gray-800'} hover:bg-gray-700`}
+                    >
+                      <span className="text-gray-200">{s.display}</span>
+                      {s.type === 'column' && <span className="text-gray-400">  · {datasetConfigs[s.datasetKey]?.title}</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             {messages.map((message, index) => (
               <div
                 key={index}
@@ -568,11 +909,13 @@ const Chatbot = () => {
               <input
                 type="text"
                 value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
+                onChange={(e) => { setInputMessage(e.target.value); updateHintList(e.target.value) }}
                 onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyDown}
                 placeholder="Mesajınızı yazın..."
                 className="flex-1 px-4 py-3 bg-gray-700 border border-gray-600 text-gray-100 placeholder:text-gray-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent text-sm transition-all"
               />
+              {/* Inline input suggestions removed in favor of overlay */}
               <button
                 onClick={handleSendMessage}
                 disabled={inputMessage.trim() === ''}
@@ -601,7 +944,7 @@ const Chatbot = () => {
           
           {/* Modal */}
           <div className="fixed inset-0 flex items-center justify-center z-50 p-8 animate-scale-in">
-            <div className="bg-gray-800 rounded-3xl shadow-2xl w-full max-w-4xl h-[700px] flex flex-col border border-gray-700 overflow-hidden">
+            <div className="bg-gray-800 rounded-3xl shadow-2xl w-[90vw] max-w-[1100px] h-[85vh] max-h-[820px] flex flex-col border border-gray-700 overflow-hidden">
               {/* Header */}
               <div className="bg-gray-900 text-white px-8 py-5 rounded-t-3xl flex justify-between items-center shadow-xl border-b border-gray-700">
                 <div className="flex items-center gap-4">
@@ -650,7 +993,30 @@ const Chatbot = () => {
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-8 space-y-5 bg-gray-800">
+              <div className="flex-1 overflow-y-auto p-8 space-y-5 bg-gray-800 relative">
+                {/* Suggestions overlay (fullscreen) */}
+                {showSuggestions && suggestions.length > 0 && isFullscreen && (
+                  <div className="absolute left-4 top-4 max-w-[520px] w-[70%] bg-gray-800/95 border border-gray-700 rounded-2xl shadow-2xl z-50">
+                    <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700">
+                      <span className="text-sm text-gray-300">Öneriler</span>
+                      <button onClick={() => { setShowSuggestions(false); setUserClosedSuggestions(true) }} className="text-gray-400 hover:text-gray-200">
+                        ×
+                      </button>
+                    </div>
+                    <div className="max-h-64 overflow-auto">
+                      {suggestions.map((s, i) => (
+                        <div
+                          key={i}
+                          onMouseDown={(e) => { e.preventDefault(); applySuggestion(s) }}
+                          className={`px-4 py-2 text-base cursor-pointer ${i === selectedSuggestionIndex ? 'bg-gray-700' : 'bg-gray-800'} hover:bg-gray-700`}
+                        >
+                          <span className="text-gray-200">{s.display}</span>
+                          {s.type === 'column' && <span className="text-gray-400">  · {datasetConfigs[s.datasetKey]?.title}</span>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {messages.map((message, index) => (
                   <div
                     key={index}
@@ -696,11 +1062,13 @@ const Chatbot = () => {
                   <input
                     type="text"
                     value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
+                    onChange={(e) => { setInputMessage(e.target.value); updateHintList(e.target.value) }}
                     onKeyPress={handleKeyPress}
+                    onKeyDown={handleKeyDown}
                     placeholder="Mesajınızı yazın..."
                     className="flex-1 px-6 py-4 bg-gray-700 border border-gray-600 text-gray-100 placeholder:text-gray-400 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent text-base transition-all"
                   />
+                  {/* Inline input suggestions removed in favor of overlay */}
                   <button
                     onClick={handleSendMessage}
                     disabled={inputMessage.trim() === ''}
