@@ -114,6 +114,32 @@ const Chatbot = () => {
     rows.forEach(r => Object.keys(r || {}).forEach(k => { if (k !== 'index') set.add(k) }))
     return Array.from(set)
   }
+  // Basit Levenshtein mesafesi
+  const levenshtein = (a, b) => {
+    const m = a.length, n = b.length
+    if (m === 0) return n
+    if (n === 0) return m
+    const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0))
+    for (let i = 0; i <= m; i++) dp[i][0] = i
+    for (let j = 0; j <= n; j++) dp[0][j] = j
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1
+        dp[i][j] = Math.min(
+          dp[i - 1][j] + 1,
+          dp[i][j - 1] + 1,
+          dp[i - 1][j - 1] + cost
+        )
+      }
+    }
+    return dp[m][n]
+  }
+  // Fuzzy match
+  const fuzzyMatch = (needle, hay, maxDist = 2) => {
+    if (!needle || !hay) return false
+    if (hay.includes(needle) || needle.includes(hay)) return true
+    return levenshtein(needle, hay) <= maxDist
+  }
   const pickColumnByMessage = (lowerMessage, keys, labeler) => {
     const msgNorm = normalizeKey(lowerMessage)
     // exact contains
@@ -121,7 +147,10 @@ const Chatbot = () => {
     if (labeler) {
       for (const k of keys) {
         const label = labeler(k)
-        if (label && msgNorm.includes(normalizeKey(label))) return k
+        if (label) {
+          const lab = normalizeKey(label)
+          if (msgNorm.includes(lab) || fuzzyMatch(msgNorm, lab)) return k
+        }
       }
     }
     return null
@@ -675,7 +704,7 @@ const Chatbot = () => {
                   <button
                     onClick={handleSendMessage}
                     disabled={inputMessage.trim() === ''}
-                    className="bg-gray-600 hover:bg-gray-700<｜place▁holder▁no▁698｜> text-white p-4 rounded-xl  disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center"
+                    className="bg-gray-600 hover:bg-gray-700 text-white p-4 rounded-xl disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center"
                   >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                   <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
@@ -697,7 +726,7 @@ const Chatbot = () => {
           }
           to {
             opacity: 1;
-            transform: λNP-translateY(0);
+            transform: translateY(0);
           }
         }
         @keyframes fadeIn {

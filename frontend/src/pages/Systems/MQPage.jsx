@@ -27,6 +27,9 @@ const MQPage = () => {
   const [chartTab, setChartTab] = useState('chart');
   const [chartData, setChartData] = useState([]);
   const [infoModal, setInfoModal] = useState(null);
+  const [thresholdsMap, setThresholdsMap] = useState({});
+  const [currentThresholds, setCurrentThresholds] = useState({ warning: 75, critical: 90, enabled: true });
+  const getThresholdKey = (metricKey) => `${activeModal || 'mq'}:${metricKey}`;
 
   // Yardımcılar - okunabilir tekil fonksiyonlar
   const getRowTime = (row) => (row?.record_timestamp || row?.bmctime || row?.updated_at || row?.created_at);
@@ -184,7 +187,6 @@ const MQPage = () => {
   const tabs = [
     { id: 'table', name: 'Tablo', icon: '📊' },
     { id: 'chart', name: 'Grafik', icon: '📈' },
-    { id: 'threshold', name: 'Threshold', icon: '⚙️' },
   ];
 
   const openModal = (type) => {
@@ -741,6 +743,8 @@ const MQPage = () => {
       .map((r) => ({ label: getRowTime(r), value: Number(r[key]) || 0 }))
       .filter(p => !isNaN(p.value));
     setChartData(points);
+    const saved = thresholdsMap[getThresholdKey(key)] || { warning: 75, critical: 90, enabled: true };
+    setCurrentThresholds(saved);
   };
 
   // Grafik kartı için ikon seçici (kolon adına göre) - Daha detaylı ikon eşleştirmeleri
@@ -1274,9 +1278,9 @@ const MQPage = () => {
                                   </svg>
                                 </div>
                                 <h5 className="font-semibold text-gray-600 text-xs mb-3">LAST UPDATE</h5>
-                                {first.record_timestamp ? (
+                                {getRowTime(first) ? (
                                   <div className="text-xs text-gray-500">
-                                    {new Date(first.record_timestamp).toLocaleString('tr-TR', {
+                                    {new Date(getRowTime(first)).toLocaleString('tr-TR', {
                                       day: '2-digit',
                                       month: '2-digit',
                                       year: 'numeric',
@@ -1453,56 +1457,7 @@ const MQPage = () => {
                   </div>
                 )}
 
-                {/* Threshold Sekmesi */}
-                {activeTab === 'threshold' && (
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-4">Threshold Ayarları</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="bg-gray-50 rounded-lg p-6">
-                        <h5 className="font-semibold text-gray-800 mb-4">Uyarı Eşikleri</h5>
-                        <div className="space-y-3">
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-600">Kritik Eşik</span>
-                            <input 
-                              type="number" 
-                              className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
-                              defaultValue="90"
-                            />
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-600">Uyarı Eşiği</span>
-                            <input 
-                              type="number" 
-                              className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
-                              defaultValue="75"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="bg-gray-50 rounded-lg p-6">
-                        <h5 className="font-semibold text-gray-800 mb-4">Bildirim Ayarları</h5>
-                        <div className="space-y-3">
-                          <label className="flex items-center">
-                            <input type="checkbox" className="mr-2" defaultChecked />
-                            <span className="text-sm text-gray-600">E-posta bildirimi</span>
-                          </label>
-                          <label className="flex items-center">
-                            <input type="checkbox" className="mr-2" />
-                            <span className="text-sm text-gray-600">SMS bildirimi</span>
-                          </label>
-                          <label className="flex items-center">
-                            <input type="checkbox" className="mr-2" />
-                            <span className="text-sm text-gray-600">Sistem bildirimi</span>
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex justify-end space-x-3 mt-6">
-                      <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">İptal</button>
-                      <button className="px-4 py-2 text-sm font-medium text-white bg-cyan-600 border border-transparent rounded-md hover:bg-cyan-700">Kaydet</button>
-                    </div>
-                  </div>
-                )}
+                {/* Threshold sekmesi ana modülde kaldırıldı - sadece grafik detay modalında kullanılacak */}
               </div>
             </div>
           </div>
@@ -1585,9 +1540,9 @@ const MQPage = () => {
                         const lineD = `M ${xPos(0)},${yPos(chartData[0]?.value || 0)} ` + chartData.map((p,i)=>`L ${xPos(i)},${yPos(p.value)}`).join(' ');
                         
                         // Threshold değerleri
-                        const criticalThreshold = 90;
-                        const warningThreshold = 75;
-                        const showThresholds = isPercentScale;
+                        const criticalThreshold = Number(currentThresholds?.critical ?? 90);
+                        const warningThreshold = Number(currentThresholds?.warning ?? 75);
+                        const showThresholds = !!currentThresholds?.enabled;
                         
                         return (
                           <>
@@ -1605,6 +1560,7 @@ const MQPage = () => {
                                   setChartData(points);
                                 }} className="px-4 py-2 text-sm font-medium text-white bg-cyan-600 rounded-md hover:bg-cyan-700">Yenile</button>
                               </div>
+                              {/* Threshold Controls moved to Threshold tab */}
                               <div className="h-96 w-full">
                                 <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
                                   {/* Grid pattern */}
@@ -1639,10 +1595,10 @@ const MQPage = () => {
                                   {showThresholds && (
                                     <>
                                       <line x1={left} y1={yPos(criticalThreshold)} x2={width-20} y2={yPos(criticalThreshold)} stroke="#ef4444" strokeWidth="2" strokeDasharray="6 4" opacity="0.6" />
-                                      <text x={width-40} y={yPos(criticalThreshold) - 5} className="text-xs fill-red-600 font-semibold" textAnchor="end">Kritik: {criticalThreshold}%</text>
+                                      <text x={width-40} y={yPos(criticalThreshold) - 5} className="text-xs fill-red-600 font-semibold" textAnchor="end">Kritik: {criticalThreshold}{isPercentScale ? '%' : ''}</text>
                                       
                                       <line x1={left} y1={yPos(warningThreshold)} x2={width-20} y2={yPos(warningThreshold)} stroke="#f59e0b" strokeWidth="2" strokeDasharray="6 4" opacity="0.6" />
-                                      <text x={width-40} y={yPos(warningThreshold) - 5} className="text-xs fill-amber-600 font-semibold" textAnchor="end">Uyarı: {warningThreshold}%</text>
+                                      <text x={width-40} y={yPos(warningThreshold) - 5} className="text-xs fill-amber-600 font-semibold" textAnchor="end">Uyarı: {warningThreshold}{isPercentScale ? '%' : ''}</text>
                                     </>
                                   )}
                                   
@@ -1698,22 +1654,31 @@ const MQPage = () => {
                       <h4 className="text-lg font-semibold text-gray-800 mb-4">Threshold Ayarları</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-gray-50 rounded-lg p-6">
-                          <h5 className="font-semibold text-gray-800 mb-4">Uyarı Eşikleri</h5>
+                          <h5 className="font-semibold text-gray-800 mb-4">Eşikler</h5>
                           <div className="space-y-3">
+                            <label className="flex items-center">
+                              <input type="checkbox" className="mr-2" checked={!!currentThresholds.enabled} onChange={(e)=>{
+                                const next = { ...currentThresholds, enabled: e.target.checked };
+                                setCurrentThresholds(next);
+                              }} />
+                              <span className="text-sm text-gray-600">Eşik çizgilerini göster</span>
+                            </label>
                             <div className="flex justify-between items-center">
                               <span className="text-sm text-gray-600">Kritik Eşik</span>
                               <input 
                                 type="number" 
-                                className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
-                                defaultValue="90"
+                                className="w-24 px-2 py-1 border border-gray-300 rounded text-sm"
+                                value={Number(currentThresholds.critical ?? 90)}
+                                onChange={(e)=> setCurrentThresholds(prev=>({ ...prev, critical: Number(e.target.value||0) }))}
                               />
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-sm text-gray-600">Uyarı Eşiği</span>
                               <input 
                                 type="number" 
-                                className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
-                                defaultValue="75"
+                                className="w-24 px-2 py-1 border border-gray-300 rounded text-sm"
+                                value={Number(currentThresholds.warning ?? 75)}
+                                onChange={(e)=> setCurrentThresholds(prev=>({ ...prev, warning: Number(e.target.value||0) }))}
                               />
                             </div>
                           </div>
@@ -1727,18 +1692,23 @@ const MQPage = () => {
                             </label>
                             <label className="flex items-center">
                               <input type="checkbox" className="mr-2" />
-                              <span className="text-sm text-gray-600">SMS bildirimi</span>
-                            </label>
-                            <label className="flex items-center">
-                              <input type="checkbox" className="mr-2" />
                               <span className="text-sm text-gray-600">Sistem bildirimi</span>
                             </label>
                           </div>
                         </div>
                       </div>
-                      <div className="flex justify-end space-x-3 mt-6">
-                        <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">İptal</button>
-                        <button className="px-4 py-2 text-sm font-medium text-white bg-cyan-600 border border-transparent rounded-md hover:bg-cyan-700">Kaydet</button>
+                      <div className="flex justify-end space-x-3 mt-2">
+                        <button onClick={()=>{
+                          // Revert changes for current metric
+                          if (!selectedChart) return;
+                          const saved = thresholdsMap[getThresholdKey(selectedChart)] || { warning: 75, critical: 90, enabled: true };
+                          setCurrentThresholds(saved);
+                        }} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">İptal</button>
+                        <button onClick={()=>{
+                          if (!selectedChart) return;
+                          setThresholdsMap(prev => ({ ...prev, [getThresholdKey(selectedChart)]: { ...currentThresholds } }));
+                          toast.success('Threshold ayarları kaydedildi');
+                        }} className="px-4 py-2 text-sm font-medium text-white bg-cyan-600 border border-transparent rounded-md hover:bg-cyan-700">Kaydet</button>
                       </div>
                     </div>
                   )}
