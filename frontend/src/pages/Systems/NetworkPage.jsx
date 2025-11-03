@@ -205,6 +205,44 @@ const NetworkPage = () => {
     return toTitleCase(columnName);
   };
 
+  // VTMBUFF için grafik anahtarlarını okunaklı başlıklara çevir
+  const getVtmbuffColumnDisplayName = (chartKey) => {
+    const map = {
+      vtmbuffIOBufSize: 'IOBuf Size',
+      vtmbuffLPBufSize: 'LPBuf Size',
+      vtmbuffLFBufSize: 'LFBuf Size',
+      vtmbuffIOBufTimesExpanded: 'IOBuf Times Expanded',
+      vtmbuffLPBufTimesExpanded: 'LPBuf Times Expanded',
+      vtmbuffLFBufTimesExpanded: 'LFBuf Times Expanded',
+    };
+    return map[chartKey] || toTitleCase(chartKey);
+  };
+
+  // TCPSTOR için grafik anahtarlarını okunaklı başlıklara çevir
+  const getTcpstorColumnDisplayName = (chartKey) => {
+    const map = {
+      tcpstorEcsaCurrent: 'ECSA Current',
+      tcpstorEcsaMax: 'ECSA Max',
+      tcpstorEcsaLimit: 'ECSA Limit',
+      tcpstorEcsaFree: 'ECSA Free',
+      tcpstorPrivateCurrent: 'Private Current',
+      tcpstorPrivateMax: 'Private Max',
+    };
+    return map[chartKey] || toTitleCase(chartKey);
+  };
+
+  // CONNSRPZ için grafik anahtarlarını okunaklı başlıklara çevir
+  const getConnsrpzColumnDisplayName = (chartKey) => {
+    const map = {
+      connsrpzActiveConns: 'Active Conns',
+      connsrpzAvgRtt: 'Average RTT (ms)',
+      connsrpzMaxRtt: 'Max RTT (ms)',
+      connsrpzBytesIn: 'Bytes In',
+      connsrpzBytesOut: 'Bytes Out',
+    };
+    return map[chartKey] || toTitleCase(chartKey);
+  };
+
   // Modal'a göre ham veriyi al
   const getCurrentRawData = (modalType) => {
     switch(modalType || activeModal) {
@@ -4782,6 +4820,18 @@ const NetworkPage = () => {
                         return getVtamcsaColumnDisplayName(selectedChart) || toTitleCase(selectedChart);
                       }
                       
+                      if (activeModal === 'VTMBUFF') {
+                        return getVtmbuffColumnDisplayName(selectedChart);
+                      }
+
+                      if (activeModal === 'tcpstor') {
+                        return getTcpstorColumnDisplayName(selectedChart);
+                      }
+
+                      if (activeModal === 'connsrpz') {
+                        return getConnsrpzColumnDisplayName(selectedChart);
+                      }
+                      
                       return toTitleCase(selectedChart);
                     })()}
                   </h3>
@@ -5106,7 +5156,18 @@ const NetworkPage = () => {
 
                   {chartTab === 'threshold' && activeModal !== 'STACKS' && (
                     <div className="space-y-6">
-                      <h4 className="text-lg font-semibold text-gray-800">{selectedChart} için Threshold Ayarları</h4>
+                      <h4 className="text-lg font-semibold text-gray-800">{
+                        (() => {
+                          if (!selectedChart) return 'Grafik';
+                          if (activeModal === 'VTMBUFF') return getVtmbuffColumnDisplayName(selectedChart);
+                          if (activeModal === 'tcpstor') return getTcpstorColumnDisplayName(selectedChart);
+                          if (activeModal === 'connsrpz') return getConnsrpzColumnDisplayName(selectedChart);
+                          if (activeModal === 'STACKS') return getStacksColumnDisplayName(selectedChart);
+                          if (activeModal === 'STACKCPU') return getStackCpuColumnDisplayName(selectedChart);
+                          if (activeModal === 'vtamcsa') return getVtamcsaColumnDisplayName(selectedChart);
+                          return toTitleCase(selectedChart);
+                        })()
+                      } için Threshold Ayarları</h4>
                       {/* Basit Threshold içeriği */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-gray-50 rounded-lg p-6">
@@ -5254,7 +5315,18 @@ const NetworkPage = () => {
                               <div className="bg-white rounded-lg border border-gray-200 p-6">
                                 {(activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa') && (
                                   <div className="flex justify-between items-center mb-4">
-                                    <h4 className="text-lg font-semibold text-gray-800">{selectedChart}</h4>
+                                    <h4 className="text-lg font-semibold text-gray-800">{
+                                      (() => {
+                                        if (!selectedChart) return '';
+                                        if (activeModal === 'VTMBUFF') return getVtmbuffColumnDisplayName(selectedChart);
+                                        if (activeModal === 'tcpstor') return getTcpstorColumnDisplayName(selectedChart);
+                                        if (activeModal === 'connsrpz') return getConnsrpzColumnDisplayName(selectedChart);
+                                        if (activeModal === 'STACKS') return getStacksColumnDisplayName(selectedChart);
+                                        if (activeModal === 'STACKCPU') return getStackCpuColumnDisplayName(selectedChart);
+                                        if (activeModal === 'vtamcsa') return getVtamcsaColumnDisplayName(selectedChart);
+                                        return toTitleCase(selectedChart);
+                                      })()
+                                    }</h4>
                                     <button onClick={() => {
                                       openChart(selectedChart);
                                     }} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">Yenile</button>
@@ -5353,7 +5425,43 @@ const NetworkPage = () => {
                       )}
                     </div>
                   )}
-                  {chartTab === 'threshold' && activeModal !== 'STACKS' && ( <div className="space-y-6"><h4 className="text-lg font-semibold text-gray-800">{selectedChart} için Threshold Ayarları</h4> {/* Basit Threshold içeriği */} <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div className="bg-gray-50 rounded-lg p-6"><h5 className="font-semibold text-gray-800 mb-4">Uyarı Eşikleri</h5><div className="space-y-3"><div className="flex justify-between items-center"><span className="text-sm text-gray-600">Kritik Eşik</span><input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" defaultValue="90"/></div><div className="flex justify-between items-center"><span className="text-sm text-gray-600">Uyarı Eşiği</span><input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" defaultValue="75"/></div></div></div><div className="bg-gray-50 rounded-lg p-6"><h5 className="font-semibold text-gray-800 mb-4">Bildirim Ayarları</h5><div className="space-y-3"><label className="flex items-center"><input type="checkbox" className="mr-2" defaultChecked /><span className="text-sm text-gray-600">E-posta</span></label><label className="flex items-center"><input type="checkbox" className="mr-2" /><span className="text-sm text-gray-600">SMS</span></label></div></div></div><div className="flex justify-end space-x-3 mt-6"><button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">İptal</button><button className={`px-4 py-2 text-sm font-medium text-white bg-${modalColor}-600 border border-transparent rounded-md hover:bg-${modalColor}-700`}>Kaydet</button></div></div> )}
+                  {chartTab === 'threshold' && activeModal !== 'STACKS' && (
+                    <div className="space-y-6">
+                      <h4 className="text-lg font-semibold text-gray-800">{
+                        (() => {
+                          if (!selectedChart) return 'Grafik';
+                          if (activeModal === 'VTMBUFF') return getVtmbuffColumnDisplayName(selectedChart);
+                          if (activeModal === 'tcpstor') return getTcpstorColumnDisplayName(selectedChart);
+                          if (activeModal === 'connsrpz') return getConnsrpzColumnDisplayName(selectedChart);
+                          if (activeModal === 'STACKS') return getStacksColumnDisplayName(selectedChart);
+                          if (activeModal === 'STACKCPU') return getStackCpuColumnDisplayName(selectedChart);
+                          if (activeModal === 'vtamcsa') return getVtamcsaColumnDisplayName(selectedChart);
+                          return toTitleCase(selectedChart);
+                        })()
+                      } için Threshold Ayarları</h4>
+                      {/* Basit Threshold içeriği */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="bg-gray-50 rounded-lg p-6">
+                          <h5 className="font-semibold text-gray-800 mb-4">Uyarı Eşikleri</h5>
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center"><span className="text-sm text-gray-600">Kritik Eşik</span><input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" defaultValue="90"/></div>
+                            <div className="flex justify-between items-center"><span className="text-sm text-gray-600">Uyarı Eşiği</span><input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" defaultValue="75"/></div>
+                          </div>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-6">
+                          <h5 className="font-semibold text-gray-800 mb-4">Bildirim Ayarları</h5>
+                          <div className="space-y-3">
+                            <label className="flex items-center"><input type="checkbox" className="mr-2" defaultChecked /><span className="text-sm text-gray-600">E-posta</span></label>
+                            <label className="flex items-center"><input type="checkbox" className="mr-2" /><span className="text-sm text-gray-600">SMS</span></label>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-end space-x-3 mt-6">
+                        <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">İptal</button>
+                        <button className={`px-4 py-2 text-sm font-medium text-white bg-${modalColor}-600 border border-transparent rounded-md hover:bg-${modalColor}-700`}>Kaydet</button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
