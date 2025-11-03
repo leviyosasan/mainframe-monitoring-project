@@ -486,6 +486,164 @@ const Chatbot = () => {
     return results
   }
 
+  // Export utilities (command-based)
+  const exportRowsToCSV = (rows, title) => {
+    const dataRows = Array.isArray(rows) ? rows : []
+    if (dataRows.length === 0) return
+    const headerKeys = getAllKeys(dataRows)
+    if (headerKeys.length === 0) return
+    const escapeCsv = (v) => {
+      const s = v === null || v === undefined ? '' : String(v)
+      if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"'
+      return s
+    }
+    const header = headerKeys.map(escapeCsv).join(',')
+    const body = dataRows.map(r => headerKeys.map(k => escapeCsv(r?.[k])).join(',')).join('\n')
+    const csv = header + '\n' + body
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    const ts = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19)
+    a.download = `${(title || 'dataset').replace(/\s+/g, '_')}_${ts}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  const ensureJsPdfLoaded = async () => {
+    try {
+      if (window.jspdf && window.jspdf.jsPDF) return window.jspdf.jsPDF
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script')
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
+        s.onload = resolve
+        s.onerror = reject
+        document.body.appendChild(s)
+      })
+      return window.jspdf && window.jspdf.jsPDF ? window.jspdf.jsPDF : null
+    } catch {
+      return null
+    }
+  }
+
+  const exportRowsToPDF = async (rows, title) => {
+    const dataRows = Array.isArray(rows) ? rows : []
+    if (dataRows.length === 0) return
+    const headerKeys = getAllKeys(dataRows)
+    if (headerKeys.length === 0) return
+
+    const JsPDFCtor = await ensureJsPdfLoaded()
+    if (JsPDFCtor) {
+      const doc = new JsPDFCtor({ unit: 'pt', format: 'a4' })
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const pageHeight = doc.internal.pageSize.getHeight()
+      const left = 40, top = 50, lineHeight = 16
+      let y = top
+
+      const docTitle = title || 'Veri Çıktısı'
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(14)
+      doc.text(docTitle, left, y)
+      y += lineHeight
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(10)
+      doc.text(`Oluşturma: ${new Date().toLocaleString('tr-TR')}`, left, y)
+      y += lineHeight * 1.5
+
+      const maxCharsPerCol = headerKeys.map(k => {
+        const maxCell = dataRows.slice(0, 200).reduce((m, r) => Math.max(m, String(r?.[k] ?? '').length), String(k).length)
+        return Math.min(Math.max(maxCell, String(k).length), 40)
+      })
+      const charToPt = 6
+      const colWidths = maxCharsPerCol.map(c => c * charToPt)
+      const totalWidth = colWidths.reduce((a, b) => a + b, 0)
+      const scale = totalWidth > (pageWidth - left * 2) ? (pageWidth - left * 2) / totalWidth : 1
+      const widths = colWidths.map(w => w * scale)
+
+      // Header
+      let x = left
+      doc.setFont('helvetica', 'bold')
+      headerKeys.forEach((h, i) => {
+        const text = String(h)
+        doc.text(text.substring(0, Math.floor(widths[i] / charToPt)), x, y, { baseline: 'top' })
+        x += widths[i]
+      })
+      y += lineHeight
+      doc.setFont('helvetica', 'normal')
+
+      // Rows
+      const maxRows = 3000
+      for (let rIndex = 0; rIndex < Math.min(dataRows.length, maxRows); rIndex++) {
+        const r = dataRows[rIndex]
+        x = left
+        headerKeys.forEach((k, i) => {
+          const raw = r?.[k]
+          const cell = raw === null || raw === undefined ? '' : String(raw)
+          const text = cell.substring(0, Math.floor(widths[i] / charToPt))
+          doc.text(text, x, y, { baseline: 'top' })
+          x += widths[i]
+        })
+        y += lineHeight
+        if (y > pageHeight - 40) {
+          doc.addPage()
+          y = top
+        }
+      }
+
+      const ts = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19)
+      doc.save(`${(title || 'dataset').replace(/\s+/g, '_')}_${ts}.pdf`)
+      return
+    }
+
+    // Fallback: open print dialog
+    const w = window.open('', '_blank')
+    if (!w) return
+    const docTitle = title || 'Veri Çıktısı'
+    const style = `
+      <style>
+        body { font-family: Arial, sans-serif; color: #111; }
+        h1 { font-size: 18px; }
+        table { border-collapse: collapse; width: 100%; font-size: 12px; }
+        th, td { border: 1px solid #999; padding: 6px 8px; text-align: left; }
+        th { background: #f0f0f0; }
+        .meta { margin: 8px 0 16px; color: #444; }
+      </style>
+    `
+    const thead = `<tr>${headerKeys.map(h => `<th>${h}</th>`).join('')}</tr>`
+    const limitRows = dataRows.slice(0, 2000)
+    const tbody = limitRows.map(r => `<tr>${headerKeys.map(k => `<td>${r?.[k] ?? ''}</td>`).join('')}</tr>`).join('')
+    w.document.write(`<!doctype html><html><head><meta charset=\"utf-8\"/>${style}</head><body>`)
+    w.document.write(`<h1>${docTitle}</h1>`)
+    w.document.write(`<div class=\"meta\">Oluşturma: ${new Date().toLocaleString('tr-TR')}</div>`)
+    w.document.write(`<table><thead>${thead}</thead><tbody>${tbody}</tbody></table>`)
+    w.document.write('</body></html>')
+    w.document.close()
+    w.focus()
+    w.print()
+  }
+
+  const resolveDatasetFromMessage = (lowerMessage) => {
+    // Check configured datasets by aliases
+    for (const [key, cfg] of Object.entries(datasetConfigs)) {
+      if (cfg.aliases.some(a => lowerMessage.includes(a))) {
+        return { key, title: cfg.title, fetch: cfg.fetch }
+      }
+    }
+    // MQ special datasets
+    if (lowerMessage.includes('connz')) {
+      return { key: 'connz', title: 'MQ CONNZ', fetch: databaseAPI.getMainviewMQConnz }
+    }
+    if (lowerMessage.includes('w2over') || lowerMessage.includes('w2 over')) {
+      return { key: 'w2over', title: 'MQ W2OVER', fetch: databaseAPI.getMainviewMQW2over }
+    }
+    if (lowerMessage.includes('qm') || lowerMessage.includes('queue manager') || lowerMessage.includes('message queue') || lowerMessage.includes('mq')) {
+      return { key: 'qm', title: 'MQ QM', fetch: databaseAPI.getMainviewMQQm }
+    }
+    return null
+  }
+
   const handleSendMessage = async () => {
     if (inputMessage.trim() === '') return
 
@@ -498,6 +656,31 @@ const Chatbot = () => {
     setInputMessage('')
     setShowSuggestions(false)
     setSelectedSuggestionIndex(-1)
+
+    // Export command: "<tablo adı> pdf" or "<tablo adı> excel"
+    const exportType = lowerMessage.includes('pdf') ? 'pdf' : (lowerMessage.includes('excel') || lowerMessage.includes('csv') || lowerMessage.includes('xls')) ? 'excel' : null
+    if (exportType) {
+      const ds = resolveDatasetFromMessage(lowerMessage)
+      if (!ds) {
+        setMessages(prev => [...prev, { text: 'Hangi tabloyu istediğinizi anlayamadım. Örnek: "tcpcons pdf" veya "qm excel"', sender: 'bot' }])
+        return
+      }
+      setMessages(prev => [...prev, { text: `${ds.title} verisini ${exportType.toUpperCase()} olarak hazırlıyorum...`, sender: 'bot' }])
+      try {
+        const resp = await ds.fetch({})
+        const rows = Array.isArray(resp?.data?.data) ? resp.data.data : []
+        if (!resp?.data?.success || rows.length === 0) {
+          setMessages(prev => [...prev, { text: `${ds.title} verisi bulunamadı.`, sender: 'bot' }])
+          return
+        }
+        if (exportType === 'excel') exportRowsToCSV(rows, ds.title)
+        else exportRowsToPDF(rows, ds.title)
+        setMessages(prev => [...prev, { text: `${ds.title} ${exportType.toUpperCase()} çıktısı hazırlandı.`, sender: 'bot' }])
+      } catch (e) {
+        setMessages(prev => [...prev, { text: `${ds.title} verisi alınırken bir hata oluştu.`, sender: 'bot' }])
+      }
+      return
+    }
 
     // CPU datası isteğini kontrol et
     if (lowerMessage.includes('son cpu') || lowerMessage.includes('cpu getir') || lowerMessage.includes('cpu verisi')) {
@@ -841,29 +1024,7 @@ const Chatbot = () => {
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gray-800 relative">
-            {/* Suggestions overlay (compact window) */}
-            {showSuggestions && suggestions.length > 0 && !isFullscreen && (
-              <div className="absolute left-3 top-3 max-w-[360px] w-[85%] bg-gray-800/95 border border-gray-700 rounded-xl shadow-2xl z-50">
-                <div className="flex items-center justify-between px-3 py-2 border-b border-gray-700">
-                  <span className="text-xs text-gray-300">Öneriler</span>
-                  <button onClick={() => { setShowSuggestions(false); setUserClosedSuggestions(true) }} className="text-gray-400 hover:text-gray-200">
-                    ×
-                  </button>
-                </div>
-                <div className="max-h-56 overflow-auto">
-                  {suggestions.map((s, i) => (
-                    <div
-                      key={i}
-                      onMouseDown={(e) => { e.preventDefault(); applySuggestion(s) }}
-                      className={`px-3 py-2 text-sm cursor-pointer ${i === selectedSuggestionIndex ? 'bg-gray-700' : 'bg-gray-800'} hover:bg-gray-700`}
-                    >
-                      <span className="text-gray-200">{s.display}</span>
-                      {s.type === 'column' && <span className="text-gray-400">  · {datasetConfigs[s.datasetKey]?.title}</span>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            
             {messages.map((message, index) => (
               <div
                 key={index}
@@ -906,16 +1067,37 @@ const Chatbot = () => {
           {/* Input */}
           <div className="border-t border-gray-700 p-4 bg-gray-800">
             <div className="flex gap-3">
-              <input
-                type="text"
-                value={inputMessage}
-                onChange={(e) => { setInputMessage(e.target.value); updateHintList(e.target.value) }}
-                onKeyPress={handleKeyPress}
-                onKeyDown={handleKeyDown}
-                placeholder="Mesajınızı yazın..."
-                className="flex-1 px-4 py-3 bg-gray-700 border border-gray-600 text-gray-100 placeholder:text-gray-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent text-sm transition-all"
-              />
-              {/* Inline input suggestions removed in favor of overlay */}
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={inputMessage}
+                  onChange={(e) => { setInputMessage(e.target.value); updateHintList(e.target.value) }}
+                  onKeyPress={handleKeyPress}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Mesajınızı yazın..."
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 text-gray-100 placeholder:text-gray-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent text-sm transition-all"
+                />
+                {showSuggestions && suggestions.length > 0 && !isFullscreen && (
+                  <div className="absolute bottom-full mb-2 left-0 right-0 bg-gray-800/95 border border-gray-700 rounded-xl shadow-2xl z-50">
+                    <div className="flex items-center justify-between px-3 py-2 border-b border-gray-700">
+                      <span className="text-xs text-gray-300">Öneriler</span>
+                      <button onClick={() => { setShowSuggestions(false); setUserClosedSuggestions(true) }} className="text-gray-400 hover:text-gray-200">×</button>
+                    </div>
+                    <div className="max-h-56 overflow-auto">
+                      {suggestions.map((s, i) => (
+                        <div
+                          key={i}
+                          onMouseDown={(e) => { e.preventDefault(); applySuggestion(s) }}
+                          className={`px-3 py-2 text-sm cursor-pointer ${i === selectedSuggestionIndex ? 'bg-gray-700' : 'bg-gray-800'} hover:bg-gray-700`}
+                        >
+                          <span className="text-gray-200">{s.display}</span>
+                          {s.type === 'column' && <span className="text-gray-400">  · {datasetConfigs[s.datasetKey]?.title}</span>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
               <button
                 onClick={handleSendMessage}
                 disabled={inputMessage.trim() === ''}
@@ -994,29 +1176,7 @@ const Chatbot = () => {
 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-8 space-y-5 bg-gray-800 relative">
-                {/* Suggestions overlay (fullscreen) */}
-                {showSuggestions && suggestions.length > 0 && isFullscreen && (
-                  <div className="absolute left-4 top-4 max-w-[520px] w-[70%] bg-gray-800/95 border border-gray-700 rounded-2xl shadow-2xl z-50">
-                    <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700">
-                      <span className="text-sm text-gray-300">Öneriler</span>
-                      <button onClick={() => { setShowSuggestions(false); setUserClosedSuggestions(true) }} className="text-gray-400 hover:text-gray-200">
-                        ×
-                      </button>
-                    </div>
-                    <div className="max-h-64 overflow-auto">
-                      {suggestions.map((s, i) => (
-                        <div
-                          key={i}
-                          onMouseDown={(e) => { e.preventDefault(); applySuggestion(s) }}
-                          className={`px-4 py-2 text-base cursor-pointer ${i === selectedSuggestionIndex ? 'bg-gray-700' : 'bg-gray-800'} hover:bg-gray-700`}
-                        >
-                          <span className="text-gray-200">{s.display}</span>
-                          {s.type === 'column' && <span className="text-gray-400">  · {datasetConfigs[s.datasetKey]?.title}</span>}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                
                 {messages.map((message, index) => (
                   <div
                     key={index}
@@ -1059,16 +1219,37 @@ const Chatbot = () => {
               {/* Input */}
               <div className="border-t border-gray-700 p-6 bg-gray-800">
                 <div className="flex gap-4">
-                  <input
-                    type="text"
-                    value={inputMessage}
-                    onChange={(e) => { setInputMessage(e.target.value); updateHintList(e.target.value) }}
-                    onKeyPress={handleKeyPress}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Mesajınızı yazın..."
-                    className="flex-1 px-6 py-4 bg-gray-700 border border-gray-600 text-gray-100 placeholder:text-gray-400 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent text-base transition-all"
-                  />
-                  {/* Inline input suggestions removed in favor of overlay */}
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      value={inputMessage}
+                      onChange={(e) => { setInputMessage(e.target.value); updateHintList(e.target.value) }}
+                      onKeyPress={handleKeyPress}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Mesajınızı yazın..."
+                      className="w-full px-6 py-4 bg-gray-700 border border-gray-600 text-gray-100 placeholder:text-gray-400 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent text-base transition-all"
+                    />
+                    {showSuggestions && suggestions.length > 0 && isFullscreen && (
+                      <div className="absolute bottom-full mb-2 left-0 right-0 bg-gray-800/95 border border-gray-700 rounded-2xl shadow-2xl z-50">
+                        <div className="flex items-center justify-between px-4 py-2 border-b border-gray-700">
+                          <span className="text-sm text-gray-300">Öneriler</span>
+                          <button onClick={() => { setShowSuggestions(false); setUserClosedSuggestions(true) }} className="text-gray-400 hover:text-gray-200">×</button>
+                        </div>
+                        <div className="max-h-64 overflow-auto">
+                          {suggestions.map((s, i) => (
+                            <div
+                              key={i}
+                              onMouseDown={(e) => { e.preventDefault(); applySuggestion(s) }}
+                              className={`px-4 py-2 text-base cursor-pointer ${i === selectedSuggestionIndex ? 'bg-gray-700' : 'bg-gray-800'} hover:bg-gray-700`}
+                            >
+                              <span className="text-gray-200">{s.display}</span>
+                              {s.type === 'column' && <span className="text-gray-400">  · {datasetConfigs[s.datasetKey]?.title}</span>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   <button
                     onClick={handleSendMessage}
                     disabled={inputMessage.trim() === ''}
