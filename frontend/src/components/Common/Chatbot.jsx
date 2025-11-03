@@ -45,6 +45,12 @@ const Chatbot = () => {
       return new Date(cleaned + 'T00:00:00')
     }
     
+    // DD-MM-YYYY formatı
+    if (/^\d{2}-\d{2}-\d{4}$/.test(cleaned)) {
+      const [day, month, year] = cleaned.split('-')
+      return new Date(`${year}-${month}-${day}T00:00:00`)
+    }
+    
     // DD.MM.YYYY formatı
     if (/^\d{2}\.\d{2}\.\d{4}$/.test(cleaned)) {
       const [day, month, year] = cleaned.split('.')
@@ -68,11 +74,14 @@ const Chatbot = () => {
 
   // Mesajdan tarih aralığı çıkar
   const extractDateRangeFromMessage = (message) => {
-    // Tarih formatları: "2025-01-01 ile 2025-01-03", "2025-01-01 - 2025-01-03", "01.01.2025 ve 03.01.2025", "cpu 01.01.2025 ve 03.01.2025" vb.
+    // Tarih formatları: "2025-01-01 ile 2025-01-03", "30-10-2025 ve 31-10-2025", "01.01.2025 ve 03.01.2025", "cpu 01.01.2025 ve 03.01.2025" vb.
     const datePatterns = [
       // YYYY-MM-DD formatları
       /(\d{4}-\d{2}-\d{2})\s*(ile|ve|and|\-|to)\s+(\d{4}-\d{2}-\d{2})/i,
       /(\d{4}-\d{2}-\d{2})\s+(\d{4}-\d{2}-\d{2})/,
+      // DD-MM-YYYY formatları
+      /(\d{2}-\d{2}-\d{4})\s+(ve|ile|and|to|\-)\s+(\d{2}-\d{2}-\d{4})/i,
+      /(\d{2}-\d{2}-\d{4})\s+(\d{2}-\d{2}-\d{4})/,
       // DD.MM.YYYY formatları
       /(\d{2}\.\d{2}\.\d{4})\s+(ve|ile|and|to|\-)\s+(\d{2}\.\d{2}\.\d{4})/i,
       /(\d{2}\.\d{2}\.\d{4})\s+(\d{2}\.\d{2}\.\d{4})/,
@@ -109,6 +118,7 @@ const Chatbot = () => {
     // Alternatif: Mesajdaki tüm tarihleri bul ve ilk iki tarihi al
     const allDatePatterns = [
       /\d{4}-\d{2}-\d{2}/g,
+      /\d{2}-\d{2}-\d{4}/g,
       /\d{2}\.\d{2}\.\d{4}/g,
       /\d{2}\/\d{2}\/\d{4}/g
     ]
@@ -1075,39 +1085,7 @@ const Chatbot = () => {
     setIsLoading(true)
     setIsTyping(true)
 
-    // Export command: "<tablo adı> pdf" or "<tablo adı> excel"
-    const exportType = lowerMessage.includes('pdf') ? 'pdf' : (lowerMessage.includes('excel') || lowerMessage.includes('csv') || lowerMessage.includes('xls')) ? 'excel' : null
-    if (exportType) {
-      const ds = resolveDatasetFromMessage(lowerMessage)
-      if (!ds) {
-        setMessages(prev => [...prev, { text: 'Hangi tabloyu istediğinizi anlayamadım. Örnek: "tcpcons pdf" veya "qm excel"', sender: 'bot', timestamp: getMessageTime() }])
-        setIsLoading(false)
-        setIsTyping(false)
-        return
-      }
-      setMessages(prev => [...prev, { text: `${ds.title} verisini ${exportType.toUpperCase()} olarak hazırlıyorum...`, sender: 'bot', timestamp: getMessageTime() }])
-      try {
-        const resp = await ds.fetch({})
-        const rows = Array.isArray(resp?.data?.data) ? resp.data.data : []
-        if (!resp?.data?.success || rows.length === 0) {
-          setMessages(prev => [...prev, { text: `${ds.title} verisi bulunamadı.`, sender: 'bot', timestamp: getMessageTime() }])
-          setIsLoading(false)
-          setIsTyping(false)
-          return
-        }
-        if (exportType === 'excel') exportRowsToCSV(rows, ds.title)
-        else exportRowsToPDF(rows, ds.title)
-        setMessages(prev => [...prev, { text: `${ds.title} ${exportType.toUpperCase()} çıktısı hazırlandı.`, sender: 'bot', timestamp: getMessageTime() }])
-      } catch (e) {
-        setMessages(prev => [...prev, { text: `${ds.title} verisi alınırken bir hata oluştu.`, sender: 'bot', timestamp: getMessageTime() }])
-      } finally {
-        setIsLoading(false)
-        setIsTyping(false)
-      }
-      return
-    }
-
-    // CPU tarih aralığı sorgusu (iki tarih arası min/max)
+    // CPU tarih aralığı sorgusu (iki tarih arası min/max) - EN ÖNCE KONTROL ET
     const dateRange = extractDateRangeFromMessage(message)
     const hasCpuKeyword = lowerMessage.includes('cpu') || lowerMessage.includes('mvs') || lowerMessage.includes('sysover')
     
@@ -1184,6 +1162,38 @@ const Chatbot = () => {
       } catch (error) {
         console.error('CPU tarih aralığı sorgusu hatası:', error)
         setMessages(prev => [...prev, { text: 'CPU verisi alınırken bir hata oluştu.', sender: 'bot', timestamp: getMessageTime() }])
+      } finally {
+        setIsLoading(false)
+        setIsTyping(false)
+      }
+      return
+    }
+
+    // Export command: "<tablo adı> pdf" or "<tablo adı> excel"
+    const exportType = lowerMessage.includes('pdf') ? 'pdf' : (lowerMessage.includes('excel') || lowerMessage.includes('csv') || lowerMessage.includes('xls')) ? 'excel' : null
+    if (exportType) {
+      const ds = resolveDatasetFromMessage(lowerMessage)
+      if (!ds) {
+        setMessages(prev => [...prev, { text: 'Hangi tabloyu istediğinizi anlayamadım. Örnek: "tcpcons pdf" veya "qm excel"', sender: 'bot', timestamp: getMessageTime() }])
+        setIsLoading(false)
+        setIsTyping(false)
+        return
+      }
+      setMessages(prev => [...prev, { text: `${ds.title} verisini ${exportType.toUpperCase()} olarak hazırlıyorum...`, sender: 'bot', timestamp: getMessageTime() }])
+      try {
+        const resp = await ds.fetch({})
+        const rows = Array.isArray(resp?.data?.data) ? resp.data.data : []
+        if (!resp?.data?.success || rows.length === 0) {
+          setMessages(prev => [...prev, { text: `${ds.title} verisi bulunamadı.`, sender: 'bot', timestamp: getMessageTime() }])
+          setIsLoading(false)
+          setIsTyping(false)
+          return
+        }
+        if (exportType === 'excel') exportRowsToCSV(rows, ds.title)
+        else exportRowsToPDF(rows, ds.title)
+        setMessages(prev => [...prev, { text: `${ds.title} ${exportType.toUpperCase()} çıktısı hazırlandı.`, sender: 'bot', timestamp: getMessageTime() }])
+      } catch (e) {
+        setMessages(prev => [...prev, { text: `${ds.title} verisi alınırken bir hata oluştu.`, sender: 'bot', timestamp: getMessageTime() }])
       } finally {
         setIsLoading(false)
         setIsTyping(false)
