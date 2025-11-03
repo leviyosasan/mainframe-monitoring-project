@@ -31,6 +31,22 @@ const NetworkPage = () => {
   const [filteredTcpstorData, setFilteredTcpstorData] = useState([]);
   const [isFiltered, setIsFiltered] = useState(false);
   const [chartData, setChartData] = useState([]);
+  const [dbConnected, setDbConnected] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const checkDb = async () => {
+      try {
+        const res = await databaseAPI.testConnection({});
+        const ok = !!(res?.data?.success || res?.status === 200);
+        if (!cancelled) setDbConnected(ok);
+      } catch (e) {
+        if (!cancelled) setDbConnected(false);
+      }
+    };
+    checkDb();
+    return () => { cancelled = true; };
+  }, []);
   
   // Stacks sıralama state'leri
   const [stacksSortColumn, setStacksSortColumn] = useState(null);
@@ -551,59 +567,101 @@ const NetworkPage = () => {
         ].join(','))
       ].join('\n');
     } else if (activeModal === 'tcpconf') {
-      headers = ['Job Name', 'Step Name', 'Target Field', 'System Name', 'Created At', 'Updated At'];
+      headers = [
+        'Job Name', 'Stack Name', 'Def Receive Bufsize', 'Def Send Bufsize', 'Def Max Receive Bufsize',
+        'Maximum Queue Depth', 'Max Retran Time', 'Min Retran Time', 'Roundtrip Gain', 'Variance Gain',
+        'Variance Multiple', 'Default Keepalive', 'Delay ACK', 'Restrict Low Port', 'Send Garbage',
+        'TCP Timestamp', 'TTLS', 'Finwait2 Time', 'System Name', 'Created At', 'Updated At'
+      ];
       csvData = [
         headers.join(','),
         ...data.map(row => [
           row.job_name || '',
-          row.step_name || '',
-          row.target_field || '',
+          row.stack_name || '',
+          row.def_receive_bufsize || '',
+          row.def_send_bufsize || '',
+          row.def_max_receive_bufsize || '',
+          row.maximum_queue_depth || '',
+          row.max_retran_time || '',
+          row.min_retran_time || '',
+          row.roundtrip_gain || '',
+          row.variance_gain || '',
+          row.variance_multiple || '',
+          row.default_keepalive || '',
+          row.delay_ack || '',
+          row.restrict_low_port || '',
+          row.send_garbage || '',
+          row.tcp_timestamp || '',
+          row.ttls || '',
+          row.finwait2time || '',
           row.system_name || '',
-          row.created_at || '',
-          row.updated_at || ''
+          row.created_at ? new Date(row.created_at).toLocaleString('tr-TR') : '',
+          row.updated_at ? new Date(row.updated_at).toLocaleString('tr-TR') : ''
         ].join(','))
       ].join('\n');
     } else if (activeModal === 'tcpcons') {
-      headers = ['Foreign IP Address', 'Foreign Port', 'Local IP Address', 'Local Port', 'State', 'System Name', 'Created At', 'Updated At'];
+      headers = [
+        'Foreign IP', 'Remote Port', 'Local Port', 'Application', 'Type of Open',
+        'Bytes In', 'Bytes Out', 'Connection Status', 'Remote Host', 'System Name', 'Created At', 'Updated At'
+      ];
       csvData = [
         headers.join(','),
         ...data.map(row => [
           row.foreign_ip_address || '',
-          row.foreign_port || '',
-          row.local_ip_address || '',
+          row.remote_port || '',
           row.local_port || '',
-          row.state || '',
+          row.application_name || '',
+          row.type_of_open || '',
+          row.interval_bytes_in || '',
+          row.interval_bytes_out || '',
+          row.connection_status || '',
+          row.remote_host_name || '',
           row.system_name || '',
-          row.created_at || '',
-          row.updated_at || ''
+          row.created_at ? new Date(row.created_at).toLocaleString('tr-TR') : '',
+          row.updated_at ? new Date(row.updated_at).toLocaleString('tr-TR') : ''
         ].join(','))
       ].join('\n');
     } else if (activeModal === 'udpconf') {
-      headers = ['Job Name', 'Step Name', 'Target Field', 'System Name', 'Created At', 'Updated At'];
+      headers = [
+        'Job Name', 'Stack Name', 'Def Recv Bufsize', 'Def Send Bufsize', 'Check Summing',
+        'Restrict Low Port', 'UDP Queue Limit', 'System Name', 'Created At', 'Updated At'
+      ];
       csvData = [
         headers.join(','),
         ...data.map(row => [
           row.job_name || '',
-          row.step_name || '',
-          row.target_field || '',
+          row.stack_name || '',
+          row.def_recv_bufsize || '',
+          row.def_send_bufsize || '',
+          row.check_summing || '',
+          row.restrict_low_port || '',
+          row.udp_queue_limit || '',
           row.system_name || '',
-          row.created_at || '',
-          row.updated_at || ''
+          row.created_at ? new Date(row.created_at).toLocaleString('tr-TR') : '',
+          row.updated_at ? new Date(row.updated_at).toLocaleString('tr-TR') : ''
         ].join(','))
       ].join('\n');
     } else if (activeModal === 'actcons') {
-      headers = ['Foreign IP Address', 'Foreign Port', 'Local IP Address', 'Local Port', 'State', 'System Name', 'Created At', 'Updated At'];
+      headers = [
+        'Foreign IP', 'Remote Port', 'Local IP', 'Local Port', 'Application', 'Type of Open',
+        'Bytes In', 'Bytes Out', 'Connection Status', 'Remote Host', 'System Name', 'Created At', 'Updated At'
+      ];
       csvData = [
         headers.join(','),
         ...data.map(row => [
           row.foreign_ip_address || '',
-          row.foreign_port || '',
+          row.remote_port || '',
           row.local_ip_address || '',
           row.local_port || '',
-          row.state || '',
+          row.application_name || '',
+          row.type_of_open || '',
+          row.interval_bytes_in || '',
+          row.interval_bytes_out || '',
+          row.connection_status || '',
+          row.remote_host_name || '',
           row.system_name || '',
-          row.created_at || '',
-          row.updated_at || ''
+          row.created_at ? new Date(row.created_at).toLocaleString('tr-TR') : '',
+          row.updated_at ? new Date(row.updated_at).toLocaleString('tr-TR') : ''
         ].join(','))
       ].join('\n');
     } else if (activeModal === 'VTMBUFF') {
@@ -715,18 +773,20 @@ const NetworkPage = () => {
 
       loadScripts().then(() => {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        // Geniş tablolar için yatay A4
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
-        // Başlık ekle
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text(`${filename} Raporu`, 14, 22);
-        
-        // Tarih ekle
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        const currentDate = new Date().toLocaleString('tr-TR');
-        doc.text(`Oluşturulma Tarihi: ${currentDate}`, 14, 30);
+        const drawPageHeader = (title) => {
+          doc.setFontSize(16);
+          doc.setFont(undefined, 'bold');
+          doc.text(`${title} Raporu`, 14, 18);
+          doc.setFontSize(10);
+          doc.setFont(undefined, 'normal');
+          const currentDate = new Date().toLocaleString('tr-TR');
+          doc.text(`Oluşturulma Tarihi: ${currentDate}`, 14, 25);
+        };
+
+        drawPageHeader(filename);
 
         // Veri türüne göre tablo verilerini hazırla
         let tableData = [];
@@ -782,48 +842,90 @@ const NetworkPage = () => {
             row.time || '-'
           ]);
         } else if (activeModal === 'tcpconf') {
-          headers = ['Job Name', 'Step Name', 'Target Field', 'System Name', 'Created At', 'Updated At'];
+          headers = [
+            'Job Name', 'Stack Name', 'Def Receive Bufsize', 'Def Send Bufsize', 'Def Max Receive Bufsize',
+            'Maximum Queue Depth', 'Max Retran Time', 'Min Retran Time', 'Roundtrip Gain', 'Variance Gain',
+            'Variance Multiple', 'Default Keepalive', 'Delay ACK', 'Restrict Low Port', 'Send Garbage',
+            'TCP Timestamp', 'TTLS', 'Finwait2 Time', 'System Name', 'Created At', 'Updated At'
+          ];
           tableData = data.map(row => [
             row.job_name || '-',
-            row.step_name || '-',
-            row.target_field || '-',
+            row.stack_name || '-',
+            row.def_receive_bufsize || '-',
+            row.def_send_bufsize || '-',
+            row.def_max_receive_bufsize || '-',
+            row.maximum_queue_depth || '-',
+            row.max_retran_time || '-',
+            row.min_retran_time || '-',
+            row.roundtrip_gain || '-',
+            row.variance_gain || '-',
+            row.variance_multiple || '-',
+            row.default_keepalive || '-',
+            row.delay_ack || '-',
+            row.restrict_low_port || '-',
+            row.send_garbage || '-',
+            row.tcp_timestamp || '-',
+            row.ttls || '-',
+            row.finwait2time || '-',
             row.system_name || '-',
-            row.created_at || '-',
-            row.updated_at || '-'
+            row.created_at ? new Date(row.created_at).toLocaleString('tr-TR') : '-',
+            row.updated_at ? new Date(row.updated_at).toLocaleString('tr-TR') : '-'
           ]);
         } else if (activeModal === 'tcpcons') {
-          headers = ['Foreign IP Address', 'Foreign Port', 'Local IP Address', 'Local Port', 'State', 'System Name', 'Created At', 'Updated At'];
+          headers = [
+            'Foreign IP', 'Remote Port', 'Local Port', 'Application', 'Type of Open',
+            'Bytes In', 'Bytes Out', 'Connection Status', 'Remote Host', 'System Name', 'Created At', 'Updated At'
+          ];
           tableData = data.map(row => [
             row.foreign_ip_address || '-',
-            row.foreign_port || '-',
-            row.local_ip_address || '-',
+            row.remote_port || '-',
             row.local_port || '-',
-            row.state || '-',
+            row.application_name || '-',
+            row.type_of_open || '-',
+            row.interval_bytes_in || '-',
+            row.interval_bytes_out || '-',
+            row.connection_status || '-',
+            row.remote_host_name || '-',
             row.system_name || '-',
-            row.created_at || '-',
-            row.updated_at || '-'
+            row.created_at ? new Date(row.created_at).toLocaleString('tr-TR') : '-',
+            row.updated_at ? new Date(row.updated_at).toLocaleString('tr-TR') : '-'
           ]);
         } else if (activeModal === 'udpconf') {
-          headers = ['Job Name', 'Step Name', 'Target Field', 'System Name', 'Created At', 'Updated At'];
+          headers = [
+            'Job Name', 'Stack Name', 'Def Recv Bufsize', 'Def Send Bufsize', 'Check Summing',
+            'Restrict Low Port', 'UDP Queue Limit', 'System Name', 'Created At', 'Updated At'
+          ];
           tableData = data.map(row => [
             row.job_name || '-',
-            row.step_name || '-',
-            row.target_field || '-',
+            row.stack_name || '-',
+            row.def_recv_bufsize || '-',
+            row.def_send_bufsize || '-',
+            row.check_summing || '-',
+            row.restrict_low_port || '-',
+            row.udp_queue_limit || '-',
             row.system_name || '-',
-            row.created_at || '-',
-            row.updated_at || '-'
+            row.created_at ? new Date(row.created_at).toLocaleString('tr-TR') : '-',
+            row.updated_at ? new Date(row.updated_at).toLocaleString('tr-TR') : '-'
           ]);
         } else if (activeModal === 'actcons') {
-          headers = ['Foreign IP Address', 'Foreign Port', 'Local IP Address', 'Local Port', 'State', 'System Name', 'Created At', 'Updated At'];
+          headers = [
+            'Foreign IP', 'Remote Port', 'Local IP', 'Local Port', 'Application', 'Type of Open',
+            'Bytes In', 'Bytes Out', 'Connection Status', 'Remote Host', 'System Name', 'Created At', 'Updated At'
+          ];
           tableData = data.map(row => [
             row.foreign_ip_address || '-',
-            row.foreign_port || '-',
+            row.remote_port || '-',
             row.local_ip_address || '-',
             row.local_port || '-',
-            row.state || '-',
+            row.application_name || '-',
+            row.type_of_open || '-',
+            row.interval_bytes_in || '-',
+            row.interval_bytes_out || '-',
+            row.connection_status || '-',
+            row.remote_host_name || '-',
             row.system_name || '-',
-            row.created_at || '-',
-            row.updated_at || '-'
+            row.created_at ? new Date(row.created_at).toLocaleString('tr-TR') : '-',
+            row.updated_at ? new Date(row.updated_at).toLocaleString('tr-TR') : '-'
           ]);
         } else if (activeModal === 'VTMBUFF') {
           headers = ['System', 'IOBuf Size', 'IOBuf Times Expanded', 'LPBuf Size', 'LPBuf Times Expanded', 'LFBuf Size', 'LFBuf Times Expanded', 'Timestamp'];
@@ -865,26 +967,56 @@ const NetworkPage = () => {
           ]);
         }
         
-        // Tablo oluştur
-        doc.autoTable({
-          head: [headers],
-          body: tableData,
-          startY: 40,
-          styles: {
-            fontSize: 8,
-            cellPadding: 2,
-            overflow: 'linebreak',
-            halign: 'left'
-          },
-          headStyles: {
-            fillColor: [242, 242, 242],
-            textColor: [0, 0, 0],
-            fontStyle: 'bold'
-          },
-          alternateRowStyles: {
-            fillColor: [249, 249, 249]
+        // Geniş tabloları sayfalara böl (sığmayan sütunları sonraki sayfada devam ettir)
+        const maxColsPerPage = 9; // A4 landscape için makul sütun sayısı
+        const pages = Math.max(1, Math.ceil(headers.length / maxColsPerPage));
+
+        for (let pageIndex = 0; pageIndex < pages; pageIndex++) {
+          if (pageIndex > 0) {
+            doc.addPage({ orientation: 'landscape' });
+            drawPageHeader(filename);
           }
-        });
+
+          const startCol = pageIndex * maxColsPerPage;
+          const endCol = Math.min(headers.length, startCol + maxColsPerPage);
+          const slicedHeaders = headers.slice(startCol, endCol);
+          const slicedBody = tableData.map(row => row.slice(startCol, endCol));
+
+          doc.autoTable({
+            head: [slicedHeaders],
+            body: slicedBody,
+            startY: 32,
+            styles: {
+              fontSize: 7,
+              cellPadding: 2,
+              overflow: 'linebreak',
+              halign: 'left'
+            },
+            columnStyles: Object.fromEntries(
+              slicedHeaders.map((_, i) => [i, { cellWidth: 'wrap' }])
+            ),
+            headStyles: {
+              fillColor: [242, 242, 242],
+              textColor: [0, 0, 0],
+              fontStyle: 'bold'
+            },
+            alternateRowStyles: {
+              fillColor: [249, 249, 249]
+            },
+            margin: { top: 28, left: 10, right: 10, bottom: 15 },
+            didDrawPage: (data) => {
+              // Sayfa altbilgisi
+              const pageCount = doc.getNumberOfPages();
+              doc.setFontSize(9);
+              doc.text(
+                `Sayfa ${data.pageNumber}/${pageCount} • Bölüm ${pageIndex + 1}/${pages}`,
+                doc.internal.pageSize.getWidth() - 10,
+                doc.internal.pageSize.getHeight() - 6,
+                { align: 'right' }
+              );
+            }
+          });
+        }
 
         // PDF'i indir
         const fileName = `${filename}_${new Date().toISOString().split('T')[0]}.pdf`;
@@ -2155,7 +2287,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('STACKS')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-blue-100 rounded-xl mb-6 mx-auto group-hover:bg-blue-200"><svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h4M8 7a2 2 0 012-2h4a2 2 0 012 2v8a2 2 0 01-2 2h-4a2 2 0 01-2-2V7z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a2 2 0 00-2-2h-4a2 2 0 00-2 2v8a2 2 0 002 2h4a2 2 0 002-2V7z"></path></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">STACKS</h2><p className="text-gray-500 text-sm font-medium">Genel STACK Bilgileri</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">STACKS</h2><p className="text-gray-500 text-sm font-medium">Genel STACK Bilgileri</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
 
@@ -2163,7 +2295,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('STACKCPU')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-green-100 rounded-xl mb-6 mx-auto group-hover:bg-green-200"><svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">STACKCPU</h2><p className="text-gray-500 text-sm font-medium">CPU ve Paket İstatistikleri</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">STACKCPU</h2><p className="text-gray-500 text-sm font-medium">CPU ve Paket İstatistikleri</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
 
@@ -2171,7 +2303,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('vtamcsa')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-purple-100 rounded-xl mb-6 mx-auto group-hover:bg-purple-200"><svg className="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">VTAMCSA</h2><p className="text-gray-500 text-sm font-medium">VTAM ve CSA Yönetimi</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">VTAMCSA</h2><p className="text-gray-500 text-sm font-medium">VTAM ve CSA Yönetimi</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
 
@@ -2179,7 +2311,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('tcpconf')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-indigo-100 rounded-xl mb-6 mx-auto group-hover:bg-indigo-200"><svg className="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">TCPCONF</h2><p className="text-gray-500 text-sm font-medium">TCP/IP Yapılandırma</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">TCPCONF</h2><p className="text-gray-500 text-sm font-medium">TCP/IP Yapılandırma</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
 
@@ -2187,7 +2319,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('tcpcons')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-teal-100 rounded-xl mb-6 mx-auto group-hover:bg-teal-200"><svg className="w-7 h-7 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">TCPCONS</h2><p className="text-gray-500 text-sm font-medium">TCP/IP Bağlantı Durumu</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">TCPCONS</h2><p className="text-gray-500 text-sm font-medium">TCP/IP Bağlantı Durumu</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
 
@@ -2195,7 +2327,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('udpconf')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-amber-100 rounded-xl mb-6 mx-auto group-hover:bg-amber-200"><svg className="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">UDPCONF</h2><p className="text-gray-500 text-sm font-medium">UDP Yapılandırma</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">UDPCONF</h2><p className="text-gray-500 text-sm font-medium">UDP Yapılandırma</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
 
@@ -2203,7 +2335,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('actcons')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-rose-100 rounded-xl mb-6 mx-auto group-hover:bg-rose-200"><svg className="w-7 h-7 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">ACTCONS</h2><p className="text-gray-500 text-sm font-medium">Aktif Bağlantı Durumu</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">ACTCONS</h2><p className="text-gray-500 text-sm font-medium">Aktif Bağlantı Durumu</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
 
@@ -2211,7 +2343,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('VTMBUFF')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-red-100 rounded-xl mb-6 mx-auto group-hover:bg-red-200"><svg className="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h-4m-2 0H7" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">VTMBUFF</h2><p className="text-gray-500 text-sm font-medium">VTAM Buffer İstatistikleri</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">VTMBUFF</h2><p className="text-gray-500 text-sm font-medium">VTAM Buffer İstatistikleri</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
 
@@ -2219,7 +2351,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('connsrpz')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-pink-100 rounded-xl mb-6 mx-auto group-hover:bg-pink-200"><svg className="w-7 h-7 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M12 20.005v-5.292a4 4 0 00-4-4h-2M18 15.713a4 4 0 00-4-4h-2" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">CONNSRPZ</h2><p className="text-gray-500 text-sm font-medium">Connection Hızı ve Durumu</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">CONNSRPZ</h2><p className="text-gray-500 text-sm font-medium">Connection Hızı ve Durumu</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
 
@@ -2227,7 +2359,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('tcpstor')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-sky-100 rounded-xl mb-6 mx-auto group-hover:bg-sky-200"><svg className="w-7 h-7 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 012-2h10a2 2 0 012 2M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">TCPSTOR</h2><p className="text-gray-500 text-sm font-medium">TCP Storage Yönetimi</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">TCPSTOR</h2><p className="text-gray-500 text-sm font-medium">TCP Storage Yönetimi</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
         </div>
