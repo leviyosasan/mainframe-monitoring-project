@@ -107,6 +107,30 @@ const RMFPage = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [isFiltered, setIsFiltered] = useState(false);
   
+  // RMF ARD için JOBNAME filtreleme state'i
+  const [jobnameFilter, setJobnameFilter] = useState('');
+  
+  // RMF ARD için JOBNAME index mapping
+  const [jobnameIndexMap, setJobnameIndexMap] = useState({});
+  
+  // RMF ASRM için JOBNAME filtreleme state'i
+  const [asrmJobnameFilter, setAsrmJobnameFilter] = useState('');
+  
+  // RMF ASRM için JOBNAME index mapping
+  const [asrmJobnameIndexMap, setAsrmJobnameIndexMap] = useState({});
+  
+  // RMF ASD için JOBNAME filtreleme state'i
+  const [asdJobnameFilter, setAsdJobnameFilter] = useState('');
+  
+  // RMF ASD için JOBNAME index mapping
+  const [asdJobnameIndexMap, setAsdJobnameIndexMap] = useState({});
+  
+  // CMF JCSA için JOBNAME filtreleme state'i
+  const [jcsaJobnameFilter, setJcsaJobnameFilter] = useState('');
+  
+  // CMF JCSA için JOBNAME index mapping
+  const [jcsaJobnameIndexMap, setJcsaJobnameIndexMap] = useState({});
+  
   // Helper functions
   const formatNumber = (value) => {
     if (value === null || value === undefined || value === '') return '-';
@@ -394,6 +418,7 @@ const RMFPage = () => {
     rmf_srcs: ['id'],
     cmf_dspcz: ['id'],
     cmf_jcsa: ['id'],
+    cmf_xcfsys: ['id'],
     cmf_xcfmbr: ['id'],
     cmf_syscpc: ['id']
   };
@@ -465,9 +490,50 @@ const RMFPage = () => {
     return isFiltered ? filteredData : getCurrentRawData();
   };
 
-  // Sıralanmış veri - filtrelenmiş veri varsa on>, kullan
+  // RMF ARD için JOBNAME filtreleme fonksiyonu
+  const filterByJobname = (data) => {
+    if (!jobnameFilter || activeModal !== 'rmf_ard') return data;
+    return data.filter(row => 
+      row.jobname && row.jobname.toLowerCase().includes(jobnameFilter.toLowerCase())
+    );
+  };
+
+  // RMF ASRM için JOBNAME filtreleme fonksiyonu
+  const filterAsrmByJobname = (data) => {
+    if (!asrmJobnameFilter || activeModal !== 'rmf_asrm') return data;
+    return data.filter(row => {
+      const jobname = row.asgname || row.ASGNAME || '';
+      return jobname && jobname.toLowerCase().includes(asrmJobnameFilter.toLowerCase());
+    });
+  };
+
+  // RMF ASD için JOBNAME filtreleme fonksiyonu
+  const filterAsdByJobname = (data) => {
+    if (!asdJobnameFilter || activeModal !== 'rmf_asd') return data;
+    return data.filter(row => 
+      row.jobname && row.jobname.toLowerCase().includes(asdJobnameFilter.toLowerCase())
+    );
+  };
+
+  // CMF JCSA için JOBNAME filtreleme fonksiyonu
+  const filterJcsaByJobname = (data) => {
+    if (!jcsaJobnameFilter || activeModal !== 'cmf_jcsa') return data;
+    return data.filter(row => 
+      row.jobname && row.jobname.toLowerCase().includes(jcsaJobnameFilter.toLowerCase())
+    );
+  };
+
+  // Sıralanmış veri - filtrelenmiş veri varsa onu kullan
   const dataToUse = isFiltered ? filteredData : getCurrentRawData();
-  const sortedData = [...dataToUse].sort((a, b) => {
+  // RMF ARD için JOBNAME filtresi uygula
+  let dataWithJobnameFilter = filterByJobname(dataToUse);
+  // RMF ASRM için JOBNAME filtresi uygula
+  dataWithJobnameFilter = filterAsrmByJobname(dataWithJobnameFilter);
+  // RMF ASD için JOBNAME filtresi uygula
+  dataWithJobnameFilter = filterAsdByJobname(dataWithJobnameFilter);
+  // CMF JCSA için JOBNAME filtresi uygula
+  dataWithJobnameFilter = filterJcsaByJobname(dataWithJobnameFilter);
+  const sortedData = [...dataWithJobnameFilter].sort((a, b) => {
     if (!sortColumn) return 0;
     
     const aValue = parseFloat(a[sortColumn]) || 0;
@@ -492,6 +558,49 @@ const RMFPage = () => {
       const response = await apiMapping[modalType]();
       if (response.data.success) {
         setData(prev => ({ ...prev, [modalType]: response.data.data }));
+        
+        // RMF ARD için JOBNAME index mapping oluştur
+        if (modalType === 'rmf_ard' && response.data.data && response.data.data.length > 0) {
+          const uniqueJobnames = [...new Set(response.data.data.map(item => item.jobname).filter(Boolean))];
+          const indexMap = {};
+          uniqueJobnames.forEach((jobname, idx) => {
+            indexMap[jobname] = idx + 1;
+          });
+          setJobnameIndexMap(indexMap);
+        }
+        
+        // RMF ASRM için JOBNAME index mapping oluştur
+        if (modalType === 'rmf_asrm' && response.data.data && response.data.data.length > 0) {
+          const uniqueJobnames = [...new Set(
+            response.data.data.map(item => item.asgname || item.ASGNAME).filter(Boolean)
+          )];
+          const indexMap = {};
+          uniqueJobnames.forEach((jobname, idx) => {
+            indexMap[jobname] = idx + 1;
+          });
+          setAsrmJobnameIndexMap(indexMap);
+        }
+        
+        // RMF ASD için JOBNAME index mapping oluştur
+        if (modalType === 'rmf_asd' && response.data.data && response.data.data.length > 0) {
+          const uniqueJobnames = [...new Set(response.data.data.map(item => item.jobname).filter(Boolean))];
+          const indexMap = {};
+          uniqueJobnames.forEach((jobname, idx) => {
+            indexMap[jobname] = idx + 1;
+          });
+          setAsdJobnameIndexMap(indexMap);
+        }
+        
+        // CMF JCSA için JOBNAME index mapping oluştur
+        if (modalType === 'cmf_jcsa' && response.data.data && response.data.data.length > 0) {
+          const uniqueJobnames = [...new Set(response.data.data.map(item => item.jobname).filter(Boolean))];
+          const indexMap = {};
+          uniqueJobnames.forEach((jobname, idx) => {
+            indexMap[jobname] = idx + 1;
+          });
+          setJcsaJobnameIndexMap(indexMap);
+        }
+        
         toast.success(`Veriler yüklendi (${response.data.data.length} kayıt)`);
       } else {
         toast.error('Veri bulunamadı');
@@ -1795,6 +1904,202 @@ const RMFPage = () => {
                       </div>
                       
                       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                        {/* RMF ARD için JOBNAME filtreleme */}
+                        {activeModal === 'rmf_ard' && (
+                          <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-green-50 border-b border-gray-200">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-4">
+                                <div className="flex items-center space-x-3">
+                                  <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9" />
+                                  </svg>
+                                  <span className="text-sm font-medium text-gray-700">Jobname:</span>
+                                  <input
+                                    type="text"
+                                    placeholder="Jobname giriniz..."
+                                    value={jobnameFilter}
+                                    onChange={(e) => {
+                                      setJobnameFilter(e.target.value);
+                                    }}
+                                    className="w-48 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
+                                  />
+                                </div>
+                              </div>
+                              
+                              {/* Sonuç Gösterimi */}
+                              {jobnameFilter && (
+                                <div className="flex items-center space-x-3">
+                                  <div className="flex items-center space-x-2 bg-green-50 rounded-lg px-3 py-1 border border-green-200">
+                                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                    <span className="text-sm text-green-700">
+                                      <span className="font-semibold">{sortedData.length}</span> kayıt
+                                    </span>
+                                  </div>
+                                  
+                                  <button
+                                    onClick={() => {
+                                      setJobnameFilter('');
+                                    }}
+                                    className="flex items-center space-x-1 px-3 py-1 text-sm text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-colors duration-200"
+                                  >
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    <span>Temizle</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* RMF ASRM için JOBNAME filtreleme */}
+                        {activeModal === 'rmf_asrm' && (
+                          <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-indigo-50 border-b border-gray-200">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-4">
+                                <div className="flex items-center space-x-3">
+                                  <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9" />
+                                  </svg>
+                                  <span className="text-sm font-medium text-gray-700">Jobname:</span>
+                                  <input
+                                    type="text"
+                                    placeholder="Jobname giriniz..."
+                                    value={asrmJobnameFilter}
+                                    onChange={(e) => {
+                                      setAsrmJobnameFilter(e.target.value);
+                                    }}
+                                    className="w-48 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
+                                  />
+                                </div>
+                              </div>
+                              
+                              {/* Sonuç Gösterimi */}
+                              {asrmJobnameFilter && (
+                                <div className="flex items-center space-x-3">
+                                  <div className="flex items-center space-x-2 bg-indigo-50 rounded-lg px-3 py-1 border border-indigo-200">
+                                    <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                                    <span className="text-sm text-indigo-700">
+                                      <span className="font-semibold">{sortedData.length}</span> kayıt
+                                    </span>
+                                  </div>
+                                  
+                                  <button
+                                    onClick={() => {
+                                      setAsrmJobnameFilter('');
+                                    }}
+                                    className="flex items-center space-x-1 px-3 py-1 text-sm text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-colors duration-200"
+                                  >
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    <span>Temizle</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* RMF ASD için JOBNAME filtreleme */}
+                        {activeModal === 'rmf_asd' && (
+                          <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-yellow-50 border-b border-gray-200">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-4">
+                                <div className="flex items-center space-x-3">
+                                  <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9" />
+                                  </svg>
+                                  <span className="text-sm font-medium text-gray-700">Jobname:</span>
+                                  <input
+                                    type="text"
+                                    placeholder="Jobname giriniz..."
+                                    value={asdJobnameFilter}
+                                    onChange={(e) => {
+                                      setAsdJobnameFilter(e.target.value);
+                                    }}
+                                    className="w-48 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
+                                  />
+                                </div>
+                              </div>
+                              
+                              {/* Sonuç Gösterimi */}
+                              {asdJobnameFilter && (
+                                <div className="flex items-center space-x-3">
+                                  <div className="flex items-center space-x-2 bg-yellow-50 rounded-lg px-3 py-1 border border-yellow-200">
+                                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                    <span className="text-sm text-yellow-700">
+                                      <span className="font-semibold">{sortedData.length}</span> kayıt
+                                    </span>
+                                  </div>
+                                  
+                                  <button
+                                    onClick={() => {
+                                      setAsdJobnameFilter('');
+                                    }}
+                                    className="flex items-center space-x-1 px-3 py-1 text-sm text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-colors duration-200"
+                                  >
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    <span>Temizle</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* CMF JCSA için JOBNAME filtreleme */}
+                        {activeModal === 'cmf_jcsa' && (
+                          <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-orange-50 border-b border-gray-200">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-4">
+                                <div className="flex items-center space-x-3">
+                                  <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9" />
+                                  </svg>
+                                  <span className="text-sm font-medium text-gray-700">Jobname:</span>
+                                  <input
+                                    type="text"
+                                    placeholder="Jobname giriniz..."
+                                    value={jcsaJobnameFilter}
+                                    onChange={(e) => {
+                                      setJcsaJobnameFilter(e.target.value);
+                                    }}
+                                    className="w-48 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white/80 backdrop-blur-sm"
+                                  />
+                                </div>
+                              </div>
+                              
+                              {/* Sonuç Gösterimi */}
+                              {jcsaJobnameFilter && (
+                                <div className="flex items-center space-x-3">
+                                  <div className="flex items-center space-x-2 bg-orange-50 rounded-lg px-3 py-1 border border-orange-200">
+                                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                    <span className="text-sm text-orange-700">
+                                      <span className="font-semibold">{sortedData.length}</span> kayıt
+                                    </span>
+                                  </div>
+                                  
+                                  <button
+                                    onClick={() => {
+                                      setJcsaJobnameFilter('');
+                                    }}
+                                    className="flex items-center space-x-1 px-3 py-1 text-sm text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-colors duration-200"
+                                  >
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    <span>Temizle</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
                         {isLoading ? (
                           <div className="p-8 text-center">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
