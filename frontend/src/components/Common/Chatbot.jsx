@@ -527,6 +527,283 @@ const Chatbot = () => {
     return null
   }
 
+  // RMF Dataset display label mapping (RMFPage.jsx columnMapping'den)
+  const rmfColumnMapping = {
+    rmf_pgspp: {
+      'id': 'ID',
+      'pdgnum': 'Page Data Set Number',
+      'pdgtypc': 'Page Data Set Type',
+      'pdgser': 'Volume Serial Number',
+      'pdredevc': 'Device Number',
+      'pdgstat': 'Page Data Set Status',
+      'pdislupc': 'Page Slot In Use Percentage',
+      'pdipxtav': 'Average Page Transfer Time',
+      'pdipiort': 'I/O Request Rate',
+      'pdippbav': 'Average Pages per Burst',
+      'pdgvioc': 'VIO Eligibility',
+      'pdibsypc': 'In Use Percentage',
+      'pdgdsn': 'Page Data Set Name',
+      'timestamp': 'Timestamp'
+    },
+    rmf_ard: {
+      'jobname': 'Jobname',
+      'device_connection_time_seconds': 'Device Connection Time for the Job',
+      'current_fixed_frames_16m': 'Current Fixed Frames < 16M',
+      'current_fixed_frame_count': 'Current Fixed Frame Count',
+      'cross_memory_register': 'Cross Memory Register',
+      'session_srm_service_absorption_rate': 'Session SRM Service Absorption Rate',
+      'session_cpu_seconds_tcb_mode': 'Session CPU Seconds in TCB Mode',
+      'cpu_seconds': 'CPU Seconds',
+      'excp_rate_per_second': 'EXCP Rate-Per-Second',
+      'swap_page_rate_per_second': 'Swap Page Rate-Per-Second',
+      'interval_lpa_page_rate': 'Interval LPA Page Rate',
+      'interval_csa_page_in_rate': 'Interval CSA Page-In Rate',
+      'realtime_non_vio_page_rate': 'Realtime Non-VIO Page Rate',
+      'private_vio_hiperspace_page_rate': 'Private VIO and Hiperspace Page Rate',
+      'created_at': 'Created At',
+      'updated_at': 'Updated At'
+    },
+    rmf_trx: {
+      'mxgcnm': 'Service Class Name',
+      'mxgcpn': 'Period Number',
+      'mxgtypc': 'WLM Type',
+      'mxiasac': 'Average Number of AS Counted',
+      'mxixavg': 'Average Active Time',
+      'mxirate': 'Transaction Rate',
+      'mxircp': 'Transactions Completed',
+      'bmctime': 'BMC Time',
+      'time': 'Time'
+    },
+    rmf_asrm: {
+      'ASGNAME': 'Jobname', 'asgname': 'Jobname',
+      'ASGCNMC': 'Service Class Name', 'asgcnmc': 'Service Class Name',
+      'ASGPGP': 'Service Class Index or Performance Period', 'asgpgp': 'Service Class Index or Performance Period',
+      'ASSACTM': 'The TRANSACTION ACTIVE time', 'assactm': 'The TRANSACTION ACTIVE time',
+      'ASGRTM': 'Current Residency Time', 'asgrtm': 'Current Residency Time',
+      'ASSTRC': 'Session Transaction Count', 'asstrc': 'Session Transaction Count',
+      'ASSJSW': 'Swap Total', 'assjsw': 'Swap Total',
+      'ASSSCSCK': 'CPU Service Unit Count', 'assscsck': 'CPU Service Unit Count',
+      'ASSMSOCK': 'Service Units Consumed Using Real Storage', 'assmsock': 'Service Units Consumed Using Real Storage',
+      'ASSIOCCK': 'I/O Service Units Consumed by the Transaction', 'assiock': 'I/O Service Units Consumed by the Transaction',
+      'ASSSRSCK': 'SRB Processor Service Consumed by Transaction', 'asssrsck': 'SRB Processor Service Consumed by Transaction',
+      'ASSWMCK': 'Total Service Units', 'asswmck': 'Total Service Units'
+    },
+    rmf_srcs: {
+      'SPLAFCAV': 'Available Frames', 'splafcav': 'Available Frames',
+      'SPLUICAV': 'Current UIC', 'spluicav': 'Current UIC',
+      'SPLSTFAV': 'SQA Frames Count', 'splstfav': 'SQA Frames Count',
+      'SPLLPFAV': 'LPA Frame Count', 'spllpfav': 'LPA Frame Count',
+      'SPLLFFAV': 'LPA Fixed Frame Count', 'spllffav': 'LPA Fixed Frame Count',
+      'SPLCPFAV': 'Pageable CSA and MLPA Frames Count', 'splcpfav': 'Pageable CSA and MLPA Frames Count',
+      'SPLCLFAV': 'Fixed LPA and CSA Frames Count', 'splclfav': 'Fixed LPA and CSA Frames Count',
+      'SPLRFFAV': 'Private Non-LSQA Fixed Frame Count', 'splrffav': 'Private Non-LSQA Fixed Frame Count',
+      'SPLQPCAV': 'Private Fixed Frames Count', 'splqpcav': 'Private Fixed Frames Count',
+      'SPLQPEAV': 'LSQA Frame Count', 'splqpeav': 'LSQA Frame Count',
+      'SCLINAV': 'Current IN Queue Length', 'sclinav': 'Current IN Queue Length',
+      'SCLLOTAV': 'Address Spaces Logically Swapped Out', 'scllotav': 'Address Spaces Logically Swapped Out',
+      'SCLOTRAV': 'Current Out Ready Queue Length', 'sclotrav': 'Current Out Ready Queue Length',
+      'SCLOTWAV': 'Current Out Wait Queue Length', 'sclotwav': 'Current Out Wait Queue Length'
+    },
+    rmf_spag: {
+      'SPLLNIRT': 'LPA Page-In Rate', 'spllnirt': 'LPA Page-In Rate',
+      'SPLCINRT': 'CSA Page-In Rate', 'splcinrt': 'CSA Page-In Rate',
+      'SPLCOTRT': 'CSA Page-Out Rate', 'splcotrt': 'CSA Page-Out Rate',
+      'SSLTSWRT': 'Total Swap Rate', 'ssltswrt': 'Total Swap Rate',
+      'SPLSINRT': 'Swap Page-In Rate', 'splsinrt': 'Swap Page-In Rate',
+      'SPLSOTRT': 'Swap Page-Out Rate', 'splsotrt': 'Swap Page-Out Rate',
+      'SPLPPIRT': 'VIO and Non-VIO Page-In Rate', 'splppirt': 'VIO and Non-VIO Page-In Rate',
+      'SPLPORT': 'VIO and Non-VIO Page-Out Rate', 'splpport': 'VIO and Non-VIO Page-Out Rate',
+      'SPLHVPRT': 'VIO Paging Rate', 'splhvprt': 'VIO Paging Rate',
+      'SPLCTWAV': 'Common Area Target Working Set', 'splctwav': 'Common Area Target Working Set',
+      'SPLAFCAV': 'Available Frames', 'splafcav': 'Available Frames',
+      'SPLUICAV': 'Current UIC', 'spluicav': 'Current UIC',
+      'SPLPESRT': 'Pages To Expanded', 'splpesrt': 'Pages To Expanded',
+      'SPLMGAAV': 'Current Migration Age', 'splmgaav': 'Current Migration Age',
+      'SPLESFAV': 'Available Expanded Storage Frames', 'splesfav': 'Available Expanded Storage Frames',
+      'SPLPEART': 'Pages To Auxiliary', 'splpeart': 'Pages To Auxiliary'
+    },
+    cmf_dspcz: {
+      'ONAM': 'Owner Name', 'onam': 'Owner Name',
+      'DSPNAME': 'Data Space Name (Count)', 'dspname': 'Data Space Name (Count)',
+      'ASID': 'ASID', 'asid': 'ASID',
+      'KEY': 'Storage Key', 'key': 'Storage Key',
+      'TYPX': 'Data Space Type', 'typx': 'Data Space Type',
+      'SCOX': 'Data Space Scope', 'scox': 'Data Space Scope',
+      'REFX': 'Storage Reference', 'refx': 'Storage Reference',
+      'PROX': 'Storage Protect', 'prox': 'Storage Protect',
+      'CSIZ': 'Current Size (Average)', 'csiz': 'Current Size (Average)',
+      'CSIZAVG': 'Current Size (Average)', 'csizavg': 'Current Size (Average)',
+      'MSIZ': 'Maximum Size (Average)', 'msiz': 'Maximum Size (Average)',
+      'MSIZAVG': 'Maximum Size (Average)', 'msizavg': 'Maximum Size (Average)'
+    },
+    cmf_xcfsys: {
+      'from_system': 'From System',
+      'to_system': 'To System',
+      'transport_class': 'Transport Class',
+      'total_messages': 'Total Messages',
+      'percent_messages_big': '% Messages Big',
+      'percent_messages_fit': '% Messages Fit',
+      'percent_messages_small': '% Messages Small',
+      'no_paths_count': 'No Paths Count',
+      'no_buffers_count': 'No Buffers Count',
+      'percent_messages_degraded': '% Messages Degraded',
+      'avg_used_message_blocks': 'Avg Used Message Blocks',
+      'percent_transport_class_buffers_used': '% of Transport Class Buffers Used',
+      'max_message': 'Maximum Message',
+      'percent_system_buffers_used': '% of System Buffers Used',
+      'max_message_blocks': 'Maximum Message Blocks',
+      'path_direction': 'Path Direction'
+    },
+    cmf_jcsa: {
+      'jobname': 'Jobname',
+      'jes_id': 'JES ID',
+      'asid': 'Address Space ID',
+      'csa_in_use_percent': 'CSA In Use Percent',
+      'ecsa_in_use_percent': 'ECSA In Use Percent',
+      'sqa_in_use_percent': 'SQA In Use Percent',
+      'esqa_in_use_percent': 'ESQA In Use Percent',
+      'csa_in_use': 'CSA in Use',
+      'ecsa_in_use': 'ECSA in Use',
+      'sqa_in_use': 'SQA In Use',
+      'esqa_in_use': 'ESQA In Use',
+      'total_used_common_storage': 'Used Common Storage',
+      'total_used_percent': 'Total Used Common Storage Percent'
+    },
+    cmf_syscpc: {
+      'smf_id': 'SMF ID', 'SMF_ID': 'SMF ID',
+      'system_name': 'System Name', 'SYSTEM_NAME': 'System Name',
+      'hardware_name': 'Hardware Name', 'HARDWARE_NAME': 'Hardware Name',
+      'cpu_model': 'CPU Model', 'CPU_MODEL': 'CPU Model',
+      'cpc_capacity': 'CPC Capacity', 'CPC_CAPACITY': 'CPC Capacity',
+      'base_cpc_capacity': 'Base CPC Capacity', 'BASE_CPC_CAPACITY': 'Base CPC Capacity',
+      'capacity_on_demand': 'Capacity on Demand', 'CAPACITY_ON_DEMAND': 'Capacity on Demand'
+    },
+    rmf_asd: {}, // Column mapping not available in RMFPage - fallback will be used
+    cmf_xcfmbr: {} // Column mapping not available in RMFPage - fallback will be used
+  }
+
+  // RMF Dataset display label fonksiyonu (genel)
+  const getRmfDisplayLabelLocal = (datasetKey) => (rawKey) => {
+    const key = String(rawKey || '').trim(); if (!key) return ''
+    const mapping = rmfColumnMapping[datasetKey]
+    if (mapping && mapping[key]) return mapping[key]
+    if (mapping && mapping[key.toUpperCase()]) return mapping[key.toUpperCase()]
+    if (mapping && mapping[key.toLowerCase()]) return mapping[key.toLowerCase()]
+    // Fallback: normalize and title case
+    return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  }
+
+  // Storage Dataset display label mapping (StoragePage.jsx'den)
+  const storageColumnMapping = {
+    csasum: {
+      'csa_in_use_percent': 'CSA Kullanım Yüzdesi',
+      'ecsa_in_use_percent': 'ECSA Kullanım Yüzdesi',
+      'rucsa_in_use_percent': 'RUCSA Kullanım Yüzdesi',
+      'sqa_in_use_percent': 'SQA Kullanım Yüzdesi',
+      'total_cs_used_percent': 'Toplam CS Kullanımı',
+      'percent_used_high_shared_storage': 'High Shared Storage Kullanımı',
+      'timestamp': 'Timestamp',
+      'bmctime': 'BMC Time',
+      'time': 'Time'
+    },
+    frminfo_fixed: {
+      'sqa_avg': 'Average SQA Frames',
+      'sqa_min': 'Minimum SQA Frames',
+      'sqa_max': 'Maximum SQA Frames',
+      'lpa_avg': 'Average LPA Frames',
+      'lpa_min': 'Minimum LPA Frames',
+      'lpa_max': 'Maximum LPA Frames',
+      'csa_avg': 'Average CSA Frames',
+      'lsqa_avg': 'Average LSQA Frames',
+      'lsqa_min': 'Minimum LSQA Frames',
+      'lsqa_max': 'Maximum LSQA Frames',
+      'private_avg': 'Average Private Frames',
+      'private_min': 'Minimum Private Frames',
+      'private_max': 'Maximum Private Frames',
+      'fixed_below_16m_avg': 'Average Fixed <16M',
+      'fixed_below_16m_min': 'Minimum Fixed <16M',
+      'fixed_below_16m_max': 'Maximum Fixed <16M',
+      'fixed_total_avg': 'Average Fixed Total',
+      'fixed_total_min': 'Minimum Fixed Total',
+      'fixed_total_max': 'Maximum Fixed Total',
+      'fixed_percentage': 'Fixed Frames Average Percentage',
+      'timestamp': 'Timestamp',
+      'system_name': 'System Name',
+      'server_name': 'Server Name'
+    },
+    frminfo_center: {
+      'spispcav': 'Average SQA Frames',
+      'spispcmn': 'Minimum SQA Frames',
+      'spispcmx': 'Maximum SQA Frames',
+      'spilpfav': 'Average LPA Frames',
+      'spilpfmn': 'Minimum LPA Frames',
+      'spilpfmx': 'Maximum LPA Frames',
+      'spicpfav': 'Average CSA Frames',
+      'spicpfmn': 'Minimum CSA Frames',
+      'spicpfmx': 'Maximum CSA Frames',
+      'spiqpcav': 'Average LSQA Frames',
+      'spiqpcmn': 'Minimum LSQA Frames',
+      'spiqpcmx': 'Maximum LSQA Frames',
+      'spiapfav': 'Average Private Frames',
+      'spiapfmn': 'Minimum Private Frames',
+      'spiapfmx': 'Maximum Private Frames',
+      'spiafcav': 'Available Frames (Average)',
+      'spiafcmn': 'Available Frames (Minimum)',
+      'spitfuav': 'Average Central Total',
+      'spiafumn': 'Minimum Central Total',
+      'spiafumx': 'Maximum Central Total',
+      'spitcpct': 'Central Frames Average Percentage',
+      'bmctime': 'BMC Time',
+      'timestamp': 'Timestamp'
+    },
+    frminfo_high_virtual: {
+      'hv_common_avg': 'Average High Virtual Common Frames',
+      'hv_common_min': 'Minimum High Virtual Common Frames',
+      'hv_common_max': 'Maximum High Virtual Common Frames',
+      'hv_shared_avg': 'Average High Virtual Shared Frames',
+      'hv_shared_min': 'Minimum High Virtual Shared Frames',
+      'hv_shared_max': 'Maximum High Virtual Shared Frames',
+      'timestamp': 'Timestamp',
+      'bmctime': 'BMC Time'
+    },
+    sysfrmiz: {
+      'spgid': 'SMF ID',
+      'spiuonlf': 'LPAR Online Storage (Average)',
+      'spluicav': 'Current UIC',
+      'spifinav': 'Average Nucleus Frames (Average)',
+      'sprefncp': '% Nucleus Frames (Average)',
+      'spispcav': 'Average SQA Frames (Average)',
+      'spreasrp': '% SQA Frames (Average)',
+      'spilpfav': 'Average LPA Frames (Average)',
+      'sprealpp': '% LPA Frames (Average)',
+      'spicpfav': 'Average CSA Frames (Average)',
+      'spreavpp': '% CSA Frames (Average)',
+      'spiqpcav': 'Average LSQA Frames (Average)',
+      'sprelsqp': '% LSQA Frames (Average)',
+      'spiapfav': 'Average Private Frames (Average)',
+      'spreprvp': '% Private Frames (Average)',
+      'spiafcav': 'Available Frames (Average)',
+      'spreavlp': '% Available Frames (Average)',
+      'spihvcav': 'Average High Virtual Common Frames',
+      'sprecmnp': '% High Virtual Common Frames',
+      'spihvsav': 'Average High Virtual Shared Frames',
+      'spreshrp': '% High Virtual Shared Frames',
+      'bmctime': 'BMC Time',
+      'timestamp': 'Timestamp'
+    }
+  }
+
+  // Storage Dataset display label fonksiyonu (genel)
+  const getStorageDisplayLabelLocal = (datasetKey) => (rawKey) => {
+    const key = String(rawKey || '').trim(); if (!key) return ''
+    const mapping = storageColumnMapping[datasetKey]
+    if (mapping && mapping[key]) return mapping[key]
+    if (mapping && mapping[key.toUpperCase()]) return mapping[key.toUpperCase()]
+    if (mapping && mapping[key.toLowerCase()]) return mapping[key.toLowerCase()]
+    // Fallback: normalize and title case
+    return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  }
+
   // Dataset metadata (aliases + API hooks + popular columns)
   const datasetConfigs = {
     stacks: {
@@ -670,6 +947,162 @@ const Chatbot = () => {
       staticColumns: ['jobname', 'jes_job_number', 'address_space_type', 'service_class_name', 'asgrnmc', 'job_step_being_monitored', 'all_cpu_seconds', 'unadj_cpu_util', 'using_cpu_p', 'cpu_delay_p', 'average_priority', 'tcb_time', 'srb_time', 'interval_unadj_remote_enclave_cpu_use', 'job_total_cpu_time', 'other_addr_space_enclave_cpu_time', 'ziip_total_cpu_time', 'ziip_interval_cpu_time', 'dep_enclave_ziip_total_time', 'dep_enclave_ziip_interval_time', 'dep_enclave_ziip_on_cp_total', 'interval_cp_time', 'resource_group_name', 'resource_group_type', 'recovery_process_boost', 'implicit_cpu_critical_flag', 'bmctime', 'time'],
       getDisplayLabel: getAddressSpaceDisplayLabelLocal,
       parseQuery: parseAddressSpaceQuery
+    },
+    // RMF Datasets
+    rmf_pgspp: {
+      title: 'RMF PGSPP',
+      aliases: ['rmf pgspp', 'pgspp', 'page space performance', 'page space', 'rmf page space'],
+      primaryAliases: ['rmf pgspp', 'pgspp'],
+      fetch: databaseAPI.getMainviewRmfPgspp,
+      check: databaseAPI.checkTableExistsRmfPgspp,
+      staticColumns: ['id', 'pdgnum', 'pdgtypc', 'pdgser', 'pdredevc', 'pdgstat', 'pdislupc', 'pdipxtav', 'pdipiort', 'pdippbav', 'pdgvioc', 'pdibsypc', 'pdgdsn', 'timestamp'],
+      getDisplayLabel: getRmfDisplayLabelLocal('rmf_pgspp')
+    },
+    rmf_ard: {
+      title: 'RMF ARD',
+      aliases: ['rmf ard', 'ard', 'application response data', 'application response', 'rmf application'],
+      primaryAliases: ['rmf ard', 'ard'],
+      fetch: databaseAPI.getMainviewRmfArd,
+      check: databaseAPI.checkTableExistsRmfArd,
+      staticColumns: ['jobname', 'device_connection_time_seconds', 'current_fixed_frames_16m', 'current_fixed_frame_count', 'cross_memory_register', 'session_srm_service_absorption_rate', 'session_cpu_seconds_tcb_mode', 'cpu_seconds', 'excp_rate_per_second', 'swap_page_rate_per_second', 'interval_lpa_page_rate', 'interval_csa_page_in_rate', 'realtime_non_vio_page_rate', 'private_vio_hiperspace_page_rate'],
+      getDisplayLabel: getRmfDisplayLabelLocal('rmf_ard')
+    },
+    rmf_trx: {
+      title: 'RMF TRX',
+      aliases: ['rmf trx', 'trx', 'transaction performance', 'transaction', 'rmf transaction'],
+      primaryAliases: ['rmf trx', 'trx'],
+      fetch: databaseAPI.getMainviewRmfTrx,
+      check: databaseAPI.checkTableExistsRmfTrx,
+      staticColumns: ['mxgcnm', 'mxgcpn', 'mxgtypc', 'mxiasac', 'mxixavg', 'mxirate', 'mxircp', 'bmctime', 'time'],
+      getDisplayLabel: getRmfDisplayLabelLocal('rmf_trx')
+    },
+    rmf_asrm: {
+      title: 'RMF ASRM',
+      aliases: ['rmf asrm', 'asrm', 'address space resource', 'address space resource management', 'rmf resource'],
+      primaryAliases: ['rmf asrm', 'asrm'],
+      fetch: databaseAPI.getMainviewRmfAsrm,
+      check: databaseAPI.checkTableExistsRmfAsrm,
+      staticColumns: ['asgname', 'asgcnmc', 'asgpgp', 'assactm', 'asgrtm', 'asstrc', 'assjsw', 'assscsck', 'assmsock', 'assiock', 'asssrsck', 'asswmck'],
+      getDisplayLabel: getRmfDisplayLabelLocal('rmf_asrm')
+    },
+    rmf_srcs: {
+      title: 'RMF SRCS',
+      aliases: ['rmf srcs', 'srcs', 'system resource data', 'system resource', 'rmf system resource'],
+      primaryAliases: ['rmf srcs', 'srcs'],
+      fetch: databaseAPI.getMainviewRmfSrcs,
+      check: databaseAPI.checkTableExistsRmfSrcs,
+      staticColumns: ['splafcav', 'spluicav', 'splstfav', 'spllpfav', 'spllffav', 'splcpfav', 'splclfav', 'splrffav', 'splqpcav', 'splqpeav', 'sclinav', 'scllotav', 'sclotrav', 'sclotwav'],
+      getDisplayLabel: getRmfDisplayLabelLocal('rmf_srcs')
+    },
+    rmf_asd: {
+      title: 'RMF ASD',
+      aliases: ['rmf asd', 'asd', 'address space data', 'address space dataset', 'rmf address space'],
+      primaryAliases: ['rmf asd', 'asd'],
+      fetch: databaseAPI.getMainviewRmfAsd,
+      check: databaseAPI.checkTableExistsRmfAsd,
+      staticColumns: [],
+      getDisplayLabel: getRmfDisplayLabelLocal('rmf_asd')
+    },
+    rmf_spag: {
+      title: 'RMF SPAG',
+      aliases: ['rmf spag', 'spag', 'storage paging data', 'storage paging', 'paging data', 'rmf paging'],
+      primaryAliases: ['rmf spag', 'spag'],
+      fetch: databaseAPI.getMainviewRmfSpag,
+      check: databaseAPI.checkTableExistsRmfSpag,
+      staticColumns: ['spllnirt', 'splcinrt', 'splcotrt', 'ssltswrt', 'splsinrt', 'splsotrt', 'splppirt', 'splpport', 'splhvprt', 'splctwav', 'splafcav', 'spluicav', 'splpesrt', 'splmgaav', 'splesfav', 'splpeart'],
+      getDisplayLabel: getRmfDisplayLabelLocal('rmf_spag')
+    },
+    // CMF Datasets
+    cmf_dspcz: {
+      title: 'CMF DSPCZ',
+      aliases: ['cmf dspcz', 'dspcz', 'data space cache', 'data space', 'cmf data space'],
+      primaryAliases: ['cmf dspcz', 'dspcz'],
+      fetch: databaseAPI.getMainviewCmfDspcz,
+      check: databaseAPI.checkTableExistsCmfDspcz,
+      staticColumns: ['onam', 'dspname', 'asid', 'key', 'typx', 'scox', 'refx', 'prox', 'csiz', 'csizavg', 'msiz', 'msizavg'],
+      getDisplayLabel: getRmfDisplayLabelLocal('cmf_dspcz')
+    },
+    cmf_xcfsys: {
+      title: 'CMF XCFSYS',
+      aliases: ['cmf xcfsys', 'xcfsys', 'cross system coupling', 'xcf system', 'cmf xcf'],
+      primaryAliases: ['cmf xcfsys', 'xcfsys'],
+      fetch: databaseAPI.getMainviewCmfXcfsys,
+      check: databaseAPI.checkTableExistsCmfXcfsys,
+      staticColumns: ['from_system', 'to_system', 'transport_class', 'total_messages', 'percent_messages_big', 'percent_messages_fit', 'percent_messages_small', 'no_paths_count', 'no_buffers_count', 'percent_messages_degraded', 'avg_used_message_blocks', 'max_message', 'percent_system_buffers_used', 'max_message_blocks', 'path_direction'],
+      getDisplayLabel: getRmfDisplayLabelLocal('cmf_xcfsys')
+    },
+    cmf_jcsa: {
+      title: 'CMF JCSA',
+      aliases: ['cmf jcsa', 'jcsa', 'job control storage', 'job control', 'cmf job'],
+      primaryAliases: ['cmf jcsa', 'jcsa'],
+      fetch: databaseAPI.getMainviewCmfJcsa,
+      check: databaseAPI.checkTableExistsCmfJcsa,
+      staticColumns: ['jobname', 'jes_id', 'asid', 'csa_in_use_percent', 'ecsa_in_use_percent', 'sqa_in_use_percent', 'esqa_in_use_percent', 'csa_in_use', 'ecsa_in_use', 'sqa_in_use', 'esqa_in_use', 'total_used_common_storage', 'total_used_percent'],
+      getDisplayLabel: getRmfDisplayLabelLocal('cmf_jcsa')
+    },
+    cmf_xcfmbr: {
+      title: 'CMF XCFMBR',
+      aliases: ['cmf xcfmbr', 'xcfmbr', 'xcf member', 'cmf xcf member'],
+      primaryAliases: ['cmf xcfmbr', 'xcfmbr'],
+      fetch: databaseAPI.getMainviewCmfXcfmbr,
+      check: databaseAPI.checkTableExistsCmfXcfmbr,
+      staticColumns: [],
+      getDisplayLabel: getRmfDisplayLabelLocal('cmf_xcfmbr')
+    },
+    cmf_syscpc: {
+      title: 'CMF SYSCPC',
+      aliases: ['cmf syscpc', 'syscpc', 'system cpc', 'cpc capacity', 'cmf cpc'],
+      primaryAliases: ['cmf syscpc', 'syscpc'],
+      fetch: databaseAPI.getMainviewCmfSyscpc,
+      check: databaseAPI.checkTableExistsCmfSyscpc,
+      staticColumns: ['smf_id', 'system_name', 'hardware_name', 'cpu_model', 'cpc_capacity', 'base_cpc_capacity', 'capacity_on_demand'],
+      getDisplayLabel: getRmfDisplayLabelLocal('cmf_syscpc')
+    },
+    // Storage Datasets
+    csasum: {
+      title: 'CSASUM',
+      aliases: ['csasum', 'common storage area summary', 'common storage', 'csa summary', 'storage csa'],
+      primaryAliases: ['csasum', 'common storage area summary'],
+      fetch: databaseAPI.getMainviewStorageCsasum,
+      check: databaseAPI.checkTableExistsCsasum,
+      staticColumns: ['csa_in_use_percent', 'ecsa_in_use_percent', 'rucsa_in_use_percent', 'sqa_in_use_percent', 'total_cs_used_percent', 'percent_used_high_shared_storage', 'timestamp', 'bmctime'],
+      getDisplayLabel: getStorageDisplayLabelLocal('csasum')
+    },
+    frminfo_center: {
+      title: 'FRMINFO Central',
+      aliases: ['frminfo center', 'frminfo central', 'frame information central', 'frame central', 'storage central'],
+      primaryAliases: ['frminfo center', 'frminfo central'],
+      fetch: databaseAPI.getMainviewStorageFrminfoCenter,
+      check: databaseAPI.checkTableExistsFrminfoCenter,
+      staticColumns: ['spispcav', 'spispcmn', 'spispcmx', 'spilpfav', 'spilpfmn', 'spilpfmx', 'spicpfav', 'spicpfmn', 'spicpfmx', 'spiqpcav', 'spiqpcmn', 'spiqpcmx', 'spiapfav', 'spiapfmn', 'spiapfmx', 'spiafcav', 'spiafcmn', 'spitfuav', 'spiafumn', 'spiafumx', 'spitcpct', 'bmctime'],
+      getDisplayLabel: getStorageDisplayLabelLocal('frminfo_center')
+    },
+    frminfo_fixed: {
+      title: 'FRMINFO Fixed',
+      aliases: ['frminfo fixed', 'frame information fixed', 'frame fixed', 'storage fixed'],
+      primaryAliases: ['frminfo fixed', 'frame information fixed'],
+      fetch: databaseAPI.getMainviewStorageFrminfofixed,
+      check: databaseAPI.checkTableExistsFrminfofixed,
+      staticColumns: ['sqa_avg', 'sqa_min', 'sqa_max', 'lpa_avg', 'lpa_min', 'lpa_max', 'csa_avg', 'lsqa_avg', 'lsqa_min', 'lsqa_max', 'private_avg', 'private_min', 'private_max', 'fixed_below_16m_avg', 'fixed_below_16m_min', 'fixed_below_16m_max', 'fixed_total_avg', 'fixed_total_min', 'fixed_total_max', 'fixed_percentage', 'timestamp'],
+      getDisplayLabel: getStorageDisplayLabelLocal('frminfo_fixed')
+    },
+    frminfo_high_virtual: {
+      title: 'FRMINFO High Virtual',
+      aliases: ['frminfo high virtual', 'frminfo highvirtual', 'frame information high virtual', 'high virtual', 'storage high virtual'],
+      primaryAliases: ['frminfo high virtual', 'frame information high virtual'],
+      fetch: databaseAPI.getMainviewStorageFrminfoHighVirtual,
+      check: databaseAPI.checkTableExistsFrminfoHighVirtual,
+      staticColumns: ['hv_common_avg', 'hv_common_min', 'hv_common_max', 'hv_shared_avg', 'hv_shared_min', 'hv_shared_max', 'timestamp', 'bmctime'],
+      getDisplayLabel: getStorageDisplayLabelLocal('frminfo_high_virtual')
+    },
+    sysfrmiz: {
+      title: 'SYSFRMIZ',
+      aliases: ['sysfrmiz', 'system frame information', 'system frame', 'frame information system'],
+      primaryAliases: ['sysfrmiz', 'system frame information'],
+      fetch: databaseAPI.getMainviewStoragesysfrmiz,
+      check: databaseAPI.checkTableExistsSysfrmiz,
+      staticColumns: ['spgid', 'spiuonlf', 'spluicav', 'spifinav', 'sprefncp', 'spispcav', 'spreasrp', 'spilpfav', 'sprealpp', 'spicpfav', 'spreavpp', 'spiqpcav', 'sprelsqp', 'spiapfav', 'spreprvp', 'spiafcav', 'spreavlp', 'spihvcav', 'sprecmnp', 'spihvsav', 'spreshrp', 'bmctime'],
+      getDisplayLabel: getStorageDisplayLabelLocal('sysfrmiz')
     }
   }
 
