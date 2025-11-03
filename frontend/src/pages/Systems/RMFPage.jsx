@@ -174,13 +174,13 @@ const RMFPage = () => {
       'pdipiort': 'I/O Request Rate',
       'pdippbav': 'Average Pages per Burst',
       'pdgvioc': 'VIO Eligibility',
-      'pdibsyPC': 'In Use Percentage',
-      'PDIBSYPC': 'In Use Percentage',
+      'pdibsypc': 'In Use Percentage',
+      'pdibsypc': 'In Use Percentage',
       'pdgdsn': 'Page Data Set Name',
       'timestamp': 'Timestamp'
     },
     rmf_ard: {
-      'jobname': 'JOBNAME',
+      'jobname': 'Jobname',
       'device_connection_time_seconds': 'Device Connection Time for the Job',
       'current_fixed_frames_16m': 'Current Fixed Frames < 16M',
       'current_fixed_frame_count': 'Current Fixed Frame Count',
@@ -265,37 +265,40 @@ const RMFPage = () => {
       'sclotrav': 'Current Out Ready Queue Length',
       'SCLOTWAV': 'Current Out Wait Queue Length',
       'sclotwav': 'Current Out Wait Queue Length'
-    }
-    ,
-    rmf_dspcz: {
-      'ONAM': 'Owner Name',
-      'onam': 'Owner Name',
-      'DSPNAME': 'Data Space Name (Count)',
-      'dspname': 'Data Space Name (Count)',
-      'ASID': 'ASID',
-      'asid': 'ASID',
-      'KEY': 'Storage Key',
-      'key': 'Storage Key',
-      'TYPX': 'Data Space Type',
-      'typx': 'Data Space Type',
-      'SCOX': 'Data Space Scope',
-      'scox': 'Data Space Scope',
-      'REFX': 'Storage Reference',
-      'refx': 'Storage Reference',
-      'PROX': 'Storage Protect',
-      'prox': 'Storage Protect',
-      'CSIZ': 'Current Size (Average)',
-      'csiz': 'Current Size (Average)',
-      'CSIZ_AVG': 'Current Size (Average)',
-      'csiz_avg': 'Current Size (Average)',
-      'CSIZ_SUM': 'Current Size (Sum)',
-      'csiz_sum': 'Current Size (Sum)',
-      'MSIZ': 'Maximum Size (Average)',
-      'msiz': 'Maximum Size (Average)',
-      'MSIZ_AVG': 'Maximum Size (Average)',
-      'msiz_avg': 'Maximum Size (Average)',
-      'MSIZ_SUM': 'Maximum Size (Sum)',
-      'msiz_sum': 'Maximum Size (Sum)'
+    },
+    rmf_spag: {
+      'SPLLNIRT': 'LPA Page-In Rate',
+      'spllnirt': 'LPA Page-In Rate',
+      'SPLCINRT': 'CSA Page-In Rate',
+      'splcinrt': 'CSA Page-In Rate',
+      'SPLCOTRT': 'CSA Page-Out Rate',
+      'splcotrt': 'CSA Page-Out Rate',
+      'SSLTSWRT': 'Total Swap Rate',
+      'ssltswrt': 'Total Swap Rate',
+      'SPLSINRT': 'Swap Page-In Rate',
+      'splsinrt': 'Swap Page-In Rate',
+      'SPLSOTRT': 'Swap Page-Out Rate',
+      'splsotrt': 'Swap Page-Out Rate',
+      'SPLPPIRT': 'VIO and Non-VIO Page-In Rate',
+      'splppirt': 'VIO and Non-VIO Page-In Rate',
+      'SPLPORT': 'VIO and Non-VIO Page-Out Rate',
+      'splpport': 'VIO and Non-VIO Page-Out Rate',
+      'SPLHVPRT': 'VIO Paging Rate',
+      'splhvprt': 'VIO Paging Rate',
+      'SPLCTWAV': 'Common Area Target Working Set',
+      'splctwav': 'Common Area Target Working Set',
+      'SPLAFCAV': 'Available Frames',
+      'splafcav': 'Available Frames',
+      'SPLUICAV': 'Current UIC',
+      'spluicav': 'Current UIC',
+      'SPLPESRT': 'Pages To Expanded',
+      'splpesrt': 'Pages To Expanded',
+      'SPLMGAAV': 'Current Migration Age',
+      'splmgaav': 'Current Migration Age',
+      'SPLESFAV': 'Available Expanded Storage Frames',
+      'splesfav': 'Available Expanded Storage Frames',
+      'SPLPEART': 'Pages To Auxiliary',
+      'splpeart': 'Pages To Auxiliary'
     },
     cmf_dspcz: {
       'ONAM': 'Owner Name',
@@ -316,33 +319,67 @@ const RMFPage = () => {
       'prox': 'Storage Protect',
       'CSIZ': 'Current Size (Average)',
       'csiz': 'Current Size (Average)',
-      'CSIZ_AVG': 'Current Size (Average)',
-      'csiz_avg': 'Current Size (Average)',
+      'CSIZAVG': 'Current Size (Average)',
+      'csizavg': 'Current Size (Average)',
       'CSIZ_SUM': 'Current Size (Sum)',
-      'csiz_sum': 'Current Size (Sum)',
+      'csizsum': 'Current Size (Sum)',
       'MSIZ': 'Maximum Size (Average)',
       'msiz': 'Maximum Size (Average)',
-      'MSIZ_AVG': 'Maximum Size (Average)',
-      'msiz_avg': 'Maximum Size (Average)',
+      'MSIZAVG': 'Maximum Size (Average)',
+      'msizavg': 'Maximum Size (Average)',
       'MSIZ_SUM': 'Maximum Size (Sum)',
-      'msiz_sum': 'Maximum Size (Sum)'
-    }
-    ,
+      'msizsum': 'Maximum Size (Sum)'
+    },
+    cmf_xcfsys: {
+      'from_system': 'From System',
+      'to_system': 'To System',
+      'transport_class': 'Transport Class',
+      'total_messages': 'Total Messages',
+      'percent_messages_big': '% Messages Big',
+      'percent_messages_fit': '% Messages Fit',
+      'percent_messages_small': '% Messages Small',
+      'no_paths_count': 'No Paths Count',
+      'no_buffers_count': 'No Buffers Count',
+      'percent_messages_degraded': '% Messages Degraded',
+      'transport_class_longest_message': 'Transport Class Longest Message',
+      'avg_used_message_blocks': 'Avg Used Message Blocks',
+      'percent_transport_class_buffers_used': '% of Transport Class Buffers Used',
+      'max_message': 'Maximum Message',
+      'percent_system_buffers_used': '% of System Buffers Used',
+      'max_message_blocks': 'Maximum Message Blocks',
+      'path_direction': 'Path Direction'
+    },
+    cmf_jcsa: {
+      'jobname': 'Jobname',
+      'jes_id': 'JES ID',
+      'asid': 'Address Space ID',
+      'csa_in_use_percent': 'CSA In Use Percent',
+      'ecsa_in_use_percent': 'ECSA In Use Percent',
+      'sqa_in_use_percent': 'SQA In Use Percent',
+      'esqa_in_use_percent': 'ESQA In Use Percent',
+      'csa_in_use': 'CSA in Use',
+      'ecsa_in_use': 'ECSA in Use',
+      'sqa_in_use': 'SQA In Use',
+      'esqa_in_use': 'ESQA In Use',
+      'total_used_common_storage': 'Used Common Storage',
+      'total_used_percent': 'Total Used Common Storage Percent'
+    },
+    cmf_xcfmbr: {},
     cmf_syscpc: {
-      'SYGID': 'SMF ID',
-      'sygid': 'SMF ID',
-      'SYXSYSN': 'System name',
-      'syxsysn': 'System name',
-      'SYGHDNM': 'Hardware Name',
-      'syghdnm': 'Hardware Name',
-      'SYGMODEL2': 'CPU Model',
-      'sygmodel2': 'CPU Model',
-      'SYGMSU': 'CPC Capacity',
-      'sygmsu': 'CPC Capacity',
-      'SYGBMSU': 'Base CPC Capacity',
-      'sygbmsu': 'Base CPC Capacity',
-      'SYGOOCOD': 'Capacity on Demand',
-      'sygoocod': 'Capacity on Demand'
+      'smf_id': 'SMF ID',
+      'SMF_ID': 'SMF ID',
+      'system_name': 'System Name',
+      'SYSTEM_NAME': 'System Name',
+      'hardware_name': 'Hardware Name',
+      'HARDWARE_NAME': 'Hardware Name',
+      'cpu_model': 'CPU Model',
+      'CPU_MODEL': 'CPU Model',
+      'cpc_capacity': 'CPC Capacity',
+      'CPC_CAPACITY': 'CPC Capacity',
+      'base_cpc_capacity': 'Base CPC Capacity',
+      'BASE_CPC_CAPACITY': 'Base CPC Capacity',
+      'capacity_on_demand': 'Capacity on Demand',
+      'CAPACITY_ON_DEMAND': 'Capacity on Demand'
     }
   };
 
@@ -355,7 +392,6 @@ const RMFPage = () => {
     rmf_asd: ['id'],
     rmf_spag: ['id'],
     rmf_srcs: ['id'],
-    rmf_dspcz: ['id'],
     cmf_dspcz: ['id'],
     cmf_jcsa: ['id'],
     cmf_xcfmbr: ['id'],
@@ -375,13 +411,13 @@ const RMFPage = () => {
         .replace(/Ö/g, 'O').replace(/ö/g, 'o')
         .replace(/Ü/g, 'U').replace(/ü/g, 'u');
     };
-    // PDIBSYPC için kapsamlı kontrol - tüm olası formatlar
+    // pdibsypc için kapsamlı kontrol - tüm olası formatlar
     if (columnName && typeof columnName === 'string') {
       const upperColumnName = columnName.toUpperCase();
-      if (upperColumnName === 'PDIBSYPC' || 
-          upperColumnName === 'PDIBSYPC' || 
-          upperColumnName.includes('PDIBSYPC') ||
-          columnName === 'pdibsyPC' ||
+      if (upperColumnName === 'pdibsypc' || 
+          upperColumnName === 'pdibsypc' || 
+          upperColumnName.includes('pdibsypc') ||
+          columnName === 'pdibsypc' ||
           columnName.toLowerCase().includes('pdibsypc')) {
         return normalizeTurkish('In Use Percentage');
       }
@@ -390,23 +426,8 @@ const RMFPage = () => {
     if (columnMapping[modalType] && columnMapping[modalType][columnName]) {
       return normalizeTurkish(columnMapping[modalType][columnName]);
     }
-    // RMF ASD: remove underscores from unmapped column names
-    if (modalType === 'rmf_asd' && typeof columnName === 'string') {
-      return normalizeTurkish(columnName.replace(/_/g, ' '));
-    }
-    if (modalType === 'rmf_spag' && typeof columnName === 'string') {
-      return normalizeTurkish(columnName.replace(/_/g, ' '));
-    }
-    if (modalType === 'cmf_xcfsys' && typeof columnName === 'string') {
-      return normalizeTurkish(columnName.replace(/_/g, ' '));
-    }
-    if (modalType === 'cmf_jcsa' && typeof columnName === 'string') {
-      return normalizeTurkish(columnName.replace(/_/g, ' '));
-    }
-    if (modalType === 'cmf_syscpc' && typeof columnName === 'string') {
-      return normalizeTurkish(columnName.replace(/_/g, ' '));
-    }
-    if (modalType === 'cmf_xcfmbr' && typeof columnName === 'string') {
+    // Fallback for unmapped column names: remove underscores
+    if (typeof columnName === 'string') {
       return normalizeTurkish(columnName.replace(/_/g, ' '));
     }
     return normalizeTurkish(columnName);
@@ -1103,7 +1124,7 @@ const RMFPage = () => {
         'pdipxtav': 'pdipxtav',
         'pdipiort': 'pdipiort',
         'pdippbav': 'pdippbav',
-        'pdibsyPC': 'pdibsyPC'
+        'pdibsypc': 'pdibsypc'
       };
       
       const field = chartFieldMapping[chartType];
@@ -1398,7 +1419,9 @@ const RMFPage = () => {
 
   const openInfo = (chartType) => {
     setPrevActiveTab(activeTab);
-    setInfoModal(chartType);
+    // Convert to lowercase to ensure consistent matching
+    const normalizedType = typeof chartType === 'string' ? chartType.toLowerCase() : chartType;
+    setInfoModal(normalizedType);
   };
 
   const closeInfo = () => {
@@ -1693,19 +1716,7 @@ const RMFPage = () => {
                 {/* Modal Header - Sticky */}
                 <div className="flex justify-between items-center mb-6 sticky top-0 bg-white z-10 pb-4 border-b border-gray-200">
                   <h3 className="text-2xl font-bold text-gray-800">
-                    {infoModal === 'asgname' && 'ASGNAME Hakkında'}
-                    {infoModal === 'asgcnmc' && 'ASGCNMC Hakkında'}
-                    {infoModal === 'asgpgp' && 'ASGPGP Hakkında'}
-                    {infoModal === 'assactm' && 'ASSACTM Hakkında'}
-                    {infoModal === 'asgrtm' && 'ASGRTM Hakkında'}
-                    {infoModal === 'asstrc' && 'ASSTRC Hakkında'}
-                    {infoModal === 'assjsw' && 'ASSJSW Hakkında'}
-                    {infoModal === 'assscsck' && 'ASSSCSCK Hakkında'}
-                    {infoModal === 'assmsock' && 'ASSMSOCK Hakkında'}
-                    {infoModal === 'assiocck' && 'ASSIOCCK Hakkında'}
-                    {infoModal === 'asssrsck' && 'ASSSRSCK Hakkında'}
-                    {infoModal === 'asswmck' && 'ASSWMCK Hakkında'}
-                    {cardData.find(card => card.id === activeModal)?.title} Detayları
+                    {(cardData.find(card => card.id === activeModal)?.title || 'RMF') + ' Detayları'}
                   </h3>
                   <button 
                     onClick={closeModal}
@@ -2525,13 +2536,13 @@ const RMFPage = () => {
 
                           {/* In Use Percentage */}
                           <div 
-                            onClick={() => openChart('pdibsyPC')}
+                            onClick={() => openChart('pdibsypc')}
                             className="group relative bg-gradient-to-br from-white to-blue-50/30 rounded-2xl border-2 border-blue-200 hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer p-6 hover:-translate-y-3 hover:scale-[1.02] pulse-subtle"
                           >
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                openInfo('pdibsyPC');
+                                openInfo('pdibsypc');
                               }}
                               className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
                             >
@@ -2560,7 +2571,7 @@ const RMFPage = () => {
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_pgspp && data.rmf_pgspp.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
-                                    {formatNumber(data.rmf_pgspp[0]?.pdibsyPC || 0)}
+                                    {formatNumber(data.rmf_pgspp[0]?.pdibsypc || 0)}%
                                   </span>
                                 ) : (
                                   <span className="text-gray-400">-</span>
@@ -2624,7 +2635,7 @@ const RMFPage = () => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                 </svg>
                               </div>
-                              <h5 className="font-bold text-gray-800 text-lg mb-2">JOBNAME</h5>
+                              <h5 className="font-bold text-gray-800 text-lg mb-2">Jobname</h5>
                               <div className="text-2xl font-bold text-gray-900">
                                 {data.rmf_ard && data.rmf_ard.length > 0 ? (
                                   <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
@@ -3434,19 +3445,17 @@ const RMFPage = () => {
                                     : 'bg-white border border-gray-200'
                                 }`}
                               >
-                                {isNumericColumn(keyName) && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      openInfo(keyName);
-                                    }}
-                                    className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                                  >
-                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                                    </svg>
-                                  </button>
-                                )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openInfo(keyName);
+                                  }}
+                                  className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                                >
+                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                  </svg>
+                                </button>
                                 {isNumericColumn(keyName) && (
                                   <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                                 )}
@@ -3642,19 +3651,17 @@ const RMFPage = () => {
                                     : 'bg-white border border-gray-200'
                                 }`}
                               >
-                                {isNumericColumn(keyName) && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      openInfo(keyName);
-                                    }}
-                                    className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                                  >
-                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                                    </svg>
-                                  </button>
-                                )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openInfo(keyName);
+                                  }}
+                                  className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                                >
+                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                  </svg>
+                                </button>
                                 {isNumericColumn(keyName) && (
                                   <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                                 )}
@@ -3746,19 +3753,17 @@ const RMFPage = () => {
                                     : 'bg-white border border-gray-200'
                                 }`}
                               >
-                                {isNumericColumn(keyName) && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      openInfo(keyName);
-                                    }}
-                                    className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                                  >
-                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                                    </svg>
-                                  </button>
-                                )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openInfo(keyName);
+                                  }}
+                                  className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                                >
+                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                  </svg>
+                                </button>
                                 {isNumericColumn(keyName) && (
                                   <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                                 )}
@@ -3832,7 +3837,8 @@ const RMFPage = () => {
                             const rows = data.cmf_jcsa || [];
                             const first = rows[0] || {};
                             const keys = Object.keys(first || {})
-                              .filter(k => k !== 'id');
+                              .filter(k => k !== 'id')
+                              .filter(k => !['created_at', 'updated_at', 'timestamp', 'bmctime', 'record_timestamp', 'time', 'last_update_time', 'bmc_time'].includes(k));
                             const nonNumeric = keys.filter(k => !isNumericColumn(k));
                             const numeric = keys.filter(k => isNumericColumn(k));
                             const ordered = [...nonNumeric, ...numeric];
@@ -3848,19 +3854,17 @@ const RMFPage = () => {
                                     : 'bg-white border border-gray-200'
                                 }`}
                               >
-                                {isNumericColumn(keyName) && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      openInfo(keyName);
-                                    }}
-                                    className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                                  >
-                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                                    </svg>
-                                  </button>
-                                )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openInfo(keyName);
+                                  }}
+                                  className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                                >
+                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                  </svg>
+                                </button>
                                 {isNumericColumn(keyName) && (
                                   <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                                 )}
@@ -3950,19 +3954,17 @@ const RMFPage = () => {
                                     : 'bg-white border border-gray-200'
                                 }`}
                               >
-                                {isNumericColumn(keyName) && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      openInfo(keyName);
-                                    }}
-                                    className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                                  >
-                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                                    </svg>
-                                  </button>
-                                )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openInfo(keyName);
+                                  }}
+                                  className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                                >
+                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                  </svg>
+                                </button>
                                 {isNumericColumn(keyName) && (
                                   <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                                 )}
@@ -4054,19 +4056,17 @@ const RMFPage = () => {
                                     : 'bg-white border border-gray-200'
                                 }`}
                               >
-                                {isNumericColumn(keyName) && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      openInfo(keyName);
-                                    }}
-                                    className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-                                  >
-                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                                    </svg>
-                                  </button>
-                                )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openInfo(keyName);
+                                  }}
+                                  className="absolute top-3 right-3 w-6 h-6 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
+                                >
+                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                  </svg>
+                                </button>
                                 {isNumericColumn(keyName) && (
                                   <div className="absolute top-2 left-2 w-3 h-3 bg-green-400 rounded-full animate-pulse group-hover:bg-green-500 transition-colors duration-300"></div>
                                 )}
@@ -4184,7 +4184,7 @@ const RMFPage = () => {
                     {selectedChart === 'pdipxtav' && 'Page Type Average'}
                     {selectedChart === 'pdipiort' && 'I/O Rate'}
                     {selectedChart === 'pdippbav' && 'Page Protection Buffer Average'}
-                    {selectedChart === 'pdibsyPC' && 'In Use Percentage'}
+                    {selectedChart === 'pdibsypc' && 'In Use Percentage'}
                     {/* RMF ARD */}
                     {selectedChart === 'device_connection_time_seconds' && 'Device Connection Time'}
                     {selectedChart === 'cpu_seconds' && 'CPU Seconds'}
@@ -4416,7 +4416,7 @@ const RMFPage = () => {
                         {selectedChart === 'pdipxtav' && 'Average Page Transfer Time Threshold Ayarları'}
                         {selectedChart === 'pdipiort' && 'I/O Request Rate Threshold Ayarları'}
                         {selectedChart === 'pdippbav' && 'Average Pages per Burst Threshold Ayarları'}
-                        {selectedChart === 'pdibsyPC' && 'In Use Percentage Threshold Ayarları'}
+                        {selectedChart === 'pdibsypc' && 'In Use Percentage Threshold Ayarları'}
                         {selectedChart === 'mxiasac' && 'Average Number of AS Counted Threshold Ayarları'}
                         {selectedChart === 'mxixavg' && 'Average Active Time Threshold Ayarları'}
                         {selectedChart === 'mxirate' && 'Transaction Rate Threshold Ayarları'}
@@ -4448,7 +4448,7 @@ const RMFPage = () => {
                                   selectedChart === 'pdipxtav' ? "1000" :
                                   selectedChart === 'pdipiort' ? "500" :
                                   selectedChart === 'pdippbav' ? "100" :
-                                  selectedChart === 'pdibsyPC' ? "95" :
+                                  selectedChart === 'pdibsypc' ? "95" :
                                   selectedChart === 'mxiasac' ? "1000" :
                                   selectedChart === 'mxixavg' ? "500" :
                                   selectedChart === 'mxirate' ? "10000" :
@@ -4478,7 +4478,7 @@ const RMFPage = () => {
                                   selectedChart === 'pdipxtav' ? "750" :
                                   selectedChart === 'pdipiort' ? "350" :
                                   selectedChart === 'pdippbav' ? "75" :
-                                  selectedChart === 'pdibsyPC' ? "80" :
+                                  selectedChart === 'pdibsypc' ? "80" :
                                   selectedChart === 'mxiasac' ? "750" :
                                   selectedChart === 'mxixavg' ? "350" :
                                   selectedChart === 'mxirate' ? "7500" :
@@ -4508,7 +4508,7 @@ const RMFPage = () => {
                                   selectedChart === 'pdipxtav' ? "500" :
                                   selectedChart === 'pdipiort' ? "200" :
                                   selectedChart === 'pdippbav' ? "50" :
-                                  selectedChart === 'pdibsyPC' ? "65" :
+                                  selectedChart === 'pdibsypc' ? "65" :
                                   selectedChart === 'mxiasac' ? "500" :
                                   selectedChart === 'mxixavg' ? "200" :
                                   selectedChart === 'mxirate' ? "5000" :
@@ -4584,302 +4584,6 @@ const RMFPage = () => {
                 </div>
 
                 <div className="space-y-6">
-                  {/* RMF ASRM Info Cards */}
-                  {infoModal === 'asgname' && (
-                    <div className="space-y-4">
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
-                        <p className="text-blue-800 text-sm">
-                          Jobname (ASGNAME), adres uzayını kullanan iş biriminin kullanıcı kimliğini (userid), iş adını (job name)
-                          veya prosedür adını gösterir.
-                        </p>
-                      </div>
-                      <div className="bg-green-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
-                        <p className="text-green-800 text-sm">
-                          Değer, sistemdeki address space’e ait tanımlayıcıdır ve diğer metriklerle korelasyon için anahtar rol oynar.
-                          Z/OS alt sistemleri ve WLM raporları ile çapraz referans yapılırken kullanılır.
-                        </p>
-                      </div>
-                      <div className="bg-yellow-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
-                        <p className="text-yellow-800 text-sm">
-                          Performans sorunlarını belirli bir iş veya kullanıcıyla ilişkilendirmek, kök neden analizi ve kapasite
-                          planlaması için gereklidir.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {infoModal === 'asgcnmc' && (
-                    <div className="space-y-4">
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
-                        <p className="text-blue-800 text-sm">
-                          Service Class Name (ASGCNMC), işlemin/işin atandığı servis sınıfının adını gösterir.
-                          Yetkiniz varsa (BMC AMI Ops UI hariç), mevcut değer üzerine yeni servis sınıfı adı (veya QUIESCE/RESUME)
-                          yazılarak değiştirilebilir.
-                        </p>
-                      </div>
-                      <div className="bg-green-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
-                        <p className="text-green-800 text-sm">
-                          WLM, servis sınıfları üzerinden hedefleri (response time, velocity vb.) ve kaynak paylaştırmayı uygular.
-                          Bu alan, WLM politikası ile performans verilerinin eşleştirilmesi için kullanılır.
-                        </p>
-                      </div>
-                      <div className="bg-yellow-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
-                        <p className="text-yellow-800 text-sm">
-                          Yanlış sınıf ataması veya uygunsuz hedefler, performans düşüşüne yol açabilir. 
-                          Sınıf adını bilmek, tuning ve SLA takibi için kritiktir.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {infoModal === 'asgpgp' && (
-                    <div className="space-y-4">
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
-                        <p className="text-blue-800 text-sm">
-                          Service Class Index / Performance Period (ASGPGP), z/OS WLM’in aktif servis politikasında
-                          transaction’ın servis hedeflerini bulmak için kullandığı dönem/sınıf indeksini gösterir.
-                        </p>
-                      </div>
-                      <div className="bg-green-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
-                        <p className="text-green-800 text-sm">
-                          Dönemler, yük arttıkça farklı hedeflerin uygulanmasını sağlar. Bu alan, dönem bazlı hedeflerin
-                          hangi aşamada devrede olduğunu saptamak için kullanılır.
-                        </p>
-                      </div>
-                      <div className="bg-yellow-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
-                        <p className="text-yellow-800 text-sm">
-                          Darboğazların hangi periodda oluştuğunu belirlemek, eşik ve hedef ayarlarını doğru yapmak için gereklidir.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {infoModal === 'assactm' && (
-                    <div className="space-y-4">
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
-                        <p className="text-blue-800 text-sm">
-                          Transaction Active Time (ASSACTM), cari işlemin başladığından bu yana geçen süreyi hh.mm.ss formatında gösterir.
-                        </p>
-                      </div>
-                      <div className="bg-green-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
-                        <p className="text-green-800 text-sm">
-                          Değer, işlem yaşam döngüsü boyunca yürütme/aktif fazdaki sürenin göstergesidir ve bekleme durumlarıyla
-                          birlikte yorumlanmalıdır.
-                        </p>
-                      </div>
-                      <div className="bg-yellow-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
-                        <p className="text-yellow-800 text-sm">
-                          Aktif süredeki anormallikler uygulama verimsizliği, rekabet veya I/O gecikmesi gösterebilir; SLA takibi için kritiktir.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {infoModal === 'asgrtm' && (
-                    <div className="space-y-4">
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
-                        <p className="text-blue-800 text-sm">
-                          Current Residency Time (ASGRTM), address space’in en son swap-out edildiğinden beri geçen süreyi gösterir.
-                        </p>
-                      </div>
-                      <div className="bg-green-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
-                        <p className="text-green-800 text-sm">
-                          Yük altında bellek baskısı ve çalışma kümeleri (working set) davranışlarını anlamak için kullanılır.
-                          Uzun süreli residency, swap aktivitesinin düşük olduğunu gösterebilir.
-                        </p>
-                      </div>
-                      <div className="bg-yellow-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
-                        <p className="text-yellow-800 text-sm">
-                          Sık swap, performansı olumsuz etkiler. Residency süresi, bellek tuning ve kapasite planlaması için önemli bir sinyaldir.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {infoModal === 'asstrc' && (
-                    <div className="space-y-4">
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
-                        <p className="text-blue-800 text-sm">
-                          Session Transaction Count (ASSTRC), oturum süresince iş için gerçekleşen transaction sayısını gösterir.
-                          Değer yalnızca iş şu anda bellekte olduğunda verilir.
-                        </p>
-                      </div>
-                      <div className="bg-green-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
-                        <p className="text-green-800 text-sm">
-                          Hacim (volume) göstergesidir ve throughput ölçümleriyle birlikte değerlendirilmelidir.
-                        </p>
-                      </div>
-                      <div className="bg-yellow-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
-                        <p className="text-yellow-800 text-sm">
-                          Anormal düşüşler, kuyruk birikmeleri veya bağımlılık sorunlarına işaret edebilir; operasyonel sağlık için kritiktir.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {infoModal === 'assjsw' && (
-                    <div className="space-y-4">
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
-                        <p className="text-blue-800 text-sm">
-                          Swap Total (ASSJSW), oturum başladığından beri address space’in kaç kez swap-in/out edildiğini gösterir.
-                        </p>
-                      </div>
-                      <div className="bg-green-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
-                        <p className="text-green-800 text-sm">
-                          Yüksek swap sayısı, bellek baskısı ve sayfa hatalarıyla ilişkili olabilir. 
-                          Sistem konfigürasyonu ve WLM politikalarıyla birlikte analiz edilmelidir.
-                        </p>
-                      </div>
-                      <div className="bg-yellow-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
-                        <p className="text-yellow-800 text-sm">
-                          Fazla swap, latency artışı ve throughput düşüşü yaratır; kapasite ve bellek tuning kararları için temel göstergedir.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {infoModal === 'assscsck' && (
-                    <div className="space-y-4">
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
-                        <p className="text-blue-800 text-sm">
-                          CPU Service Unit Count (ASSSCSCK), oturum süresince tüketilen CPU servis birimlerinin (binler) sayısını gösterir.
-                        </p>
-                      </div>
-                      <div className="bg-green-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
-                        <p className="text-green-800 text-sm">
-                          Servis birimleri, z/OS kaynak tüketiminin normalize edilmiş ölçüsüdür. İş yükleri arasında adil karşılaştırma sağlar.
-                        </p>
-                      </div>
-                      <div className="bg-yellow-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
-                        <p className="text-yellow-800 text-sm">
-                          CPU tüketiminin izlenmesi, maliyetlendirme, kapasite planlaması ve performans ayarlamaları için gereklidir.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {infoModal === 'assmsock' && (
-                    <div className="space-y-4">
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
-                        <p className="text-blue-800 text-sm">
-                          Service Units Consumed Using Real Storage (ASSMSOCK), transaction’ın gerçek bellek kullanımı için
-                          tükettiği servis birimlerini gösterir; son swap-in döneminde biriken birimler dahildir.
-                        </p>
-                      </div>
-                      <div className="bg-green-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
-                        <p className="text-green-800 text-sm">
-                          Gerçek bellek tüketimi, paging/swap davranışıyla birlikte değerlendirilmelidir. Yüksek değerler
-                          çalışma kümesi büyüklüğüne işaret edebilir.
-                        </p>
-                      </div>
-                      <div className="bg-yellow-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
-                        <p className="text-yellow-800 text-sm">
-                          Bellek baskısı ve performans ilişkisini anlamaya yardımcı olur; bellek ayarlamaları ve kapasite kararlarını bilgilendirir.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {infoModal === 'assiocck' && (
-                    <div className="space-y-4">
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
-                        <p className="text-blue-800 text-sm">
-                          I/O Service Units Consumed by the Transaction (ASSIOCCK), transaction’ın I/O işlemleri için 
-                          tükettiği servis birimlerini gösterir; son swap-in döneminde biriken birimler dahildir.
-                        </p>
-                      </div>
-                      <div className="bg-green-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
-                        <p className="text-green-800 text-sm">
-                          I/O servis birimleri, disk/cihaz gecikmeleri ve throughput ile birlikte değerlendirilmelidir.
-                          Yüksek değerler I/O-bound davranışa işaret edebilir.
-                        </p>
-                      </div>
-                      <div className="bg-yellow-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
-                        <p className="text-yellow-800 text-sm">
-                          I/O darboğazları toplam yanıt süresini artırır. Sorunlu cihaz/volume tespiti ve iyileştirme için kritik önemdedir.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {infoModal === 'asssrsck' && (
-                    <div className="space-y-4">
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
-                        <p className="text-blue-800 text-sm">
-                          SRB Processor Service Consumed by Transaction (ASSSRSCK), transaction’ın SRB işlemleri için
-                          CPU tarafından tüketilen toplam servis birimlerini gösterir; son swap-in dönemindeki birimler dahildir.
-                        </p>
-                      </div>
-                      <div className="bg-green-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
-                        <p className="text-green-800 text-sm">
-                          SRB (Supervisor Request Block) işlemleri, çekirdek seviyesinde yürütmeler içerir ve CPU tüketim profilini etkiler.
-                        </p>
-                      </div>
-                      <div className="bg-yellow-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
-                        <p className="text-yellow-800 text-sm">
-                          Yüksek SRB tüketimi, sistem seviyesinde optimizasyon gerektirebilir; CPU planlaması ve kapasite için önemlidir.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {infoModal === 'asswmck' && (
-                    <div className="space-y-4">
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
-                        <p className="text-blue-800 text-sm">
-                          Total Service Units (ASSWMCK), oturum süresince address space tarafından tüketilen toplam SRM servis birimlerinin
-                          (binler) sayısını gösterir.
-                        </p>
-                      </div>
-                      <div className="bg-green-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
-                        <p className="text-green-800 text-sm">
-                          SRM servis birimleri, farklı kaynak tüketimlerini (CPU, I/O, bellek) ortak bir ölçekte ifade eder; maliyetlendirme 
-                          ve adil karşılaştırma için kullanılır.
-                        </p>
-                      </div>
-                      <div className="bg-yellow-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
-                        <p className="text-yellow-800 text-sm">
-                          Toplam tüketim, işin sistem üzerindeki genel etkisini gösterir; kapasite, maliyet ve SLA değerlendirmeleri için esastır.
-                        </p>
-                      </div>
-                    </div>
-                  )}
                   {/* Hızlı Zaman Aralıkları */}
                   <div>
                     <h4 className="text-lg font-semibold text-gray-800 mb-4">Hızlı Zaman Aralıkları</h4>
@@ -4993,25 +4697,15 @@ const RMFPage = () => {
                 {/* Info Modal Header */}
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-2xl font-bold text-gray-800">
-                    {infoModal === 'mxgcnm' && 'MXGCNM Hakkında'}
-                    {infoModal === 'mxgcpn' && 'MXGCPN Hakkında'}
-                    {infoModal === 'mxgtypc' && 'MXGTYPC Hakkında'}
-                    {infoModal === 'mxiasac' && 'MXIASAC Hakkında'}
-                    {infoModal === 'mxixavg' && 'MXIXAVG Hakkında'}
-                    {infoModal === 'mxirate' && 'MXIRATE Hakkında'}
-                    {infoModal === 'mxircp' && 'MXIRCP Hakkında'}
-                    {infoModal === 'pdgnum' && 'PDGNUM Hakkında'}
-                    {infoModal === 'pdgtypc' && 'PDGTYPC Hakkında'}
-                    {infoModal === 'pdgser' && 'PDGSER Hakkında'}
-                    {infoModal === 'pdredevc' && 'PDREDEVC Hakkında'}
-                    {infoModal === 'pdgstat' && 'PDGSTAT Hakkında'}
-                    {infoModal === 'pdislupc' && 'PDISLUPC Hakkında'}
-                    {infoModal === 'pdipxtav' && 'PDIPXTAV Hakkında'}
-                    {infoModal === 'pdipiort' && 'PDIPIORT Hakkında'}
-                    {infoModal === 'pdippbav' && 'PDIPPBAV Hakkında'}
-                    {infoModal === 'pdgvioc' && 'PDGVIOC Hakkında'}
-                    {infoModal === 'pdibsyPC' && 'PDIBSYPC Hakkında'}
-                    {infoModal === 'pdgdsn' && 'PDGDSN Hakkında'}
+                    {(() => {
+                      if (!infoModal) return '';
+                      const displayName = getDisplayName(infoModal, activeModal);
+                      // Eğer mapping bulunamazsa veya sonuç infoModal ile aynıysa, title case'e çevir
+                      if (!displayName || displayName === infoModal) {
+                        return toTitleCase(infoModal);
+                      }
+                      return displayName;
+                    })()}
                   </h3>
                   <button 
                     onClick={closeInfo}
@@ -5519,14 +5213,13 @@ const RMFPage = () => {
                   )}
 
                   {/* In Use Percentage Info Card */}
-                  {infoModal === 'pdibsyPC' && (
+                  {infoModal === 'pdibsypc' && (
                     <div className="space-y-4">
                       <div className="bg-blue-50 rounded-lg p-4">
                         <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
                         <p className="text-blue-800 text-sm">
-                          In Use Percentage (PDIBSYPC), RMF PGSPP kayıtlarında ölçüm aralığının ne kadarında 
-                          sayfa veri setinin Auxiliary Storage Manager (ASM) tarafından kullanıldığını yüzde olarak 
-                          gösteren alanı gösterir. Bu metrik, sayfa veri setinin aktif kullanım süresini belirtir.
+                          In Use Percentage (pdibsypc) alanı, sayfa veri setinin ölçüm aralığı boyunca ne kadar yüzdesinin 
+                          Auxiliary Storage Manager (ASM) tarafından kullanıldığını söyler.
                         </p>
                       </div>
                       <div className="bg-green-50 rounded-lg p-4">
@@ -5534,17 +5227,18 @@ const RMFPage = () => {
                         <ul className="text-green-800 text-sm space-y-1">
                           <li>• <strong>Birim:</strong> Yüzde değeri (0-100%)</li>
                           <li>• <strong>Hesaplama:</strong> Kullanım süresi / Toplam ölçüm aralığı × 100</li>
-                          <li>• <strong>ASM Kullanımı:</strong> Auxiliary Storage Manager tarafından aktif kullanım</li>
-                          <li>• <strong>Zaman Aralığı:</strong> Belirli ölçüm periyodu boyunca</li>
+                          <li>• <strong>ASM Kullanımı:</strong> Auxiliary Storage Manager (Yardımcı Depolama Yöneticisi) tarafından aktif kullanım</li>
+                          <li>• <strong>Zaman Aralığı:</strong> Belirli ölçüm periyodu boyunca hesaplanır</li>
+                          <li>• <strong>Kapsam:</strong> Sayfa veri setinin aktif kullanım durumu</li>
                         </ul>
                       </div>
                       <div className="bg-yellow-50 rounded-lg p-4">
                         <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
                         <p className="text-yellow-800 text-sm">
                           In Use Percentage, sayfa veri setinin ne kadar aktif kullanıldığını belirlemek için kritik öneme sahiptir. 
-                          Yüksek değerler o veri setinin sistem için önemli olduğunu gösterirken, düşük değerler 
-                          az kullanılan veri setlerini işaret eder. Bu metrik sayesinde sayfa veri setlerinin 
-                          kullanım yoğunluğunu analiz edebilir, kaynak planlaması yapabilir ve performans optimizasyonu gerçekleştirebilirsiniz.
+                          Yüksek değerler, o veri setinin sistem için önemli olduğunu ve ASM tarafından yoğun şekilde kullanıldığını 
+                          gösterir. Bu metrik sayesinde sayfa veri setlerinin kullanım yoğunluğunu analiz edebilir, kaynak planlaması 
+                          yapabilir, performans darboğazlarını tespit edebilir ve optimizasyon stratejileri geliştirebilirsiniz.
                         </p>
                       </div>
                     </div>
@@ -5583,7 +5277,7 @@ const RMFPage = () => {
                   )}
 
                   {/* ============== RMF ARD INFO CARDS ============== */}
-                  {infoModal === 'jobname' && (
+                  {infoModal === 'jobname' && activeModal === 'rmf_ard' && (
                     <div className="space-y-4">
                       <div className="bg-blue-50 rounded-lg p-4">
                         <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
@@ -5605,29 +5299,36 @@ const RMFPage = () => {
                       </div>
                     </div>
                   )}
-
-                  {infoModal === 'device_connection_time_seconds' && (
+                  
+                  {infoModal==='device_connection_time_seconds' && (
                     <div className="space-y-4">
                       <div className="bg-blue-50 rounded-lg p-4">
                         <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
                         <p className="text-blue-800 text-sm">
-                          Job için Aygıt Bağlantı Süresi, iş için herhangi bir aygıtın aktif olduğu toplam süreyi saniye cinsinden gösterir.
+                          Device Connection Time for the Job (İş İçin Cihaz Bağlantı Süresi) alanı, iş için herhangi bir cihazın aktif olduğu saniye sayısını gösterir.
                         </p>
                       </div>
                       <div className="bg-green-50 rounded-lg p-4">
                         <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
                         <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
-                          <li>Birim: saniye</li>
-                          <li>Kapsam: interval boyunca aktif cihaz süresi toplamı</li>
-                          <li>Kaynak: RMF I/O metrikleri</li>
+                          <li>• <strong>Birim:</strong> Saniye (seconds)</li>
+                          <li>• <strong>Kapsam:</strong> İş için aktif olan tüm cihazlar</li>
+                          <li>• <strong>Ölçüm:</strong> Cihaz bağlantı süresi toplamı</li>
+                          <li>• <strong>Zaman Aralığı:</strong> Oturum başlangıcından itibaren</li>
                         </ul>
                       </div>
                       <div className="bg-yellow-50 rounded-lg p-4">
                         <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
-                        <p className="text-yellow-800 text-sm">Yoğun I/O bağlılıklarını ortaya çıkarır; cihaz darboğazlarını ve iş-odaklı I/O etkisini belirlemede kritiktir.</p>
+                        <p className="text-yellow-800 text-sm">
+                          Device Connection Time, işin I/O operasyonlarını ve cihaz kullanım yoğunluğunu değerlendirmek için kritik öneme sahiptir. 
+                          Yüksek değerler, işin yoğun I/O aktivitesi gerçekleştirdiğini ve cihazlara uzun süre bağlı kaldığını gösterir. 
+                          Bu metrik sayesinde I/O performansını analiz edebilir, cihaz bağlantı sürelerini optimize edebilir, 
+                          I/O darboğazlarını tespit edebilir ve kaynak kullanımını daha verimli hale getirebilirsiniz.
+                        </p>
                       </div>
                     </div>
                   )}
+
 
                   {infoModal === 'current_fixed_frames_16m' && (
                     <div className="space-y-4">
@@ -5904,6 +5605,3009 @@ const RMFPage = () => {
                       </div>
                     </div>
                   )}
+
+                  {/* ============== RMF ASRM INFO CARDS ============== */}
+                  {infoModal === 'asgname' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Jobname (ASGNAME) alanı, adres uzayını kullanan iş biriminin kullanıcı kimliğini (userid), iş adını (job name)
+                          veya prosedür adını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Bu alan, adres uzayını kullanan iş birimini tanımlayan kimlik bilgisini taşır. Z/OS sisteminde her adres uzayı
+                          bir kullanıcı kimliği, iş adı veya prosedür adı ile ilişkilendirilir. Bu değer, sistem kaynaklarının hangi
+                          iş birimi tarafından kullanıldığını takip etmek için kullanılır ve diğer performans metrikleriyle korelasyon
+                          için anahtar rol oynar.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Performans sorunlarını belirli bir iş, kullanıcı veya prosedürle ilişkilendirmek için kritik öneme sahiptir.
+                          Kök neden analizi, kapasite planlaması ve kaynak kullanım maliyetlendirmesi için temel tanımlayıcıdır.
+                          Sistem yöneticileri bu bilgiyi kullanarak hangi işlerin sistem kaynaklarını yoğun kullandığını tespit edebilir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'asgcnmc' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Service Class Name (ASGCNMC) alanı, işin servis sınıfı adını içerir. BMC AMI Ops UI hariç, yetkiniz varsa
+                          mevcut değer üzerine yeni bir servis sınıfı adı (veya QUIESCE veya RESUME) yazarak değiştirebilirsiniz.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Servis sınıfı, z/OS Workload Manager (WLM) tarafından iş yüklerine atanan performans hedeflerini ve
+                          kaynak paylaştırma kurallarını tanımlar. WLM, servis sınıfları üzerinden response time, velocity gibi
+                          hedefleri uygular. Bu alan, aktif WLM politikasındaki servis sınıfı yapılandırması ile performans verilerinin
+                          eşleştirilmesi için kullanılır.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Yanlış servis sınıfı ataması veya uygunsuz hedefler, performans düşüşüne yol açabilir. Servis sınıfı adını
+                          bilmek, WLM tuning, SLA takibi ve performans analizi için kritiktir. Ayrıca, yetkili kullanıcılar bu alan
+                          üzerinden QUIESCE veya RESUME komutlarını kullanarak işleri kontrol edebilir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'asgpgp' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Service Class Index veya Performance Period (ASGPGP), z/OS Workload Manager (WLM)'in aktif Servis Politikasında
+                          transaction'ın servis hedeflerini bulmak için kullandığı numarayı içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Servis Sınıfı İndeksi, WLM'in her servis sınıfı için tanımlı dönemleri (period) ve bu dönemlerdeki servis
+                          hedeflerini takip etmek için kullandığı sayısal bir değerdir. WLM politikasında, servis sınıfları birden fazla
+                          performans dönemine sahip olabilir ve her dönemde farklı hedefler tanımlanabilir. Bu alan, transaction'ın
+                          hangi dönem/indeks altında çalıştığını ve hangi hedeflerin uygulandığını belirler.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Darboğazların ve performans sorunlarının hangi performans döneminde oluştuğunu belirlemek için kritiktir.
+                          Bu bilgi, WLM politikasındaki dönem eşiklerinin ve hedef ayarlarının doğru yapılandırılıp yapılandırılmadığını
+                          değerlendirmek ve tuning kararları almak için gereklidir. Ayrıca, performans eğrilerinin hangi dönemde
+                          başladığını anlamak için kullanılır.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'assactm' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          TRANSACTION ACTIVE (ASSACTM) alanı, mevcut transaction'ın başladığından bu yana geçen süreyi içerir.
+                          Zaman değeri hh.mm.ss formatında ifade edilir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Bu metrik, transaction'ın aktif olduğu toplam süreyi ölçer. Transaction başladığında zamanlayıcı başlar ve
+                          transaction sonlanana kadar devam eder. Değer, işlem yaşam döngüsü boyunca yürütme ve aktif fazdaki sürenin
+                          toplamını gösterir. Bekleme durumları, I/O işlemleri ve CPU kullanımı gibi faktörler bu süreyi etkiler.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Transaction aktif süresindeki anormallikler, uygulama verimsizliği, kaynak rekabeti veya I/O gecikmeleri gibi
+                          sorunlara işaret edebilir. SLA takibi, response time analizi ve performans sorunlarının tespiti için kritik
+                          bir metriktir. Uzun aktif süreler, sistem darboğazları veya uygulama performans sorunları anlamına gelebilir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'asgrtm' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Current Residency Time (ASGRTM) alanı, address space'in en son swap-out edildiğinden bu yana geçen süreyi gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Residency time, bir address space'in bellekte (real storage) ne kadar süredir kesintisiz kaldığını ölçer.
+                          Address space swap-out edildiğinde bu sayaç sıfırlanır ve tekrar swap-in edildiğinde yeniden başlar. Bu metrik,
+                          bellek baskısı altında çalışma kümeleri (working set) davranışlarını anlamak için kullanılır. Uzun süreli
+                          residency, swap aktivitesinin düşük olduğunu ve bellek kaynaklarının yeterli olduğunu gösterebilir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Sık swap-in/swap-out işlemleri, performansı olumsuz etkiler çünkü disk I/O'larına neden olur ve latency artışı
+                          yaratır. Residency süresi, bellek tuning ve kapasite planlaması için önemli bir sinyaldir. Kısa residency
+                          süreleri, bellek baskısı ve yetersiz bellek kaynaklarına işaret edebilir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'asstrc' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Session Transaction Count (ASSTRC) alanı, oturum süresince iş için gerçekleşen transaction sayısını gösterir.
+                          Değer yalnızca iş şu anda bellekte (storage) olduğunda verilir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Bu metrik, bir iş oturumunun başlamasından itibaren gerçekleşen toplam transaction sayısını ölçer. Sayaç,
+                          address space bellekte olduğu sürece güncellenir. Swap-out durumunda sayaç durur ve swap-in sonrası devam eder.
+                          Bu, iş hacmi (volume) göstergesidir ve throughput ölçümleriyle birlikte değerlendirilmelidir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Transaction sayısındaki anormal düşüşler, kuyruk birikmeleri, bağımlılık sorunları veya sistem darboğazlarına
+                          işaret edebilir. Operasyonel sağlık, throughput analizi ve kapasite planlaması için kritik bir göstergedir.
+                          Yüksek transaction sayıları, sistem üzerindeki iş yükü yoğunluğunu gösterir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'assjsw' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Swap Total (ASSJSW) alanı, oturum başladığından bu yana address space'in kaç kez swap-in veya swap-out edildiğini gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Bu metrik, bir address space'in oturum süresince toplam swap işlemi sayısını ölçer. Her swap-in ve swap-out
+                          işlemi bu sayaca eklenir. Yüksek swap sayısı, bellek baskısı, sayfa hataları ve yetersiz bellek kaynaklarıyla
+                          ilişkili olabilir. Sistem konfigürasyonu, bellek ayarları ve WLM politikalarıyla birlikte analiz edilmelidir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Fazla swap işlemi, disk I/O'larına neden olarak latency artışı ve throughput düşüşü yaratır. Bu, sistem performansını
+                          olumsuz etkiler. Swap toplam sayısı, kapasite planlaması ve bellek tuning kararları için temel bir göstergedir.
+                          Yüksek değerler, bellek kaynaklarının yetersiz olduğunu veya bellek ayarlarının optimize edilmesi gerektiğini gösterir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'assscsck' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          CPU Service Unit Count (ASSSCSCK) alanı, oturum başladığından bu yana address space tarafından tüketilen
+                          CPU servis birimlerinin (binler cinsinden) sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          CPU servis birimleri, z/OS sisteminde CPU kaynak tüketiminin normalize edilmiş ölçüsüdür. Bu birimler,
+                          farklı işlemci tipleri ve sistem konfigürasyonları arasında tutarlı karşılaştırma sağlar. Değer binler
+                          cinsinden ifade edilir, bu nedenle gerçek CPU tüketimini hesaplamak için 1000 ile çarpılması gerekebilir.
+                          Servis birimleri, iş yükleri arasında adil karşılaştırma ve maliyetlendirme için kullanılır.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          CPU tüketiminin izlenmesi, maliyetlendirme, kapasite planlaması ve performans ayarlamaları için gereklidir.
+                          Yüksek CPU servis birimi tüketimi, CPU-bound iş yüklerini veya performans sorunlarını gösterir. Bu metrik,
+                          hangi işlerin sistem CPU kaynaklarını yoğun kullandığını tespit etmek ve CPU kapasitesi planlaması yapmak için
+                          kritik öneme sahiptir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'assmsock' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Service Units Consumed Using Real Storage (ASSMSOCK) alanı, transaction başladığından bu yana gerçek bellek
+                          (real storage) kullanımı için tüketilen servis birimlerinin sayısını gösterir. Son swap-in döneminde biriken
+                          servis birimleri bu değere dahildir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Bu metrik, transaction'ın gerçek bellek (real storage) kullanımı için harcadığı kaynakları servis birimi
+                          cinsinden ölçer. Gerçek bellek tüketimi, paging ve swap davranışıyla birlikte değerlendirilmelidir. Yüksek
+                          değerler, büyük çalışma kümesi (working set) boyutuna veya yoğun bellek kullanımına işaret edebilir.
+                          Son swap-in dönemindeki birimler dahil olduğu için, güncel bellek kullanım profili hakkında bilgi verir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Bellek baskısı ve performans arasındaki ilişkiyi anlamaya yardımcı olur. Bu metrik, bellek ayarlamaları,
+                          kapasite planlaması ve bellek kaynaklarının optimal kullanımı için kritik kararlar alınmasını sağlar.
+                          Yüksek bellek servis birimi tüketimi, bellek kaynaklarının yetersiz olduğunu veya bellek optimizasyonu
+                          gerektiğini gösterebilir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'assiocck' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          I/O Service Units Consumed by the Transaction (ASSIOCCK) alanı, transaction başladığından bu yana I/O işlemleri
+                          için tüketilen servis birimlerinin sayısını gösterir. Son swap-in döneminde biriken I/O servis birimleri
+                          bu değere dahildir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          I/O servis birimleri, transaction'ın disk okuma/yazma işlemleri ve diğer I/O operasyonları için harcadığı
+                          kaynakları ölçer. Bu değer, disk/cihaz gecikmeleri, throughput ve I/O sıklığı ile birlikte değerlendirilmelidir.
+                          Yüksek değerler, I/O-bound davranışa, yavaş cihazlara veya yoğun disk aktivitesine işaret edebilir.
+                          Son swap-in dönemindeki birimler dahil olduğu için, güncel I/O kullanım profili hakkında bilgi verir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          I/O darboğazları, transaction'ın toplam yanıt süresini önemli ölçüde artırabilir. Bu metrik, sorunlu cihaz/volume
+                          tespiti, I/O performans iyileştirmeleri ve kapasite planlaması için kritik öneme sahiptir. Yüksek I/O servis
+                          birimi tüketimi, disk kaynaklarının optimize edilmesi gerektiğini veya I/O alt yapısının genişletilmesi
+                          gerektiğini gösterebilir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'asssrsck' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          SRB Processor Service Consumed by Transaction (ASSSRSCK) alanı, transaction başladığından bu yana transaction'ın
+                          CPU kodunun SRB (Supervisor Request Block) işlemleri için tüketilen toplam servis birimlerini gösterir.
+                          Son swap-in döneminde biriken birimler bu değere dahildir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          SRB (Supervisor Request Block) işlemleri, z/OS çekirdek seviyesinde (supervisor mode) yürütülen işlemlerdir.
+                          Bu işlemler, sistem servis çağrıları, I/O tamamlanma işlemleri ve diğer sistem seviyesi operasyonları içerir.
+                          SRB işlemleri, transaction'ın CPU tüketim profilini etkiler ve normal TCB (Task Control Block) işlemlerinden
+                          farklı olarak çekirdek seviyesinde çalışır. Son swap-in dönemindeki birimler dahil olduğu için, güncel SRB
+                          kullanım profili hakkında bilgi verir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Yüksek SRB tüketimi, sistem seviyesinde optimizasyon gerektirebilir. Bu metrik, CPU planlaması, kapasite planlaması
+                          ve sistem performans analizi için önemlidir. SRB işlemleri, sistem kaynaklarının kullanımını etkiler ve çekirdek
+                          seviyesindeki darboğazları tespit etmek için kullanılır. Aşırı SRB tüketimi, sistem seviyesinde performans sorunlarına
+                          veya optimize edilmesi gereken sistem servislerine işaret edebilir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'asswmck' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Total Service Units (ASSWMCK) alanı, oturum süresince address space tarafından tüketilen toplam SRM
+                          (System Resource Manager) servis birimlerinin (binler cinsinden) sayısını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          SRM servis birimleri, z/OS Sistem Kaynak Yöneticisi (System Resource Manager) tarafından kullanılan normalize
+                          edilmiş ölçüm birimidir. Bu birimler, farklı kaynak tüketimlerini (CPU, I/O, bellek, SRB vb.) ortak bir ölçekte
+                          ifade eder. Değer binler cinsinden ifade edilir, bu nedenle gerçek tüketimi hesaplamak için 1000 ile çarpılması
+                          gerekebilir. SRM servis birimleri, maliyetlendirme, kaynak paylaştırma ve farklı iş yükleri arasında adil
+                          karşılaştırma için kullanılır.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Toplam servis birimi tüketimi, bir işin sistem üzerindeki genel etkisini ve kaynak kullanımını gösterir.
+                          Bu metrik, kapasite planlaması, maliyetlendirme ve SLA değerlendirmeleri için esastır. Yüksek toplam servis
+                          birimi tüketimi, sistem kaynaklarının yoğun kullanıldığını gösterir ve kapasite artışı veya kaynak optimizasyonu
+                          gerektiğine işaret edebilir. İş yükleri arasında karşılaştırma yapmak ve adil kaynak dağıtımı sağlamak için
+                          kritik bir göstergedir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ============== RMF SRCS INFO CARDS ============== */}
+                  {infoModal === 'splafcav' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Available Frames (SPLAFCAV) alanı, şu anda kullanılabilir olan merkezi depolama (central storage) frame sayısını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Bu metrik, sistemdeki kullanılabilir bellek frame'lerinin sayısını gösterir. Frame'ler, z/OS sisteminde bellek yönetiminin
+                          temel birimidir. Merkezi depolama (central storage), sistemin fiziksel bellek kaynaklarını ifade eder. Bu değer,
+                          sistemin bellek kullanılabilirliğini ve bellek baskısının olup olmadığını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Düşük kullanılabilir frame sayısı, bellek baskısı ve potansiyel performans sorunlarına işaret edebilir. Bu metrik,
+                          bellek kapasitesi planlaması, bellek yönetimi ve sistem performansı için kritik öneme sahiptir. Yetersiz kullanılabilir
+                          frame, paging ve swap aktivitesini artırabilir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'spluicav' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Current UIC (SPLUICAV) alanı, mevcut sistem unreferenced interval count (UIC) değerini içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          UIC (Unreferenced Interval Count), z/OS Storage Management'daki bellek yönetimi için kullanılan bir sayaçtır.
+                          Bu değer, referans edilmeyen bellek sayfalarının sayısını ölçer ve sistem bellek yönetimi algoritmaları tarafından
+                          kullanılır. UIC, bellek temizleme ve sayfa yönetimi kararlarında önemli bir faktördür.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          UIC değeri, bellek kullanım verimliliği ve bellek yönetimi performansını değerlendirmek için kullanılır. Yüksek UIC
+                          değerleri, bellek sayfalarının düşük kullanımını veya bellek sızıntısı gibi sorunları gösterebilir. Bu metrik,
+                          bellek optimizasyonu ve sistem performansı için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'splstfav' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          SQA Frames Count (SPLSTFAV) alanı, interval süresince işe tahsis edilen toplam SQA (System Queue Area) frame sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          SQA (System Queue Area), z/OS sisteminin sistem seviyesi veri yapılarını ve kuyruk yönetimini desteklemek için kullanılan
+                          özel bir bellek alanıdır. Yüksek SQA frame sayısı, sistem gerçek depolama (real storage) kısıtlamalarında bir sorun
+                          olduğunu gösterebilir. Bu metrik, sistem seviyesi bellek kullanımını ve kaynak tahsisini gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Yüksek SQA frame sayısı, bellek baskısı ve gerçek depolama kısıtlamalarına işaret edebilir. Bu durum, sistem performansını
+                          etkileyebilir ve bellek kaynaklarının optimize edilmesi gerektiğini gösterebilir. Sistem seviyesi bellek kullanımını
+                          izlemek ve kapasite planlaması yapmak için kritik öneme sahiptir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'spllpfav' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          LPA Frame Count (SPLLPFAV) alanı, son toplama döngüsü sırasında depolamada bulunan toplam LPA (Link Pack Area) frame sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          LPA (Link Pack Area), z/OS sisteminde sıkça kullanılan modüllerin paylaşımlı bir bellek alanında saklandığı özel bir alandır.
+                          Bu alan, sistem performansını artırmak için tasarlanmıştır. LPA frame sayısı, sistemin paylaşımlı kod ve veri yapıları için
+                          ne kadar bellek kullandığını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          LPA kullanımı, sistem performansını etkiler çünkü paylaşımlı modüller bellekte tutulur ve hızlı erişim sağlanır.
+                          LPA frame sayısını izlemek, bellek kullanımını optimize etmek ve sistem performansını artırmak için önemlidir.
+                          Yüksek LPA kullanımı, bellek kaynaklarının verimli kullanıldığını gösterebilir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'spllffav' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          LPA Fixed Frame Count (SPLLFFAV) alanı, son toplama döngüsü sırasında depolamada bulunan toplam sabit (fixed) LPA frame sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Sabit LPA frame'leri, swap-out edilemeyen ve gerçek bellekte kalması gereken LPA frame'lerini ifade eder. Bu frame'ler,
+                          sistemin kritik modüllerini içerir ve performans için bellekte sabit tutulmalıdır. Sabit LPA frame sayısı, sistemin
+                          kritik kod bileşenleri için ne kadar bellek ayırdığını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Sabit LPA frame'leri, sistem performansı için kritik öneme sahiptir. Bu frame'ler swap-out edilemez, bu nedenle gerçek
+                          bellek kaynaklarını kullanır. Yüksek sabit LPA frame sayısı, bellek kaynaklarının kritik sistem bileşenleri için
+                          kullanıldığını gösterir ve bellek planlaması için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'splcpfav' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Pageable CSA and MLPA Frames Count (SPLCPFAV) alanı, şu anda sayfalanabilir (pageable) olan CSA ve MLPA frame'lerinin sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          CSA (Common System Area) ve MLPA (Modified Link Pack Area), sistem seviyesi veri yapıları ve paylaşımlı kod alanlarıdır.
+                          Sayfalanabilir frame'ler, gerekirse diske sayfalanabilir (paged out) ve bellek kaynaklarını optimize etmeye yardımcı olur.
+                          Bu metrik, sistemin esnek bellek yönetimi için kullandığı frame sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Sayfalanabilir CSA ve MLPA frame'leri, bellek esnekliği sağlar ve bellek kaynaklarının optimize edilmesine yardımcı olur.
+                          Bu frame'ler, bellek baskısı altında diske sayfalanabilir, böylece diğer işler için bellek kaynakları serbest bırakılır.
+                          Bu metrik, bellek yönetimi ve kapasite planlaması için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'splclfav' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Fixed LPA and CSA Frames Count (SPLCLFAV) alanı, şu anda sabit (fixed) olan CSA ve LPA frame'lerinin sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Sabit LPA ve CSA frame'leri, swap-out edilemeyen ve gerçek bellekte kalması gereken frame'lerdir. Bu frame'ler,
+                          sistemin kritik veri yapılarını ve modüllerini içerir. Sabit frame sayısı, sistemin performans için gerekli olan
+                          minimum bellek gereksinimini gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Sabit LPA ve CSA frame'leri, sistem performansı ve kararlılığı için kritiktir. Bu frame'ler swap-out edilemez ve
+                          gerçek bellek kaynaklarını kullanır. Yüksek sabit frame sayısı, sistemin kritik bileşenleri için ne kadar bellek
+                          ayırdığını gösterir ve bellek planlaması için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'splrffav' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Private Non-LSQA Fixed Frame Count (SPLRFFAV) alanı, son toplama döngüsü süresince depolamada bulunan özel (private)
+                          sabit (fixed) non-LSQA frame'lerinin toplam sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Özel non-LSQA sabit frame'leri, belirli bir address space'e ait olan ve swap-out edilemeyen frame'lerdir. LSQA (Local
+                          System Queue Area) hariç, bu frame'ler address space'in özel bellek alanını oluşturur. Bu frame'ler, address space'in
+                          kritik veri yapılarını ve modüllerini içerir ve gerçek bellekte sabit tutulmalıdır.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Özel sabit frame sayısı, address space'lerin gerçek bellek gereksinimlerini gösterir. Yüksek sabit frame sayısı,
+                          bellek kaynaklarının yoğun kullanıldığını ve potansiyel bellek baskısı riskini gösterir. Bu metrik, bellek kapasitesi
+                          planlaması ve performans optimizasyonu için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'splqpcav' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Private Fixed Frames Count (SPLQPCAV) alanı, LSQA frame'leri olmayan özel sabit frame'lerin mevcut sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Özel sabit frame'ler, belirli bir address space'e ait olan ve swap-out edilemeyen frame'lerdir. LSQA hariç, bu frame'ler
+                          address space'in özel bellek alanını oluşturur. Bu metrik, sistemin özel bellek gereksinimlerini ve gerçek bellek
+                          kullanımını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Özel sabit frame sayısı, address space'lerin gerçek bellek gereksinimlerini ve bellek kullanım profilini gösterir.
+                          Yüksek değerler, bellek kaynaklarının yoğun kullanıldığını ve bellek planlaması için önemli olduğunu gösterir.
+                          Bu metrik, kapasite planlaması ve performans optimizasyonu için kritiktir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'splqpeav' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          LSQA Frame Count (SPLQPEAV) alanı, tüm address space'ler için tahsis edilen toplam LSQA (Local System Queue Area) frame sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          LSQA (Local System Queue Area), her address space için yerel sistem kuyruklarını ve veri yapılarını desteklemek için
+                          kullanılan özel bir bellek alanıdır. LSQA frame sayısı, sistemin tüm address space'ler için toplam LSQA gereksinimini
+                          gösterir. Bu alan, address space seviyesi sistem operasyonları için kritiktir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          LSQA frame sayısı, sistem seviyesi bellek kullanımını ve address space'lerin sistem kaynak gereksinimlerini gösterir.
+                          Yüksek LSQA kullanımı, bellek kaynaklarının sistem operasyonları için kullanıldığını gösterir. Bu metrik, bellek
+                          planlaması ve kapasite yönetimi için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'sclinav' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Current IN Queue Length (SCLINAV) alanı, SMR (Storage Management Routines) IN kuyruğundaki toplam address space sayısını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          SMR IN kuyruğu, belleğe alınmayı (swap-in) bekleyen address space'leri içerir. Bu kuyruk, bellek yönetimi süreçlerinde
+                          kritik bir rol oynar. Yüksek IN kuyruk uzunluğu, birçok address space'in belleğe alınmayı beklediğini gösterir.
+                          Bu, bellek baskısı veya yetersiz bellek kaynaklarının bir göstergesi olabilir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          IN kuyruk uzunluğu, bellek yönetimi performansını ve bellek kaynaklarının yeterliliğini gösterir. Uzun IN kuyrukları,
+                          bellek baskısı, gecikmiş swap-in işlemleri ve potansiyel performans sorunlarına işaret edebilir. Bu metrik, bellek
+                          kapasitesi planlaması ve performans optimizasyonu için kritiktir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'scllotav' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Address Spaces Logically Swapped Out (SCLLOTAV) alanı, SRM (System Resource Manager) kuyruklarında mantıksal olarak
+                          swap-out edilmiş toplam address space sayısını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          Mantıksal olarak swap-out edilmiş address space'ler, SRM tarafından bellek yönetimi için kuyruklarda tutulan ve
+                          fiziksel bellekte olmayan address space'lerdir. Bu metrik, sistemin bellek yönetimi süreçlerinde ne kadar address
+                          space'in bellek dışında olduğunu gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Mantıksal swap-out sayısı, bellek yönetimi ve bellek baskısı seviyesini gösterir. Yüksek sayılar, birçok address space'in
+                          bellek dışında olduğunu ve bellek kaynaklarının sınırlı olduğunu gösterebilir. Bu metrik, bellek kapasitesi planlaması
+                          ve performans analizi için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'sclotrav' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Current Out Ready Queue Length (SCLOTRAV) alanı, SMR (Storage Management Routines) OUT ready kuyruğundaki toplam address space sayısını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          SMR OUT ready kuyruğu, swap-out işlemi için hazır olan address space'leri içerir. Bu kuyruk, bellek yönetimi süreçlerinde
+                          address space'lerin bellekten çıkarılmasını yönetir. OUT ready kuyruk uzunluğu, bellek yönetimi aktivitesini ve swap-out
+                          işlemlerinin durumunu gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          OUT ready kuyruk uzunluğu, bellek yönetimi performansını ve swap-out işlemlerinin yoğunluğunu gösterir. Yüksek kuyruk
+                          uzunlukları, bellek baskısı ve yoğun swap-out aktivitesine işaret edebilir. Bu metrik, bellek planlaması ve performans
+                          optimizasyonu için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'sclotwav' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Current Out Wait Queue Length (SCLOTWAV) alanı, SMR (Storage Management Routines) OUT wait kuyruğundaki toplam address space sayısını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <p className="text-green-800 text-sm">
+                          SMR OUT wait kuyruğu, swap-out işlemi için bekleyen (waiting) address space'leri içerir. Bu kuyruk, bellek yönetimi
+                          süreçlerinde swap-out işlemlerinin tamamlanmasını bekleyen address space'leri yönetir. OUT wait kuyruk uzunluğu,
+                          bellek yönetimi aktivitesini ve swap-out işlemlerinin bekleme durumunu gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          OUT wait kuyruk uzunluğu, bellek yönetimi performansını ve swap-out işlemlerinin gecikme durumunu gösterir. Uzun wait
+                          kuyrukları, swap-out işlemlerinin geciktiğini veya bellek yönetimi darboğazları olduğunu gösterebilir. Bu metrik,
+                          bellek planlaması ve performans sorunlarının tespiti için kritiktir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ============== RMF SPAG INFO CARDS ============== */}
+                  {activeModal === 'rmf_spag' && infoModal && (infoModal.toLowerCase() === 'spllnirt' || infoModal.toLowerCase() === 'lpa_page_in_rate') && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          LPA Page-In Rate (SPLLNIRT), son 15 saniye içinde LPA (Link Pack Area) sayfalarının sayfa saniye cinsinden sayfa içine (page-in) alınma oranını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Birim:</strong> Sayfa/saniye (pages per second)</li>
+                          <li>• <strong>Zaman Aralığı:</strong> Son 15 saniye</li>
+                          <li>• <strong>LPA:</strong> Link Pack Area, paylaşımlı kod ve veri yapılarını içerir</li>
+                          <li>• <strong>Page-In:</strong> Diskten belleğe sayfa aktarım işlemi</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          LPA Page-In Rate, sistem performansını ve bellek yönetimi verimliliğini değerlendirmek için kritiktir. Yüksek page-in oranları, bellek baskısı ve potansiyel performans sorunlarına işaret edebilir. Bu metrik, bellek planlaması ve sistem performansı optimizasyonu için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeModal === 'rmf_spag' && infoModal && (infoModal.toLowerCase() === 'splcinrt' || infoModal.toLowerCase() === 'csa_page_in_rate') && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          CSA Page-In Rate (SPLCINRT), son 15 saniye içinde CSA (Common System Area) sayfalarının sayfa saniye cinsinden sayfa içine (page-in) alınma oranını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Birim:</strong> Sayfa/saniye (pages per second)</li>
+                          <li>• <strong>Zaman Aralığı:</strong> Son 15 saniye</li>
+                          <li>• <strong>CSA:</strong> Common System Area, sistem seviyesi veri yapılarını içerir</li>
+                          <li>• <strong>Kullanım:</strong> Sistem kuyrukları ve paylaşımlı veri yapıları için</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          CSA Page-In Rate, sistem seviyesi bellek yönetimi ve performansını değerlendirmek için önemlidir. Yüksek page-in oranları, bellek baskısı ve sistem kaynaklarının yoğun kullanıldığını gösterir. Bu metrik, bellek planlaması ve sistem performansı optimizasyonu için kritiktir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeModal === 'rmf_spag' && infoModal && (infoModal.toLowerCase() === 'splcotrt' || infoModal.toLowerCase() === 'csa_page_out_rate') && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          CSA Page-Out Rate (SPLCOTRT), son 15 saniye içinde CSA (Common System Area) sayfalarının sayfa saniye cinsinden sayfa dışına (page-out) alınma oranını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Birim:</strong> Sayfa/saniye (pages per second)</li>
+                          <li>• <strong>Zaman Aralığı:</strong> Son 15 saniye</li>
+                          <li>• <strong>Page-Out:</strong> Bellekten diske sayfa yazma işlemi</li>
+                          <li>• <strong>Amaç:</strong> Bellek kaynaklarını serbest bırakmak</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          CSA Page-Out Rate, bellek yönetimi ve sistem performansını değerlendirmek için önemlidir. Yüksek page-out oranları, bellek baskısı ve yoğun disk I/O aktivitesine işaret edebilir. Bu metrik, bellek planlaması ve sistem performansı optimizasyonu için kritiktir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeModal === 'rmf_spag' && infoModal && (infoModal.toLowerCase() === 'ssltswrt' || infoModal.toLowerCase() === 'total_swap_rate') && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Total Swap Rate (SSLTSWRT), son 15 saniye içinde herhangi bir swap nedeniyle swap-out edilen tüm address space'lerin dakika başına swap (swap-per-minute) oranını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Birim:</strong> Swap/dakika (swap per minute)</li>
+                          <li>• <strong>Zaman Aralığı:</strong> Son 15 saniye</li>
+                          <li>• <strong>Kapsam:</strong> Tüm swap-out edilen address space'ler</li>
+                          <li>• <strong>Swap:</strong> Address space'lerin belleğe alınıp çıkarılması</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Total Swap Rate, bellek yönetimi performansını ve bellek baskısı seviyesini değerlendirmek için kritiktir. Yüksek swap oranları, bellek kaynaklarının sınırlı olduğunu ve sistem performansının etkilenebileceğini gösterir. Bu metrik, bellek kapasitesi planlaması ve performans optimizasyonu için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeModal === 'rmf_spag' && infoModal && (infoModal.toLowerCase() === 'splsinrt' || infoModal.toLowerCase() === 'swap_page_in_rate') && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Swap Page-In Rate (SPLSINRT), son 15 saniye içinde swap sayfa içine (page-in) alma oranını sayfa saniye cinsinden gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Birim:</strong> Sayfa/saniye (pages per second)</li>
+                          <li>• <strong>Zaman Aralığı:</strong> Son 15 saniye</li>
+                          <li>• <strong>Swap Page-In:</strong> Swap edilmiş address space'lerin sayfalarının diskten belleğe geri yüklenmesi</li>
+                          <li>• <strong>Aktivite:</strong> Bellek baskısı göstergesi</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Swap Page-In Rate, bellek yönetimi performansını ve bellek kaynaklarının yeterliliğini değerlendirmek için kritiktir. Yüksek swap page-in oranları, bellek baskısı ve potansiyel performans sorunlarına işaret edebilir. Bu metrik, bellek kapasitesi planlaması ve sistem performansı optimizasyonu için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeModal === 'rmf_spag' && infoModal && (infoModal.toLowerCase() === 'splsotrt' || infoModal.toLowerCase() === 'swap_page_out_rate') && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Swap Page-Out Rate (SPLSOTRT), son 15 saniye içinde swap sayfa dışına (page-out) alma oranını sayfa saniye cinsinden gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Birim:</strong> Sayfa/saniye (pages per second)</li>
+                          <li>• <strong>Zaman Aralığı:</strong> Son 15 saniye</li>
+                          <li>• <strong>Swap Page-Out:</strong> Address space'lerin sayfalarının belleğen diske yazılması</li>
+                          <li>• <strong>Amaç:</strong> Bellek kaynaklarını serbest bırakmak ve bellek baskısını azaltmak</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Swap Page-Out Rate, bellek yönetimi performansını ve bellek baskısı seviyesini değerlendirmek için kritiktir. Yüksek swap page-out oranları, bellek kaynaklarının sınırlı olduğunu ve yoğun disk I/O aktivitesine işaret edebilir. Bu metrik, bellek kapasitesi planlaması ve sistem performansı optimizasyonu için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeModal === 'rmf_spag' && infoModal && (infoModal.toLowerCase() === 'splppirt' || infoModal.toLowerCase() === 'vio_non_vio_page_in_rate') && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          VIO and Non-VIO Page-In Rate (SPLPPIRT), interval süresince sistem için VIO sayfa içine (page-in) alma ve non-VIO sayfa içine alma işlemlerinin saniye başına oranını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Birim:</strong> Sayfa/saniye (pages per second)</li>
+                          <li>• <strong>Kapsam:</strong> VIO ve Non-VIO page-in işlemleri</li>
+                          <li>• <strong>VIO:</strong> Virtual I/O, hipervisor seviyesinde gerçekleştirilen sanal I/O</li>
+                          <li>• <strong>Zaman Aralığı:</strong> Interval süresince sistem genelindeki aktivite</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          VIO ve Non-VIO Page-In Rate, sistem bellek yönetimi ve I/O performansını değerlendirmek için önemlidir. Bu metrik, bellek yönetimi verimliliğini ve I/O aktivitesinin sistem üzerindeki etkisini gösterir. Yüksek oranlar, bellek baskısı ve potansiyel performans sorunlarına işaret edebilir. Bu metrik, bellek planlaması ve performans optimizasyonu için kritiktir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeModal === 'rmf_spag' && infoModal && (infoModal.toLowerCase() === 'splpport' || infoModal.toLowerCase() === 'vio_non_vio_page_out_rate') && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          VIO and Non-VIO Page-Out Rate (SPLPORT), interval süresince sistem için VIO sayfa dışına (page-out) alma ve non-VIO sayfa dışına alma işlemlerinin saniye başına oranını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Birim:</strong> Sayfa/saniye (pages per second)</li>
+                          <li>• <strong>Kapsam:</strong> VIO ve Non-VIO page-out işlemleri</li>
+                          <li>• <strong>VIO:</strong> Virtual I/O, hipervisor seviyesinde gerçekleştirilen sanal I/O</li>
+                          <li>• <strong>Amaç:</strong> Bellek kaynaklarını serbest bırakmak</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          VIO ve Non-VIO Page-Out Rate, sistem bellek yönetimi ve I/O performansını değerlendirmek için önemlidir. Bu metrik, bellek yönetimi verimliliğini ve I/O aktivitesinin sistem üzerindeki etkisini gösterir. Yüksek oranlar, bellek baskısı ve yoğun disk I/O aktivitesine işaret edebilir. Bu metrik, bellek planlaması ve performans optimizasyonu için kritiktir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeModal === 'rmf_spag' && infoModal && (infoModal.toLowerCase() === 'splhvprt' || infoModal.toLowerCase() === 'vio_paging_rate') && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          VIO Paging Rate (SPLHVPRT), interval süresince sistem için VIO sayfa içine (page-in) alma ve VIO sayfa dışına (page-out) alma işlemlerinin saniye başına oranını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Birim:</strong> Sayfa/saniye (pages per second)</li>
+                          <li>• <strong>Kapsam:</strong> VIO page-in ve page-out işlemleri</li>
+                          <li>• <strong>VIO:</strong> Virtual I/O, hipervisor seviyesinde gerçekleştirilen sanal I/O</li>
+                          <li>• <strong>Toplam Aktivite:</strong> VIO sayfalama aktivitesinin toplam oranı</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          VIO Paging Rate, sistem bellek yönetimi ve sanal I/O performansını değerlendirmek için önemlidir. Bu metrik, VIO aktivitesinin sistem üzerindeki etkisini ve bellek yönetimi verimliliğini gösterir. Yüksek VIO paging oranları, bellek baskısı ve potansiyel performans sorunlarına işaret edebilir. Bu metrik, bellek planlaması ve performans optimizasyonu için kritiktir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeModal === 'rmf_spag' && infoModal && (infoModal.toLowerCase() === 'splctwav' || infoModal.toLowerCase() === 'common_area_target_wset') && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Common Area Target Working Set (SPLCTWAV), iş için belirlenen ortak alan için hedef çalışma seti boyutunu gösteren bir ila üç haneli bir sayı içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Format:</strong> 1-3 haneli sayı</li>
+                          <li>• <strong>Kapsam:</strong> Ortak alan (common area) için hedef çalışma seti</li>
+                          <li>• <strong>Kullanım:</strong> Bellek yönetimi algoritmaları tarafından kullanılır</li>
+                          <li>• <strong>Etki:</strong> Sayfa çalma (page stealing) işlemlerini etkiler</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Common Area Target Working Set, bellek yönetimi ve performans optimizasyonu için kritiktir. Bu değer, sayfa çalma aktivitesini ve bellek yönetimi davranışını etkiler. Doğru hedef çalışma seti boyutu, bellek kullanımını optimize eder ve performans sorunlarını önler. Bu metrik, bellek planlaması ve performans optimizasyonu için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeModal === 'rmf_spag' && infoModal && (infoModal.toLowerCase() === 'splafcav' || infoModal.toLowerCase() === 'available_frames') && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Available Frames (SPLAFCAV), şu anda kullanılabilir olan merkezi depolama (central storage) frame sayısını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Birim:</strong> Frame sayısı</li>
+                          <li>• <strong>Kapsam:</strong> Merkezi depolama (central storage)</li>
+                          <li>• <strong>Frame:</strong> z/OS sisteminde bellek yönetiminin temel birimi</li>
+                          <li>• <strong>Gösterge:</strong> Sistemin bellek kullanılabilirliği</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Düşük kullanılabilir frame sayısı, bellek baskısı ve potansiyel performans sorunlarına işaret edebilir. Bu metrik, bellek kapasitesi planlaması, bellek yönetimi ve sistem performansı için kritik öneme sahiptir. Yetersiz kullanılabilir frame, paging ve swap aktivitesini artırabilir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeModal === 'rmf_spag' && infoModal && (infoModal.toLowerCase() === 'spluicav' || infoModal.toLowerCase() === 'current_uic') && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Current UIC (SPLUICAV), mevcut sistem unreferenced interval count (UIC) değerini içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>UIC:</strong> Unreferenced Interval Count</li>
+                          <li>• <strong>Kullanım:</strong> z/OS Storage Management bellek yönetimi için sayaç</li>
+                          <li>• <strong>Ölçüm:</strong> Referans edilmeyen bellek sayfalarının sayısı</li>
+                          <li>• <strong>Kullanım Amacı:</strong> Bellek temizleme ve sayfa yönetimi kararları</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          UIC değeri, bellek kullanım verimliliği ve bellek yönetimi performansını değerlendirmek için kullanılır. Yüksek UIC değerleri, bellek sayfalarının düşük kullanımını veya bellek sızıntısı gibi sorunları gösterebilir. Bu metrik, bellek optimizasyonu ve sistem performansı için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeModal === 'rmf_spag' && infoModal && (infoModal.toLowerCase() === 'splpesrt' || infoModal.toLowerCase() === 'pages_to_expanded_rate') && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Pages To Expanded (SPLPESRT), son 15 saniye içinde tüm sayfaların merkezi depolamadan genişletilmiş depolamaya (expanded storage) taşınma oranını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Birim:</strong> Sayfa/saniye (pages per second)</li>
+                          <li>• <strong>Zaman Aralığı:</strong> Son 15 saniye</li>
+                          <li>• <strong>Yön:</strong> Merkezi depolamadan genişletilmiş depolamaya</li>
+                          <li>• <strong>Genişletilmiş Depolama:</strong> Merkezi depolamadan daha yavaş, diskten daha hızlı bellek katmanı</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Pages To Expanded Rate, bellek yönetimi ve bellek hiyerarşisi kullanımını değerlendirmek için önemlidir. Yüksek oranlar, bellek baskısı ve bellek kaynaklarının optimize edilmesi gerektiğini gösterir. Bu metrik, bellek planlaması ve performans optimizasyonu için kritiktir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeModal === 'rmf_spag' && infoModal && (infoModal.toLowerCase() === 'splmgaav' || infoModal.toLowerCase() === 'current_migration_age') && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Current Migration Age (SPLMGAAV), mevcut genişletilmiş depolama (expanded storage) göç yaşını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Göç Yaşı:</strong> Genişletilmiş depolamadan yardımcı depolamaya sayfa göçü için kullanılan yaş</li>
+                          <li>• <strong>Kullanım:</strong> Bellek yönetimi algoritmaları tarafından kullanılır</li>
+                          <li>• <strong>Karar:</strong> Sayfaların ne zaman yardımcı depolamaya taşınacağını belirler</li>
+                          <li>• <strong>Denge:</strong> Bellek kullanımı ve performans arasındaki dengeyi sağlar</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Current Migration Age, bellek yönetimi ve bellek hiyerarşisi kullanımını değerlendirmek için önemlidir. Bu değer, sayfa göç aktivitesini ve bellek kaynaklarının verimliliğini etkiler. Doğru göç yaşı, bellek kullanımını optimize eder ve performans sorunlarını önler. Bu metrik, bellek planlaması ve performans optimizasyonu için kritiktir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeModal === 'rmf_spag' && infoModal && (infoModal.toLowerCase() === 'splesfav' || infoModal.toLowerCase() === 'available_expanded_frames') && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Available Expanded Storage Frames (SPLESFAV), genişletilmiş depolamada (expanded storage) şu anda kullanılabilir olan frame sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Birim:</strong> Frame sayısı</li>
+                          <li>• <strong>Kapsam:</strong> Genişletilmiş depolama (expanded storage)</li>
+                          <li>• <strong>Karakteristik:</strong> Merkezi depolamadan daha yavaş, diskten daha hızlı</li>
+                          <li>• <strong>Gösterge:</strong> Genişletilmiş depolama kaynaklarının kullanılabilirliği</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Available Expanded Storage Frames, bellek yönetimi ve bellek hiyerarşisi kullanımını değerlendirmek için kritiktir. Düşük kullanılabilir frame sayısı, genişletilmiş depolama baskısı ve potansiyel performans sorunlarına işaret edebilir. Bu metrik, bellek kapasitesi planlaması ve performans optimizasyonu için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeModal === 'rmf_spag' && infoModal && (infoModal.toLowerCase() === 'splpeart' || infoModal.toLowerCase() === 'pages_to_auxiliary_rate') && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Pages To Auxiliary (SPLPEART), son 15 saniye içinde tüm sayfaların genişletilmiş depolamadan (expanded storage) yardımcı depolamaya (auxiliary storage) taşınma oranını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1">
+                          <li>• <strong>Birim:</strong> Sayfa/saniye (pages per second)</li>
+                          <li>• <strong>Zaman Aralığı:</strong> Son 15 saniye</li>
+                          <li>• <strong>Yön:</strong> Genişletilmiş depolamadan yardımcı depolamaya</li>
+                          <li>• <strong>Yardımcı Depolama:</strong> Genellikle disk depolaması, en yavaş bellek katmanı</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Pages To Auxiliary Rate, bellek yönetimi ve bellek hiyerarşisi kullanımını değerlendirmek için kritiktir. Yüksek oranlar, bellek baskısı ve yoğun disk I/O aktivitesine işaret edebilir. Bu metrik, bellek planlaması ve performans optimizasyonu için önemlidir. Yüksek oranlar, performans sorunlarına ve gecikmelere neden olabilir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ============== RMF ASD INFO CARDS ============== */}
+                  {infoModal === 'jobname' && activeModal === 'rmf_asd' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Jobname alanı, adres alanını kullanan iş biriminin kullanıcı kimliğini (userid), iş adını veya prosedür adını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Kaynak: SMF/RMF kayıtlarından alınır</li>
+                          <li>• Format: 1-8 karakterlik isim/prosedür</li>
+                          <li>• Bağlam: Adres alanı/iş birimi tanımlaması</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">Performans veya kaynak kullanım sorunlarını doğrudan ilgili iş veya kullanıcı ile ilişkilendirmenizi sağlar.</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {infoModal === 'service_class_name' && activeModal === 'rmf_asd' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Service Class Name (Servis Sınıfı Adı) alanı, işin servis sınıfı adını içerir. BMC AMI Ops UI dışında, 
+                          yetkiniz varsa mevcut değerin üzerine yeni bir servis sınıfı adı (veya QUIESCE ya da RESUME) yazarak değiştirebilirsiniz.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Kaynak: WLM (Workload Manager) servis politikası</li>
+                          <li>• Değiştirilebilir: Yetkili kullanıcılar tarafından</li>
+                          <li>• Özel komutlar: QUIESCE, RESUME</li>
+                          <li>• Kapsam: İşin performans sınıflandırması</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Service Class Name, işin hangi performans sınıfına ait olduğunu gösterir ve WLM tarafından 
+                          kaynak tahsisi ve performans hedeflerinin belirlenmesi için kullanılır. Bu değer, işin önceliğini 
+                          ve kaynak gereksinimlerini anlamak için kritiktir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {infoModal === 'service_class_index' && activeModal === 'rmf_asd' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Service Class Index (Servis Sınıfı İndeksi) veya Performance Period (Performans Dönemi), 
+                          z/OS Workload Manager (WLM) tarafından işlemin servis hedeflerini aktif Servis Politikasında 
+                          bulmak için kullanılan sayıdır.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Kaynak: z/OS WLM (Workload Manager)</li>
+                          <li>• Kullanım: Aktif Servis Politikasında servis hedeflerini bulma</li>
+                          <li>• Alternatif: Performance Period olarak da kullanılabilir</li>
+                          <li>• Bağlam: WLM servis yapılandırması</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Service Class Index, WLM'in işin performans hedeflerini ve kaynak tahsisini nasıl yöneteceğini 
+                          belirleyen kritik bir değerdir. Bu indeks, aktif servis politikasında doğru performans hedeflerinin 
+                          uygulanmasını sağlar ve işin kaynak gereksinimlerini optimize eder.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ============== CMF DSPCZ INFO CARDS ============== */}
+                  {infoModal === 'onam' && activeModal === 'cmf_dspcz' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Owner Name (ONAM) alanı, veri alanını sahip olan adres alanının adını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Kaynak: Veri alanı sahiplik bilgisi</li>
+                          <li>• Format: Adres alanı adı</li>
+                          <li>• Kapsam: CMF DSPCZ kayıtları</li>
+                          <li>• Kullanım: Veri alanının sahipliğini belirleme</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Owner Name, veri alanının hangi adres alanına ait olduğunu belirlemek için kritiktir. 
+                          Bu bilgi, veri alanının erişimi, yönetimi ve sorun giderme işlemleri için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'dspname' && activeModal === 'cmf_dspcz' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Data Space Name (DSPNAME) alanı, veri alanının adını içerir. Veri alanı adı sekiz karakter uzunluğundadır ve veri alanı oluşturulduğunda atanır.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Format: 8 karakter</li>
+                          <li>• Atama: Veri alanı oluşturulduğunda</li>
+                          <li>• Kullanım: Veri alanı tanımlayıcısı</li>
+                          <li>• Kapsam: CMF DSPCZ kayıtları</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Data Space Name, veri alanını benzersiz şekilde tanımlamak için kritiktir. 
+                          Bu isim, veri alanını referans etmek, yönetmek ve izlemek için kullanılır.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'asid' && activeModal === 'cmf_dspcz' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          ASID (Address Space ID) alanı, adres alanının z/OS tarafından oluşturulan sayısal tanımlayıcısını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Kaynak: z/OS tarafından üretilir</li>
+                          <li>• Format: Sayısal tanımlayıcı</li>
+                          <li>• Kullanım: Adres alanı benzersiz kimliği</li>
+                          <li>• Kapsam: CMF DSPCZ kayıtları</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          ASID, adres alanını benzersiz şekilde tanımlamak için kritiktir. 
+                          Bu değer, adres alanını izlemek, yönetmek ve sorun gidermek için kullanılır.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'key' && activeModal === 'cmf_dspcz' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Storage Key (KEY) alanı, veri alanının depolama anahtarını içerir. Depolama anahtarı DSPSERV CREATE isteğinde belirtilir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Kaynak: DSPSERV CREATE makrosunda belirtilir</li>
+                          <li>• Format: Depolama anahtarı değeri</li>
+                          <li>• Kullanım: Bellek koruma ve erişim kontrolü</li>
+                          <li>• Kapsam: CMF DSPCZ kayıtları</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Storage Key, veri alanının bellek korumasını ve erişim kontrolünü belirlemek için kritiktir. 
+                          Bu anahtar, veri alanının güvenliğini ve izolasyonunu sağlar.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'typx' && activeModal === 'cmf_dspcz' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Data Space Type (TYPX) alanı, veri alanının türünü tanımlar. Geçerli türler: Basic (veri alanını gösterir) ve Hiper (hiperspace'i gösterir).
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Basic: Veri alanı</li>
+                          <li>• Hiper: Hiperspace</li>
+                          <li>• Kullanım: Veri alanı türü tanımlaması</li>
+                          <li>• Kapsam: CMF DSPCZ kayıtları</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Data Space Type, veri alanının türünü belirlemek için kritiktir. 
+                          Bu bilgi, veri alanının özelliklerini ve kullanım şeklini anlamak için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'scox' && activeModal === 'cmf_dspcz' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Data Space Scope (SCOX) alanı, veri alanına hangi adres alanlarının referans verebileceğini tanımlar.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Kapsam: Adres alanları erişim kontrolü</li>
+                          <li>• Kullanım: Veri alanı erişim politikası</li>
+                          <li>• Format: Erişim kapsamı tanımlaması</li>
+                          <li>• Bağlam: CMF DSPCZ kayıtları</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Data Space Scope, veri alanına hangi adres alanlarının erişebileceğini belirlemek için kritiktir. 
+                          Bu bilgi, veri alanının güvenliğini ve izolasyonunu sağlar.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'refx' && activeModal === 'cmf_dspcz' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Storage Reference (REFX) alanı, veri alanına hangi tür programların referans verebileceğini tanımlar.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Kapsam: Program türleri erişim kontrolü</li>
+                          <li>• Kullanım: Program erişim politikası</li>
+                          <li>• Format: Erişim referansı tanımlaması</li>
+                          <li>• Bağlam: CMF DSPCZ kayıtları</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Storage Reference, veri alanına hangi program türlerinin erişebileceğini belirlemek için kritiktir. 
+                          Bu bilgi, veri alanının güvenliğini ve erişim kontrolünü sağlar.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'prox' && activeModal === 'cmf_dspcz' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Storage Protect (PROX) alanı, veri alanının getirme korumasına sahip olup olmadığını tanımlar.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Kapsam: Getirme koruması</li>
+                          <li>• Kullanım: Bellek koruma politikası</li>
+                          <li>• Format: Koruma durumu tanımlaması</li>
+                          <li>• Bağlam: CMF DSPCZ kayıtları</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Storage Protect, veri alanının bellek korumasına sahip olup olmadığını belirlemek için kritiktir. 
+                          Bu bilgi, veri alanının güvenliğini ve entegrasyonunu sağlar.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {(infoModal === 'csiz' || infoModal === 'csizavg') && activeModal === 'cmf_dspcz' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Current Size (Average) (CSIZ) alanı, veri alanı veya hiperspace içinde şu anda adreslenebilir çerçeve (sayfa) sayısını içerir. 
+                          Değer, alanın başlangıç boyutunu (DSPSERV CREATE makrosunda belirtilen) ve herhangi bir genişletmeyi (DSPSERV EXTEND makrosu kullanılarak eklenen) temsil eder.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Çerçeve (sayfa) sayısı</li>
+                          <li>• Kapsam: Veri alanı veya hiperspace içinde adreslenebilir alan</li>
+                          <li>• Başlangıç Boyutu: DSPSERV CREATE makrosunda belirtilen değer</li>
+                          <li>• Genişletme: DSPSERV EXTEND makrosu ile eklenen alan</li>
+                          <li>• Hesaplama: Başlangıç boyutu + genişletmeler</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Current Size, veri alanının mevcut boyutunu ve kullanılabilir alanını belirlemek için kritiktir. 
+                          Bu metrik, veri alanının kapasitesini ve genişletme gereksinimlerini analiz etmek için önemlidir.
+                          Değer, başlangıç boyutu ve genişletmelerin toplamını temsil eder, böylece veri alanının mevcut durumunu anlamanızı sağlar.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {(infoModal === 'msiz' || infoModal === 'msizavg') && activeModal === 'cmf_dspcz' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Maximum Size (Average) (MSIZ) alanı, veri alanı veya hiperspace'in potansiyel olarak adresleyebileceği maksimum çerçeve (sayfa) sayısını içerir. 
+                          Bu değer, veri alanı oluşturulduğunda DSPSERV makrosunda belirtilmiştir. 
+                          Bu, çalışma seti boyutunu yansıtmaz ve "yüksek su işareti" değildir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Çerçeve (sayfa) sayısı</li>
+                          <li>• Kapsam: Veri alanı veya hiperspace'in potansiyel maksimum alanı</li>
+                          <li>• Kaynak: DSPSERV CREATE makrosunda belirtilir</li>
+                          <li>• Belirtme: Veri alanı oluşturulduğunda tanımlanır</li>
+                          <li>• Önemli Not: Çalışma seti boyutunu yansıtmaz ve "yüksek su işareti" değildir</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Maximum Size, veri alanının potansiyel maksimum kapasitesini belirlemek için kritiktir. 
+                          Bu metrik, veri alanının genişletme potansiyelini ve kapasite planlamasını analiz etmek için önemlidir.
+                          Bu değer, veri alanının teorik maksimum sınırını gösterir ve kaynak planlaması için rehberlik sağlar.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'csizsum' && activeModal === 'cmf_dspcz' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Current Size (Sum) (CSIZ_SUM) alanı, tüm veri alanları veya hiperspace'ler içinde şu anda adreslenebilir çerçeve (sayfa) sayısının toplamını içerir.
+                          Değer, alanların başlangıç boyutlarının (DSPSERV CREATE makrosunda belirtilen) ve herhangi bir genişletmenin (DSPSERV EXTEND makrosu kullanılarak eklenen) toplamını temsil eder.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Çerçeve (sayfa) sayısı toplamı</li>
+                          <li>• Kapsam: Tüm veri alanları ve hiperspace'ler içinde adreslenebilir alan toplamı</li>
+                          <li>• Başlangıç Boyutu: DSPSERV CREATE makrosunda belirtilen değerlerin toplamı</li>
+                          <li>• Genişletme: DSPSERV EXTEND makrosu ile eklenen alanların toplamı</li>
+                          <li>• Hesaplama: Tüm alanların (başlangıç boyutu + genişletmeler) toplamı</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Current Size (Sum), tüm veri alanlarının toplam mevcut boyutunu ve kullanılabilir alanını belirlemek için kritiktir. 
+                          Bu metrik, toplam kapasiteyi, genişletme gereksinimlerini ve sistem kaynakları planlamasını analiz etmek için önemlidir.
+                          Değer, tüm veri alanlarının mevcut durumunu genel bir bakış açısıyla anlamanızı sağlar.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'msizsum' && activeModal === 'cmf_dspcz' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Maximum Size (Sum) (MSIZ_SUM) alanı, tüm veri alanları veya hiperspace'lerin potansiyel olarak adresleyebileceği maksimum çerçeve (sayfa) sayısının toplamını içerir.
+                          Bu değerler, veri alanları oluşturulduğunda DSPSERV makrosunda belirtilmiştir. Bu, çalışma seti boyutunu yansıtmaz ve "yüksek su işareti" değildir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Çerçeve (sayfa) sayısı toplamı</li>
+                          <li>• Kapsam: Tüm veri alanları ve hiperspace'lerin potansiyel maksimum alanı toplamı</li>
+                          <li>• Kaynak: DSPSERV CREATE makrosunda belirtilen değerlerin toplamı</li>
+                          <li>• Belirtme: Veri alanları oluşturulduğunda tanımlanır</li>
+                          <li>• Önemli Not: Çalışma seti boyutunu yansıtmaz ve "yüksek su işareti" değildir</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Maximum Size (Sum), tüm veri alanlarının toplam potansiyel maksimum kapasitesini belirlemek için kritiktir. 
+                          Bu metrik, toplam genişletme potansiyelini ve kapasite planlamasını analiz etmek için önemlidir.
+                          Bu değer, tüm veri alanlarının teorik maksimum sınırını gösterir ve sistem kaynakları planlaması için rehberlik sağlar.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ============== CMF XCFSYS INFO CARDS ============== */}
+                  {infoModal === 'from_system' && activeModal === 'cmf_xcfsys' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          From System (XSGFSYS) alanı, veri yolunun kaynağı olan sistemin adını gösterir. Örneğin, veri yolu SYSA'dan SYSB'ye gidiyorsa, bu alan SYSA'yı gösterir. Bu alan boş ise, sistem adı bilinmiyor demektir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Format: Sistem adı (VARCHAR)</li>
+                          <li>• Kapsam: XCF veri yolu kaynağı</li>
+                          <li>• Boş Değer: Sistem adı bilinmiyor</li>
+                          <li>• Kullanım: Veri yolunun kaynak sistemini belirleme</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          From System, veri yolunun hangi sistemden başladığını belirlemek için kritiktir. Bu bilgi, XCF veri yolu performansını analiz etmek, sorun giderme işlemleri yapmak ve veri akışını takip etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'to_system' && activeModal === 'cmf_xcfsys' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          To System (XSGTSYS) alanı, veri yolunun hedefi olan sistemin adını gösterir. Örneğin, veri yolu SYSA'dan SYSB'ye gidiyorsa, bu alan SYSB'yi gösterir. Bu alan boş ise, sistem adı bilinmiyor demektir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Format: Sistem adı (VARCHAR)</li>
+                          <li>• Kapsam: XCF veri yolu hedefi</li>
+                          <li>• Boş Değer: Sistem adı bilinmiyor</li>
+                          <li>• Kullanım: Veri yolunun hedef sistemini belirleme</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          To System, veri yolunun hangi sisteme gittiğini belirlemek için kritiktir. Bu bilgi, XCF veri yolu performansını analiz etmek, sorun giderme işlemleri yapmak ve veri akışını takip etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'transport_class' && activeModal === 'cmf_xcfsys' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Transport Class (XSGTCN) alanı, XCF'ye tanımlı taşıma sınıfının adını gösterir. Bu alan boş ise, yol gelen (inbound) bir yoldur.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Format: Taşıma sınıfı adı (VARCHAR)</li>
+                          <li>• Kapsam: XCF taşıma sınıfı tanımı</li>
+                          <li>• Boş Değer: Yol gelen (inbound) yönlü</li>
+                          <li>• Kullanım: XCF veri yolunun taşıma sınıfını belirleme</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Transport Class, XCF veri yolunun taşıma sınıfını belirlemek için kritiktir. Bu bilgi, veri yolunun performansını ve önceliğini anlamak için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'total_messages' && activeModal === 'cmf_xcfsys' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Total Messages (XSITOTM) alanı, belirtilen taşıma sınıfı için bu sistem tarafından gönderilen veya alınan toplam mesaj sayısını gösterir. Bu, tampondan büyük mesajları, tampona sığan mesajları ve tampondan küçük mesajları içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Mesaj sayısı (BIGINT)</li>
+                          <li>• Kapsam: Tüm mesaj türleri (büyük, sığan, küçük)</li>
+                          <li>• İçerik: Gönderilen ve alınan mesajlar</li>
+                          <li>• Kullanım: Toplam mesaj aktivitesi ölçümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Total Messages, sistem arası iletişim hacmini ve XCF veri yolunun kullanım yoğunluğunu belirlemek için kritiktir. Bu metrik, veri yolu performansını analiz etmek ve kapasite planlaması yapmak için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'percent_messages_big' && activeModal === 'cmf_xcfsys' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Percent Messages Big (XSIPBIG) alanı, taşıma sınıfı tampon uzunluğundan daha büyük mesajların yüzdesini gösterir. Örneğin, 100 toplam mesaj varsa ve bunlardan 10'u tampon boyutundan büyükse, bu alan 10 gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (NUMERIC(7,4))</li>
+                          <li>• Kapsam: Tampon boyutundan büyük mesajlar</li>
+                          <li>• Hesaplama: (Büyük mesaj sayısı / Toplam mesaj sayısı) × 100</li>
+                          <li>• Kullanım: Büyük mesaj oranı ölçümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Percent Messages Big, sistem arası iletişimde büyük mesajların oranını belirlemek için kritiktir. Yüksek değerler, veri yolu performansını etkileyebilir ve tampon boyutu optimizasyonu gerektirebilir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'percent_messages_fit' && activeModal === 'cmf_xcfsys' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Percent Messages Fit (XSIPFIT) alanı, taşıma sınıfı tampon uzunluğuna eşit isteklerin yüzdesini gösterir. Örneğin, 100 toplam mesaj varsa ve bunlardan 70'i tampon boyutuna sığıyorsa, bu alan 70 gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (NUMERIC(7,4))</li>
+                          <li>• Kapsam: Tampon boyutuna eşit mesajlar</li>
+                          <li>• Hesaplama: (Sığan mesaj sayısı / Toplam mesaj sayısı) × 100</li>
+                          <li>• Kullanım: Tampon boyutuna sığan mesaj oranı</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Percent Messages Fit, mesaj boyutlarının tampon boyutuna uygunluğunu belirlemek için kritiktir. Yüksek değerler, veri yolu performansının optimum olduğunu gösterir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'percent_messages_small' && activeModal === 'cmf_xcfsys' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Percent Messages Small (XSIPSML) alanı, taşıma sınıfı tampon uzunluğundan küçük mesaj isteklerinin yüzdesini gösterir. Örneğin, 100 toplam mesaj varsa ve bunlardan 20'si tampon boyutundan küçükse, bu alan 20 gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (NUMERIC(7,4))</li>
+                          <li>• Kapsam: Tampon boyutundan küçük mesajlar</li>
+                          <li>• Hesaplama: (Küçük mesaj sayısı / Toplam mesaj sayısı) × 100</li>
+                          <li>• Kullanım: Küçük mesaj oranı ölçümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Percent Messages Small, küçük mesajların oranını belirlemek için kritiktir. Düşük değerler, veri yolu performansının iyi olduğunu gösterir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'no_paths_count' && activeModal === 'cmf_xcfsys' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          No Paths Count (XSINOP) alanı, yol yok durumunun kaç kez oluştuğunu gösterir. Bu alan, yerel yollar için sıfır gösterir. Çıkan (outbound) yollar için, bu alanın değeri belirtilen taşıma sınıfı içindir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Sayı (BIGINT)</li>
+                          <li>• Kapsam: Yol yok durumu sayısı</li>
+                          <li>• Yerel Yollar: 0 gösterir</li>
+                          <li>• Kullanım: Yol erişilebilirlik sorunları</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          No Paths Count, veri yolunun erişilebilirlik sorunlarını belirlemek için kritiktir. Yüksek değerler, veri yolu bağlantı sorunlarına işaret edebilir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'no_buffers_count' && activeModal === 'cmf_xcfsys' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          No Buffers Count (XSIBSY) alanı, hiç tampon kullanılabilir olmadığı için bir mesajın reddedilme sayısını gösterir. Yerel veya çıkan (outbound) yollar için, bu alandaki değer belirtilen taşıma sınıfındaki tüm reddedilen mesajları içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Sayı (BIGINT)</li>
+                          <li>• Kapsam: Tampon eksikliği reddeden mesajlar</li>
+                          <li>• İçerik: Taşıma sınıfındaki tüm reddedilen mesajlar</li>
+                          <li>• Kullanım: Tampon kaynak yönetimi</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          No Buffers Count, tampon eksikliği nedeniyle reddedilen mesajları belirlemek için kritiktir. Yüksek değerler, tampon kaynağı yetersizliğine işaret edebilir ve kapasite artışı gerektirebilir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'percent_messages_degraded' && activeModal === 'cmf_xcfsys' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Percent Messages Degraded (XSIPDEG) alanı, taşıma sınıfı tampon boyutundan daha büyük olan ve geciktirilen mesajların yüzdesini gösterir. Örneğin, 20 mesaj tampon boyutundan büyükse ve bunlardan 10'u geciktirildiyse, bu alan 50 gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (NUMERIC(7,4))</li>
+                          <li>• Kapsam: Geciktirilen büyük mesajlar</li>
+                          <li>• Hesaplama: (Geciktirilen büyük mesajlar / Büyük mesajlar) × 100</li>
+                          <li>• Kullanım: Performans düşüşü ölçümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Percent Messages Degraded, veri yolu performans düşüşünü belirlemek için kritiktir. Yüksek değerler, sistem performans sorunlarına işaret edebilir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'transport_class_longest_message' && activeModal === 'cmf_xcfsys' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Transport Class Longest Message (XSGTCL) alanı, belirtilen taşıma sınıfı için tampona sığan en uzun mesajın uzunluğunu gösterir. Bu alan yalnızca çıkan (outbound) yollar için geçerlidir. Gelen (inbound) yollar için bu alan boştur.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Uzunluk (BIGINT)</li>
+                          <li>• Kapsam: Tampona sığan en uzun mesaj</li>
+                          <li>• Geçerlilik: Yalnızca çıkan (outbound) yollar</li>
+                          <li>• Kullanım: Tampon boyutu optimizasyonu</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Transport Class Longest Message, tampon boyutunu optimize etmek için kritiktir. Bu metrik, veri yolu kapasitesini analiz etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'avg_used_message_blocks' && activeModal === 'cmf_xcfsys' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Average Used Message Blocks (XSIAUSE) alanı, sistemde kullanılan mesaj tampon alanının 1K baytlık bloklarının ortalama sayısını gösterir. Yerel veya çıkan (outbound) yol ise, değer belirtilen taşıma sınıfı içindir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: 1K bayt blok sayısı (NUMERIC(7,4))</li>
+                          <li>• Kapsam: Ortalama kullanılan mesaj tampon alanı</li>
+                          <li>• Hesaplama: Kullanılan toplam blok / Zaman</li>
+                          <li>• Kullanım: Tampon alanı kullanım yönetimi</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Average Used Message Blocks, tampon alanı kullanımını belirlemek için kritiktir. Bu metrik, tampon kaynağı planlaması ve performans optimizasyonu için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'percent_transport_class_buffers_used' && activeModal === 'cmf_xcfsys' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Percent of Transport Class Buffers Used (XSIPSMX) alanı, kullanılan XCF taşıma sınıfı tamponlarının yüzdesini gösterir. Örneğin, 20 XCF taşıma tamponu varsa ve bunlardan 10'u kullanılıyorsa, bu alan 50 gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (NUMERIC(7,4))</li>
+                          <li>• Kapsam: XCF taşıma sınıfı tamponları</li>
+                          <li>• Hesaplama: (Kullanılan tamponlar / Toplam tamponlar) × 100</li>
+                          <li>• Kullanım: Taşıma sınıfı tampon kullanım yönetimi</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Percent of Transport Class Buffers Used, taşıma sınıfı tampon kullanımını belirlemek için kritiktir. Yüksek değerler, tampon kaynağı yetersizliğine işaret edebilir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'max_message' && activeModal === 'cmf_xcfsys' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Maximum Message (XSGSMX) alanı, belirtilen taşıma sınıfı için müşteri tarafından tanımlanan maksimum 1K baytlık tampon alanı blok sayısını gösterir. Yerel veya çıkan (outbound) yol ise, değer taşıma sınıfı içindir. Bu değer SETXCF komutu ile değiştirilebilir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: 1K bayt blok sayısı (BIGINT)</li>
+                          <li>• Kapsam: Müşteri tanımlı maksimum tampon alanı</li>
+                          <li>• Değiştirme: SETXCF komutu ile yapılabilir</li>
+                          <li>• Kullanım: Tampon alanı kapasite yönetimi</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Maximum Message, tampon alanı kapasitesini belirlemek için kritiktir. Bu metrik, kapasite planlaması ve performans optimizasyonu için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'percent_system_buffers_used' && activeModal === 'cmf_xcfsys' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Percent of System Buffers Used (XSIPUSE) alanı, kullanılan XCF sistem tamponlarının yüzdesini gösterir. Örneğin, 20 XCF tamponu mevcut ise ve bunlardan 10'u şu anda kullanılıyorsa, bu alan 50 gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (NUMERIC(7,4))</li>
+                          <li>• Kapsam: XCF sistem tamponları</li>
+                          <li>• Hesaplama: (Kullanılan tamponlar / Mevcut tamponlar) × 100</li>
+                          <li>• Kullanım: Sistem tampon kullanım yönetimi</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Percent of System Buffers Used, sistem tampon kullanımını belirlemek için kritiktir. Yüksek değerler, sistem kaynak yetersizliğine işaret edebilir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'max_message_blocks' && activeModal === 'cmf_xcfsys' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Maximum Message Blocks (XSGMXB) alanı, bu sistem için XCF'de tanımlı mesaj tampon alanının maksimum 1K baytlık blok sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: 1K bayt blok sayısı (BIGINT)</li>
+                          <li>• Kapsam: XCF'de tanımlı maksimum tampon alanı</li>
+                          <li>• Tanımlama: XCF yapılandırmasında belirtilir</li>
+                          <li>• Kullanım: Sistem tampon kapasite yönetimi</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Maximum Message Blocks, sistem tampon kapasitesini belirlemek için kritiktir. Bu metrik, kapasite planlaması ve performans optimizasyonu için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'path_direction' && activeModal === 'cmf_xcfsys' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Path Direction (XSGDIRC) alanı, XCF yolunun yönünü gösterir. Bu alanın olası değerleri şunlardır: INBOUND (Gelen), OUTBOUND (Çıkan), LOCAL (Yerel).
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Format: Yön değeri (VARCHAR)</li>
+                          <li>• Değerler: INBOUND, OUTBOUND, LOCAL</li>
+                          <li>• INBOUND: Gelen yol</li>
+                          <li>• OUTBOUND: Çıkan yol</li>
+                          <li>• LOCAL: Yerel yol</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Path Direction, XCF yolunun yönünü belirlemek için kritiktir. Bu bilgi, veri yolu performansını ve bağlantı türünü anlamak için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ============== CMF XCFMBR INFO CARDS ============== */}
+                  {infoModal === 'system_name' && activeModal === 'cmf_xcfmbr' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          System Name (XDGSNAM) alanı, belirtilen XCF üyesinin tanımlandığı sistemin adını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Format: Sistem adı (VARCHAR)</li>
+                          <li>• Kapsam: XCF üyesinin tanımlandığı sistem</li>
+                          <li>• Kaynak: XCF grup tanımlaması</li>
+                          <li>• Kullanım: Üyenin kaynak sistemini belirleme</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          System Name, XCF üyesinin hangi sistemde tanımlandığını belirlemek için kritiktir. Bu bilgi, üye bilgilerini takip etmek ve sorun giderme işlemleri yapmak için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'group_name' && activeModal === 'cmf_xcfmbr' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Group Name (XDGGRP) alanı, XCF üyesinin ait olduğu XCF grup adını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Format: Grup adı (VARCHAR)</li>
+                          <li>• Kapsam: XCF grup üyelik bilgisi</li>
+                          <li>• Kaynak: XCF grup tanımlaması</li>
+                          <li>• Kullanım: Üyenin grup üyeliğini belirleme</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Group Name, XCF üyesinin hangi gruba ait olduğunu belirlemek için kritiktir. Bu bilgi, grup içi iletişimi ve üye yönetimini takip etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'member_name' && activeModal === 'cmf_xcfmbr' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Member Name (XDGMEM) alanı, bu kayıttaki verinin temsil ettiği XCF üyesinin adını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Format: Üye adı (VARCHAR)</li>
+                          <li>• Kapsam: XCF üye tanımlaması</li>
+                          <li>• Kaynak: XCF grup üyelik kayıtları</li>
+                          <li>• Kullanım: Üyenin benzersiz tanımlayıcısı</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Member Name, XCF üyesini benzersiz şekilde tanımlamak için kritiktir. Bu bilgi, üye verilerini takip etmek ve performans analizi yapmak için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'job_name' && activeModal === 'cmf_xcfmbr' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Job Name (XDDJNAM) alanı, üyenin XCF grubuna katıldığında iş adını gösterir. Bu alan sadece sistem zOS 1.2 ve üzerinde çalışıyorsa ve üye yerel sistemde tanımlıysa geçerli veri içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Format: İş adı (VARCHAR)</li>
+                          <li>• Koşul: zOS 1.2 ve üzeri gerekli</li>
+                          <li>• Koşul: Üye yerel sistemde tanımlı olmalı</li>
+                          <li>• Kullanım: Üyeyle ilişkili işi belirleme</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Job Name, XCF üyesinin hangi işle ilişkili olduğunu belirlemek için kritiktir. Bu bilgi, üye davranışını ve iş performansını analiz etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'percent_received_group_signals' && activeModal === 'cmf_xcfmbr' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Percent Received of the Groups Signals (XDIRGTP) alanı, XCF üyesi tarafından alınan bu grup sinyallerinin yüzdesini gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (DECIMAL)</li>
+                          <li>• Kapsam: Grup sinyalleri alım oranı</li>
+                          <li>• Hesaplama: (Alınan grup sinyalleri / Toplam grup sinyalleri) × 100</li>
+                          <li>• Kullanım: Grup içi iletişim etkinliği ölçümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Percent Received of the Groups Signals, XCF üyesinin grup içi iletişimde ne kadar aktif olduğunu belirlemek için kritiktir. Bu metrik, grup performansını ve üye etkinliğini analiz etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'percent_received_system_signals' && activeModal === 'cmf_xcfmbr' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Percent Received of the System Signals (XDIRSTP) alanı, XCF üyesi tarafından alınan bu sistem sinyallerinin yüzdesini gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (DECIMAL)</li>
+                          <li>• Kapsam: Sistem sinyalleri alım oranı</li>
+                          <li>• Hesaplama: (Alınan sistem sinyalleri / Toplam sistem sinyalleri) × 100</li>
+                          <li>• Kullanım: Sistem düzeyinde iletişim etkinliği ölçümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Percent Received of the System Signals, XCF üyesinin sistem düzeyinde ne kadar aktif olduğunu belirlemek için kritiktir. Bu metrik, sistem performansını ve üye etkinliğini analiz etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'percent_received_total_signals' && activeModal === 'cmf_xcfmbr' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Percent Received of the Total Signals (XDIRTTP) alanı, XCF üyesi tarafından alınan tüm sistem sinyallerinin yüzdesini gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (DECIMAL)</li>
+                          <li>• Kapsam: Tüm sistemlerin sinyalleri alım oranı</li>
+                          <li>• Hesaplama: (Alınan toplam sinyaller / Toplam sinyaller) × 100</li>
+                          <li>• Kullanım: Genel iletişim etkinliği ölçümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Percent Received of the Total Signals, XCF üyesinin tüm sistemlerle olan iletişiminde ne kadar aktif olduğunu belirlemek için kritiktir. Bu metrik, genel performansı analiz etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'percent_sent_group_signals' && activeModal === 'cmf_xcfmbr' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Percent Sent of the Groups Signals (XDISGTP) alanı, XCF üyesi tarafından gönderilen bu grup sinyallerinin yüzdesini gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (DECIMAL)</li>
+                          <li>• Kapsam: Grup sinyalleri gönderim oranı</li>
+                          <li>• Hesaplama: (Gönderilen grup sinyalleri / Toplam grup sinyalleri) × 100</li>
+                          <li>• Kullanım: Grup içi iletişim etkinliği ölçümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Percent Sent of the Groups Signals, XCF üyesinin grup içi iletişimde ne kadar aktif gönderici olduğunu belirlemek için kritiktir. Bu metrik, grup performansını ve üye etkinliğini analiz etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'percent_sent_system_signals' && activeModal === 'cmf_xcfmbr' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Percent Sent of the System Signals (XDISSTP) alanı, XCF üyesi tarafından gönderilen bu sistem sinyallerinin yüzdesini gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (DECIMAL)</li>
+                          <li>• Kapsam: Sistem sinyalleri gönderim oranı</li>
+                          <li>• Hesaplama: (Gönderilen sistem sinyalleri / Toplam sistem sinyalleri) × 100</li>
+                          <li>• Kullanım: Sistem düzeyinde iletişim etkinliği ölçümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Percent Sent of the System Signals, XCF üyesinin sistem düzeyinde ne kadar aktif gönderici olduğunu belirlemek için kritiktir. Bu metrik, sistem performansını ve üye etkinliğini analiz etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'percent_sent_total_signals' && activeModal === 'cmf_xcfmbr' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Percent Sent of the Total Signals (XDISTTP) alanı, XCF üyesi tarafından gönderilen tüm sistem sinyallerinin yüzdesini gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (DECIMAL)</li>
+                          <li>• Kapsam: Tüm sistemlerin sinyalleri gönderim oranı</li>
+                          <li>• Hesaplama: (Gönderilen toplam sinyaller / Toplam sinyaller) × 100</li>
+                          <li>• Kullanım: Genel iletişim etkinliği ölçümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Percent Sent of the Total Signals, XCF üyesinin tüm sistemlerle olan iletişiminde ne kadar aktif gönderici olduğunu belirlemek için kritiktir. Bu metrik, genel performansı analiz etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'percent_group_signals' && activeModal === 'cmf_xcfmbr' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Percent Groups Signals (XDITGTP) alanı, XCF üyesi tarafından gönderilen ve alınan bu grup sinyallerinin yüzdesini gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (DECIMAL)</li>
+                          <li>• Kapsam: Grup sinyalleri toplam etkinlik oranı</li>
+                          <li>• Hesaplama: (Gönderilen + Alınan grup sinyalleri) / Toplam grup sinyalleri × 100</li>
+                          <li>• Kullanım: Grup içi toplam iletişim ölçümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Percent Groups Signals, XCF üyesinin grup içi toplam iletişim etkinliğini belirlemek için kritiktir. Bu metrik, grup performansını ve üye etkinliğini kapsamlı olarak analiz etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'percent_system_signals' && activeModal === 'cmf_xcfmbr' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Percent System Signals (XDITSTP) alanı, XCF üyesi tarafından gönderilen ve alınan bu sistem sinyallerinin yüzdesini gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (DECIMAL)</li>
+                          <li>• Kapsam: Sistem sinyalleri toplam etkinlik oranı</li>
+                          <li>• Hesaplama: (Gönderilen + Alınan sistem sinyalleri) / Toplam sistem sinyalleri × 100</li>
+                          <li>• Kullanım: Sistem düzeyinde toplam iletişim ölçümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Percent System Signals, XCF üyesinin sistem düzeyinde toplam iletişim etkinliğini belirlemek için kritiktir. Bu metrik, sistem performansını ve üye etkinliğini kapsamlı olarak analiz etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'percent_total_signals' && activeModal === 'cmf_xcfmbr' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Percent Total Signals (XDITTTP) alanı, XCF üyesi tarafından gönderilen ve alınan tüm sistem sinyallerinin yüzdesini gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (DECIMAL)</li>
+                          <li>• Kapsam: Tüm sistemlerin sinyalleri toplam etkinlik oranı</li>
+                          <li>• Hesaplama: (Gönderilen + Alınan toplam sinyaller) / Toplam sinyaller × 100</li>
+                          <li>• Kullanım: Genel toplam iletişim ölçümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Percent Total Signals, XCF üyesinin tüm sistemlerle olan toplam iletişim etkinliğini belirlemek için kritiktir. Bu metrik, genel performansı kapsamlı olarak analiz etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'signals_received_by_member' && activeModal === 'cmf_xcfmbr' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Signals Received by Member (XDIRCNT) alanı, XCF üyesi tarafından alınan toplam sinyal sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Sinyal sayısı (BIGINT)</li>
+                          <li>• Kapsam: XCF üyesinin aldığı tüm sinyaller</li>
+                          <li>• Kaynak: XCF grup iletişim kayıtları</li>
+                          <li>• Kullanım: Üye alım aktivitesi ölçümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Signals Received by Member, XCF üyesinin ne kadar iletişim aldığını belirlemek için kritiktir. Bu metrik, üye aktivitesini ve grup içi iletişim yoğunluğunu analiz etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'signals_sent_by_member' && activeModal === 'cmf_xcfmbr' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Signals Sent by Member (XDISCNT) alanı, XCF üyesi tarafından gönderilen toplam sinyal sayısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Sinyal sayısı (BIGINT)</li>
+                          <li>• Kapsam: XCF üyesinin gönderdiği tüm sinyaller</li>
+                          <li>• Kaynak: XCF grup iletişim kayıtları</li>
+                          <li>• Kullanım: Üye gönderim aktivitesi ölçümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Signals Sent by Member, XCF üyesinin ne kadar iletişim gönderdiğini belirlemek için kritiktir. Bu metrik, üye aktivitesini ve grup içi iletişim yoğunluğunu analiz etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'status' && activeModal === 'cmf_xcfmbr' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Status (XDGSTAC) alanı, XCF üyesinin durumunu temsil eden bir karakter dizisini gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Format: Durum karakter dizisi (VARCHAR)</li>
+                          <li>• Kapsam: XCF üye durumu tanımlaması</li>
+                          <li>• Kaynak: XCF grup durum bilgisi</li>
+                          <li>• Kullanım: Üyenin mevcut durumunu belirleme</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Status, XCF üyesinin mevcut durumunu belirlemek için kritiktir. Bu bilgi, üye sağlığını izlemek ve sorun giderme işlemleri yapmak için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ============== CMF JCSA INFO CARDS ============== */}
+                  {infoModal === 'jobname' && activeModal === 'cmf_jcsa' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Jobname (CDREJNAM) alanı, işin 1-8 karakterlik adını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Format: 1-8 karakterlik isim</li>
+                          <li>• Kapsam: İş tanımlayıcısı</li>
+                          <li>• Kaynak: CMF JCSA kayıtları</li>
+                          <li>• Kullanım: İş benzersiz kimliği</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Jobname, işi benzersiz şekilde tanımlamak için kritiktir. Bu bilgi, veri izleme ve sorun giderme için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'jes_id' && activeModal === 'cmf_jcsa' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          JES ID (CDREJID) alanı, adres alanı için JES iş numarasını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Format: JES iş numarası (VARCHAR)</li>
+                          <li>• Kapsam: JES sistem entegrasyonu</li>
+                          <li>• Kaynak: CMF JCSA kayıtları</li>
+                          <li>• Kullanım: JES iş takibi</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          JES ID, işin JES sistemindeki tanımlayıcısını belirlemek için kritiktir. Bu bilgi, JES entegrasyonu ve izleme için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'asid' && activeModal === 'cmf_jcsa' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Address Space ID (CDREASID) alanı, adres alanının z/OS tarafından oluşturulan sayısal tanımlayıcısını gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Sayısal tanımlayıcı (INTEGER)</li>
+                          <li>• Kapsam: Z/OS adres alanı kimliği</li>
+                          <li>• Kaynak: z/OS tarafından üretilir</li>
+                          <li>• Kullanım: Adres alanı benzersiz kimliği</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Address Space ID, adres alanını benzersiz şekilde tanımlamak için kritiktir. Bu değer, adres alanını izlemek, yönetmek ve sorun gidermek için kullanılır.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'csa_in_use_percent' && activeModal === 'cmf_jcsa' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          CSA In Use Percent (CDRECSUP) alanı, görünüm türüne göre CSA kullanımı hakkında farklı bilgiler gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (FLOAT)</li>
+                          <li>• Kapsam: CSA kullanım oranı</li>
+                          <li>• Kullanım: Görünüm türüne göre değişir</li>
+                          <li>• Bağlam: İş bilgileri görünümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          CSA In Use Percent, CSA kullanım oranını belirlemek için kritiktir. Bu metrik, bellek kullanımını ve kaynak planlamasını analiz etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'ecsa_in_use_percent' && activeModal === 'cmf_jcsa' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          ECSA In Use Percent (CDREECUP) alanı, görünüm türüne göre farklı bilgiler gösterir. İş bilgileri görünümünde, iş tarafından şu anda kullanılan ECSA'nın yüzdesini gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (FLOAT)</li>
+                          <li>• Kapsam: ECSA kullanım oranı</li>
+                          <li>• İş Bilgisi: İş tarafından kullanılan ECSA yüzdesi</li>
+                          <li>• Kullanım: Görünüm türüne göre değişir</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          ECSA In Use Percent, ECSA kullanım oranını belirlemek için kritiktir. Bu metrik, bellek kullanımını ve kaynak planlamasını analiz etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'sqa_in_use_percent' && activeModal === 'cmf_jcsa' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          SQA In Use Percent (CDRESQUP) alanı, görünüm türüne göre SQA kullanımı hakkında farklı bilgiler gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (FLOAT)</li>
+                          <li>• Kapsam: SQA kullanım oranı</li>
+                          <li>• Kullanım: Görünüm türüne göre değişir</li>
+                          <li>• Bağlam: İş bilgileri görünümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          SQA In Use Percent, SQA kullanım oranını belirlemek için kritiktir. Bu metrik, bellek kullanımını ve kaynak planlamasını analiz etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'esqa_in_use_percent' && activeModal === 'cmf_jcsa' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          ESQA In Use Percent (CDREESUP) alanı, görünüm türüne göre ESQA kullanımı hakkında farklı bilgiler gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (FLOAT)</li>
+                          <li>• Kapsam: ESQA kullanım oranı</li>
+                          <li>• Kullanım: Görünüm türüne göre değişir</li>
+                          <li>• Bağlam: İş bilgileri görünümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          ESQA In Use Percent, ESQA kullanım oranını belirlemek için kritiktir. Bu metrik, bellek kullanımını ve kaynak planlamasını analiz etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'csa_in_use' && activeModal === 'cmf_jcsa' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          CSA in Use (CDRECSAU) alanı, görünüm türüne göre farklı bilgiler gösterir. İş bilgileri görünümünde, iş tarafından şu anda kullanılan CSA miktarını gösteren sayısal bir değer gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Sayısal değer (BIGINT)</li>
+                          <li>• Kapsam: CSA kullanım miktarı</li>
+                          <li>• İş Bilgisi: İş tarafından kullanılan CSA miktarı</li>
+                          <li>• Kullanım: Görünüm türüne göre değişir</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          CSA in Use, CSA kullanım miktarını belirlemek için kritiktir. Bu metrik, bellek kaynak yönetimini ve planlama için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'ecsa_in_use' && activeModal === 'cmf_jcsa' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          ECSA in Use (CDREECSU) alanı, görünüm türüne göre farklı bilgiler gösterir. İş bilgileri görünümünde, iş tarafından şu anda kullanılan ECSA miktarını gösteren sayısal bir değer gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Sayısal değer (BIGINT)</li>
+                          <li>• Kapsam: ECSA kullanım miktarı</li>
+                          <li>• İş Bilgisi: İş tarafından kullanılan ECSA miktarı</li>
+                          <li>• Kullanım: Görünüm türüne göre değişir</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          ECSA in Use, ECSA kullanım miktarını belirlemek için kritiktir. Bu metrik, bellek kaynak yönetimini ve planlama için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'sqa_in_use' && activeModal === 'cmf_jcsa' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          SQA In Use (CDRESQAU) alanı, görünüm türüne göre farklı bilgiler gösterir. İş bilgileri görünümünde, iş tarafından şu anda kullanılan SQA miktarını gösteren sayısal bir değer gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Sayısal değer (BIGINT)</li>
+                          <li>• Kapsam: SQA kullanım miktarı</li>
+                          <li>• İş Bilgisi: İş tarafından kullanılan SQA miktarı</li>
+                          <li>• Kullanım: Görünüm türüne göre değişir</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          SQA In Use, SQA kullanım miktarını belirlemek için kritiktir. Bu metrik, bellek kaynak yönetimini ve planlama için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'esqa_in_use' && activeModal === 'cmf_jcsa' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          ESQA In Use (CDREESQU) alanı, görünüm türüne göre farklı bilgiler gösterir. İş bilgileri görünümünde, iş tarafından şu anda kullanılan ESQA miktarını gösteren sayısal bir değer gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Sayısal değer (BIGINT)</li>
+                          <li>• Kapsam: ESQA kullanım miktarı</li>
+                          <li>• İş Bilgisi: İş tarafından kullanılan ESQA miktarı</li>
+                          <li>• Kullanım: Görünüm türüne göre değişir</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          ESQA In Use, ESQA kullanım miktarını belirlemek için kritiktir. Bu metrik, bellek kaynak yönetimini ve planlama için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'total_used_common_storage' && activeModal === 'cmf_jcsa' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Used Common Storage (CDRETU) alanı, iş bilgileri görünümünde, iş tarafından şu anda kullanılan toplam ortak depolama miktarını gösteren sayısal bir değer gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Sayısal değer (BIGINT)</li>
+                          <li>• Kapsam: Toplam ortak depolama kullanımı</li>
+                          <li>• İş Bilgisi: İş tarafından kullanılan toplam ortak depolama</li>
+                          <li>• Kullanım: Bellek kaynak yönetimi</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Used Common Storage, toplam ortak depolama kullanımını belirlemek için kritiktir. Bu metrik, bellek kaynak yönetimini ve planlama için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {infoModal === 'total_used_percent' && activeModal === 'cmf_jcsa' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Total Used Common Storage Percent (CDRETUP) alanı, görünüm türüne göre ortak depolama kullanımı hakkında farklı bilgiler gösterir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: Yüzde (FLOAT)</li>
+                          <li>• Kapsam: Toplam ortak depolama kullanım oranı</li>
+                          <li>• Kullanım: Görünüm türüne göre değişir</li>
+                          <li>• Bağlam: İş bilgileri görünümü</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Total Used Common Storage Percent, toplam ortak depolama kullanım oranını belirlemek için kritiktir. Bu metrik, bellek kullanımını ve kaynak planlamasını analiz etmek için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ============== CMF SYSCPC INFO CARDS ============== */}
+                  {(infoModal === 'smf_id' || infoModal === 'SMF_ID') && activeModal === 'cmf_syscpc' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          SMF ID alanı, SMF kayıtlarında kullanılan sistem tanımlayıcısını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Format: Sistem tanımlayıcısı (VARCHAR)</li>
+                          <li>• Kapsam: SMF kayıt tanımlaması</li>
+                          <li>• Kaynak: SMF sistem tanımlaması</li>
+                          <li>• Kullanım: SMF kayıtlarında sistem tanımlama</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          SMF ID, sistemin SMF kayıtlarında nasıl tanımlandığını belirlemek için kritiktir. Bu bilgi, SMF kayıt takibi ve sistem analizi için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {(infoModal === 'system_name' || infoModal === 'SYSTEM_NAME') && activeModal === 'cmf_syscpc' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          System name alanı, CVTSNAME'de tanımlanan sistem adını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Format: Sistem adı (VARCHAR)</li>
+                          <li>• Kapsam: CVTSNAME tanımlaması</li>
+                          <li>• Kaynak: Z/OS sistem adı</li>
+                          <li>• Kullanım: Sistem benzersiz tanımlaması</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          System name, sistemin benzersiz kimliğini belirlemek için kritiktir. Bu bilgi, sistem takibi ve yönetimi için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {(infoModal === 'hardware_name' || infoModal === 'HARDWARE_NAME') && activeModal === 'cmf_syscpc' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Hardware Name alanı, işlemci yapılandırmasının donanım adını içerir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Format: Donanım adı (VARCHAR)</li>
+                          <li>• Kapsam: İşlemci yapılandırması</li>
+                          <li>• Kaynak: Donanım fabrika tanımlaması</li>
+                          <li>• Kullanım: Donanım tanımlaması</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Hardware Name, işlemci donanımını tanımlamak için kritiktir. Bu bilgi, donanım takibi ve kapasite planlaması için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {(infoModal === 'cpu_model' || infoModal === 'CPU_MODEL') && activeModal === 'cmf_syscpc' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          CPU Model alanı, CPC (central processing complex) model tanımlayıcısını içerir. CPC aynı zamanda CEC (central electronic complex) olarak da anılır.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Format: Model tanımlayıcısı (VARCHAR)</li>
+                          <li>• Kapsam: CPC/CEC model tanımı</li>
+                          <li>• CPC: Central Processing Complex</li>
+                          <li>• CEC: Central Electronic Complex</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          CPU Model, işlemci donanım modelini belirlemek için kritiktir. Bu bilgi, performans analizi ve kapasite planlaması için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {(infoModal === 'cpc_capacity' || infoModal === 'CPC_CAPACITY') && activeModal === 'cmf_syscpc' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          CPC Capacity alanı, saatteki milyon servis birimi (MSU) cinsinden mevcut CPC CPU kapasitesini içerir. On/Off Capacity on Demand (OOCoD) nedeniyle, bu alan CPC kalıcı kapasitesinden farklı bir değere sahip olabilir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: MSU/saat (milyon servis birimi)</li>
+                          <li>• Kapsam: Mevcut CPC CPU kapasitesi</li>
+                          <li>• OOCoD: On/Off Capacity on Demand etkisi</li>
+                          <li>• Kullanım: Dinamik kapasite takibi</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          CPC Capacity, sistemin mevcut CPU kapasitesini belirlemek için kritiktir. Bu metrik, kapasite planlaması, maliyet yönetimi ve performans optimizasyonu için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {(infoModal === 'base_cpc_capacity' || infoModal === 'BASE_CPC_CAPACITY') && activeModal === 'cmf_syscpc' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Base CPC Capacity alanı, saatteki milyon servis birimi (MSU) cinsinden CPC CPU kalıcı kapasitesini içerir. On/Off Capacity on Demand (OOCoD) nedeniyle, bu alan mevcut CPC kapasitesinden farklı bir değere sahip olabilir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Birim: MSU/saat (milyon servis birimi)</li>
+                          <li>• Kapsam: CPC CPU kalıcı kapasitesi</li>
+                          <li>• OOCoD: On/Off Capacity on Demand etkisi</li>
+                          <li>• Kullanım: Temel kapasite takibi</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Base CPC Capacity, sistemin kalıcı CPU kapasitesini belirlemek için kritiktir. Bu metrik, kapasite planlaması, maliyet analizi ve OOCoD kullanımını anlamak için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {(infoModal === 'capacity_on_demand' || infoModal === 'CAPACITY_ON_DEMAND') && activeModal === 'cmf_syscpc' && (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                        <p className="text-blue-800 text-sm">
+                          Capacity on Demand alanı, On/Off Capacity on Demand (OOCoD)'in aktif olup olmadığını gösterir. OOCoD, iş yükü gereksinimlerini karşılamaya yardımcı olmak için CP kapasite seviyesini artırmanızı sağlar. CP kapasitesi MSU cinsinden ifade edilir.
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                        <ul className="text-green-800 text-sm space-y-1 list-disc list-inside">
+                          <li>• Format: Aktif/Pasif durumu</li>
+                          <li>• OOCoD: On/Off Capacity on Demand</li>
+                          <li>• Kapsam: CP kapasite yönetimi</li>
+                          <li>• Birim: MSU (milyon servis birimi)</li>
+                        </ul>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-4">
+                        <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                        <p className="text-yellow-800 text-sm">
+                          Capacity on Demand, OOCoD'nin aktif olup olmadığını belirlemek için kritiktir. Bu bilgi, dinamik kapasite yönetimi, maliyet kontrolü ve performans optimizasyonu için önemlidir.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ============== RMF ASD INFO CARDS (Dinamik - özel alanlar hariç) ============== */}
+                  {activeModal === 'rmf_asd' && infoModal && !['jobname', 'service_class_name', 'service_class_index'].includes(infoModal.toLowerCase()) && (() => {
+                    const rows = data.rmf_asd || [];
+                    const first = rows[0] || {};
+                    const timeLike = ['created_at','updated_at','timestamp','bmctime','record_timestamp','time'];
+                    const keys = Object.keys(first || {})
+                      .filter(k => k !== 'id')
+                      .filter(k => !timeLike.includes(String(k).toLowerCase()));
+                    
+                    // Eğer bu keyName mevcut kolonlar arasındaysa ve infoModal ile eşleşiyorsa
+                    if (keys.includes(infoModal)) {
+                      const displayName = getDisplayName(infoModal, 'rmf_asd');
+                      const isNumeric = isNumericColumn(infoModal);
+                      
+                      return (
+                        <div className="space-y-4">
+                          <div className="bg-blue-50 rounded-lg p-4">
+                            <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                            <p className="text-blue-800 text-sm">
+                              {displayName} alanı, RMF ASD (Address Space Data) kayıtlarında {isNumeric ? 'sayısal bir değer' : 'metin/alfanümerik bir değer'} içerir.
+                              {isNumeric ? ' Bu metrik, sistem performansı ve kaynak kullanımı ile ilgili ölçümler sağlar.' : ' Bu alan, sistem yapılandırması veya tanımlayıcı bilgiler içerir.'}
+                            </p>
+                          </div>
+                          <div className="bg-green-50 rounded-lg p-4">
+                            <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                            <p className="text-green-800 text-sm">
+                              {isNumeric 
+                                ? 'Bu metrik, RMF ASD kayıtlarından alınan sayısal bir performans değeridir. Değer, sistem tarafından toplanan ham verilerden hesaplanır ve zaman içindeki değişimlerini analiz etmek için kullanılır.'
+                                : 'Bu alan, RMF ASD kayıtlarından alınan tanımlayıcı veya yapılandırma bilgisidir. Bu değerler, sistem yapılandırması, tanımlayıcılar veya durum bilgileri gibi kategorik veriler içerebilir.'}
+                            </p>
+                          </div>
+                          <div className="bg-yellow-50 rounded-lg p-4">
+                            <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                            <p className="text-yellow-800 text-sm">
+                              {isNumeric
+                                ? 'Bu metrik, sistem performansını ve kaynak kullanımını izlemek için önemlidir. Zaman içindeki değişimlerini analiz ederek, performans sorunlarını tespit etmek, kapasite planlaması yapmak ve optimizasyon kararları almak için kullanılabilir.'
+                                : 'Bu alan, sistem yapılandırmasını ve tanımlayıcı bilgileri anlamak için önemlidir. Bu bilgiler, kayıtları kategorize etmek, filtrelemek ve analiz etmek için kullanılabilir.'}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
               </div>
             </div>
