@@ -14,6 +14,8 @@ const Chatbot = () => {
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
   const [columnsCache, setColumnsCache] = useState({})
   const [userClosedSuggestions, setUserClosedSuggestions] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isTyping, setIsTyping] = useState(false)
 
   // Tunables
   const SUGGESTION_LIMIT = 8
@@ -23,6 +25,135 @@ const Chatbot = () => {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  // Mesaj zaman damgası oluştur
+  const getMessageTime = () => {
+    return new Date().toLocaleTimeString('tr-TR', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    })
+  }
+
+  // Tarih parse fonksiyonu (esnek tarih formatları)
+  const parseFlexibleDate = (dateStr) => {
+    if (!dateStr) return null
+    const cleaned = dateStr.trim()
+    
+    // YYYY-MM-DD formatı
+    if (/^\d{4}-\d{2}-\d{2}$/.test(cleaned)) {
+      return new Date(cleaned + 'T00:00:00')
+    }
+    
+    // DD.MM.YYYY formatı
+    if (/^\d{2}\.\d{2}\.\d{4}$/.test(cleaned)) {
+      const [day, month, year] = cleaned.split('.')
+      return new Date(`${year}-${month}-${day}T00:00:00`)
+    }
+    
+    // DD/MM/YYYY formatı
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(cleaned)) {
+      const [day, month, year] = cleaned.split('/')
+      return new Date(`${year}-${month}-${day}T00:00:00`)
+    }
+    
+    // Genel Date parse
+    const parsed = new Date(cleaned)
+    if (!isNaN(parsed.getTime())) {
+      return parsed
+    }
+    
+    return null
+  }
+
+  // Mesajdan tarih aralığı çıkar
+  const extractDateRangeFromMessage = (message) => {
+    // Tarih formatları: "2025-01-01 ile 2025-01-03", "2025-01-01 - 2025-01-03", "01.01.2025 ve 03.01.2025", "cpu 01.01.2025 ve 03.01.2025" vb.
+    const datePatterns = [
+      // YYYY-MM-DD formatları
+      /(\d{4}-\d{2}-\d{2})\s*(ile|ve|and|\-|to)\s+(\d{4}-\d{2}-\d{2})/i,
+      /(\d{4}-\d{2}-\d{2})\s+(\d{4}-\d{2}-\d{2})/,
+      // DD.MM.YYYY formatları
+      /(\d{2}\.\d{2}\.\d{4})\s+(ve|ile|and|to|\-)\s+(\d{2}\.\d{2}\.\d{4})/i,
+      /(\d{2}\.\d{2}\.\d{4})\s+(\d{2}\.\d{2}\.\d{4})/,
+      // DD/MM/YYYY formatları
+      /(\d{2}\/\d{2}\/\d{4})\s+(ve|ile|and|to|\-)\s+(\d{2}\/\d{2}\/\d{4})/i,
+      /(\d{2}\/\d{2}\/\d{4})\s+(\d{2}\/\d{2}\/\d{4})/
+    ]
+    
+    for (const pattern of datePatterns) {
+      const match = message.match(pattern)
+      if (match) {
+        const startDate = parseFlexibleDate(match[1])
+        const endDate = parseFlexibleDate(match[2] || match[3])
+        
+        if (startDate && endDate) {
+          // Tarih sıralamasını kontrol et (başlangıç bitişten büyükse yer değiştir)
+          if (startDate > endDate) {
+            const temp = startDate
+            const correctedStart = endDate
+            const correctedEnd = temp
+            correctedStart.setHours(0, 0, 0, 0)
+            correctedEnd.setHours(23, 59, 59, 999)
+            return { startDate: correctedStart, endDate: correctedEnd }
+          }
+          
+          // Başlangıç tarihini günün başına, bitiş tarihini günün sonuna ayarla
+          startDate.setHours(0, 0, 0, 0)
+          endDate.setHours(23, 59, 59, 999)
+          return { startDate, endDate }
+        }
+      }
+    }
+    
+    // Alternatif: Mesajdaki tüm tarihleri bul ve ilk iki tarihi al
+    const allDatePatterns = [
+      /\d{4}-\d{2}-\d{2}/g,
+      /\d{2}\.\d{2}\.\d{4}/g,
+      /\d{2}\/\d{2}\/\d{4}/g
+    ]
+    
+    for (const pattern of allDatePatterns) {
+      const matches = message.match(pattern)
+      if (matches && matches.length >= 2) {
+        const date1 = parseFlexibleDate(matches[0])
+        const date2 = parseFlexibleDate(matches[1])
+        
+        if (date1 && date2) {
+          const startDate = date1 < date2 ? date1 : date2
+          const endDate = date1 < date2 ? date2 : date1
+          startDate.setHours(0, 0, 0, 0)
+          endDate.setHours(23, 59, 59, 999)
+          return { startDate, endDate }
+        }
+      }
+    }
+    
+    return null
+  }
+
+  // Chatbot'u kapat ve tüm state'leri sıfırla (yeniden açıldığında en baştan başlasın)
+  const resetAndCloseChatbot = () => {
+    // Mesajları başlangıç durumuna getir
+    setMessages([{ text: 'Merhaba! Size nasıl yardımcı olabilirim?', sender: 'bot' }])
+    // Diğer state'leri sıfırla
+    setInputMessage('')
+    setSuggestions([])
+    setShowSuggestions(false)
+    setSelectedSuggestionIndex(-1)
+    setUserClosedSuggestions(false)
+    // Fullscreen modunu kapat
+    setIsFullscreen(false)
+    // Chatbot'u kapat
+    setIsOpen(false)
+  }
+
+  // Chatbot'u arka plana at (state'leri koru, kaldığı yerden devam etsin)
+  const minimizeChatbot = () => {
+    // Fullscreen modunu kapat
+    setIsFullscreen(false)
+    // Chatbot'u kapat (state'ler korunur)
+    setIsOpen(false)
   }
 
   useEffect(() => {
@@ -184,6 +315,35 @@ const Chatbot = () => {
     return pairs.join('\n')
   }
 
+  // Dataset bilgi mesajı oluştur (sadece dataset adı yazıldığında)
+  const buildDatasetInfoMessage = (title, columns, datasetKey) => {
+    const cfg = datasetConfigs[datasetKey]
+    const getDisplayLabel = cfg?.getDisplayLabel || ((key) => key)
+    
+    // İlk birkaç kolonu göster
+    const displayColumns = columns.slice(0, 10).map(col => {
+      const displayName = getDisplayLabel(col)
+      return `• ${displayName}`
+    })
+    
+    const moreText = columns.length > 10 ? `\nve ${columns.length - 10} kolon daha` : ''
+    
+    return `📊 ${title}\n\nMevcut kolonlar:\n${displayColumns.join('\n')}${moreText}\n\n💡 Örnek sorgular:\n• ${datasetKey} ${columns[0] || 'kolon_adı'}\n• ${datasetKey} ${columns[1] || 'kolon_adı'}`
+  }
+
+  // Kolon bulunamadı mesajı oluştur
+  const buildColumnNotFoundMessage = (title, examples, datasetKey) => {
+    const cfg = datasetConfigs[datasetKey]
+    const getDisplayLabel = cfg?.getDisplayLabel || ((key) => key)
+    
+    const displayExamples = examples.slice(0, 8).map(ex => {
+      const displayName = getDisplayLabel(ex)
+      return `• ${displayName}`
+    })
+    
+    return `❓ ${title} için aradığınız kolon bulunamadı.\n\nMevcut kolonlar:\n${displayExamples.join('\n')}\n\n💡 Örnek sorgular:\n• ${datasetKey} ${examples[0] || 'kolon_adı'}\n• ${datasetKey} ${examples[1] || 'kolon_adı'}`
+  }
+
   // Display label eşlemleri (MQPage.jsx ile uyumlu sade kopya)
   const getQmDisplayLabelLocal = (rawKey) => {
     const key = String(rawKey || '').trim(); if (!key) return ''
@@ -231,6 +391,130 @@ const Chatbot = () => {
     if (n === 'wzocpf') return 'Command Prefix'
     if (n === 'wzorqexc') return 'Reply Q Exceptions'
     return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  }
+
+  // ZOS CPU/MVS SYSOVER display label
+  const getCpuDisplayLabelLocal = (rawKey) => {
+    const key = String(rawKey || '').trim(); if (!key) return ''
+    const n = key.toLowerCase().replace(/[^a-z0-9]/g, '')
+    if (n === 'syxsysn') return 'SYS'
+    if (n === 'succpub') return 'CPU Busy%'
+    if (n === 'sucziib') return 'zIIP Busy%'
+    if (n === 'scicpavg') return 'CPU Avg'
+    if (n === 'suciinrt') return 'I/O Rate'
+    if (n === 'suklqior') return 'Queue I/O'
+    if (n === 'sukadbpc') return 'DASD Busy%'
+    if (n === 'csrecspu') return 'CPU SPU'
+    if (n === 'csreecpu') return 'CPU EPU'
+    if (n === 'csresqpu') return 'SQ PU'
+    if (n === 'csreespu') return 'ES PU'
+    if (n === 'bmctime') return 'Date/Time'
+    if (n === 'time') return 'Time'
+    return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  }
+
+  // ZOS Address Space/JCPU display label
+  const getAddressSpaceDisplayLabelLocal = (rawKey) => {
+    const key = String(rawKey || '').trim(); if (!key) return ''
+    const n = key.toLowerCase().replace(/[^a-z0-9]/g, '')
+    if (n === 'jobname') return 'Jobname'
+    if (n === 'jesjobnumber' || n === 'jes_job_number') return 'JES Job Number'
+    if (n === 'addressspacetype' || n === 'address_space_type') return 'Address Space Type'
+    if (n === 'serviceclassname' || n === 'service_class_name') return 'Service Class Name'
+    if (n === 'asgrnmc') return 'ASGRNMC'
+    if (n === 'jobstepbeingmonitored' || n === 'job_step_being_monitored') return 'Job Step Being Monitored'
+    if (n === 'allcpusec' || n === 'all_cpu_seconds') return 'ALL CPU seconds'
+    if (n === 'unadjcpuutil' || n === 'unadj_cpu_util') return 'Unadj CPU Util (All Enclaves)'
+    if (n === 'usingcpup' || n === 'using_cpu_p') return 'Using CPU %'
+    if (n === 'cpudelayp' || n === 'cpu_delay_p') return 'CPU Delay %'
+    if (n === 'averagepriority' || n === 'average_priority') return 'Average Priority'
+    if (n === 'tcbtime') return 'TCB Time'
+    if (n === 'srb_time' || n === 'srbtime') return '% SRB Time'
+    if (n === 'bmctime') return 'BMC Time'
+    if (n === 'time') return 'Time'
+    return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  }
+
+  // ZOS Spool/JESPOOL display label
+  const getSpoolDisplayLabelLocal = (rawKey) => {
+    const key = String(rawKey || '').trim(); if (!key) return ''
+    const n = key.toLowerCase().replace(/[^a-z0-9]/g, '')
+    if (n === 'id') return 'ID'
+    if (n === 'bmctime') return 'Date/Time'
+    if (n === 'time') return 'Time'
+    if (n === 'smfid' || n === 'smf_id') return 'SMF ID'
+    if (n === 'volume') return 'Volume'
+    if (n === 'status') return 'Status'
+    if (n === 'totalvolumes' || n === 'total_volumes') return 'Total Volumes'
+    if (n === 'spoolutil' || n === 'spool_util') return 'Spool %UTIL'
+    if (n === 'totaltracks' || n === 'total_tracks') return 'Total Tracks'
+    if (n === 'usedtracks' || n === 'used_tracks') return 'Used Tracks'
+    if (n === 'activespoolutil' || n === 'active_spool_util') return 'Active %UTIL'
+    if (n === 'totalactivetracks' || n === 'total_active_tracks') return 'Total Active Tracks'
+    return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  }
+
+  // ZOS CPU parse query
+  const parseCpuQuery = (lowerMessage) => {
+    const candidates = [
+      { col: 'succpub', label: 'CPU Busy%', keys: ['succpub', 'cpu busy', 'cpu busy%', 'cpubusy', 'cpu kullanım', 'cpu kullanimi'] },
+      { col: 'sucziib', label: 'zIIP Busy%', keys: ['sucziib', 'ziiip busy', 'ziiip busy%', 'ziip', 'ziiip kullanım'] },
+      { col: 'scicpavg', label: 'CPU Avg', keys: ['scicpavg', 'cpu avg', 'cpu average', 'cpu ortalaması', 'cpu ortalamasi'] },
+      { col: 'suciinrt', label: 'I/O Rate', keys: ['suciinrt', 'io rate', 'i/o rate', 'io oranı', 'io orani'] },
+      { col: 'suklqior', label: 'Queue I/O', keys: ['suklqior', 'queue io', 'queue i/o', 'kuyruk io'] },
+      { col: 'sukadbpc', label: 'DASD Busy%', keys: ['sukadbpc', 'dasd busy', 'dasd busy%', 'dasd kullanım'] },
+      { col: 'csrecspu', label: 'CPU SPU', keys: ['csrecspu', 'cpu spu', 'spu'] },
+      { col: 'csreecpu', label: 'CPU EPU', keys: ['csreecpu', 'cpu epu', 'epu'] },
+      { col: 'csresqpu', label: 'SQ PU', keys: ['csresqpu', 'sq pu', 'sqpu'] },
+      { col: 'csreespu', label: 'ES PU', keys: ['csreespu', 'es pu', 'espu'] },
+      { col: 'syxsysn', label: 'SYS', keys: ['syxsysn', 'sys', 'system', 'sistem'] },
+      { col: 'bmctime', label: 'Date/Time', keys: ['bmctime', 'date', 'tarih', 'time', 'zaman'] },
+    ]
+    for (const c of candidates) {
+      if (c.keys.some(k => lowerMessage.includes(k))) return c
+    }
+    return null
+  }
+
+  // ZOS Address Space parse query
+  const parseAddressSpaceQuery = (lowerMessage) => {
+    const candidates = [
+      { col: 'jobname', label: 'Jobname', keys: ['jobname', 'job name', 'job adı', 'job adi'] },
+      { col: 'jes_job_number', label: 'JES Job Number', keys: ['jes job number', 'jes_job_number', 'jes job', 'job number'] },
+      { col: 'address_space_type', label: 'Address Space Type', keys: ['address space type', 'address_space_type', 'address space', 'adres alanı tipi'] },
+      { col: 'service_class_name', label: 'Service Class Name', keys: ['service class name', 'service_class_name', 'service class', 'servis sınıfı'] },
+      { col: 'asgrnmc', label: 'ASGRNMC', keys: ['asgrnmc', 'asgrn'] },
+      { col: 'job_step_being_monitored', label: 'Job Step Being Monitored', keys: ['job step being monitored', 'job_step_being_monitored', 'job step', 'job adımı'] },
+      { col: 'all_cpu_seconds', label: 'ALL CPU seconds', keys: ['all cpu seconds', 'all_cpu_seconds', 'cpu seconds', 'cpu saniye'] },
+      { col: 'using_cpu_p', label: 'Using CPU %', keys: ['using cpu', 'using_cpu_p', 'using cpu%', 'cpu kullanım'] },
+      { col: 'cpu_delay_p', label: 'CPU Delay %', keys: ['cpu delay', 'cpu_delay_p', 'cpu delay%', 'cpu gecikme'] },
+      { col: 'average_priority', label: 'Average Priority', keys: ['average priority', 'average_priority', 'priority', 'öncelik'] },
+      { col: 'tcb_time', label: 'TCB Time', keys: ['tcb time', 'tcb_time', 'tcb'] },
+      { col: 'srb_time', label: '% SRB Time', keys: ['srb time', 'srb_time', 'srb'] },
+    ]
+    for (const c of candidates) {
+      if (c.keys.some(k => lowerMessage.includes(k))) return c
+    }
+    return null
+  }
+
+  // ZOS Spool parse query
+  const parseSpoolQuery = (lowerMessage) => {
+    const candidates = [
+      { col: 'total_volumes', label: 'Total Volumes', keys: ['total volumes', 'total_volumes', 'volumes', 'toplam volume'] },
+      { col: 'spool_util', label: 'Spool %UTIL', keys: ['spool util', 'spool_util', 'spool kullanım', 'spool kullanim', 'spool%'] },
+      { col: 'total_tracks', label: 'Total Tracks', keys: ['total tracks', 'total_tracks', 'tracks', 'toplam track'] },
+      { col: 'used_tracks', label: 'Used Tracks', keys: ['used tracks', 'used_tracks', 'kullanılan tracks', 'kullanilan tracks'] },
+      { col: 'active_spool_util', label: 'Active %UTIL', keys: ['active spool util', 'active_spool_util', 'aktif spool', 'aktif kullanım'] },
+      { col: 'total_active_tracks', label: 'Total Active Tracks', keys: ['total active tracks', 'total_active_tracks', 'aktif tracks'] },
+      { col: 'volume', label: 'Volume', keys: ['volume', 'vol'] },
+      { col: 'status', label: 'Status', keys: ['status', 'durum'] },
+      { col: 'smf_id', label: 'SMF ID', keys: ['smf id', 'smf_id', 'smf'] },
+    ]
+    for (const c of candidates) {
+      if (c.keys.some(k => lowerMessage.includes(k))) return c
+    }
+    return null
   }
 
   // Dataset metadata (aliases + API hooks + popular columns)
@@ -314,6 +598,68 @@ const Chatbot = () => {
       fetch: databaseAPI.getMainviewNetworkConnsrpz,
       check: databaseAPI.checkTableExistsConnsrpz,
       staticColumns: []
+    },
+    // MQ Datasets
+    qm: {
+      title: 'MQ QM',
+      aliases: ['qm', 'mq', 'queue manager', 'message queue'],
+      primaryAliases: ['qm', 'mq'],
+      fetch: databaseAPI.getMainviewMQQm,
+      check: databaseAPI.checkTableExistsMQQm,
+      staticColumns: [],
+      getDisplayLabel: getQmDisplayLabelLocal,
+      parseQuery: parseMqQuery
+    },
+    connz: {
+      title: 'MQ CONNZ',
+      aliases: ['connz', 'mq connz'],
+      primaryAliases: ['connz'],
+      fetch: databaseAPI.getMainviewMQConnz,
+      check: databaseAPI.checkTableExistsMQConnz,
+      staticColumns: ['Application Name', 'Type Of Information (Hex)', 'Address Space Identifier', 'Application Type(Maximum)', 'CICS Transaction Id', 'CICS Task number', 'IMS PSB Name', 'Object Name(Maximum)', 'Queue Manager'],
+      getDisplayLabel: getConnzDisplayLabelLocal,
+      parseQuery: parseConnzQuery
+    },
+    w2over: {
+      title: 'MQ W2OVER',
+      aliases: ['w2over', 'w2 over', 'mq w2over'],
+      primaryAliases: ['w2over'],
+      fetch: databaseAPI.getMainviewMQW2over,
+      check: databaseAPI.checkTableExistsMQW2over,
+      staticColumns: ['Channels Retrying', 'Local Queues at Max Depth High', 'Transmit Queues at Max Depth High', 'Dead-Letter Message Count', 'Queue Manager Events', 'Queue Manager Status', 'Free Pages in Page Set 0', 'Event Listener Status', 'Command Server Status'],
+      getDisplayLabel: getW2overDisplayLabelLocal,
+      parseQuery: parseW2overQuery
+    },
+    // ZOS System Datasets
+    mvsSysover: {
+      title: 'CPU',
+      aliases: ['cpu', 'cpu performans ve kullanım', 'cpu performans', 'cpu kullanım', 'cpu kullanımı', 'mvs sysover', 'sysover', 'mvs', 'sysover data', 'system overview'],
+      primaryAliases: ['cpu', 'cpu performans ve kullanım'],
+      fetch: databaseAPI.getMainviewMvsSysover,
+      check: databaseAPI.checkTableExists,
+      staticColumns: ['syxsysn', 'succpub', 'sucziib', 'scicpavg', 'suciinrt', 'suklqior', 'sukadbpc', 'csrecspu', 'csreecpu', 'csresqpu', 'csreespu', 'bmctime', 'time'],
+      getDisplayLabel: getCpuDisplayLabelLocal,
+      parseQuery: parseCpuQuery
+    },
+    jespool: {
+      title: 'Spool',
+      aliases: ['spool', 'iş kuyruğu yönetimi', 'iş kuyruğu', 'kuyruk yönetimi', 'jespool', 'jesp', 'jes pool', 'job entry subsystem', 'job queue'],
+      primaryAliases: ['spool', 'iş kuyruğu yönetimi'],
+      fetch: databaseAPI.getMainviewMvsJespool,
+      check: databaseAPI.checkTableExistsJespool,
+      staticColumns: ['id', 'bmctime', 'time', 'smf_id', 'total_volumes', 'spool_util', 'total_tracks', 'used_tracks', 'active_spool_util', 'total_active_tracks', 'used_active_tracks', 'active_vols', 'volume', 'status', 'volume_util', 'volume_tracks', 'volume_used', 'other_vols'],
+      getDisplayLabel: getSpoolDisplayLabelLocal,
+      parseQuery: parseSpoolQuery
+    },
+    jcpu: {
+      title: 'Address Space',
+      aliases: ['address space', 'adres alanı yönetimi', 'adres alanı', 'adres alani', 'adres alanı', 'jcpu', 'j cpu', 'addressspace', 'address space data'],
+      primaryAliases: ['address space', 'adres alanı yönetimi'],
+      fetch: databaseAPI.getMainviewMvsJCPU,
+      check: databaseAPI.checkTableExistsJCPU,
+      staticColumns: ['jobname', 'jes_job_number', 'address_space_type', 'service_class_name', 'asgrnmc', 'job_step_being_monitored', 'all_cpu_seconds', 'unadj_cpu_util', 'using_cpu_p', 'cpu_delay_p', 'average_priority', 'tcb_time', 'srb_time', 'interval_unadj_remote_enclave_cpu_use', 'job_total_cpu_time', 'other_addr_space_enclave_cpu_time', 'ziip_total_cpu_time', 'ziip_interval_cpu_time', 'dep_enclave_ziip_total_time', 'dep_enclave_ziip_interval_time', 'dep_enclave_ziip_on_cp_total', 'interval_cp_time', 'resource_group_name', 'resource_group_type', 'recovery_process_boost', 'implicit_cpu_critical_flag', 'bmctime', 'time'],
+      getDisplayLabel: getAddressSpaceDisplayLabelLocal,
+      parseQuery: parseAddressSpaceQuery
     }
   }
 
@@ -340,48 +686,118 @@ const Chatbot = () => {
     }
   }
 
-  // Generic table query helper for network datasets
+  // Generic table query helper for all datasets (Network + MQ + ZOS)
   const queryDataset = async (lowerMessage, fetchFunction, title, datasetKey) => {
     const listAll = LIST_ALL_KEYWORDS.some(k => lowerMessage.includes(k))
+    const cfg = datasetConfigs[datasetKey]
+    
+    setIsLoading(true)
+    setIsTyping(true)
+    setMessages(prev => [...prev, { text: `${title} verisini çekiyorum...`, sender: 'bot', timestamp: getMessageTime() }])
 
     try {
       const response = await fetchFunction({})
       if (!response?.data?.success) {
-        setMessages(prev => [...prev, { text: `${title} verisi alınamadı.`, sender: 'bot' }])
+        setMessages(prev => [...prev, { text: `${title} verisi alınamadı.`, sender: 'bot', timestamp: getMessageTime() }])
+        setIsLoading(false)
+        setIsTyping(false)
         return
       }
 
       const rows = Array.isArray(response.data.data) ? response.data.data : []
       if (rows.length === 0) {
-        setMessages(prev => [...prev, { text: `${title} için veri bulunamadı.`, sender: 'bot' }])
+        setMessages(prev => [...prev, { text: `${title} için veri bulunamadı.`, sender: 'bot', timestamp: getMessageTime() }])
+        setIsLoading(false)
+        setIsTyping(false)
+        return
+      }
+
+      // Mesajda sadece dataset adı var mı kontrol et (kolon belirtilmemiş)
+      const datasetAliases = cfg?.aliases || []
+      const messageTokens = lowerMessage.trim().split(/\s+/).filter(Boolean)
+      const onlyDatasetName = messageTokens.length === 1 && datasetAliases.some(alias => {
+        const aliasLower = alias.toLowerCase()
+        const aliasTokens = aliasLower.split(/\s+/).filter(Boolean)
+        // Mesaj sadece dataset alias'ını içeriyorsa
+        return messageTokens[0] === aliasTokens[0] || normalizeKey(messageTokens[0]) === normalizeKey(aliasTokens[0])
+      })
+
+      if (onlyDatasetName && !listAll) {
+        await ensureColumnsLoaded(datasetKey)
+        const keys = getAllKeys(rows)
+        let examples = keys
+        if ((!examples || examples.length === 0) && datasetKey) {
+          examples = columnsCache[datasetKey] || cfg?.staticColumns || []
+        }
+        const message = buildDatasetInfoMessage(title, examples, datasetKey)
+        setMessages(prev => [...prev, { text: message, sender: 'bot', timestamp: getMessageTime() }])
+        setIsLoading(false)
+        setIsTyping(false)
         return
       }
 
       if (listAll) {
         const summary = buildSummary(rows, 20)
-        setMessages(prev => [...prev, { text: `📦 ${title} - Tüm Kolonlar (son değerler)\n${summary}`, sender: 'bot' }])
+        setMessages(prev => [...prev, { text: `📦 ${title} - Tüm Kolonlar (son değerler)\n${summary}`, sender: 'bot', timestamp: getMessageTime() }])
+        setIsLoading(false)
+        setIsTyping(false)
         return
       }
 
       const keys = getAllKeys(rows)
-      const picked = pickColumnByMessage(lowerMessage, keys)
-      if (!picked) {
+      const getDisplayLabel = cfg?.getDisplayLabel || ((key) => key)
+      
+      // MQ ve ZOS dataset'leri için özel parse fonksiyonu varsa kullan
+      let target = null
+      if (cfg?.parseQuery) {
+        target = cfg.parseQuery(lowerMessage)
+      }
+      
+      // Parse query ile bulunamadıysa, genel kolon arama yap (getDisplayLabel ile)
+      if (!target || !target.col) {
+        const picked = pickColumnByMessage(lowerMessage, keys, getDisplayLabel)
+        if (picked) {
+          target = { col: picked, label: getDisplayLabel(picked) }
+        }
+      }
+
+      if (!target || !target.col) {
         let examples = keys
         if ((!examples || examples.length === 0) && datasetKey) {
           await ensureColumnsLoaded(datasetKey)
-          examples = columnsCache[datasetKey] || datasetConfigs[datasetKey]?.staticColumns || []
+          examples = columnsCache[datasetKey] || cfg?.staticColumns || []
         }
-        const preview = (examples || []).slice(0, 12).join(', ')
-        setMessages(prev => [...prev, { text: `${title} için aradığınız kolon bulunamadı. Örnek kolonlar: ${preview}. Tümü için "${(datasetKey || title).split(' ')[0].toLowerCase()} tüm" yazabilirsiniz.`, sender: 'bot' }])
+        const message = buildColumnNotFoundMessage(title, examples, datasetKey)
+        setMessages(prev => [...prev, { text: message, sender: 'bot', timestamp: getMessageTime() }])
+        setIsLoading(false)
+        setIsTyping(false)
         return
       }
 
+      const picked = target.col
+      const pickedLabel = target.label || getDisplayLabel(picked)
+      
       const row = rows.find(r => r?.[picked] !== null && r?.[picked] !== undefined && String(r?.[picked]).trim() !== '') || rows[0]
       const ts = row?.record_timestamp || row?.bmctime || row?.updated_at || row?.created_at || row?.time || row?.timestamp
-      const reply = `📦 ${title} - ${picked}\n• Değer: ${formatValue(row?.[picked])}\n• Zaman: ${formatTrDate(ts)}`
-      setMessages(prev => [...prev, { text: reply, sender: 'bot' }])
+      
+      // MQ QM ve ZOS CPU için özel formatlama (sayısal değerler için)
+      let formattedVal
+      const val = Number.isFinite(Number(row?.[picked])) ? Number(row?.[picked]) : null
+      if (val !== null && (cfg?.title === 'MQ QM' || cfg?.title === 'CPU')) {
+        formattedVal = Math.abs(val) < 1 ? val.toFixed(4) : val.toLocaleString('tr-TR')
+      } else {
+        formattedVal = formatValue(row?.[picked])
+      }
+      
+      const reply = `📦 ${title} - ${pickedLabel}\n• Değer: ${formattedVal}\n• Zaman: ${formatTrDate(ts)}`
+      setMessages(prev => [...prev, { text: reply, sender: 'bot', timestamp: getMessageTime() }])
+      setIsLoading(false)
+      setIsTyping(false)
     } catch (err) {
-      setMessages(prev => [...prev, { text: `${title} verisi alınırken bir hata oluştu.`, sender: 'bot' }])
+      console.error(`${title} query error:`, err)
+      setMessages(prev => [...prev, { text: `${title} verisi alınırken bir hata oluştu.`, sender: 'bot', timestamp: getMessageTime() }])
+      setIsLoading(false)
+      setIsTyping(false)
     }
   }
 
@@ -645,46 +1061,139 @@ const Chatbot = () => {
   }
 
   const handleSendMessage = async () => {
-    if (inputMessage.trim() === '') return
+    if (inputMessage.trim() === '' || isLoading) return
 
     const message = inputMessage
     const lowerMessage = message.toLowerCase().trim()
 
     // Kullanıcı mesajını ekle
-    const userMessage = { text: message, sender: 'user' }
+    const userMessage = { text: message, sender: 'user', timestamp: getMessageTime() }
     setMessages(prev => [...prev, userMessage])
     setInputMessage('')
     setShowSuggestions(false)
     setSelectedSuggestionIndex(-1)
+    setIsLoading(true)
+    setIsTyping(true)
 
     // Export command: "<tablo adı> pdf" or "<tablo adı> excel"
     const exportType = lowerMessage.includes('pdf') ? 'pdf' : (lowerMessage.includes('excel') || lowerMessage.includes('csv') || lowerMessage.includes('xls')) ? 'excel' : null
     if (exportType) {
       const ds = resolveDatasetFromMessage(lowerMessage)
       if (!ds) {
-        setMessages(prev => [...prev, { text: 'Hangi tabloyu istediğinizi anlayamadım. Örnek: "tcpcons pdf" veya "qm excel"', sender: 'bot' }])
+        setMessages(prev => [...prev, { text: 'Hangi tabloyu istediğinizi anlayamadım. Örnek: "tcpcons pdf" veya "qm excel"', sender: 'bot', timestamp: getMessageTime() }])
+        setIsLoading(false)
+        setIsTyping(false)
         return
       }
-      setMessages(prev => [...prev, { text: `${ds.title} verisini ${exportType.toUpperCase()} olarak hazırlıyorum...`, sender: 'bot' }])
+      setMessages(prev => [...prev, { text: `${ds.title} verisini ${exportType.toUpperCase()} olarak hazırlıyorum...`, sender: 'bot', timestamp: getMessageTime() }])
       try {
         const resp = await ds.fetch({})
         const rows = Array.isArray(resp?.data?.data) ? resp.data.data : []
         if (!resp?.data?.success || rows.length === 0) {
-          setMessages(prev => [...prev, { text: `${ds.title} verisi bulunamadı.`, sender: 'bot' }])
+          setMessages(prev => [...prev, { text: `${ds.title} verisi bulunamadı.`, sender: 'bot', timestamp: getMessageTime() }])
+          setIsLoading(false)
+          setIsTyping(false)
           return
         }
         if (exportType === 'excel') exportRowsToCSV(rows, ds.title)
         else exportRowsToPDF(rows, ds.title)
-        setMessages(prev => [...prev, { text: `${ds.title} ${exportType.toUpperCase()} çıktısı hazırlandı.`, sender: 'bot' }])
+        setMessages(prev => [...prev, { text: `${ds.title} ${exportType.toUpperCase()} çıktısı hazırlandı.`, sender: 'bot', timestamp: getMessageTime() }])
       } catch (e) {
-        setMessages(prev => [...prev, { text: `${ds.title} verisi alınırken bir hata oluştu.`, sender: 'bot' }])
+        setMessages(prev => [...prev, { text: `${ds.title} verisi alınırken bir hata oluştu.`, sender: 'bot', timestamp: getMessageTime() }])
+      } finally {
+        setIsLoading(false)
+        setIsTyping(false)
+      }
+      return
+    }
+
+    // CPU tarih aralığı sorgusu (iki tarih arası min/max)
+    const dateRange = extractDateRangeFromMessage(message)
+    const hasCpuKeyword = lowerMessage.includes('cpu') || lowerMessage.includes('mvs') || lowerMessage.includes('sysover')
+    
+    if (dateRange && hasCpuKeyword) {
+      setIsTyping(true)
+      setMessages(prev => [...prev, { text: `${dateRange.startDate.toLocaleDateString('tr-TR')} ile ${dateRange.endDate.toLocaleDateString('tr-TR')} arasındaki CPU verilerini çekiyorum...`, sender: 'bot', timestamp: getMessageTime() }])
+      
+      try {
+        const response = await databaseAPI.getMainviewMvsSysover({})
+        
+        if (response.data?.success) {
+          const rows = Array.isArray(response.data.data) ? response.data.data : []
+          
+          // Tarih aralığına göre filtrele
+          const filteredRows = rows.filter(row => {
+            const rowDate = new Date(row.bmctime || row.created_at || row.time)
+            return rowDate >= dateRange.startDate && rowDate <= dateRange.endDate
+          })
+          
+          if (filteredRows.length === 0) {
+            setMessages(prev => [...prev, { text: 'Belirtilen tarih aralığında CPU verisi bulunamadı.', sender: 'bot', timestamp: getMessageTime() }])
+            setIsLoading(false)
+            setIsTyping(false)
+            return
+          }
+          
+          // CPU Busy% değerlerini al (succpub)
+          const cpuValues = filteredRows
+            .map(row => parseFloat(row.succpub))
+            .filter(val => !isNaN(val) && val !== null)
+          
+          if (cpuValues.length === 0) {
+            setMessages(prev => [...prev, { text: 'Belirtilen tarih aralığında geçerli CPU değeri bulunamadı.', sender: 'bot', timestamp: getMessageTime() }])
+            setIsLoading(false)
+            setIsTyping(false)
+            return
+          }
+          
+          const minCpu = Math.min(...cpuValues)
+          const maxCpu = Math.max(...cpuValues)
+          const avgCpu = cpuValues.reduce((a, b) => a + b, 0) / cpuValues.length
+          
+          // Min ve max değerlerin hangi tarihte olduğunu bul
+          const minRow = filteredRows.find(row => parseFloat(row.succpub) === minCpu)
+          const maxRow = filteredRows.find(row => parseFloat(row.succpub) === maxCpu)
+          
+          const formatDateTime = (dateStr) => {
+            if (!dateStr) return 'N/A'
+            try {
+              return new Date(dateStr).toLocaleString('tr-TR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+              })
+            } catch {
+              return dateStr
+            }
+          }
+          
+          const responseText = `📊 CPU Analiz Raporu\n` +
+            `📅 Tarih Aralığı: ${dateRange.startDate.toLocaleDateString('tr-TR')} - ${dateRange.endDate.toLocaleDateString('tr-TR')}\n\n` +
+            `⚡ CPU Busy% İstatistikleri:\n` +
+            `• Minimum: %${minCpu.toFixed(2)} (${formatDateTime(minRow?.bmctime || minRow?.created_at || minRow?.time)})\n` +
+            `• Maximum: %${maxCpu.toFixed(2)} (${formatDateTime(maxRow?.bmctime || maxRow?.created_at || maxRow?.time)})\n` +
+            `• Ortalama: %${avgCpu.toFixed(2)}\n` +
+            `• Kayıt Sayısı: ${cpuValues.length}`
+          
+          setMessages(prev => [...prev, { text: responseText, sender: 'bot', timestamp: getMessageTime() }])
+        } else {
+          setMessages(prev => [...prev, { text: 'CPU verisi alınamadı. Lütfen daha sonra tekrar deneyin.', sender: 'bot', timestamp: getMessageTime() }])
+        }
+      } catch (error) {
+        console.error('CPU tarih aralığı sorgusu hatası:', error)
+        setMessages(prev => [...prev, { text: 'CPU verisi alınırken bir hata oluştu.', sender: 'bot', timestamp: getMessageTime() }])
+      } finally {
+        setIsLoading(false)
+        setIsTyping(false)
       }
       return
     }
 
     // CPU datası isteğini kontrol et
     if (lowerMessage.includes('son cpu') || lowerMessage.includes('cpu getir') || lowerMessage.includes('cpu verisi')) {
-      setMessages(prev => [...prev, { text: 'CPU verilerini çekiyorum...', sender: 'bot' }])
+      setMessages(prev => [...prev, { text: 'CPU verilerini çekiyorum...', sender: 'bot', timestamp: getMessageTime() }])
       
       try {
         const response = await databaseAPI.getLatestCpuData({})
@@ -713,12 +1222,15 @@ const Chatbot = () => {
             `🖥️ System: ${data.syxsysn || 'N/A'}\n` +
             `📅 Tarih: ${formattedDate}`
           
-          setMessages(prev => [...prev, { text: cpuResponse, sender: 'bot' }])
+          setMessages(prev => [...prev, { text: cpuResponse, sender: 'bot', timestamp: getMessageTime() }])
         } else {
-          setMessages(prev => [...prev, { text: 'CPU verisi alınamadı. Lütfen daha sonra tekrar deneyin.', sender: 'bot' }])
+          setMessages(prev => [...prev, { text: 'CPU verisi alınamadı. Lütfen daha sonra tekrar deneyin.', sender: 'bot', timestamp: getMessageTime() }])
         }
       } catch (error) {
-        setMessages(prev => [...prev, { text: 'CPU verisi alınırken bir hata oluştu.', sender: 'bot' }])
+        setMessages(prev => [...prev, { text: 'CPU verisi alınırken bir hata oluştu.', sender: 'bot', timestamp: getMessageTime() }])
+      } finally {
+        setIsLoading(false)
+        setIsTyping(false)
       }
       return
     }
@@ -726,7 +1238,6 @@ const Chatbot = () => {
     // Network datasets (alias-aware)
     for (const [key, cfg] of Object.entries(datasetConfigs)) {
       if (cfg.aliases.some(a => lowerMessage.includes(a))) {
-        setMessages(prev => [...prev, { text: `${cfg.title} verisini çekiyorum...`, sender: 'bot' }])
         await queryDataset(lowerMessage, cfg.fetch, cfg.title, key)
         return
       }
@@ -738,7 +1249,6 @@ const Chatbot = () => {
     const inferred = await guessDatasetByColumn(lowerMessage)
     if (inferred) {
       const cfg = datasetConfigs[inferred]
-      setMessages(prev => [...prev, { text: `${cfg.title} verisini çekiyorum...`, sender: 'bot' }])
       await queryDataset(lowerMessage, cfg.fetch, cfg.title, inferred)
       return
     }
@@ -754,11 +1264,18 @@ const Chatbot = () => {
         setSuggestions(sugs)
         setShowSuggestions(true)
         setSelectedSuggestionIndex(0)
+        setIsLoading(false)
+        setIsTyping(false)
         return
       }
     }
 
-    // MQ CONNZ data query
+    // Fallback: anlamadı mesajı
+    setMessages(prev => [...prev, { text: 'Üzgünüm, ne demek istediğinizi tam olarak anlayamadım. Lütfen daha detaylı bir soru sorun veya bir dataset adı belirtin.', sender: 'bot', timestamp: getMessageTime() }])
+    setIsLoading(false)
+    setIsTyping(false)
+
+    // MQ CONNZ data query (eski kod - datasetConfigs'teki alias'lar çalışmazsa buraya düşer)
     if (lowerMessage.includes('connz')) {
       const listAll = lowerMessage.includes('tüm') || lowerMessage.includes('hepsi') || lowerMessage.includes('kolon') || lowerMessage.includes('columns') || lowerMessage.includes('liste')
       let target = parseConnzQuery(lowerMessage)
@@ -770,38 +1287,46 @@ const Chatbot = () => {
           const keys = getAllKeys(rows)
           const picked = pickColumnByMessage(lowerMessage, keys, getConnzDisplayLabelLocal)
           if (picked) target = { col: picked, label: getConnzDisplayLabelLocal(picked) }
-        } catch {}
+        } catch {
+          setIsLoading(false)
+          setIsTyping(false)
+        }
       }
       if (!target && !listAll) {
-        setMessages(prev => [...prev, { text: 'CONNZ için örnek sorgular: Application Name, Type Of Information (Hex) (Count), Address Space Identifier, Application Type(Maximum), CICS Transaction Id. Tüm kolonlar için: "connz tüm" yazabilirsiniz.', sender: 'bot' }])
-      } else {
-        setMessages(prev => [...prev, { text: `MQ CONNZ ${target ? target.label : 'tüm kolonlar'} verisini çekiyorum...`, sender: 'bot' }])
-        try {
-          const response = await databaseAPI.getMainviewMQConnz({})
-          if (response.data?.success) {
-            const rows = Array.isArray(response.data.data) ? response.data.data : []
-            if (listAll) {
-              const summary = buildSummary(rows, 20)
-              setMessages(prev => [...prev, { text: `📦 MQ CONNZ - Tüm Kolonlar (son değerler)\n${summary}`, sender: 'bot' }])
-            } else {
-              const row = rows.find(r => {
-                const v = r?.[target.col]
-                return v !== null && v !== undefined && String(v).trim() !== ''
-              }) || rows[0]
-              const valueRaw = row?.[target.col]
-              const ts = row?.record_timestamp || row?.bmctime || row?.updated_at || row?.created_at
-              const formattedVal = formatValue(valueRaw)
-              const reply = `📦 MQ CONNZ - ${target.label}\n` +
-                `• Değer: ${formattedVal}\n` +
-                `• Zaman: ${formatTrDate(ts)}`
-              setMessages(prev => [...prev, { text: reply, sender: 'bot' }])
-            }
+        setMessages(prev => [...prev, { text: 'CONNZ için örnek sorgular: Application Name, Type Of Information (Hex) (Count), Address Space Identifier, Application Type(Maximum), CICS Transaction Id. Tüm kolonlar için: "connz tüm" yazabilirsiniz.', sender: 'bot', timestamp: getMessageTime() }])
+        setIsLoading(false)
+        setIsTyping(false)
+        return
+      }
+      setMessages(prev => [...prev, { text: `MQ CONNZ ${target ? target.label : 'tüm kolonlar'} verisini çekiyorum...`, sender: 'bot', timestamp: getMessageTime() }])
+      try {
+        const response = await databaseAPI.getMainviewMQConnz({})
+        if (response.data?.success) {
+          const rows = Array.isArray(response.data.data) ? response.data.data : []
+          if (listAll) {
+            const summary = buildSummary(rows, 20)
+            setMessages(prev => [...prev, { text: `📦 MQ CONNZ - Tüm Kolonlar (son değerler)\n${summary}`, sender: 'bot', timestamp: getMessageTime() }])
           } else {
-            setMessages(prev => [...prev, { text: 'MQ CONNZ verisi alınamadı.', sender: 'bot' }])
+            const row = rows.find(r => {
+              const v = r?.[target.col]
+              return v !== null && v !== undefined && String(v).trim() !== ''
+            }) || rows[0]
+            const valueRaw = row?.[target.col]
+            const ts = row?.record_timestamp || row?.bmctime || row?.updated_at || row?.created_at
+            const formattedVal = formatValue(valueRaw)
+            const reply = `📦 MQ CONNZ - ${target.label}\n` +
+              `• Değer: ${formattedVal}\n` +
+              `• Zaman: ${formatTrDate(ts)}`
+            setMessages(prev => [...prev, { text: reply, sender: 'bot', timestamp: getMessageTime() }])
           }
-        } catch (err) {
-          setMessages(prev => [...prev, { text: 'MQ CONNZ verisi alınırken bir hata oluştu.', sender: 'bot' }])
+        } else {
+          setMessages(prev => [...prev, { text: 'MQ CONNZ verisi alınamadı.', sender: 'bot', timestamp: getMessageTime() }])
         }
+      } catch (err) {
+        setMessages(prev => [...prev, { text: 'MQ CONNZ verisi alınırken bir hata oluştu.', sender: 'bot', timestamp: getMessageTime() }])
+      } finally {
+        setIsLoading(false)
+        setIsTyping(false)
       }
       return
     }
@@ -1011,9 +1536,20 @@ const Chatbot = () => {
                 </svg>
               </button>
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={minimizeChatbot}
                 className="hover:bg-white/20 rounded-xl p-2 transition-all duration-200 hover:scale-110"
-                aria-label="Chatbot'u kapat"
+                aria-label="Chatbot'u arka plana at"
+                title="Arka plana at"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 12h16" />
+                </svg>
+              </button>
+              <button
+                onClick={resetAndCloseChatbot}
+                className="hover:bg-white/20 rounded-xl p-2 transition-all duration-200 hover:scale-110"
+                aria-label="Chatbot'u kapat ve sıfırla"
+                title="Kapat ve sıfırla"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -1118,10 +1654,7 @@ const Chatbot = () => {
           {/* Backdrop */}
           <div 
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-fade-in"
-            onClick={() => {
-              setIsFullscreen(false)
-              setIsOpen(false)
-            }}
+            onClick={minimizeChatbot}
           />
           
           {/* Modal */}
@@ -1160,12 +1693,20 @@ const Chatbot = () => {
                     </svg>
                   </button>
                   <button
-                    onClick={() => {
-                      setIsFullscreen(false)
-                      setIsOpen(false)
-                    }}
+                    onClick={minimizeChatbot}
                     className="hover:bg-white/20 rounded-xl p-2.5 transition-all duration-200 hover:scale-110"
-                    aria-label="Chatbot'u kapat"
+                    aria-label="Chatbot'u arka plana at"
+                    title="Arka plana at"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 12h16" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={resetAndCloseChatbot}
+                    className="hover:bg-white/20 rounded-xl p-2.5 transition-all duration-200 hover:scale-110"
+                    aria-label="Chatbot'u kapat ve sıfırla"
+                    title="Kapat ve sıfırla"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
