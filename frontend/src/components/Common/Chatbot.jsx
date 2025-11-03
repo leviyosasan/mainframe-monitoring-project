@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { databaseAPI } from '../../services/api'
+import toast from 'react-hot-toast'
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -1345,152 +1346,489 @@ const Chatbot = () => {
     return results
   }
 
-  // Export utilities (command-based)
-  const exportRowsToCSV = (rows, title) => {
+  // Export utilities (command-based) - MQPage.jsx ile uyumlu, XLSX formatında
+  const exportRowsToCSV = (rows, title, datasetKey = null) => {
     const dataRows = Array.isArray(rows) ? rows : []
-    if (dataRows.length === 0) return
-    const headerKeys = getAllKeys(dataRows)
-    if (headerKeys.length === 0) return
-    const escapeCsv = (v) => {
-      const s = v === null || v === undefined ? '' : String(v)
-      if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"'
-      return s
-    }
-    const header = headerKeys.map(escapeCsv).join(',')
-    const body = dataRows.map(r => headerKeys.map(k => escapeCsv(r?.[k])).join(',')).join('\n')
-    const csv = header + '\n' + body
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    const ts = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19)
-    a.download = `${(title || 'dataset').replace(/\s+/g, '_')}_${ts}.csv`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  }
-
-  const ensureJsPdfLoaded = async () => {
-    try {
-      if (window.jspdf && window.jspdf.jsPDF) return window.jspdf.jsPDF
-      await new Promise((resolve, reject) => {
-        const s = document.createElement('script')
-        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
-        s.onload = resolve
-        s.onerror = reject
-        document.body.appendChild(s)
-      })
-      return window.jspdf && window.jspdf.jsPDF ? window.jspdf.jsPDF : null
-    } catch {
-      return null
-    }
-  }
-
-  const exportRowsToPDF = async (rows, title) => {
-    const dataRows = Array.isArray(rows) ? rows : []
-    if (dataRows.length === 0) return
-    const headerKeys = getAllKeys(dataRows)
-    if (headerKeys.length === 0) return
-
-    const JsPDFCtor = await ensureJsPdfLoaded()
-    if (JsPDFCtor) {
-      const doc = new JsPDFCtor({ unit: 'pt', format: 'a4' })
-      const pageWidth = doc.internal.pageSize.getWidth()
-      const pageHeight = doc.internal.pageSize.getHeight()
-      const left = 40, top = 50, lineHeight = 16
-      let y = top
-
-      const docTitle = title || 'Veri Çıktısı'
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(14)
-      doc.text(docTitle, left, y)
-      y += lineHeight
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(10)
-      doc.text(`Oluşturma: ${new Date().toLocaleString('tr-TR')}`, left, y)
-      y += lineHeight * 1.5
-
-      const maxCharsPerCol = headerKeys.map(k => {
-        const maxCell = dataRows.slice(0, 200).reduce((m, r) => Math.max(m, String(r?.[k] ?? '').length), String(k).length)
-        return Math.min(Math.max(maxCell, String(k).length), 40)
-      })
-      const charToPt = 6
-      const colWidths = maxCharsPerCol.map(c => c * charToPt)
-      const totalWidth = colWidths.reduce((a, b) => a + b, 0)
-      const scale = totalWidth > (pageWidth - left * 2) ? (pageWidth - left * 2) / totalWidth : 1
-      const widths = colWidths.map(w => w * scale)
-
-      // Header
-      let x = left
-      doc.setFont('helvetica', 'bold')
-      headerKeys.forEach((h, i) => {
-        const text = String(h)
-        doc.text(text.substring(0, Math.floor(widths[i] / charToPt)), x, y, { baseline: 'top' })
-        x += widths[i]
-      })
-      y += lineHeight
-      doc.setFont('helvetica', 'normal')
-
-      // Rows
-      const maxRows = 3000
-      for (let rIndex = 0; rIndex < Math.min(dataRows.length, maxRows); rIndex++) {
-        const r = dataRows[rIndex]
-        x = left
-        headerKeys.forEach((k, i) => {
-          const raw = r?.[k]
-          const cell = raw === null || raw === undefined ? '' : String(raw)
-          const text = cell.substring(0, Math.floor(widths[i] / charToPt))
-          doc.text(text, x, y, { baseline: 'top' })
-          x += widths[i]
-        })
-        y += lineHeight
-        if (y > pageHeight - 40) {
-          doc.addPage()
-          y = top
-        }
-      }
-
-      const ts = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 19)
-      doc.save(`${(title || 'dataset').replace(/\s+/g, '_')}_${ts}.pdf`)
+    if (dataRows.length === 0) {
+      toast.error('Dışa aktarılacak veri bulunamadı')
       return
     }
 
-    // Fallback: open print dialog
-    const w = window.open('', '_blank')
-    if (!w) return
-    const docTitle = title || 'Veri Çıktısı'
-    const style = `
-      <style>
-        body { font-family: Arial, sans-serif; color: #111; }
-        h1 { font-size: 18px; }
-        table { border-collapse: collapse; width: 100%; font-size: 12px; }
-        th, td { border: 1px solid #999; padding: 6px 8px; text-align: left; }
-        th { background: #f0f0f0; }
-        .meta { margin: 8px 0 16px; color: #444; }
-      </style>
-    `
-    const thead = `<tr>${headerKeys.map(h => `<th>${h}</th>`).join('')}</tr>`
-    const limitRows = dataRows.slice(0, 2000)
-    const tbody = limitRows.map(r => `<tr>${headerKeys.map(k => `<td>${r?.[k] ?? ''}</td>`).join('')}</tr>`).join('')
-    w.document.write(`<!doctype html><html><head><meta charset=\"utf-8\"/>${style}</head><body>`)
-    w.document.write(`<h1>${docTitle}</h1>`)
-    w.document.write(`<div class=\"meta\">Oluşturma: ${new Date().toLocaleString('tr-TR')}</div>`)
-    w.document.write(`<table><thead>${thead}</thead><tbody>${tbody}</tbody></table>`)
-    w.document.write('</body></html>')
-    w.document.close()
-    w.focus()
-    w.print()
+    try {
+      let rawHeaders = Object.keys(dataRows[0] || {})
+      // Index kolonunu çıkar
+      rawHeaders = rawHeaders.filter(h => h !== 'index')
+
+      // Display label kullan (eğer varsa)
+      let displayHeaders = rawHeaders
+      if (datasetKey && datasetConfigs[datasetKey]?.getDisplayLabel) {
+        const getDisplayLabel = datasetConfigs[datasetKey].getDisplayLabel
+        displayHeaders = rawHeaders.map(h => getDisplayLabel(h) || h)
+      } else {
+        // Varsayılan: underscore'ları boşlukla değiştir, her kelimenin ilk harfini büyük yap
+        displayHeaders = rawHeaders.map(h => h.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()))
+      }
+
+      // XLSX kütüphanesini dinamik yükle
+      const loadXlsx = () => new Promise((resolve, reject) => {
+        if (window.XLSX) {
+          resolve(window.XLSX)
+          return
+        }
+        const script = document.createElement('script')
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
+        script.onload = () => resolve(window.XLSX)
+        script.onerror = () => reject(new Error('XLSX yüklenemedi'))
+        document.head.appendChild(script)
+      })
+
+      // Tarih formatı için yardımcı
+      const now = new Date()
+      const two = (n) => String(n).padStart(2, '0')
+      const stamp = `${now.getFullYear()}-${two(now.getMonth()+1)}-${two(now.getDate())}`
+
+      loadXlsx().then((XLSX) => {
+        try {
+          // AOA (Array of Arrays) verisi: başlık + satırlar (her başlık ayrı hücrede)
+          const aoa = [
+            displayHeaders, // Her başlık ayrı dizi elemanı olarak (ayrı hücreler)
+            ...dataRows.map(row => rawHeaders.map(h => {
+              const v = row[h]
+              if (v === null || v === undefined) return ''
+              // Tarih stringlerini Date'e çevir (Excel tarih olarak algılar)
+              if (typeof v === 'string' && v.match(/\d{4}-\d{2}-\d{2}/)) {
+                const d = new Date(v)
+                return isNaN(d.getTime()) ? v : d
+              }
+              return v
+            }))
+          ]
+
+          const wb = XLSX.utils.book_new()
+          const ws = XLSX.utils.aoa_to_sheet(aoa)
+
+          // Kolon genişliklerini içeriğe göre hesapla (MQPage.jsx'deki gibi)
+          const maxCols = rawHeaders.length
+          const colWidths = Array.from({ length: maxCols }, (_, c) => {
+            let maxLen = String(displayHeaders[c] || '').length
+            for (let r = 1; r < aoa.length; r++) {
+              const cell = aoa[r][c]
+              const len = cell instanceof Date ? 19 : String(cell ?? '').length
+              if (len > maxLen) maxLen = len
+            }
+            const wch = Math.min(60, Math.max(12, maxLen + 2))
+            return { wch }
+          })
+          ws['!cols'] = colWidths
+
+          XLSX.utils.book_append_sheet(wb, ws, (title || 'Export').slice(0, 31))
+          const safeName = (title || 'dataset').replace(/[^a-zA-Z0-9_]/g, '_')
+          XLSX.writeFile(wb, `${safeName}_${stamp}.xlsx`)
+          toast.success('Excel dosyası başarıyla indirildi')
+        } catch (xlsxErr) {
+          console.error('XLSX oluşturma hatası, CSV ye düşülüyor:', xlsxErr)
+          // XLSX başarısızsa CSV fallback (başlıklar ayrı hücrelerde)
+          const escapeCSV = (value) => {
+            if (value === null || value === undefined) return ''
+            const stringValue = String(value)
+            if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+              return `"${stringValue.replace(/"/g, '""')}"`
+            }
+            return stringValue
+          }
+          const formatValue = (value) => {
+            if (value === null || value === undefined) return ''
+            if (value instanceof Date) return value.toLocaleString('tr-TR')
+            if (typeof value === 'string' && value.match(/\d{4}-\d{2}-\d{2}/)) {
+              try { return new Date(value).toLocaleString('tr-TR') } catch { return value }
+            }
+            if (typeof value === 'number') return value.toLocaleString('tr-TR')
+            return String(value)
+          }
+          // CSV'de de başlıklar ayrı hücrelerde (virgülle ayrılmış)
+          const csvRows = dataRows.map(row => rawHeaders.map(h => escapeCSV(formatValue(row[h]))).join(','))
+          const csv = [displayHeaders.join(','), ...csvRows].join('\r\n')
+          const BOM = '\uFEFF'
+          const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `${(title || 'dataset').replace(/[^a-zA-Z0-9_]/g, '_')}_${stamp}.csv`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+          toast.success('CSV dosyası başarıyla indirildi')
+        }
+      }).catch(() => {
+        // XLSX yüklenemediyse doğrudan CSV fallback
+        const escapeCSV = (value) => {
+          if (value === null || value === undefined) return ''
+          const stringValue = String(value)
+          if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+            return `"${stringValue.replace(/"/g, '""')}"`
+          }
+          return stringValue
+        }
+        const formatValue = (value) => {
+          if (value === null || value === undefined) return ''
+          if (value instanceof Date) return value.toLocaleString('tr-TR')
+          if (typeof value === 'string' && value.match(/\d{4}-\d{2}-\d{2}/)) {
+            try { return new Date(value).toLocaleString('tr-TR') } catch { return value }
+          }
+          if (typeof value === 'number') return value.toLocaleString('tr-TR')
+          return String(value)
+        }
+        // CSV'de de başlıklar ayrı hücrelerde (virgülle ayrılmış)
+        const csvRows = dataRows.map(row => rawHeaders.map(h => escapeCSV(formatValue(row[h]))).join(','))
+        const csv = [displayHeaders.join(','), ...csvRows].join('\r\n')
+        const BOM = '\uFEFF'
+        const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${(title || 'dataset').replace(/[^a-zA-Z0-9_]/g, '_')}_${stamp}.csv`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+        toast.success('CSV dosyası başarıyla indirildi')
+      })
+    } catch (error) {
+      console.error('Excel export hatası:', error)
+      toast.error('Excel oluşturulurken hata oluştu')
+    }
+  }
+
+  const exportRowsToPDF = async (rows, title, datasetKey = null) => {
+    const dataRows = Array.isArray(rows) ? rows : []
+    if (dataRows.length === 0) {
+      toast.error('Dışa aktarılacak veri bulunamadı')
+      return
+    }
+
+    // jsPDF ve AutoTable eklentisini dinamik yükle ve tabloyu düzgün biçimle
+    const ensureJsPDF = () => new Promise((resolve) => {
+      if (window.jspdf?.jsPDF) return resolve()
+      const s = document.createElement('script')
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
+      s.onload = () => resolve()
+      document.head.appendChild(s)
+    })
+
+    const ensureAutoTable = () => new Promise((resolve) => {
+      if (window.jspdf?.jsPDF && typeof window.jspdf.jsPDF === 'function' && typeof window.jspdf.jsPDF.API?.autoTable === 'function') {
+        return resolve()
+      }
+      const s = document.createElement('script')
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js'
+      s.onload = () => resolve()
+      document.head.appendChild(s)
+    })
+
+    try {
+      await ensureJsPDF()
+      await ensureAutoTable()
+
+      const { jsPDF } = window.jspdf
+      const headers = Object.keys(dataRows[0])
+      
+      // Display label kullan (eğer varsa)
+      let displayHeaders = headers
+      if (datasetKey && datasetConfigs[datasetKey]?.getDisplayLabel) {
+        const getDisplayLabel = datasetConfigs[datasetKey].getDisplayLabel
+        displayHeaders = headers.map(h => getDisplayLabel(h) || h)
+      }
+      
+      // İstek gereği tüm PDF'ler A4 yatay
+      const doc = new jsPDF('l', 'mm', 'a4')
+
+      // Sayfa boyutları (A4 yatay: 297mm x 210mm)
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const pageHeight = doc.internal.pageSize.getHeight()
+      const marginLeft = 14
+      const marginRight = 14
+      const marginTop = 30
+      const marginBottom = 20
+      const availableWidth = pageWidth - marginLeft - marginRight
+
+      // Font boyutu ve minimum kolon genişliği hesapla
+      const fontSize = headers.length > 12 ? 6 : headers.length > 8 ? 7 : 8
+      const minCellWidth = headers.length > 12 ? 14 : headers.length > 8 ? 18 : 24
+      const cellPadding = 1.5
+
+      // Kolon genişliklerini hesapla (içeriğe göre veya minimum genişlik)
+      const calculateColumnWidths = (headerIndices) => {
+        const widths = []
+        let totalWidth = 0
+        
+        headerIndices.forEach((idx) => {
+          const header = displayHeaders[idx]
+          const sampleData = dataRows.slice(0, 10).map(row => String(row[headers[idx]] ?? '')).concat([header])
+          const maxLength = Math.max(...sampleData.map(s => s.length))
+          // Yaklaşık genişlik hesapla (font boyutuna göre)
+          const estimatedWidth = Math.max(minCellWidth, (maxLength * fontSize * 0.6) + (cellPadding * 2))
+          widths.push(Math.min(estimatedWidth, availableWidth * 0.4)) // Tek kolon maksimum %40
+          totalWidth += widths[widths.length - 1]
+        })
+        
+        return { widths, totalWidth }
+      }
+
+      // Kolonları sayfa genişliğine göre grupla
+      const columnGroups = []
+      let currentGroup = []
+      let currentGroupWidth = 0
+
+      headers.forEach((header, idx) => {
+        const headerText = displayHeaders[idx]
+        const sampleData = dataRows.slice(0, 10).map(row => String(row[header] ?? '')).concat([headerText])
+        const maxLength = Math.max(...sampleData.map(s => s.length))
+        const estimatedWidth = Math.max(minCellWidth, (maxLength * fontSize * 0.6) + (cellPadding * 2))
+        const columnWidth = Math.min(estimatedWidth, availableWidth * 0.4)
+
+        // Eğer bu kolonu eklemek sayfa genişliğini aşıyorsa, mevcut grubu kaydet ve yeni grup başlat
+        if (currentGroup.length > 0 && currentGroupWidth + columnWidth > availableWidth) {
+          columnGroups.push([...currentGroup])
+          currentGroup = [idx]
+          currentGroupWidth = columnWidth
+        } else {
+          currentGroup.push(idx)
+          currentGroupWidth += columnWidth
+        }
+      })
+
+      // Son grubu ekle
+      if (currentGroup.length > 0) {
+        columnGroups.push(currentGroup)
+      }
+
+      const totalPages = columnGroups.length
+
+      // Başlık ve tarih yazımı için yardımcı fonksiyon (MQPage.jsx'deki gibi)
+      const writeHeader = (partText = '') => {
+        doc.setFontSize(16)
+        doc.setFont('helvetica', 'bold')
+        doc.text(`${title || 'Veri Raporu'}${partText}`, marginLeft, 16)
+        doc.setFontSize(10)
+        doc.setFont('helvetica', 'normal')
+        doc.text(`Oluşturulma Tarihi: ${new Date().toLocaleDateString('tr-TR')} ${new Date().toLocaleTimeString('tr-TR')}`, marginLeft, 24)
+      }
+
+      // Her kolon grubu için tablo oluştur
+      columnGroups.forEach((groupIndices, groupIndex) => {
+        // Her grup için yeni sayfa (ilk grup hariç)
+        if (groupIndex > 0) {
+          doc.addPage()
+        }
+
+        // Başlığa "Bölüm X/Y" ekle (MQPage.jsx'deki gibi)
+        const partText = totalPages > 1 ? ` - Bölüm ${groupIndex + 1}/${totalPages}` : ''
+        writeHeader(partText)
+
+        // Bu grup için başlıklar ve veriler
+        const groupHeaders = groupIndices.map(idx => displayHeaders[idx])
+        const groupBody = dataRows.map((row) => groupIndices.map((idx) => String(row[headers[idx]] ?? '')))
+
+        // Kolon genişliklerini hesapla
+        const { widths: columnWidths } = calculateColumnWidths(groupIndices)
+        const totalColumnWidth = columnWidths.reduce((sum, w) => sum + w, 0)
+        
+        // Eğer toplam genişlik sayfa genişliğinden küçükse, orantılı olarak genişlet
+        let adjustedWidths = columnWidths
+        if (totalColumnWidth < availableWidth && groupIndices.length > 1) {
+          const scaleFactor = availableWidth / totalColumnWidth
+          adjustedWidths = columnWidths.map(w => w * scaleFactor)
+        }
+
+        // Kolon stilleri
+        const columnStyles = groupIndices.reduce((acc, idx, i) => {
+          acc[i] = {
+            cellWidth: adjustedWidths[i],
+            halign: 'left',
+            minCellWidth: minCellWidth
+          }
+          return acc
+        }, {})
+
+        // Bu grubun ilk sayfa numarasını kaydet (didDrawPage callback için)
+        const groupStartPage = doc.internal.getCurrentPageInfo().pageNumber
+
+        // Tablo oluştur
+        doc.autoTable({
+          head: [groupHeaders],
+          body: groupBody,
+          startY: marginTop,
+          theme: 'grid',
+          styles: {
+            font: 'helvetica',
+            fontSize: fontSize,
+            cellPadding: cellPadding,
+            overflow: 'linebreak',
+            valign: 'middle',
+          },
+          headStyles: {
+            fillColor: [240, 240, 240],
+            textColor: 20,
+            halign: 'left',
+            fontStyle: 'bold',
+          },
+          alternateRowStyles: { fillColor: [249, 250, 251] },
+          columnStyles: columnStyles,
+          didDrawPage: (dataArg) => {
+            // AutoTable'ın otomatik oluşturduğu ek sayfalar için başlık tekrarı
+            const currentPage = dataArg.pageNumber
+            // Eğer bu grup için ilk sayfadan sonraki sayfalardaysak başlık ekle
+            if (currentPage > groupStartPage) {
+              writeHeader(partText)
+            }
+          },
+        })
+      })
+
+      const now = new Date()
+      const two = (n) => String(n).padStart(2, '0')
+      const stamp = `${now.getFullYear()}-${two(now.getMonth()+1)}-${two(now.getDate())}_${two(now.getHours())}-${two(now.getMinutes())}-${two(now.getSeconds())}`
+      doc.save(`${(title || 'dataset')}_${stamp}.pdf`)
+      toast.success('Veriler PDF formatında indirildi')
+    } catch (error) {
+      console.error('PDF export error:', error)
+      toast.error('PDF oluşturulurken bir hata oluştu')
+    }
   }
 
   const resolveDatasetFromMessage = (lowerMessage) => {
-    // Check configured datasets by aliases
+    // İlk kelimeye öncelik ver
+    const words = lowerMessage.split(/\s+/).filter(Boolean)
+    const firstWord = words[0] || ''
+    const firstWordNormalized = normalizeKey(firstWord)
+    
+    // 1. ÖNCE: İlk kelime tam olarak bir dataset alias'ı ile eşleşiyor mu?
+    let firstWordMatch = null
+    let firstWordMatchScore = 0
+    
     for (const [key, cfg] of Object.entries(datasetConfigs)) {
-      if (cfg.aliases.some(a => lowerMessage.includes(a))) {
-        return { key, title: cfg.title, fetch: cfg.fetch }
+      for (const alias of cfg.aliases) {
+        const aliasLower = alias.toLowerCase()
+        const aliasNormalized = normalizeKey(aliasLower)
+        
+        // Tam eşleşme (normalize edilmiş)
+        if (firstWordNormalized === aliasNormalized) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          const score = (isPrimary ? 10 : 5) + (firstWord === aliasLower ? 2 : 0)
+          if (score > firstWordMatchScore) {
+            firstWordMatch = { key, cfg, isPrimary }
+            firstWordMatchScore = score
+          }
+        }
+        // Tam eşleşme (orijinal)
+        else if (firstWord === aliasLower) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          const score = (isPrimary ? 10 : 5) + 2
+          if (score > firstWordMatchScore) {
+            firstWordMatch = { key, cfg, isPrimary }
+            firstWordMatchScore = score
+          }
+        }
       }
     }
-    // MQ special datasets
+    
+    if (firstWordMatch) {
+      return { key: firstWordMatch.key, title: firstWordMatch.cfg.title, fetch: firstWordMatch.cfg.fetch }
+    }
+    
+    // 2. İlk kelime bir alias'ın başlangıcı mı? (örn: "tcpconf" -> "tcp conf")
+    let prefixMatch = null
+    let prefixMatchScore = 0
+    
+    for (const [key, cfg] of Object.entries(datasetConfigs)) {
+      for (const alias of cfg.aliases) {
+        const aliasLower = alias.toLowerCase()
+        const aliasNormalized = normalizeKey(aliasLower)
+        
+        if (firstWordNormalized.startsWith(aliasNormalized) && aliasNormalized.length >= 3) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          const score = (isPrimary ? 8 : 4) + aliasNormalized.length
+          if (score > prefixMatchScore) {
+            prefixMatch = { key, cfg, isPrimary, aliasLength: aliasLower.length }
+            prefixMatchScore = score
+          }
+        }
+        else if (aliasNormalized.startsWith(firstWordNormalized) && firstWordNormalized.length >= 3) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          const score = (isPrimary ? 8 : 4) + firstWordNormalized.length
+          if (score > prefixMatchScore) {
+            prefixMatch = { key, cfg, isPrimary, aliasLength: aliasLower.length }
+            prefixMatchScore = score
+          }
+        }
+      }
+    }
+    
+    if (prefixMatch) {
+      return { key: prefixMatch.key, title: prefixMatch.cfg.title, fetch: prefixMatch.cfg.fetch }
+    }
+    
+    // 3. Tüm mesajda exact match (word boundary ile)
+    const exactMatches = []
+    for (const [key, cfg] of Object.entries(datasetConfigs)) {
+      for (const alias of cfg.aliases) {
+        const aliasLower = alias.toLowerCase()
+        const exactMatch = words.some(w => {
+          const normalized = normalizeKey(w)
+          const aliasNormalized = normalizeKey(aliasLower)
+          return normalized === aliasNormalized
+        })
+        const fullMatch = lowerMessage === aliasLower || normalizeKey(lowerMessage) === normalizeKey(aliasLower)
+        if (exactMatch || fullMatch) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          exactMatches.push({ key, cfg, score: exactMatch ? 2 : 1, isPrimary, aliasLength: aliasLower.length, alias })
+        }
+      }
+    }
+    
+    if (exactMatches.length > 0) {
+      exactMatches.sort((a, b) => {
+        if (a.isPrimary !== b.isPrimary) return b.isPrimary ? 1 : -1
+        if (a.aliasLength !== b.aliasLength) return b.aliasLength - a.aliasLength
+        return b.score - a.score
+      })
+      const best = exactMatches[0]
+      return { key: best.key, title: best.cfg.title, fetch: best.cfg.fetch }
+    }
+    
+    // 4. Son çare: includes ile kontrol et (normalize edilmiş ve daha spesifik olanlara öncelik ver)
+    const includesMatches = []
+    const lowerMessageNormalized = normalizeKey(lowerMessage)
+    
+    for (const [key, cfg] of Object.entries(datasetConfigs)) {
+      for (const alias of cfg.aliases) {
+        const aliasLower = alias.toLowerCase()
+        const aliasNormalized = normalizeKey(aliasLower)
+        
+        if (lowerMessageNormalized.includes(aliasNormalized) && aliasNormalized.length >= 4) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          const aliasLength = aliasNormalized.length
+          includesMatches.push({ key, cfg, isPrimary, aliasLength, alias: aliasLower })
+        }
+        else if (lowerMessage.includes(aliasLower) && aliasLower.length >= 4) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          const aliasLength = aliasLower.length
+          includesMatches.push({ key, cfg, isPrimary, aliasLength, alias: aliasLower })
+        }
+      }
+    }
+    
+    if (includesMatches.length > 0) {
+      includesMatches.sort((a, b) => {
+        if (a.isPrimary !== b.isPrimary) return b.isPrimary ? 1 : -1
+        return b.aliasLength - a.aliasLength
+      })
+      const best = includesMatches[0]
+      return { key: best.key, title: best.cfg.title, fetch: best.cfg.fetch }
+    }
+    
+    // MQ special datasets (backward compatibility)
     if (lowerMessage.includes('connz')) {
       return { key: 'connz', title: 'MQ CONNZ', fetch: databaseAPI.getMainviewMQConnz }
     }
@@ -1622,8 +1960,8 @@ const Chatbot = () => {
           setIsTyping(false)
           return
         }
-        if (exportType === 'excel') exportRowsToCSV(rows, ds.title)
-        else exportRowsToPDF(rows, ds.title)
+        if (exportType === 'excel') exportRowsToCSV(rows, ds.title, ds.key)
+        else await exportRowsToPDF(rows, ds.title, ds.key)
         setMessages(prev => [...prev, { text: `${ds.title} ${exportType.toUpperCase()} çıktısı hazırlandı.`, sender: 'bot', timestamp: getMessageTime() }])
       } catch (e) {
         setMessages(prev => [...prev, { text: `${ds.title} verisi alınırken bir hata oluştu.`, sender: 'bot', timestamp: getMessageTime() }])
@@ -1678,12 +2016,150 @@ const Chatbot = () => {
       return
     }
 
-    // Network datasets (alias-aware)
+    // Network datasets (alias-aware) - İlk kelimeye öncelik ver
+    const words = lowerMessage.split(/\s+/).filter(Boolean)
+    const firstWord = words[0] || ''
+    const firstWordNormalized = normalizeKey(firstWord)
+    
+    // 1. ÖNCE: İlk kelime tam olarak bir dataset alias'ı ile eşleşiyor mu?
+    let firstWordMatch = null
+    let firstWordMatchScore = 0
+    
     for (const [key, cfg] of Object.entries(datasetConfigs)) {
-      if (cfg.aliases.some(a => lowerMessage.includes(a))) {
-        await queryDataset(lowerMessage, cfg.fetch, cfg.title, key)
-        return
+      for (const alias of cfg.aliases) {
+        const aliasLower = alias.toLowerCase()
+        const aliasNormalized = normalizeKey(aliasLower)
+        
+        // Tam eşleşme (normalize edilmiş)
+        if (firstWordNormalized === aliasNormalized) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          const score = (isPrimary ? 10 : 5) + (firstWord === aliasLower ? 2 : 0)
+          if (score > firstWordMatchScore) {
+            firstWordMatch = { key, cfg, isPrimary }
+            firstWordMatchScore = score
+          }
+        }
+        // Tam eşleşme (orijinal)
+        else if (firstWord === aliasLower) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          const score = (isPrimary ? 10 : 5) + 2
+          if (score > firstWordMatchScore) {
+            firstWordMatch = { key, cfg, isPrimary }
+            firstWordMatchScore = score
+          }
+        }
       }
+    }
+    
+    if (firstWordMatch) {
+      await queryDataset(lowerMessage, firstWordMatch.cfg.fetch, firstWordMatch.cfg.title, firstWordMatch.key)
+      return
+    }
+    
+    // 2. İlk kelime bir alias'ın başlangıcı mı? (örn: "tcpconf" -> "tcp conf" normalize edildiğinde "tcpconf")
+    // Bu durumda normalize edilmiş alias ilk kelimenin başlangıcı olmalı veya tam tersi
+    let prefixMatch = null
+    let prefixMatchScore = 0
+    
+    for (const [key, cfg] of Object.entries(datasetConfigs)) {
+      for (const alias of cfg.aliases) {
+        const aliasLower = alias.toLowerCase()
+        const aliasNormalized = normalizeKey(aliasLower)
+        
+        // Normalize edilmiş alias, normalize edilmiş ilk kelimenin başlangıcı mı?
+        // Örnek: "tcp conf" normalize -> "tcpconf", ilk kelime "tcpconf" normalize -> "tcpconf"
+        // "tcpconf".startsWith("tcpconf") -> true
+        if (firstWordNormalized.startsWith(aliasNormalized) && aliasNormalized.length >= 3) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          const score = (isPrimary ? 8 : 4) + aliasNormalized.length
+          if (score > prefixMatchScore) {
+            prefixMatch = { key, cfg, isPrimary, aliasLength: aliasLower.length }
+            prefixMatchScore = score
+          }
+        }
+        // Veya normalize edilmiş alias, normalize edilmiş ilk kelimenin başlangıcı mı?
+        // Örnek: "tcpconf" normalize -> "tcpconf", "tcp conf" normalize -> "tcpconf"
+        else if (aliasNormalized.startsWith(firstWordNormalized) && firstWordNormalized.length >= 3) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          const score = (isPrimary ? 8 : 4) + firstWordNormalized.length
+          if (score > prefixMatchScore) {
+            prefixMatch = { key, cfg, isPrimary, aliasLength: aliasLower.length }
+            prefixMatchScore = score
+          }
+        }
+      }
+    }
+    
+    if (prefixMatch) {
+      await queryDataset(lowerMessage, prefixMatch.cfg.fetch, prefixMatch.cfg.title, prefixMatch.key)
+      return
+    }
+    
+    // 3. Tüm mesajda exact match (word boundary ile)
+    const exactMatches = []
+    for (const [key, cfg] of Object.entries(datasetConfigs)) {
+      for (const alias of cfg.aliases) {
+        const aliasLower = alias.toLowerCase()
+        // Word boundary ile exact match
+        const exactMatch = words.some(w => {
+          const normalized = normalizeKey(w)
+          const aliasNormalized = normalizeKey(aliasLower)
+          return normalized === aliasNormalized
+        })
+        // Veya tam string match
+        const fullMatch = lowerMessage === aliasLower || normalizeKey(lowerMessage) === normalizeKey(aliasLower)
+        if (exactMatch || fullMatch) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          exactMatches.push({ key, cfg, score: exactMatch ? 2 : 1, isPrimary, aliasLength: aliasLower.length })
+        }
+      }
+    }
+    
+    // En yüksek skorlu ve primary olan eşleşmeyi seç
+    if (exactMatches.length > 0) {
+      exactMatches.sort((a, b) => {
+        if (a.isPrimary !== b.isPrimary) return b.isPrimary ? 1 : -1
+        if (a.aliasLength !== b.aliasLength) return b.aliasLength - a.aliasLength
+        return b.score - a.score
+      })
+      const best = exactMatches[0]
+      await queryDataset(lowerMessage, best.cfg.fetch, best.cfg.title, best.key)
+      return
+    }
+    
+    // 4. Son çare: includes ile kontrol et (ama normalize edilmiş ve daha spesifik olanlara öncelik ver)
+    const includesMatches = []
+    const lowerMessageNormalized = normalizeKey(lowerMessage)
+    
+    for (const [key, cfg] of Object.entries(datasetConfigs)) {
+      for (const alias of cfg.aliases) {
+        const aliasLower = alias.toLowerCase()
+        const aliasNormalized = normalizeKey(aliasLower)
+        
+        // Normalize edilmiş mesaj, normalize edilmiş alias içeriyor mu?
+        if (lowerMessageNormalized.includes(aliasNormalized) && aliasNormalized.length >= 4) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          const aliasLength = aliasNormalized.length
+          includesMatches.push({ key, cfg, isPrimary, aliasLength })
+        }
+        // Veya orijinal alias mesajda geçiyor mu?
+        else if (lowerMessage.includes(aliasLower) && aliasLower.length >= 4) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          const aliasLength = aliasLower.length
+          includesMatches.push({ key, cfg, isPrimary, aliasLength })
+        }
+      }
+    }
+    
+    if (includesMatches.length > 0) {
+      // En uzun ve primary alias'a sahip olanı seç
+      includesMatches.sort((a, b) => {
+        if (a.isPrimary !== b.isPrimary) return b.isPrimary ? 1 : -1
+        return b.aliasLength - a.aliasLength
+      })
+      const best = includesMatches[0]
+      await queryDataset(lowerMessage, best.cfg.fetch, best.cfg.title, best.key)
+      return
     }
 
     // explicit keyword fallbacks removed (aliases already cover cases)
