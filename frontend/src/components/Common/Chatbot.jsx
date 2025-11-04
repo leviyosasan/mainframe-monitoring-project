@@ -1061,7 +1061,7 @@ const Chatbot = () => {
     },
     // Storage Datasets
     csasum: {
-      title: 'CSASUM',
+      title: 'Storage CSASUM',
       aliases: ['csasum', 'common storage area summary', 'common storage', 'csa summary', 'storage csa'],
       primaryAliases: ['csasum', 'common storage area summary'],
       fetch: databaseAPI.getMainviewStorageCsasum,
@@ -1070,7 +1070,7 @@ const Chatbot = () => {
       getDisplayLabel: getStorageDisplayLabelLocal('csasum')
     },
     frminfo_center: {
-      title: 'FRMINFO Central',
+      title: 'Storage FRMINFO Central',
       aliases: ['frminfo center', 'frminfo central', 'frame information central', 'frame central', 'storage central'],
       primaryAliases: ['frminfo center', 'frminfo central'],
       fetch: databaseAPI.getMainviewStorageFrminfoCenter,
@@ -1079,7 +1079,7 @@ const Chatbot = () => {
       getDisplayLabel: getStorageDisplayLabelLocal('frminfo_center')
     },
     frminfo_fixed: {
-      title: 'FRMINFO Fixed',
+      title: 'Storage FRMINFO Fixed',
       aliases: ['frminfo fixed', 'frame information fixed', 'frame fixed', 'storage fixed'],
       primaryAliases: ['frminfo fixed', 'frame information fixed'],
       fetch: databaseAPI.getMainviewStorageFrminfofixed,
@@ -1088,7 +1088,7 @@ const Chatbot = () => {
       getDisplayLabel: getStorageDisplayLabelLocal('frminfo_fixed')
     },
     frminfo_high_virtual: {
-      title: 'FRMINFO High Virtual',
+      title: 'Storage FRMINFO High Virtual',
       aliases: ['frminfo high virtual', 'frminfo highvirtual', 'frame information high virtual', 'high virtual', 'storage high virtual'],
       primaryAliases: ['frminfo high virtual', 'frame information high virtual'],
       fetch: databaseAPI.getMainviewStorageFrminfoHighVirtual,
@@ -1097,7 +1097,7 @@ const Chatbot = () => {
       getDisplayLabel: getStorageDisplayLabelLocal('frminfo_high_virtual')
     },
     sysfrmiz: {
-      title: 'SYSFRMIZ',
+      title: 'Storage SYSFRMIZ',
       aliases: ['sysfrmiz', 'system frame information', 'system frame', 'frame information system'],
       primaryAliases: ['sysfrmiz', 'system frame information'],
       fetch: databaseAPI.getMainviewStoragesysfrmiz,
@@ -1256,14 +1256,49 @@ const Chatbot = () => {
       // Dataset name suggestions 
       const needle = normalizeKey(lower)
       const allowIncludes = needle.length >= ALIAS_INCLUDE_MIN
+      const seenKeys = new Set() // Tekrar eden dataset'leri önlemek için
       if (needle.length > 0) {
         Object.entries(datasetConfigs).forEach(([key, cfg]) => {
-          const baseList = needle.length <= ALIAS_INCLUDE_MIN - 1 ? (cfg.primaryAliases || cfg.aliases) : cfg.aliases
-          const hit = baseList.some(a => {
+          // Önce primaryAliases'i kontrol et, sonra tüm aliases'i (çok kelimeli alias'lar için)
+          const primaryList = cfg.primaryAliases || []
+          const allAliases = cfg.aliases || []
+          // Her iki listeyi de kontrol et (primaryAliases öncelikli ama çok kelimeli alias'lar da dahil)
+          // Tekrar edenleri önlemek için Set kullan
+          const uniqueAliases = new Set([...primaryList, ...allAliases])
+          const allLists = Array.from(uniqueAliases)
+          
+          let hasAliasMatch = false
+          
+          // Eşleşen alias'ları bul ve önerilere ekle
+          allLists.forEach(a => {
             const an = normalizeKey(a)
-            return allowIncludes ? an.includes(needle) : an.startsWith(needle)
+            const matches = allowIncludes ? an.includes(needle) : an.startsWith(needle)
+            if (matches) {
+              hasAliasMatch = true
+              // Eğer alias çok kelimeli ise (örn: "mq w2over"), onu öneride göster
+              // Aksi halde sadece dataset title'ı göster
+              const isMultiWord = a.split(/\s+/).length > 1
+              const displayText = isMultiWord ? a : cfg.title
+              const insertText = isMultiWord ? a : key
+              
+              // Aynı key için tekrar eden önerileri önle (ama çok kelimeli alias'lar için farklı öneriler ekle)
+              const uniqueKey = isMultiWord ? `${key}:${a}` : key
+              if (!seenKeys.has(uniqueKey)) {
+                seenKeys.add(uniqueKey)
+                sugs.push({ type: 'dataset', datasetKey: key, display: displayText, insertText: insertText })
+              }
+            }
           })
-          if (hit) sugs.push({ type: 'dataset', datasetKey: key, display: cfg.title, insertText: key })
+          
+          // Eğer alias'ta eşleşme yoksa, title'da ara (örn: "Network" -> "Network Stacks", "Network TCPCONF")
+          if (!hasAliasMatch && cfg.title) {
+            const titleNormalized = normalizeKey(cfg.title)
+            const titleMatches = allowIncludes ? titleNormalized.includes(needle) : titleNormalized.startsWith(needle)
+            if (titleMatches && !seenKeys.has(key)) {
+              seenKeys.add(key)
+              sugs.push({ type: 'dataset', datasetKey: key, display: cfg.title, insertText: key })
+            }
+          }
         })
       }
     }
@@ -1702,8 +1737,35 @@ const Chatbot = () => {
     const words = lowerMessage.split(/\s+/).filter(Boolean)
     const firstWord = words[0] || ''
     const firstWordNormalized = normalizeKey(firstWord)
+    const lowerMessageNormalized = normalizeKey(lowerMessage)
     
-    // 1. ÖNCE: İlk kelime tam olarak bir dataset alias'ı ile eşleşiyor mu?
+    // 1. EN ÖNCE: Tüm mesaj tam olarak bir alias ile eşleşiyor mu? (örn: "mq w2over" -> "mq w2over" alias'ı)
+    // Bu, daha spesifik eşleşmeleri öncelemek için kritik
+    const fullMatches = []
+    for (const [key, cfg] of Object.entries(datasetConfigs)) {
+      for (const alias of cfg.aliases) {
+        const aliasLower = alias.toLowerCase()
+        const aliasNormalized = normalizeKey(aliasLower)
+        
+        // Tam mesaj eşleşmesi (normalize edilmiş ve orijinal)
+        if (lowerMessage === aliasLower || lowerMessageNormalized === aliasNormalized) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          const aliasLength = aliasLower.length
+          fullMatches.push({ key, cfg, isPrimary, aliasLength, alias: aliasLower })
+        }
+      }
+    }
+    
+    if (fullMatches.length > 0) {
+      fullMatches.sort((a, b) => {
+        if (a.isPrimary !== b.isPrimary) return b.isPrimary ? 1 : -1
+        return b.aliasLength - a.aliasLength // Daha uzun alias'lar öncelikli (daha spesifik)
+      })
+      const best = fullMatches[0]
+      return { key: best.key, title: best.cfg.title, fetch: best.cfg.fetch }
+    }
+    
+    // 2. İlk kelime tam olarak bir dataset alias'ı ile eşleşiyor mu?
     let firstWordMatch = null
     let firstWordMatchScore = 0
     
@@ -1737,7 +1799,7 @@ const Chatbot = () => {
       return { key: firstWordMatch.key, title: firstWordMatch.cfg.title, fetch: firstWordMatch.cfg.fetch }
     }
     
-    // 2. İlk kelime bir alias'ın başlangıcı mı? (örn: "tcpconf" -> "tcp conf")
+    // 3. İlk kelime bir alias'ın başlangıcı mı? (örn: "tcpconf" -> "tcp conf")
     let prefixMatch = null
     let prefixMatchScore = 0
     
@@ -1769,7 +1831,7 @@ const Chatbot = () => {
       return { key: prefixMatch.key, title: prefixMatch.cfg.title, fetch: prefixMatch.cfg.fetch }
     }
     
-    // 3. Tüm mesajda exact match (word boundary ile)
+    // 4. Tüm mesajda exact match (word boundary ile)
     const exactMatches = []
     for (const [key, cfg] of Object.entries(datasetConfigs)) {
       for (const alias of cfg.aliases) {
@@ -1779,10 +1841,9 @@ const Chatbot = () => {
           const aliasNormalized = normalizeKey(aliasLower)
           return normalized === aliasNormalized
         })
-        const fullMatch = lowerMessage === aliasLower || normalizeKey(lowerMessage) === normalizeKey(aliasLower)
-        if (exactMatch || fullMatch) {
+        if (exactMatch) {
           const isPrimary = cfg.primaryAliases?.includes(alias) || false
-          exactMatches.push({ key, cfg, score: exactMatch ? 2 : 1, isPrimary, aliasLength: aliasLower.length, alias })
+          exactMatches.push({ key, cfg, score: 2, isPrimary, aliasLength: aliasLower.length, alias })
         }
       }
     }
@@ -1797,9 +1858,8 @@ const Chatbot = () => {
       return { key: best.key, title: best.cfg.title, fetch: best.cfg.fetch }
     }
     
-    // 4. Son çare: includes ile kontrol et (normalize edilmiş ve daha spesifik olanlara öncelik ver)
+    // 5. Son çare: includes ile kontrol et (normalize edilmiş ve daha spesifik olanlara öncelik ver)
     const includesMatches = []
-    const lowerMessageNormalized = normalizeKey(lowerMessage)
     
     for (const [key, cfg] of Object.entries(datasetConfigs)) {
       for (const alias of cfg.aliases) {
@@ -2016,12 +2076,40 @@ const Chatbot = () => {
       return
     }
 
-    // Network datasets (alias-aware) - İlk kelimeye öncelik ver
+    // Network datasets (alias-aware) - Tam mesaj eşleşmesine öncelik ver
     const words = lowerMessage.split(/\s+/).filter(Boolean)
     const firstWord = words[0] || ''
     const firstWordNormalized = normalizeKey(firstWord)
+    const lowerMessageNormalized = normalizeKey(lowerMessage)
     
-    // 1. ÖNCE: İlk kelime tam olarak bir dataset alias'ı ile eşleşiyor mu?
+    // 1. EN ÖNCE: Tüm mesaj tam olarak bir alias ile eşleşiyor mu? (örn: "mq w2over" -> "mq w2over" alias'ı)
+    // Bu, daha spesifik eşleşmeleri öncelemek için kritik
+    const fullMatches = []
+    for (const [key, cfg] of Object.entries(datasetConfigs)) {
+      for (const alias of cfg.aliases) {
+        const aliasLower = alias.toLowerCase()
+        const aliasNormalized = normalizeKey(aliasLower)
+        
+        // Tam mesaj eşleşmesi (normalize edilmiş ve orijinal)
+        if (lowerMessage === aliasLower || lowerMessageNormalized === aliasNormalized) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          const aliasLength = aliasLower.length
+          fullMatches.push({ key, cfg, isPrimary, aliasLength, alias: aliasLower })
+        }
+      }
+    }
+    
+    if (fullMatches.length > 0) {
+      fullMatches.sort((a, b) => {
+        if (a.isPrimary !== b.isPrimary) return b.isPrimary ? 1 : -1
+        return b.aliasLength - a.aliasLength // Daha uzun alias'lar öncelikli (daha spesifik)
+      })
+      const best = fullMatches[0]
+      await queryDataset(lowerMessage, best.cfg.fetch, best.cfg.title, best.key)
+      return
+    }
+    
+    // 2. İlk kelime tam olarak bir dataset alias'ı ile eşleşiyor mu?
     let firstWordMatch = null
     let firstWordMatchScore = 0
     
@@ -2056,7 +2144,7 @@ const Chatbot = () => {
       return
     }
     
-    // 2. İlk kelime bir alias'ın başlangıcı mı? (örn: "tcpconf" -> "tcp conf" normalize edildiğinde "tcpconf")
+    // 3. İlk kelime bir alias'ın başlangıcı mı? (örn: "tcpconf" -> "tcp conf" normalize edildiğinde "tcpconf")
     // Bu durumda normalize edilmiş alias ilk kelimenin başlangıcı olmalı veya tam tersi
     let prefixMatch = null
     let prefixMatchScore = 0
@@ -2095,7 +2183,7 @@ const Chatbot = () => {
       return
     }
     
-    // 3. Tüm mesajda exact match (word boundary ile)
+    // 4. Tüm mesajda exact match (word boundary ile)
     const exactMatches = []
     for (const [key, cfg] of Object.entries(datasetConfigs)) {
       for (const alias of cfg.aliases) {
@@ -2106,11 +2194,9 @@ const Chatbot = () => {
           const aliasNormalized = normalizeKey(aliasLower)
           return normalized === aliasNormalized
         })
-        // Veya tam string match
-        const fullMatch = lowerMessage === aliasLower || normalizeKey(lowerMessage) === normalizeKey(aliasLower)
-        if (exactMatch || fullMatch) {
+        if (exactMatch) {
           const isPrimary = cfg.primaryAliases?.includes(alias) || false
-          exactMatches.push({ key, cfg, score: exactMatch ? 2 : 1, isPrimary, aliasLength: aliasLower.length })
+          exactMatches.push({ key, cfg, score: 2, isPrimary, aliasLength: aliasLower.length })
         }
       }
     }
@@ -2127,9 +2213,8 @@ const Chatbot = () => {
       return
     }
     
-    // 4. Son çare: includes ile kontrol et (ama normalize edilmiş ve daha spesifik olanlara öncelik ver)
+    // 5. Son çare: includes ile kontrol et (ama normalize edilmiş ve daha spesifik olanlara öncelik ver)
     const includesMatches = []
-    const lowerMessageNormalized = normalizeKey(lowerMessage)
     
     for (const [key, cfg] of Object.entries(datasetConfigs)) {
       for (const alias of cfg.aliases) {
