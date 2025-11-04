@@ -295,17 +295,29 @@ const Chatbot = () => {
   }
   const pickColumnByMessage = (lowerMessage, keys, labeler) => {
     const msgNorm = normalizeKey(lowerMessage)
-    // exact contains
-    for (const k of keys) { if (msgNorm.includes(normalizeKey(k))) return k }
+    
+    // ÖNCE: Display label'larda ara (kullanıcı dostu isimler)
     if (labeler) {
       for (const k of keys) {
         const label = labeler(k)
         if (label) {
           const lab = normalizeKey(label)
-          if (msgNorm.includes(lab) || fuzzyMatch(msgNorm, lab)) return k
+          // Exact match veya fuzzy match
+          if (msgNorm === lab || msgNorm.includes(lab) || lab.includes(msgNorm) || fuzzyMatch(msgNorm, lab)) {
+            return k
+          }
         }
       }
     }
+    
+    // SONRA: Raw key'lerde ara (fallback)
+    for (const k of keys) { 
+      const keyNorm = normalizeKey(k)
+      if (msgNorm === keyNorm || msgNorm.includes(keyNorm) || keyNorm.includes(msgNorm)) {
+        return k
+      }
+    }
+    
     return null
   }
   const formatValue = (v) => {
@@ -314,13 +326,22 @@ const Chatbot = () => {
     if (!Number.isFinite(n)) return String(v)
     return Math.abs(n) < 1 ? n.toFixed(4) : n.toLocaleString('tr-TR')
   }
-  const buildSummary = (rows, maxPairs = 12) => {
+  const buildSummary = (rows, maxPairs = 12, datasetKey = null) => {
     const first = rows?.[0] || {}
     const keys = Object.keys(first).filter(k => k !== 'index')
     const pairs = []
+    
+    // Display label fonksiyonunu al
+    let getDisplayLabel = (key) => key
+    if (datasetKey) {
+      const cfg = datasetConfigs[datasetKey]
+      getDisplayLabel = cfg?.getDisplayLabel || ((key) => key)
+    }
+    
     for (const k of keys) {
       const r = rows.find(row => row?.[k] !== null && row?.[k] !== undefined) || first
-      pairs.push(`${k}: ${formatValue(r?.[k])}`)
+      const displayLabel = getDisplayLabel(k)
+      pairs.push(`${displayLabel}: ${formatValue(r?.[k])}`)
       if (pairs.length >= maxPairs) break
     }
     return pairs.join('\n')
@@ -339,7 +360,14 @@ const Chatbot = () => {
     
     const moreText = columns.length > 10 ? `\nve ${columns.length - 10} kolon daha` : ''
     
-    return `📊 ${title}\n\nMevcut kolonlar:\n${displayColumns.join('\n')}${moreText}\n\n💡 Örnek sorgular:\n• ${datasetKey} ${columns[0] || 'kolon_adı'}\n• ${datasetKey} ${columns[1] || 'kolon_adı'}`
+    // Örnek sorgular için display label kullan
+    const example1 = columns[0] ? getDisplayLabel(columns[0]) : 'kolon_adı'
+    const example2 = columns[1] ? getDisplayLabel(columns[1]) : 'kolon_adı'
+    
+    // Dataset key'i için primary alias kullan (daha kısa)
+    const primaryAlias = cfg?.primaryAliases?.[0] || datasetKey
+    
+    return `📊 ${title}\n\nMevcut kolonlar:\n${displayColumns.join('\n')}${moreText}\n\n💡 Örnek sorgular:\n• ${primaryAlias} ${example1}\n• ${primaryAlias} ${example2}`
   }
 
   // Kolon bulunamadı mesajı oluştur
@@ -352,7 +380,14 @@ const Chatbot = () => {
       return `• ${displayName}`
     })
     
-    return `❓ ${title} için aradığınız kolon bulunamadı.\n\nMevcut kolonlar:\n${displayExamples.join('\n')}\n\n💡 Örnek sorgular:\n• ${datasetKey} ${examples[0] || 'kolon_adı'}\n• ${datasetKey} ${examples[1] || 'kolon_adı'}`
+    // Örnek sorgular için display label kullan
+    const example1 = examples[0] ? getDisplayLabel(examples[0]) : 'kolon_adı'
+    const example2 = examples[1] ? getDisplayLabel(examples[1]) : 'kolon_adı'
+    
+    // Dataset key'i için primary alias kullan (daha kısa)
+    const primaryAlias = cfg?.primaryAliases?.[0] || datasetKey
+    
+    return `❓ ${title} için aradığınız kolon bulunamadı.\n\nMevcut kolonlar:\n${displayExamples.join('\n')}\n\n💡 Örnek sorgular:\n• ${primaryAlias} ${example1}\n• ${primaryAlias} ${example2}`
   }
 
   // Display label eşlemleri (MQPage.jsx ile uyumlu sade kopya)
@@ -794,6 +829,385 @@ const Chatbot = () => {
     }
   }
 
+  // ZOS Dataset display label mapping (ZOSPage.jsx'den)
+  const zosColumnMapping = {
+    cpu: {
+      'syxsysn': 'SYS',
+      'SYXSYSN': 'SYS',
+      'succpub': 'CPU Busy%',
+      'SUCCPUB': 'CPU Busy%',
+      'sucziib': 'zIIP Busy%',
+      'SUCZIIB': 'zIIP Busy%',
+      'scicpavg': 'CPU Avg',
+      'SCICPAVG': 'CPU Avg',
+      'suciinrt': 'I/O Rate',
+      'SUCIINRT': 'I/O Rate',
+      'suklqior': 'Queue I/O',
+      'SUKLQIOR': 'Queue I/O',
+      'sukadbpc': 'DASD Busy%',
+      'SUKADBPC': 'DASD Busy%',
+      'csrecspu': 'CPU SPU',
+      'CSRECSPU': 'CPU SPU',
+      'csreecpu': 'CPU EPU',
+      'CSREECPU': 'CPU EPU',
+      'csresqpu': 'SQ PU',
+      'CSRESQPU': 'SQ PU',
+      'csreespu': 'ES PU',
+      'CSREESPU': 'ES PU',
+      'bmctime': 'BMC Time',
+      'BMCTIME': 'BMC Time',
+      'time': 'Time',
+      'TIME': 'Time'
+    },
+    jcpu: {
+      'jobname': 'Jobname',
+      'JOBNAME': 'Jobname',
+      'jes_job_number': 'JES Job Number',
+      'JES_JOB_NUMBER': 'JES Job Number',
+      'address_space_type': 'Address Space Type',
+      'ADDRESS_SPACE_TYPE': 'Address Space Type',
+      'service_class_name': 'Service Class Name',
+      'SERVICE_CLASS_NAME': 'Service Class Name',
+      'asgrnmc': 'ASGRNMC',
+      'ASGRNMC': 'ASGRNMC',
+      'job_step_being_monitored': 'Job Step Being Monitored',
+      'JOB_STEP_BEING_MONITORED': 'Job Step Being Monitored',
+      'all_cpu_seconds': 'ALL CPU seconds',
+      'ALL_CPU_SECONDS': 'ALL CPU seconds',
+      'unadj_cpu_util_with_all_enclaves': 'Unadj CPU Util (All Enclaves)',
+      'UNADJ_CPU_UTIL_WITH_ALL_ENCLAVES': 'Unadj CPU Util (All Enclaves)',
+      'using_cpu_percentage': 'Using CPU %',
+      'USING_CPU_PERCENTAGE': 'Using CPU %',
+      'cpu_delay_percentage': 'CPU Delay %',
+      'CPU_DELAY_PERCENTAGE': 'CPU Delay %',
+      'average_priority': 'Average Priority',
+      'AVERAGE_PRIORITY': 'Average Priority',
+      'tcb_time': 'TCB Time',
+      'TCB_TIME': 'TCB Time',
+      'percentage_srb_time': '% SRB Time',
+      'PERCENTAGE_SRB_TIME': '% SRB Time',
+      'interval_unadj_remote_enclave_cpu_use': 'Interval Unadj Remote Enclave CPU use',
+      'INTERVAL_UNADJ_REMOTE_ENCLAVE_CPU_USE': 'Interval Unadj Remote Enclave CPU use',
+      'job_total_cpu_time': 'Job Total CPU Time',
+      'JOB_TOTAL_CPU_TIME': 'Job Total CPU Time',
+      'other_address_space_enclave_cpu_time': 'Other Addr Space Enclave CPU Time',
+      'OTHER_ADDRESS_SPACE_ENCLAVE_CPU_TIME': 'Other Addr Space Enclave CPU Time',
+      'ziip_total_cpu_time': 'zIIP Total CPU Time',
+      'ZIIP_TOTAL_CPU_TIME': 'zIIP Total CPU Time',
+      'ziip_interval_cpu_time': 'zIIP Interval CPU Time',
+      'ZIIP_INTERVAL_CPU_TIME': 'zIIP Interval CPU Time',
+      'dependent_enclave_ziip_total_time': 'Dep Enclave zIIP Total Time',
+      'DEPENDENT_ENCLAVE_ZIIP_TOTAL_TIME': 'Dep Enclave zIIP Total Time',
+      'dependent_enclave_ziip_interval_time': 'Dep Enclave zIIP Interval Time',
+      'DEPENDENT_ENCLAVE_ZIIP_INTERVAL_TIME': 'Dep Enclave zIIP Interval Time',
+      'dependent_enclave_ziip_on_cp_total': 'Dep Enclave zIIP On CP Total',
+      'DEPENDENT_ENCLAVE_ZIIP_ON_CP_TOTAL': 'Dep Enclave zIIP On CP Total',
+      'interval_cp_time': 'Interval CP time',
+      'INTERVAL_CP_TIME': 'Interval CP time',
+      'resource_group_name': 'Resource Group Name',
+      'RESOURCE_GROUP_NAME': 'Resource Group Name',
+      'resource_group_type': 'Resource Group Type',
+      'RESOURCE_GROUP_TYPE': 'Resource Group Type',
+      'recovery_process_boost': 'Recovery Process Boost',
+      'RECOVERY_PROCESS_BOOST': 'Recovery Process Boost',
+      'implicit_cpu_critical_flag': 'Implicit CPU Critical Flag',
+      'IMPLICIT_CPU_CRITICAL_FLAG': 'Implicit CPU Critical Flag',
+      'bmctime': 'BMC Time',
+      'BMCTIME': 'BMC Time',
+      'time': 'Time',
+      'TIME': 'Time'
+    },
+    jespool: {
+      'total_volumes': 'Total Volumes',
+      'TOTAL_VOLUMES': 'Total Volumes',
+      'total_files': 'Total Files',
+      'TOTAL_FILES': 'Total Files',
+      'total_tracks': 'Total Tracks',
+      'TOTAL_TRACKS': 'Total Tracks',
+      'total_cylinders': 'Total Cylinders',
+      'TOTAL_CYLINDERS': 'Total Cylinders',
+      'bmctime': 'BMC Time',
+      'BMCTIME': 'BMC Time',
+      'time': 'Time',
+      'TIME': 'Time'
+    }
+  }
+
+  // ZOS Dataset display label fonksiyonu (genel)
+  const getZosDisplayLabelLocal = (datasetKey) => (rawKey) => {
+    const key = String(rawKey || '').trim(); if (!key) return ''
+    const mapping = zosColumnMapping[datasetKey]
+    if (mapping && mapping[key]) return mapping[key]
+    if (mapping && mapping[key.toUpperCase()]) return mapping[key.toUpperCase()]
+    if (mapping && mapping[key.toLowerCase()]) return mapping[key.toLowerCase()]
+    // Fallback: normalize and title case
+    return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  }
+
+  // Network Dataset column mapping (NetworkPage.jsx'den)
+  const networkColumnMapping = {
+    stacks: {
+      'jtarget': 'Target Field',
+      'J_TARGET': 'Target Field',
+      'j_target': 'Target Field',
+      'asid8': 'Stack ASID',
+      'ASID': 'Stack ASID',
+      'asid': 'Stack ASID',
+      'ver_rel': 'Stack Version',
+      'Version': 'Stack Version',
+      'version': 'Stack Version',
+      'jobnam8': 'Job Name',
+      'JOBNAM8': 'Job Name',
+      'job_name': 'Job Name',
+      'stepnam8': 'Step Name',
+      'STEPNAM8': 'Step Name',
+      'step_name': 'Step Name',
+      'mvslvlx8': 'MVS Level',
+      'MVSLVLX8': 'MVS Level',
+      'mvs_level': 'MVS Level',
+      'startc8': 'Start Time of Stack',
+      'STARTC8': 'Start Time of Stack',
+      'start_time': 'Start Time of Stack',
+      'ipaddrc8': 'Stack IP ADDRESS',
+      'IPADDRC8': 'Stack IP ADDRESS',
+      'ip_address': 'Stack IP ADDRESS',
+      'status18': 'Stack Status',
+      'STATUS18': 'Stack Status',
+      'status': 'Stack Status'
+    },
+    stackcpu: {
+      'statstks': 'TCPIP Stack Name',
+      'STATSTKS': 'TCPIP Stack Name',
+      'ippktrcd': 'Interval Packets Received',
+      'IPPKTRCD': 'Interval Packets Received',
+      'ippktrtr': 'Packets Received per Second',
+      'IPPKTRTR': 'Packets Received per Second',
+      'ipoutred': 'Current Output Requests',
+      'IPOUTRED': 'Current Output Requests',
+      'ipoutrtr': 'Output Requests per Second',
+      'IPOUTRTR': 'Output Requests per Second'
+    },
+    vtamcsa: {
+      'j_system': 'System Field',
+      'J_SYSTEM': 'System Field',
+      'j system': 'System Field',
+      'J System': 'System Field',
+      'csacur': 'Current ECSA Usage',
+      'CSACUR': 'Current ECSA Usage',
+      'csamax': 'Maximum ECSA Usage',
+      'CSAMAX': 'Maximum ECSA Usage',
+      'csalim': 'CSA Limit',
+      'CSALIM': 'CSA Limit',
+      'csausage': 'ECSA Storage Usage',
+      'CSAUSAGE': 'ECSA Storage Usage',
+      'c24cur': 'Current CSA24 Usage',
+      'C24CUR': 'Current CSA24 Usage',
+      'c24max': 'Maximum CSA24 Usage',
+      'C24MAX': 'Maximum CSA24 Usage',
+      'vtmcur': 'Current Private Usage',
+      'VTMCUR': 'Current Private Usage',
+      'vtmmax': 'Maximum Private Usage',
+      'VTMMAX': 'Maximum Private Usage'
+    },
+    tcpstor: {
+      'step_name': 'Step',
+      'STEP_NAME': 'Step',
+      'step': 'Step',
+      'system_name': 'System',
+      'SYSTEM_NAME': 'System',
+      'system': 'System',
+      'ecsa_current': 'ECSA Current',
+      'ECSA_CURRENT': 'ECSA Current',
+      'ecsa_max': 'ECSA Max',
+      'ECSA_MAX': 'ECSA Max',
+      'ecsa_limit': 'ECSA Limit',
+      'ECSA_LIMIT': 'ECSA Limit',
+      'ecsa_free': 'ECSA Free',
+      'ECSA_FREE': 'ECSA Free',
+      'private_current': 'Private Current',
+      'PRIVATE_CURRENT': 'Private Current',
+      'private_max': 'Private Max',
+      'PRIVATE_MAX': 'Private Max',
+      'record_timestamp': 'Timestamp',
+      'RECORD_TIMESTAMP': 'Timestamp',
+      'timestamp': 'Timestamp',
+      'bmctime': 'BMC Time',
+      'BMCTIME': 'BMC Time',
+      'time': 'Time'
+    },
+    tcpconf: {
+      'job_name': 'Job Name',
+      'JOB_NAME': 'Job Name',
+      'stack_name': 'Stack Name',
+      'STACK_NAME': 'Stack Name',
+      'def_receive_bufsize': 'Def Receive Bufsize',
+      'DEF_RECEIVE_BUFSIZE': 'Def Receive Bufsize',
+      'def_send_bufsize': 'Def Send Bufsize',
+      'DEF_SEND_BUFSIZE': 'Def Send Bufsize',
+      'def_max_receive_bufsize': 'Max Receive Bufsize',
+      'DEF_MAX_RECEIVE_BUFSIZE': 'Max Receive Bufsize',
+      'maximum_queue_depth': 'Max Queue Depth',
+      'MAXIMUM_QUEUE_DEPTH': 'Max Queue Depth',
+      'max_retran_time': 'Max Retran Time',
+      'MAX_RETRAN_TIME': 'Max Retran Time',
+      'min_retran_time': 'Min Retran Time',
+      'MIN_RETRAN_TIME': 'Min Retran Time',
+      'roundtrip_gain': 'Roundtrip Gain',
+      'ROUNDTRIP_GAIN': 'Roundtrip Gain',
+      'variance_gain': 'Variance Gain',
+      'VARIANCE_GAIN': 'Variance Gain',
+      'variance_multiple': 'Variance Multiple',
+      'VARIANCE_MULTIPLE': 'Variance Multiple',
+      'default_keepalive': 'Default Keepalive',
+      'DEFAULT_KEEPALIVE': 'Default Keepalive',
+      'delay_ack': 'Delay ACK',
+      'DELAY_ACK': 'Delay ACK',
+      'restrict_low_port': 'Restrict Low Port',
+      'RESTRICT_LOW_PORT': 'Restrict Low Port',
+      'send_garbage': 'Send Garbage',
+      'SEND_GARBAGE': 'Send Garbage',
+      'tcp_timestamp': 'TCP Timestamp',
+      'TCP_TIMESTAMP': 'TCP Timestamp',
+      'ttls': 'TTLS',
+      'TTLS': 'TTLS',
+      'finwait2time': 'Finwait2 Time',
+      'FINWAIT2TIME': 'Finwait2 Time',
+      'system_name': 'System Name',
+      'SYSTEM_NAME': 'System Name',
+      'created_at': 'Created At',
+      'CREATED_AT': 'Created At',
+      'updated_at': 'Updated At',
+      'UPDATED_AT': 'Updated At'
+    },
+    tcpcons: {
+      'foreign_ip_address': 'Foreign IP',
+      'FOREIGN_IP_ADDRESS': 'Foreign IP',
+      'remote_port': 'Remote Port',
+      'REMOTE_PORT': 'Remote Port',
+      'local_port': 'Local Port',
+      'LOCAL_PORT': 'Local Port',
+      'application_name': 'Application',
+      'APPLICATION_NAME': 'Application',
+      'type_of_open': 'Type of Open',
+      'TYPE_OF_OPEN': 'Type of Open',
+      'interval_bytes_in': 'Bytes In',
+      'INTERVAL_BYTES_IN': 'Bytes In',
+      'interval_bytes_out': 'Bytes Out',
+      'INTERVAL_BYTES_OUT': 'Bytes Out',
+      'connection_status': 'Connection Status',
+      'CONNECTION_STATUS': 'Connection Status',
+      'remote_host_name': 'Remote Host',
+      'REMOTE_HOST_NAME': 'Remote Host',
+      'system_name': 'System Name',
+      'SYSTEM_NAME': 'System Name',
+      'created_at': 'Created At',
+      'CREATED_AT': 'Created At',
+      'updated_at': 'Updated At',
+      'UPDATED_AT': 'Updated At'
+    },
+    actcons: {
+      'foreign_ip_address': 'Foreign IP',
+      'FOREIGN_IP_ADDRESS': 'Foreign IP',
+      'remote_port': 'Remote Port',
+      'REMOTE_PORT': 'Remote Port',
+      'local_ip_address': 'Local IP',
+      'LOCAL_IP_ADDRESS': 'Local IP',
+      'local_port': 'Local Port',
+      'LOCAL_PORT': 'Local Port',
+      'application_name': 'Application',
+      'APPLICATION_NAME': 'Application',
+      'type_of_open': 'Type of Open',
+      'TYPE_OF_OPEN': 'Type of Open',
+      'interval_bytes_in': 'Bytes In',
+      'INTERVAL_BYTES_IN': 'Bytes In',
+      'interval_bytes_out': 'Bytes Out',
+      'INTERVAL_BYTES_OUT': 'Bytes Out',
+      'connection_status': 'Connection Status',
+      'CONNECTION_STATUS': 'Connection Status',
+      'remote_host_name': 'Remote Host',
+      'REMOTE_HOST_NAME': 'Remote Host',
+      'system_name': 'System Name',
+      'SYSTEM_NAME': 'System Name',
+      'created_at': 'Created At',
+      'CREATED_AT': 'Created At',
+      'updated_at': 'Updated At',
+      'UPDATED_AT': 'Updated At'
+    },
+    vtmbuff: {
+      'system_name': 'System',
+      'SYSTEM_NAME': 'System',
+      'iobuf_size': 'IOBuf Size',
+      'IOBUF_SIZE': 'IOBuf Size',
+      'iobuf_times_expanded': 'IOBuf Times Expanded',
+      'IOBUF_TIMES_EXPANDED': 'IOBuf Times Expanded',
+      'lpbuf_size': 'LPBuf Size',
+      'LPBUF_SIZE': 'LPBuf Size',
+      'lpbuf_times_expanded': 'LPBuf Times Expanded',
+      'LPBUF_TIMES_EXPANDED': 'LPBuf Times Expanded',
+      'lfbuf_size': 'LFBuf Size',
+      'LFBUF_SIZE': 'LFBuf Size',
+      'lfbuf_times_expanded': 'LFBuf Times Expanded',
+      'LFBUF_TIMES_EXPANDED': 'LFBuf Times Expanded',
+      'record_timestamp': 'Timestamp',
+      'RECORD_TIMESTAMP': 'Timestamp',
+      'timestamp': 'Timestamp'
+    },
+    connsrpz: {
+      'foreign_ip_address': 'Foreign IP',
+      'FOREIGN_IP_ADDRESS': 'Foreign IP',
+      'active_conns': 'Active Conns',
+      'ACTIVE_CONNS': 'Active Conns',
+      'average_rtt_ms': 'Avg RTT (ms)',
+      'AVERAGE_RTT_MS': 'Avg RTT (ms)',
+      'max_rtt_ms': 'Max RTT (ms)',
+      'MAX_RTT_MS': 'Max RTT (ms)',
+      'interval_bytes_in_sum': 'Bytes In',
+      'INTERVAL_BYTES_IN_SUM': 'Bytes In',
+      'interval_bytes_out_sum': 'Bytes Out',
+      'INTERVAL_BYTES_OUT_SUM': 'Bytes Out',
+      'stack_name': 'Stack',
+      'STACK_NAME': 'Stack',
+      'remote_host_name': 'Remote Host',
+      'REMOTE_HOST_NAME': 'Remote Host',
+      'record_timestamp': 'Timestamp',
+      'RECORD_TIMESTAMP': 'Timestamp',
+      'timestamp': 'Timestamp'
+    },
+    udpconf: {
+      'job_name': 'Job Name',
+      'JOB_NAME': 'Job Name',
+      'stack_name': 'Stack Name',
+      'STACK_NAME': 'Stack Name',
+      'def_recv_bufsize': 'Def Recv Bufsize',
+      'DEF_RECV_BUFSIZE': 'Def Recv Bufsize',
+      'def_send_bufsize': 'Def Send Bufsize',
+      'DEF_SEND_BUFSIZE': 'Def Send Bufsize',
+      'check_summing': 'Check Summing',
+      'CHECK_SUMMING': 'Check Summing',
+      'restrict_low_port': 'Restrict Low Port',
+      'RESTRICT_LOW_PORT': 'Restrict Low Port',
+      'udp_queue_limit': 'UDP Queue Limit',
+      'UDP_QUEUE_LIMIT': 'UDP Queue Limit',
+      'system_name': 'System Name',
+      'SYSTEM_NAME': 'System Name',
+      'created_at': 'Created At',
+      'CREATED_AT': 'Created At',
+      'updated_at': 'Updated At',
+      'UPDATED_AT': 'Updated At'
+    }
+  }
+
+  // Network Dataset display label fonksiyonu (genel)
+  const getNetworkDisplayLabelLocal = (datasetKey) => (rawKey) => {
+    const key = String(rawKey || '').trim(); if (!key) return ''
+    const mapping = networkColumnMapping[datasetKey]
+    if (mapping && mapping[key]) return mapping[key]
+    if (mapping && mapping[key.toUpperCase()]) return mapping[key.toUpperCase()]
+    if (mapping && mapping[key.toLowerCase()]) return mapping[key.toLowerCase()]
+    // Fallback: normalize and title case
+    return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  }
+
   // Storage Dataset display label fonksiyonu (genel)
   const getStorageDisplayLabelLocal = (datasetKey) => (rawKey) => {
     const key = String(rawKey || '').trim(); if (!key) return ''
@@ -813,7 +1227,8 @@ const Chatbot = () => {
       primaryAliases: ['stacks', 'stack'],
       fetch: databaseAPI.getMainviewNetworkStacks,
       check: databaseAPI.checkTableExistsStacks,
-      staticColumns: ['jobnam8', 'stepnam8', 'jtarget', 'asid8', 'mvslvlx8', 'ver_rel', 'startc8', 'ipaddrc8', 'status18']
+      staticColumns: ['jobnam8', 'stepnam8', 'jtarget', 'asid8', 'mvslvlx8', 'ver_rel', 'startc8', 'ipaddrc8', 'status18'],
+      getDisplayLabel: getNetworkDisplayLabelLocal('stacks')
     },
     stackcpu: {
       title: 'Network StackCPU',
@@ -821,7 +1236,8 @@ const Chatbot = () => {
       primaryAliases: ['stackcpu'],
       fetch: databaseAPI.getMainviewNetworkStackCPU,
       check: databaseAPI.checkTableExistsStackCPU,
-      staticColumns: ['statstks', 'ippktrcd', 'ippktrtr', 'ipoutred', 'ipoutrtr']
+      staticColumns: ['statstks', 'ippktrcd', 'ippktrtr', 'ipoutred', 'ipoutrtr'],
+      getDisplayLabel: getNetworkDisplayLabelLocal('stackcpu')
     },
     vtamcsa: {
       title: 'Network VTAMCSA',
@@ -829,7 +1245,8 @@ const Chatbot = () => {
       primaryAliases: ['vtamcsa'],
       fetch: databaseAPI.getMainviewNetworkVtamcsa,
       check: databaseAPI.checkTableExistsVtamcsa,
-      staticColumns: ['csacur', 'csamax', 'csalim', 'csausage', 'c24cur', 'c24max', 'vtmcur', 'vtmmax']
+      staticColumns: ['csacur', 'csamax', 'csalim', 'csausage', 'c24cur', 'c24max', 'vtmcur', 'vtmmax'],
+      getDisplayLabel: getNetworkDisplayLabelLocal('vtamcsa')
     },
     tcpconf: {
       title: 'Network TCPCONF',
@@ -837,7 +1254,8 @@ const Chatbot = () => {
       primaryAliases: ['tcpconf'],
       fetch: databaseAPI.getMainviewNetworkTcpconf,
       check: databaseAPI.checkTableExiststcpconf,
-      staticColumns: ['job_name', 'stack_name', 'def_receive_bufsize', 'def_send_bufsize', 'def_max_receive_bufsize', 'maximum_queue_depth', 'default_keepalive', 'delay_ack', 'finwait2time', 'ttls']
+      staticColumns: ['job_name', 'stack_name', 'def_receive_bufsize', 'def_send_bufsize', 'def_max_receive_bufsize', 'maximum_queue_depth', 'default_keepalive', 'delay_ack', 'finwait2time', 'ttls'],
+      getDisplayLabel: getNetworkDisplayLabelLocal('tcpconf')
     },
     tcpcons: {
       title: 'Network TCPCONS',
@@ -845,7 +1263,8 @@ const Chatbot = () => {
       primaryAliases: ['tcpcons'],
       fetch: databaseAPI.getMainviewNetworktcpcons,
       check: databaseAPI.checkTableExiststcpcons,
-      staticColumns: ['foreign_ip_address', 'remote_port', 'local_port', 'application_name', 'type_of_open', 'interval_bytes_in', 'interval_bytes_out', 'connection_status', 'remote_host_name', 'system_name']
+      staticColumns: ['foreign_ip_address', 'remote_port', 'local_port', 'application_name', 'type_of_open', 'interval_bytes_in', 'interval_bytes_out', 'connection_status', 'remote_host_name', 'system_name'],
+      getDisplayLabel: getNetworkDisplayLabelLocal('tcpcons')
     },
     udpconf: {
       title: 'Network UDPCONF',
@@ -853,7 +1272,8 @@ const Chatbot = () => {
       primaryAliases: ['udpconf'],
       fetch: databaseAPI.getMainviewNetworkUdpconf,
       check: databaseAPI.checkTableExistsudpconf,
-      staticColumns: ['job_name', 'stack_name', 'def_recv_bufsize', 'def_send_bufsize', 'check_summing', 'restrict_low_port', 'udp_queue_limit']
+      staticColumns: ['job_name', 'stack_name', 'def_recv_bufsize', 'def_send_bufsize', 'check_summing', 'restrict_low_port', 'udp_queue_limit'],
+      getDisplayLabel: getNetworkDisplayLabelLocal('udpconf')
     },
     actcons: {
       title: 'Network ACTCONS',
@@ -861,7 +1281,8 @@ const Chatbot = () => {
       primaryAliases: ['actcons'],
       fetch: databaseAPI.getMainviewNetworkactcons,
       check: databaseAPI.checkTableExistsactcons,
-      staticColumns: ['foreign_ip_address', 'remote_port', 'local_ip_address', 'local_port', 'application_name', 'type_of_open', 'interval_bytes_in', 'interval_bytes_out', 'connection_status', 'remote_host_name', 'system_name']
+      staticColumns: ['foreign_ip_address', 'remote_port', 'local_ip_address', 'local_port', 'application_name', 'type_of_open', 'interval_bytes_in', 'interval_bytes_out', 'connection_status', 'remote_host_name', 'system_name'],
+      getDisplayLabel: getNetworkDisplayLabelLocal('actcons')
     },
     vtmbuff: {
       title: 'Network VTMBUFF',
@@ -869,7 +1290,8 @@ const Chatbot = () => {
       primaryAliases: ['vtmbuff'],
       fetch: databaseAPI.getMainviewNetworkVtmbuff,
       check: databaseAPI.checkTableExistsVtmbuff,
-      staticColumns: []
+      staticColumns: ['system_name', 'iobuf_size', 'iobuf_times_expanded', 'lpbuf_size', 'lpbuf_times_expanded', 'lfbuf_size', 'lfbuf_times_expanded'],
+      getDisplayLabel: getNetworkDisplayLabelLocal('vtmbuff')
     },
     tcpstor: {
       title: 'Network TCPSTOR',
@@ -877,7 +1299,8 @@ const Chatbot = () => {
       primaryAliases: ['tcpstor'],
       fetch: databaseAPI.getMainviewNetworkTcpstor,
       check: databaseAPI.checkTableExistsTcpstor,
-      staticColumns: []
+      staticColumns: ['step_name', 'system_name', 'ecsa_current', 'ecsa_max', 'ecsa_limit', 'ecsa_free', 'private_current', 'private_max'],
+      getDisplayLabel: getNetworkDisplayLabelLocal('tcpstor')
     },
     connsrpz: {
       title: 'Network CONNSRPZ',
@@ -885,7 +1308,8 @@ const Chatbot = () => {
       primaryAliases: ['connsrpz'],
       fetch: databaseAPI.getMainviewNetworkConnsrpz,
       check: databaseAPI.checkTableExistsConnsrpz,
-      staticColumns: []
+      staticColumns: ['foreign_ip_address', 'active_conns', 'average_rtt_ms', 'max_rtt_ms', 'interval_bytes_in_sum', 'interval_bytes_out_sum', 'stack_name', 'remote_host_name'],
+      getDisplayLabel: getNetworkDisplayLabelLocal('connsrpz')
     },
     // MQ Datasets
     qm: {
@@ -926,8 +1350,7 @@ const Chatbot = () => {
       fetch: databaseAPI.getMainviewMvsSysover,
       check: databaseAPI.checkTableExists,
       staticColumns: ['syxsysn', 'succpub', 'sucziib', 'scicpavg', 'suciinrt', 'suklqior', 'sukadbpc', 'csrecspu', 'csreecpu', 'csresqpu', 'csreespu', 'bmctime', 'time'],
-      getDisplayLabel: getCpuDisplayLabelLocal,
-      parseQuery: parseCpuQuery
+      getDisplayLabel: getZosDisplayLabelLocal('cpu')
     },
     jespool: {
       title: 'Spool',
@@ -935,9 +1358,8 @@ const Chatbot = () => {
       primaryAliases: ['spool', 'iş kuyruğu yönetimi'],
       fetch: databaseAPI.getMainviewMvsJespool,
       check: databaseAPI.checkTableExistsJespool,
-      staticColumns: ['id', 'bmctime', 'time', 'smf_id', 'total_volumes', 'spool_util', 'total_tracks', 'used_tracks', 'active_spool_util', 'total_active_tracks', 'used_active_tracks', 'active_vols', 'volume', 'status', 'volume_util', 'volume_tracks', 'volume_used', 'other_vols'],
-      getDisplayLabel: getSpoolDisplayLabelLocal,
-      parseQuery: parseSpoolQuery
+      staticColumns: ['total_volumes', 'total_files', 'total_tracks', 'total_cylinders', 'bmctime', 'time'],
+      getDisplayLabel: getZosDisplayLabelLocal('jespool')
     },
     jcpu: {
       title: 'Address Space',
@@ -945,9 +1367,8 @@ const Chatbot = () => {
       primaryAliases: ['address space', 'adres alanı yönetimi'],
       fetch: databaseAPI.getMainviewMvsJCPU,
       check: databaseAPI.checkTableExistsJCPU,
-      staticColumns: ['jobname', 'jes_job_number', 'address_space_type', 'service_class_name', 'asgrnmc', 'job_step_being_monitored', 'all_cpu_seconds', 'unadj_cpu_util', 'using_cpu_p', 'cpu_delay_p', 'average_priority', 'tcb_time', 'srb_time', 'interval_unadj_remote_enclave_cpu_use', 'job_total_cpu_time', 'other_addr_space_enclave_cpu_time', 'ziip_total_cpu_time', 'ziip_interval_cpu_time', 'dep_enclave_ziip_total_time', 'dep_enclave_ziip_interval_time', 'dep_enclave_ziip_on_cp_total', 'interval_cp_time', 'resource_group_name', 'resource_group_type', 'recovery_process_boost', 'implicit_cpu_critical_flag', 'bmctime', 'time'],
-      getDisplayLabel: getAddressSpaceDisplayLabelLocal,
-      parseQuery: parseAddressSpaceQuery
+      staticColumns: ['jobname', 'jes_job_number', 'address_space_type', 'service_class_name', 'asgrnmc', 'job_step_being_monitored', 'all_cpu_seconds', 'unadj_cpu_util_with_all_enclaves', 'using_cpu_percentage', 'cpu_delay_percentage', 'average_priority', 'tcb_time', 'percentage_srb_time', 'interval_unadj_remote_enclave_cpu_use', 'job_total_cpu_time', 'other_address_space_enclave_cpu_time', 'ziip_total_cpu_time', 'ziip_interval_cpu_time', 'dependent_enclave_ziip_total_time', 'dependent_enclave_ziip_interval_time', 'dependent_enclave_ziip_on_cp_total', 'interval_cp_time', 'resource_group_name', 'resource_group_type', 'recovery_process_boost', 'implicit_cpu_critical_flag', 'bmctime', 'time'],
+      getDisplayLabel: getZosDisplayLabelLocal('jcpu')
     },
     // RMF Datasets
     rmf_pgspp: {
@@ -1181,7 +1602,7 @@ const Chatbot = () => {
       }
 
       if (listAll) {
-        const summary = buildSummary(rows, 20)
+        const summary = buildSummary(rows, 20, datasetKey)
         setMessages(prev => [...prev, { text: `📦 ${title} - Tüm Kolonlar (son değerler)\n${summary}`, sender: 'bot', timestamp: getMessageTime() }])
         setIsLoading(false)
         setIsTyping(false)
@@ -2279,6 +2700,8 @@ const Chatbot = () => {
     setIsLoading(false)
     setIsTyping(false)
 
+    // Eski MQ kodları kaldırıldı - artık queryDataset kullanılıyor
+    /*
     // MQ CONNZ data query (eski kod - datasetConfigs'teki alias'lar çalışmazsa buraya düşer)
     if (lowerMessage.includes('connz')) {
       const listAll = lowerMessage.includes('tüm') || lowerMessage.includes('hepsi') || lowerMessage.includes('kolon') || lowerMessage.includes('columns') || lowerMessage.includes('liste')
@@ -2308,7 +2731,7 @@ const Chatbot = () => {
         if (response.data?.success) {
           const rows = Array.isArray(response.data.data) ? response.data.data : []
           if (listAll) {
-            const summary = buildSummary(rows, 20)
+            const summary = buildSummary(rows, 20, 'connz')
             setMessages(prev => [...prev, { text: `📦 MQ CONNZ - Tüm Kolonlar (son değerler)\n${summary}`, sender: 'bot', timestamp: getMessageTime() }])
           } else {
             const row = rows.find(r => {
@@ -2357,7 +2780,7 @@ const Chatbot = () => {
           if (response.data?.success) {
             const rows = Array.isArray(response.data.data) ? response.data.data : []
             if (listAll) {
-              const summary = buildSummary(rows, 20)
+              const summary = buildSummary(rows, 20, 'w2over')
               setMessages(prev => [...prev, { text: `📦 MQ W2OVER - Tüm Kolonlar (son değerler)\n${summary}`, sender: 'bot' }])
             } else {
               const row = rows.find(r => Number.isFinite(Number(r?.[target.col]))) || rows[0]
@@ -2424,20 +2847,22 @@ const Chatbot = () => {
             return
           }
           if (listAll) {
-            const summary = buildSummary(rows, 20)
+            const summary = buildSummary(rows, 20, 'qm')
             setMessages(prev => [...prev, { text: `📦 MQ QM - Tüm Kolonlar (son değerler)\n${summary}`, sender: 'bot' }])
             return
           }
           const keys = getAllKeys(rows)
           const picked = pickColumnByMessage(lowerMessage, keys, getQmDisplayLabelLocal)
           if (!picked) {
-            const preview = keys.slice(0, 10).join(', ')
+            // Display label'ları kullan
+            const preview = keys.slice(0, 10).map(key => getQmDisplayLabelLocal(key)).join(', ')
             setMessages(prev => [...prev, { text: `Aradığınız QM kolonu bulunamadı. Örnekler: ${preview}. Tümünü görmek için "qm tüm" yazabilirsiniz.`, sender: 'bot' }])
             return
           }
           const row = rows.find(r => r?.[picked] !== null && r?.[picked] !== undefined) || rows[0]
           const ts = row?.record_timestamp || row?.bmctime || row?.updated_at || row?.created_at
-          const reply = `📦 MQ QM - ${picked}\n• Değer: ${formatValue(row?.[picked])}\n• Zaman: ${formatTrDate(ts)}`
+          const pickedLabel = getQmDisplayLabelLocal(picked)
+          const reply = `📦 MQ QM - ${pickedLabel}\n• Değer: ${formatValue(row?.[picked])}\n• Zaman: ${formatTrDate(ts)}`
           setMessages(prev => [...prev, { text: reply, sender: 'bot' }])
         } else {
           setMessages(prev => [...prev, { text: 'MQ QM verisi alınamadı.', sender: 'bot' }])
@@ -2447,6 +2872,7 @@ const Chatbot = () => {
       }
       return
     }
+    */
 
     // Diğer bot cevapları
     setTimeout(() => {
