@@ -169,7 +169,7 @@ const Chatbot = () => {
 
   useEffect(() => {
     scrollToBottom()
-  }, [messages])
+  }, [messages, isTyping])
 
   const getBotResponse = (message) => {
     const lowerMessage = message.toLowerCase().trim()
@@ -1659,8 +1659,13 @@ const Chatbot = () => {
       setIsLoading(false)
       setIsTyping(false)
     } catch (err) {
+      // Hata detaylarını sadece console'da tut
       console.error(`${title} query error:`, err)
-      setMessages(prev => [...prev, { text: `${title} verisi alınırken bir hata oluştu.`, sender: 'bot', timestamp: getMessageTime() }])
+      setMessages(prev => [...prev, { 
+        text: 'Üzgünüm, aradığınız veri alınırken bir hata oluştu. Lütfen tekrar deneyin.', 
+        sender: 'bot', 
+        timestamp: getMessageTime() 
+      }])
       setIsLoading(false)
       setIsTyping(false)
     }
@@ -1696,17 +1701,14 @@ const Chatbot = () => {
             const matches = allowIncludes ? an.includes(needle) : an.startsWith(needle)
             if (matches) {
               hasAliasMatch = true
-              // RMF dataset'leri için her zaman title kullan (RMF Page kart isimleriyle birebir aynı olması için)
-              // Diğer dataset'ler için: eğer alias çok kelimeli ise (örn: "mq w2over"), onu öneride göster
-              // Aksi halde sadece dataset title'ı göster
-              const isRmfDataset = key.startsWith('rmf_') || key.startsWith('cmf_')
+              // TÜM dataset'ler için her zaman cfg.title kullan (web uygulamasındaki kart isimleriyle birebir aynı olması için)
+              // Çok kelimeli alias'lar için insertText'i alias olarak kullan (örn: "mq w2over")
               const isMultiWord = a.split(/\s+/).length > 1
-              const displayText = isRmfDataset ? cfg.title : (isMultiWord ? a : cfg.title)
+              const displayText = cfg.title // Her zaman web uygulamasındaki kart adını kullan
               const insertText = isMultiWord ? a : key
               
               // Aynı key için tekrar eden önerileri önle (ama çok kelimeli alias'lar için farklı öneriler ekle)
-              // RMF dataset'leri için uniqueKey her zaman key olsun (title'ı kullandığımız için)
-              const uniqueKey = isRmfDataset ? key : (isMultiWord ? `${key}:${a}` : key)
+              const uniqueKey = isMultiWord ? `${key}:${a}` : key
               if (!seenKeys.has(uniqueKey)) {
                 seenKeys.add(uniqueKey)
                 sugs.push({ type: 'dataset', datasetKey: key, display: displayText, insertText: insertText })
@@ -1740,16 +1742,15 @@ const Chatbot = () => {
       await ensureColumnsLoaded(matchedDatasetKey)
       const cols = columnsCache[matchedDatasetKey] || datasetConfigs[matchedDatasetKey].staticColumns || []
       const lastToken = tokens[tokens.length - 1] || ''
-      // RMF dataset'leri için kolon adlarını mapping'den al
-      const isRmfDataset = matchedDatasetKey.startsWith('rmf_') || matchedDatasetKey.startsWith('cmf_')
-      const columnMapping = isRmfDataset ? rmfColumnMapping[matchedDatasetKey] : null
+      const cfg = datasetConfigs[matchedDatasetKey]
+      const getDisplayLabel = cfg?.getDisplayLabel || ((key) => key)
       
       cols
         .filter(c => c && c.toLowerCase().includes(lastToken))
         .slice(0, 10)
         .forEach(c => {
-          // RMF dataset'leri için mapping'den display adını al, yoksa orijinal kolon adını kullan
-          const displayName = columnMapping && columnMapping[c] ? columnMapping[c] : (columnMapping && columnMapping[c.toUpperCase()] ? columnMapping[c.toUpperCase()] : c)
+          // TÜM dataset'ler için getDisplayLabel fonksiyonunu kullan (web uygulamasındaki kolon isimleriyle birebir aynı olması için)
+          const displayName = getDisplayLabel(c)
           sugs.push({ type: 'column', datasetKey: matchedDatasetKey, display: displayName, insertText: `${matchedDatasetKey} ${c}` })
         })
     }
@@ -1762,16 +1763,15 @@ const Chatbot = () => {
         const cols = (columnsCache[k] || cfg.staticColumns || []).slice(0, 20)
         cols.forEach(c => all.push({ datasetKey: k, column: c }))
       }
-      // RMF dataset'leri için kolon adlarını mapping'den al
-      const isRmfDataset = (datasetKey) => datasetKey.startsWith('rmf_') || datasetKey.startsWith('cmf_')
       
       all
         .filter(it => it.column && it.column.toLowerCase().includes(lastToken) && lastToken.length >= COLUMN_SUGGEST_MIN)
         .slice(0, SUGGESTION_LIMIT)
         .forEach(it => {
-          // RMF dataset'leri için mapping'den display adını al, yoksa orijinal kolon adını kullan
-          const columnMapping = isRmfDataset(it.datasetKey) ? rmfColumnMapping[it.datasetKey] : null
-          const displayName = columnMapping && columnMapping[it.column] ? columnMapping[it.column] : (columnMapping && columnMapping[it.column.toUpperCase()] ? columnMapping[it.column.toUpperCase()] : it.column)
+          // TÜM dataset'ler için getDisplayLabel fonksiyonunu kullan
+          const cfg = datasetConfigs[it.datasetKey]
+          const getDisplayLabel = cfg?.getDisplayLabel || ((key) => key)
+          const displayName = getDisplayLabel(it.column)
           sugs.push({ type: 'column', datasetKey: it.datasetKey, display: displayName, insertText: `${it.datasetKey} ${it.column}` })
         })
     }
@@ -1792,16 +1792,26 @@ const Chatbot = () => {
 
   // Try to infer dataset from a column name when user doesn't type dataset
   const guessDatasetByColumn = async (lowerMessage) => {
-    const msgNorm = normalizeKey(lowerMessage)
-    const candidates = []
-    for (const [key, cfg] of Object.entries(datasetConfigs)) {
-      await ensureColumnsLoaded(key)
-      const cols = columnsCache[key] || cfg.staticColumns || []
-      const hit = cols.some(c => msgNorm.includes(normalizeKey(c)))
-      if (hit) candidates.push(key)
+    try {
+      const msgNorm = normalizeKey(lowerMessage)
+      const candidates = []
+      for (const [key, cfg] of Object.entries(datasetConfigs)) {
+        try {
+          await ensureColumnsLoaded(key)
+          const cols = columnsCache[key] || cfg.staticColumns || []
+          const hit = cols.some(c => msgNorm.includes(normalizeKey(c)))
+          if (hit) candidates.push(key)
+        } catch (err) {
+          // Bir dataset'te hata olursa diğerlerine devam et
+          console.error(`Error loading columns for ${key} in guessDatasetByColumn:`, err)
+        }
+      }
+      if (candidates.length === 1) return candidates[0]
+      return null
+    } catch (err) {
+      console.error('Error in guessDatasetByColumn:', err)
+      return null
     }
-    if (candidates.length === 1) return candidates[0]
-    return null
   }
 
   const findDatasetsByColumn = async (rawTerm) => {
@@ -1809,16 +1819,93 @@ const Chatbot = () => {
     const results = []
     if (!term) return results
     for (const [key, cfg] of Object.entries(datasetConfigs)) {
-      await ensureColumnsLoaded(key)
-      const cols = columnsCache[key] || cfg.staticColumns || []
-      for (const c of cols) {
-        if (normalizeKey(c).includes(term)) {
-          results.push({ datasetKey: key, title: cfg.title, column: c })
-          break
+      try {
+        await ensureColumnsLoaded(key)
+        const cols = columnsCache[key] || cfg.staticColumns || []
+        const getDisplayLabel = cfg?.getDisplayLabel || ((k) => k)
+        
+        for (const c of cols) {
+          // Hem raw column name hem de display label'da ara
+          const rawMatch = normalizeKey(c).includes(term)
+          const displayLabel = getDisplayLabel(c)
+          const displayMatch = normalizeKey(displayLabel).includes(term)
+          
+          if (rawMatch || displayMatch) {
+            results.push({ datasetKey: key, title: cfg.title, column: c, displayLabel: displayLabel })
+            break
+          }
         }
+      } catch (err) {
+        // Bir dataset'te hata olursa diğerlerine devam et
+        console.error(`Error loading columns for ${key}:`, err)
       }
     }
     return results
+  }
+
+  // Benzer dataset'leri bulan fonksiyon (fuzzy matching)
+  const findSimilarDatasets = async (lowerMessage) => {
+    const results = []
+    const messageNormalized = normalizeKey(lowerMessage)
+    const messageWords = lowerMessage.split(/\s+/).filter(Boolean)
+    
+    try {
+      for (const [key, cfg] of Object.entries(datasetConfigs)) {
+        let score = 0
+        
+        // Title'da arama
+        const titleNormalized = normalizeKey(cfg.title)
+        if (titleNormalized.includes(messageNormalized) || messageNormalized.includes(titleNormalized)) {
+          score += 10
+        }
+        
+        // Alias'larda arama
+        for (const alias of cfg.aliases || []) {
+          const aliasNormalized = normalizeKey(alias.toLowerCase())
+          if (aliasNormalized.includes(messageNormalized) || messageNormalized.includes(aliasNormalized)) {
+            score += 8
+            break
+          }
+        }
+        
+        // Kolonlarda arama (display label ile)
+        try {
+          await ensureColumnsLoaded(key)
+          const cols = columnsCache[key] || cfg.staticColumns || []
+          const getDisplayLabel = cfg?.getDisplayLabel || ((k) => k)
+          
+          for (const c of cols) {
+            const displayLabel = getDisplayLabel(c)
+            const displayNormalized = normalizeKey(displayLabel)
+            if (displayNormalized.includes(messageNormalized) || messageNormalized.includes(displayNormalized)) {
+              score += 5
+              break
+            }
+          }
+        } catch (err) {
+          // Kolon yükleme hatası olursa devam et
+        }
+        
+        // Mesajdaki kelimelerin dataset title veya alias'larda geçmesi
+        for (const word of messageWords) {
+          const wordNormalized = normalizeKey(word)
+          if (wordNormalized.length >= 3 && (titleNormalized.includes(wordNormalized) || cfg.aliases?.some(a => normalizeKey(a.toLowerCase()).includes(wordNormalized)))) {
+            score += 3
+          }
+        }
+        
+        if (score > 0) {
+          results.push({ key, title: cfg.title, score, primaryAlias: cfg.primaryAliases?.[0] || key })
+        }
+      }
+      
+      // Score'a göre sırala ve en yüksek 5'ini döndür
+      results.sort((a, b) => b.score - a.score)
+      return results.slice(0, 5)
+    } catch (err) {
+      console.error('Error finding similar datasets:', err)
+      return []
+    }
   }
 
   // Export utilities (command-based) - MQPage.jsx ile uyumlu, XLSX formatında
@@ -2356,6 +2443,20 @@ const Chatbot = () => {
     setIsLoading(true)
     setIsTyping(true)
 
+    // Tüm async işlemleri try-catch ile koru
+    try {
+      // Çok kısa mesajlar için basit, profesyonel mesaj
+      if (lowerMessage.length <= 1) {
+        setMessages(prev => [...prev, { 
+          text: 'Üzgünüm, aradığınız değeri bulamadım. Lütfen bir dataset adı veya dataset adı + kolon adı şeklinde sorgu yazın (örn: "cpu", "tcpconf stack_name").', 
+          sender: 'bot', 
+          timestamp: getMessageTime() 
+        }])
+        setIsLoading(false)
+        setIsTyping(false)
+        return
+      }
+
     // CPU tarih aralığı sorgusu (iki tarih arası min/max) - EN ÖNCE KONTROL ET
     const dateRange = extractDateRangeFromMessage(message)
     const hasCpuKeyword = lowerMessage.includes('cpu') || lowerMessage.includes('mvs') || lowerMessage.includes('sysover')
@@ -2689,35 +2790,48 @@ const Chatbot = () => {
 
     // explicit keyword fallbacks removed (aliases already cover cases)
 
-    // Column-only queries: infer dataset if possible
-    const inferred = await guessDatasetByColumn(lowerMessage)
-    if (inferred) {
-      const cfg = datasetConfigs[inferred]
-      await queryDataset(lowerMessage, cfg.fetch, cfg.title, inferred)
-      return
+    // Column-only queries: infer dataset if possible (timeout ile)
+    try {
+      const inferencePromise = guessDatasetByColumn(lowerMessage)
+      const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(null), 2000)) // 2 saniye timeout
+      const inferred = await Promise.race([inferencePromise, timeoutPromise])
+      
+      if (inferred) {
+        const cfg = datasetConfigs[inferred]
+        await queryDataset(lowerMessage, cfg.fetch, cfg.title, inferred)
+        return
+      }
+    } catch (err) {
+      // Hata durumunda devam et
+      console.error('Error in guessDatasetByColumn:', err)
     }
 
-    // If message looks like a column name, surface suggestions instead of generic fallback
+    // If message looks like a column name, surface suggestions instead of generic fallback (timeout ile)
     if (/^[a-zA-Z0-9_]+$/.test(lowerMessage) && lowerMessage.length >= COLUMN_SUGGEST_MIN) {
-      const matches = await findDatasetsByColumn(lowerMessage)
-      if (matches.length > 0) {
-        const sugs = matches.slice(0, SUGGESTION_LIMIT).map(m => ({
-          type: 'column', datasetKey: m.datasetKey, display: `${m.column}`, insertText: `${m.datasetKey} ${m.column}`
-        }))
-        setInputMessage(message)
-        setSuggestions(sugs)
-        setShowSuggestions(true)
-        setSelectedSuggestionIndex(0)
-        setIsLoading(false)
-        setIsTyping(false)
-        return
+      try {
+        const matchesPromise = findDatasetsByColumn(lowerMessage)
+        const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve([]), 2000)) // 2 saniye timeout
+        const matches = await Promise.race([matchesPromise, timeoutPromise])
+        
+        if (matches && matches.length > 0) {
+          const sugs = matches.slice(0, SUGGESTION_LIMIT).map(m => ({
+            type: 'column', datasetKey: m.datasetKey, display: m.displayLabel || m.column, insertText: `${m.datasetKey} ${m.column}`
+          }))
+          setInputMessage(message)
+          setSuggestions(sugs)
+          setShowSuggestions(true)
+          setSelectedSuggestionIndex(0)
+          setIsLoading(false)
+          setIsTyping(false)
+          return
+        }
+      } catch (err) {
+        // Hata durumunda devam et, fallback mesajına git
+        console.error('Error in findDatasetsByColumn:', err)
       }
     }
 
-    // Fallback: anlamadı mesajı
-    setMessages(prev => [...prev, { text: 'Üzgünüm, ne demek istediğinizi tam olarak anlayamadım. Lütfen daha detaylı bir soru sorun veya bir dataset adı belirtin.', sender: 'bot', timestamp: getMessageTime() }])
-    setIsLoading(false)
-    setIsTyping(false)
+    // Fallback mesajı aşağıda, genel bot cevapları kısmında işlenecek
 
     // Eski MQ kodları kaldırıldı - artık queryDataset kullanılıyor
     /*
@@ -2893,11 +3007,36 @@ const Chatbot = () => {
     }
     */
 
-    // Diğer bot cevapları
-    setTimeout(() => {
-      const botMessage = { text: getBotResponse(message), sender: 'bot' }
-      setMessages(prev => [...prev, botMessage])
-    }, 500)
+    // Diğer bot cevapları (genel konuşma mesajları için)
+    const botResponse = getBotResponse(message)
+    if (botResponse && botResponse !== 'Anlıyorum. Daha fazla bilgi için lütfen detaylı bir soru sorun.') {
+      // Genel konuşma mesajı varsa göster
+      setMessages(prev => [...prev, { text: botResponse, sender: 'bot', timestamp: getMessageTime() }])
+      setIsLoading(false)
+      setIsTyping(false)
+      return
+    }
+    
+    // Genel konuşma mesajı yoksa, hemen basit ve profesyonel bir mesaj göster (async işlem yapmadan)
+    setMessages(prev => [...prev, { 
+      text: 'Üzgünüm, aradığınız değeri bulamadım. Lütfen bir dataset adı veya dataset adı + kolon adı şeklinde sorgu yazın (örn: "cpu", "tcpconf stack_name").', 
+      sender: 'bot', 
+      timestamp: getMessageTime() 
+    }])
+    setIsLoading(false)
+    setIsTyping(false)
+    } catch (err) {
+      // Genel hata yakalama - chatbot'un donmasını önle
+      // Hata detaylarını sadece console'da tut, kullanıcıya basit mesaj göster
+      console.error('Chatbot error in handleSendMessage:', err)
+      setMessages(prev => [...prev, { 
+        text: 'Üzgünüm, bir hata oluştu. Lütfen tekrar deneyin.', 
+        sender: 'bot', 
+        timestamp: getMessageTime() 
+      }])
+      setIsLoading(false)
+      setIsTyping(false)
+    }
   }
 
   const handleKeyPress = (e) => {
@@ -3047,6 +3186,31 @@ const Chatbot = () => {
                 </div>
               </div>
             ))}
+            
+            {/* Typing Indicator */}
+            {isTyping && (
+              <div className="flex gap-3 flex-row">
+                {/* Avatar */}
+                <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gray-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232 3.45 1.232 4.68 0C28.45 15.5 28.8 13.8 29 12c0-4.5-3-7.5-9-7.5s-9 3-9 7.5c0 1.8.55 3.5 1.318 4.702M5 14.5V19.5a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0023 19.5v-5a2.25 2.25 0 00-2.25-2.25H7.25A2.25 2.25 0 005 14.5z" />
+                  </svg>
+                </div>
+                
+                {/* Typing Bubble */}
+                <div className="bg-gray-700 text-gray-100 border border-gray-600 rounded-2xl px-4 py-3 shadow-sm">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-gray-400 font-medium">Yazıyor</span>
+                    <div className="flex gap-1">
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms', animationDuration: '1.4s' }}></span>
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '200ms', animationDuration: '1.4s' }}></span>
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '400ms', animationDuration: '1.4s' }}></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div ref={messagesEndRef} />
           </div>
 
@@ -3204,6 +3368,31 @@ const Chatbot = () => {
                     </div>
                   </div>
                 ))}
+                
+                {/* Typing Indicator */}
+                {isTyping && (
+                  <div className="flex gap-4 flex-row">
+                    {/* Avatar */}
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center shadow-md bg-gray-700">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232 3.45 1.232 4.68 0C28.45 15.5 28.8 13.8 29 12c0-4.5-3-7.5-9-7.5s-9 3-9 7.5c0 1.8.55 3.5 1.318 4.702M5 14.5V19.5a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0023 19.5v-5a2.25 2.25 0 00-2.25-2.25H7.25A2.25 2.25 0 005 14.5z" />
+                      </svg>
+                    </div>
+                    
+                    {/* Typing Bubble */}
+                    <div className="bg-gray-700 text-gray-100 border border-gray-600 rounded-2xl px-5 py-4 shadow-lg">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-400 font-medium">Yazıyor</span>
+                        <div className="flex gap-1.5">
+                          <span className="w-2.5 h-2.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms', animationDuration: '1.4s' }}></span>
+                          <span className="w-2.5 h-2.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '200ms', animationDuration: '1.4s' }}></span>
+                          <span className="w-2.5 h-2.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '400ms', animationDuration: '1.4s' }}></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
                 <div ref={messagesEndRef} />
               </div>
 
