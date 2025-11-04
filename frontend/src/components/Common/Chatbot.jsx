@@ -295,6 +295,7 @@ const Chatbot = () => {
   }
   const pickColumnByMessage = (lowerMessage, keys, labeler) => {
     const msgNorm = normalizeKey(lowerMessage)
+    const candidates = []
     
     // ÖNCE: Display label'larda ara (kullanıcı dostu isimler)
     if (labeler) {
@@ -302,11 +303,46 @@ const Chatbot = () => {
         const label = labeler(k)
         if (label) {
           const lab = normalizeKey(label)
-          // Exact match veya fuzzy match
-          if (msgNorm === lab || msgNorm.includes(lab) || lab.includes(msgNorm) || fuzzyMatch(msgNorm, lab)) {
-            return k
+          let score = 0
+          
+          // Exact match (en yüksek öncelik)
+          if (msgNorm === lab) {
+            score = 100
+          }
+          // Mesaj label'ı tam olarak içeriyor (tam eşleşme)
+          else if (msgNorm.includes(lab) && lab.length >= msgNorm.length * 0.8) {
+            score = 80
+          }
+          // Label mesajı tam olarak içeriyor (tam eşleşme)
+          else if (lab.includes(msgNorm) && msgNorm.length >= lab.length * 0.8) {
+            score = 70
+          }
+          // Mesaj label'ı içeriyor (kısmi eşleşme - daha uzun label'lar öncelikli)
+          else if (msgNorm.includes(lab)) {
+            score = 50 + (lab.length / 100) // Daha uzun label'lar daha yüksek skor
+          }
+          // Label mesajı içeriyor (kısmi eşleşme - daha uzun label'lar öncelikli)
+          else if (lab.includes(msgNorm)) {
+            score = 40 + (msgNorm.length / 100) // Daha uzun mesajlar daha yüksek skor
+          }
+          // Fuzzy match
+          else if (fuzzyMatch(msgNorm, lab)) {
+            score = 30
+          }
+          
+          if (score > 0) {
+            candidates.push({ key: k, score, labelLength: lab.length })
           }
         }
+      }
+      
+      // En yüksek skorlu ve en uzun label'ı seç
+      if (candidates.length > 0) {
+        candidates.sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score
+          return b.labelLength - a.labelLength // Skor eşitse daha uzun label'ı seç
+        })
+        return candidates[0].key
       }
     }
     
@@ -732,12 +768,12 @@ const Chatbot = () => {
   // Storage Dataset display label mapping (StoragePage.jsx'den)
   const storageColumnMapping = {
     csasum: {
-      'csa_in_use_percent': 'CSA Kullanım Yüzdesi',
-      'ecsa_in_use_percent': 'ECSA Kullanım Yüzdesi',
-      'rucsa_in_use_percent': 'RUCSA Kullanım Yüzdesi',
-      'sqa_in_use_percent': 'SQA Kullanım Yüzdesi',
-      'total_cs_used_percent': 'Toplam CS Kullanımı',
-      'percent_used_high_shared_storage': 'High Shared Storage Kullanımı',
+      'csa_in_use_percent': 'CSA in use percent',
+      'ecsa_in_use_percent': 'ECSA in use percent',
+      'rucsa_in_use_percent': 'RUCSA in use percent',
+      'sqa_in_use_percent': 'SQA in use percent',
+      'total_cs_used_percent': 'Total CS used percent',
+      'percent_used_high_shared_storage': 'High Shared Storage used percent',
       'timestamp': 'Timestamp',
       'bmctime': 'BMC Time',
       'time': 'Time'
@@ -1483,8 +1519,8 @@ const Chatbot = () => {
     // Storage Datasets
     csasum: {
       title: 'Storage CSASUM',
-      aliases: ['csasum', 'common storage area summary', 'common storage', 'csa summary', 'storage csa'],
-      primaryAliases: ['csasum', 'common storage area summary'],
+      aliases: ['storage csasum', 'csasum', 'common storage area summary', 'common storage', 'csa summary', 'storage csa'],
+      primaryAliases: ['storage csasum', 'csasum'],
       fetch: databaseAPI.getMainviewStorageCsasum,
       check: databaseAPI.checkTableExistsCsasum,
       staticColumns: ['csa_in_use_percent', 'ecsa_in_use_percent', 'rucsa_in_use_percent', 'sqa_in_use_percent', 'total_cs_used_percent', 'percent_used_high_shared_storage', 'timestamp', 'bmctime'],
@@ -1492,8 +1528,8 @@ const Chatbot = () => {
     },
     frminfo_center: {
       title: 'Storage FRMINFO Central',
-      aliases: ['frminfo center', 'frminfo central', 'frame information central', 'frame central', 'storage central'],
-      primaryAliases: ['frminfo center', 'frminfo central'],
+      aliases: ['storage frminfo central', 'frminfo center', 'frminfo central', 'frame information central', 'frame central', 'storage central'],
+      primaryAliases: ['storage frminfo central', 'frminfo central'],
       fetch: databaseAPI.getMainviewStorageFrminfoCenter,
       check: databaseAPI.checkTableExistsFrminfoCenter,
       staticColumns: ['spispcav', 'spispcmn', 'spispcmx', 'spilpfav', 'spilpfmn', 'spilpfmx', 'spicpfav', 'spicpfmn', 'spicpfmx', 'spiqpcav', 'spiqpcmn', 'spiqpcmx', 'spiapfav', 'spiapfmn', 'spiapfmx', 'spiafcav', 'spiafcmn', 'spitfuav', 'spiafumn', 'spiafumx', 'spitcpct', 'bmctime'],
@@ -1501,8 +1537,8 @@ const Chatbot = () => {
     },
     frminfo_fixed: {
       title: 'Storage FRMINFO Fixed',
-      aliases: ['frminfo fixed', 'frame information fixed', 'frame fixed', 'storage fixed'],
-      primaryAliases: ['frminfo fixed', 'frame information fixed'],
+      aliases: ['storage frminfo fixed', 'frminfo fixed', 'frame information fixed', 'frame fixed', 'storage fixed'],
+      primaryAliases: ['storage frminfo fixed', 'frminfo fixed'],
       fetch: databaseAPI.getMainviewStorageFrminfofixed,
       check: databaseAPI.checkTableExistsFrminfofixed,
       staticColumns: ['sqa_avg', 'sqa_min', 'sqa_max', 'lpa_avg', 'lpa_min', 'lpa_max', 'csa_avg', 'lsqa_avg', 'lsqa_min', 'lsqa_max', 'private_avg', 'private_min', 'private_max', 'fixed_below_16m_avg', 'fixed_below_16m_min', 'fixed_below_16m_max', 'fixed_total_avg', 'fixed_total_min', 'fixed_total_max', 'fixed_percentage', 'timestamp'],
@@ -1510,8 +1546,8 @@ const Chatbot = () => {
     },
     frminfo_high_virtual: {
       title: 'Storage FRMINFO High Virtual',
-      aliases: ['frminfo high virtual', 'frminfo highvirtual', 'frame information high virtual', 'high virtual', 'storage high virtual'],
-      primaryAliases: ['frminfo high virtual', 'frame information high virtual'],
+      aliases: ['storage frminfo high virtual', 'frminfo high virtual', 'frminfo highvirtual', 'frame information high virtual', 'high virtual', 'storage high virtual'],
+      primaryAliases: ['storage frminfo high virtual', 'frminfo high virtual'],
       fetch: databaseAPI.getMainviewStorageFrminfoHighVirtual,
       check: databaseAPI.checkTableExistsFrminfoHighVirtual,
       staticColumns: ['hv_common_avg', 'hv_common_min', 'hv_common_max', 'hv_shared_avg', 'hv_shared_min', 'hv_shared_max', 'timestamp', 'bmctime'],
@@ -1519,8 +1555,8 @@ const Chatbot = () => {
     },
     sysfrmiz: {
       title: 'Storage SYSFRMIZ',
-      aliases: ['sysfrmiz', 'system frame information', 'system frame', 'frame information system'],
-      primaryAliases: ['sysfrmiz', 'system frame information'],
+      aliases: ['storage sysfrmiz', 'sysfrmiz', 'system frame information', 'system frame', 'frame information system'],
+      primaryAliases: ['storage sysfrmiz', 'sysfrmiz'],
       fetch: databaseAPI.getMainviewStoragesysfrmiz,
       check: databaseAPI.checkTableExistsSysfrmiz,
       staticColumns: ['spgid', 'spiuonlf', 'spluicav', 'spifinav', 'sprefncp', 'spispcav', 'spreasrp', 'spilpfav', 'sprealpp', 'spicpfav', 'spreavpp', 'spiqpcav', 'sprelsqp', 'spiapfav', 'spreprvp', 'spiafcav', 'spreavlp', 'spihvcav', 'sprecmnp', 'spihvsav', 'spreshrp', 'bmctime'],
@@ -1683,6 +1719,22 @@ const Chatbot = () => {
       const needle = normalizeKey(lower)
       const allowIncludes = needle.length >= ALIAS_INCLUDE_MIN
       const seenKeys = new Set() // Tekrar eden dataset'leri önlemek için
+      
+      // Özel durum: "storage" yazıldığında tüm storage tablolarını göster
+      if (lower.includes('storage') || normalizeKey(lower) === 'storage') {
+        Object.entries(datasetConfigs).forEach(([key, cfg]) => {
+          // Title'da "Storage" geçen tüm dataset'leri ekle
+          if (cfg.title && cfg.title.toLowerCase().includes('storage')) {
+            if (!seenKeys.has(key)) {
+              seenKeys.add(key)
+              // Primary alias'ı kullan, yoksa key'i kullan
+              const insertText = cfg.primaryAliases?.[0] || key
+              sugs.push({ type: 'dataset', datasetKey: key, display: cfg.title, insertText: insertText })
+            }
+          }
+        })
+      }
+      
       if (needle.length > 0) {
         Object.entries(datasetConfigs).forEach(([key, cfg]) => {
           // Önce primaryAliases'i kontrol et, sonra tüm aliases'i (çok kelimeli alias'lar için)
@@ -1751,7 +1803,8 @@ const Chatbot = () => {
         .forEach(c => {
           // TÜM dataset'ler için getDisplayLabel fonksiyonunu kullan (web uygulamasındaki kolon isimleriyle birebir aynı olması için)
           const displayName = getDisplayLabel(c)
-          sugs.push({ type: 'column', datasetKey: matchedDatasetKey, display: displayName, insertText: `${matchedDatasetKey} ${c}` })
+          // insertText'te de display label kullan (web'deki gibi görünsün)
+          sugs.push({ type: 'column', datasetKey: matchedDatasetKey, display: displayName, insertText: `${matchedDatasetKey} ${displayName}` })
         })
     }
 
@@ -1768,11 +1821,12 @@ const Chatbot = () => {
         .filter(it => it.column && it.column.toLowerCase().includes(lastToken) && lastToken.length >= COLUMN_SUGGEST_MIN)
         .slice(0, SUGGESTION_LIMIT)
         .forEach(it => {
-          // TÜM dataset'ler için getDisplayLabel fonksiyonunu kullan
+          // TÜM dataset'ler için getDisplayLabel fonksiyonunu kullan (web uygulamasındaki kolon isimleriyle birebir aynı olması için)
           const cfg = datasetConfigs[it.datasetKey]
           const getDisplayLabel = cfg?.getDisplayLabel || ((key) => key)
           const displayName = getDisplayLabel(it.column)
-          sugs.push({ type: 'column', datasetKey: it.datasetKey, display: displayName, insertText: `${it.datasetKey} ${it.column}` })
+          // insertText'te de display label kullan (web'deki gibi görünsün)
+          sugs.push({ type: 'column', datasetKey: it.datasetKey, display: displayName, insertText: `${it.datasetKey} ${displayName}` })
         })
     }
 
@@ -2815,7 +2869,7 @@ const Chatbot = () => {
         
         if (matches && matches.length > 0) {
           const sugs = matches.slice(0, SUGGESTION_LIMIT).map(m => ({
-            type: 'column', datasetKey: m.datasetKey, display: m.displayLabel || m.column, insertText: `${m.datasetKey} ${m.column}`
+            type: 'column', datasetKey: m.datasetKey, display: m.displayLabel || m.column, insertText: `${m.datasetKey} ${m.displayLabel || m.column}`
           }))
           setInputMessage(message)
           setSuggestions(sugs)
