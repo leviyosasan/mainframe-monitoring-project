@@ -1696,14 +1696,17 @@ const Chatbot = () => {
             const matches = allowIncludes ? an.includes(needle) : an.startsWith(needle)
             if (matches) {
               hasAliasMatch = true
-              // Eğer alias çok kelimeli ise (örn: "mq w2over"), onu öneride göster
+              // RMF dataset'leri için her zaman title kullan (RMF Page kart isimleriyle birebir aynı olması için)
+              // Diğer dataset'ler için: eğer alias çok kelimeli ise (örn: "mq w2over"), onu öneride göster
               // Aksi halde sadece dataset title'ı göster
+              const isRmfDataset = key.startsWith('rmf_') || key.startsWith('cmf_')
               const isMultiWord = a.split(/\s+/).length > 1
-              const displayText = isMultiWord ? a : cfg.title
+              const displayText = isRmfDataset ? cfg.title : (isMultiWord ? a : cfg.title)
               const insertText = isMultiWord ? a : key
               
               // Aynı key için tekrar eden önerileri önle (ama çok kelimeli alias'lar için farklı öneriler ekle)
-              const uniqueKey = isMultiWord ? `${key}:${a}` : key
+              // RMF dataset'leri için uniqueKey her zaman key olsun (title'ı kullandığımız için)
+              const uniqueKey = isRmfDataset ? key : (isMultiWord ? `${key}:${a}` : key)
               if (!seenKeys.has(uniqueKey)) {
                 seenKeys.add(uniqueKey)
                 sugs.push({ type: 'dataset', datasetKey: key, display: displayText, insertText: insertText })
@@ -1737,10 +1740,18 @@ const Chatbot = () => {
       await ensureColumnsLoaded(matchedDatasetKey)
       const cols = columnsCache[matchedDatasetKey] || datasetConfigs[matchedDatasetKey].staticColumns || []
       const lastToken = tokens[tokens.length - 1] || ''
+      // RMF dataset'leri için kolon adlarını mapping'den al
+      const isRmfDataset = matchedDatasetKey.startsWith('rmf_') || matchedDatasetKey.startsWith('cmf_')
+      const columnMapping = isRmfDataset ? rmfColumnMapping[matchedDatasetKey] : null
+      
       cols
         .filter(c => c && c.toLowerCase().includes(lastToken))
         .slice(0, 10)
-        .forEach(c => sugs.push({ type: 'column', datasetKey: matchedDatasetKey, display: c, insertText: `${matchedDatasetKey} ${c}` }))
+        .forEach(c => {
+          // RMF dataset'leri için mapping'den display adını al, yoksa orijinal kolon adını kullan
+          const displayName = columnMapping && columnMapping[c] ? columnMapping[c] : (columnMapping && columnMapping[c.toUpperCase()] ? columnMapping[c.toUpperCase()] : c)
+          sugs.push({ type: 'column', datasetKey: matchedDatasetKey, display: displayName, insertText: `${matchedDatasetKey} ${c}` })
+        })
     }
 
     // If no dataset matched, still suggest global columns
@@ -1751,10 +1762,18 @@ const Chatbot = () => {
         const cols = (columnsCache[k] || cfg.staticColumns || []).slice(0, 20)
         cols.forEach(c => all.push({ datasetKey: k, column: c }))
       }
+      // RMF dataset'leri için kolon adlarını mapping'den al
+      const isRmfDataset = (datasetKey) => datasetKey.startsWith('rmf_') || datasetKey.startsWith('cmf_')
+      
       all
         .filter(it => it.column && it.column.toLowerCase().includes(lastToken) && lastToken.length >= COLUMN_SUGGEST_MIN)
         .slice(0, SUGGESTION_LIMIT)
-        .forEach(it => sugs.push({ type: 'column', datasetKey: it.datasetKey, display: `${it.column}`, insertText: `${it.datasetKey} ${it.column}` }))
+        .forEach(it => {
+          // RMF dataset'leri için mapping'den display adını al, yoksa orijinal kolon adını kullan
+          const columnMapping = isRmfDataset(it.datasetKey) ? rmfColumnMapping[it.datasetKey] : null
+          const displayName = columnMapping && columnMapping[it.column] ? columnMapping[it.column] : (columnMapping && columnMapping[it.column.toUpperCase()] ? columnMapping[it.column.toUpperCase()] : it.column)
+          sugs.push({ type: 'column', datasetKey: it.datasetKey, display: displayName, insertText: `${it.datasetKey} ${it.column}` })
+        })
     }
 
     // keep panel compact
@@ -2883,8 +2902,8 @@ const Chatbot = () => {
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      if (showSuggestions && selectedSuggestionIndex >= 0) return
       e.preventDefault()
+      // Enter tuşu sadece mesaj gönderir, önerileri uygulamaz
       handleSendMessage()
     }
   }
@@ -2897,12 +2916,13 @@ const Chatbot = () => {
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
       setSelectedSuggestionIndex(prev => (prev - 1 + suggestions.length) % suggestions.length)
-    } else if (e.key === 'Tab' || e.key === 'Enter') {
+    } else if (e.key === 'Tab') {
       e.preventDefault()
       applySuggestion(suggestions[selectedSuggestionIndex] || suggestions[0])
     } else if (e.key === 'Escape') {
       setShowSuggestions(false)
     }
+    // Enter tuşu artık önerileri uygulamıyor, sadece mesaj gönderiyor (handleKeyPress'te)
   }
 
   return (
