@@ -1760,7 +1760,7 @@ const MQPage = () => {
 
         {/* Info Modal */}
         {infoModal && (() => {
-          // Key'e göre Türkçe açıklamalar
+          // Key'e göre Türkçe açıklamalar - Ne Ölçer?
           const getFieldDescription = (key) => {
             const k = String(key || '').toLowerCase();
             
@@ -1835,29 +1835,164 @@ const MQPage = () => {
             // Varsayılan genel açıklama
             return 'Bu veri alanı MQ sisteminin performans ve durum metriklerini ölçer. IBM MQ queue manager\'ın çalışma bilgilerini sağlar.';
           };
+
+          // Key'e göre Teknik Detaylar
+          const getTechnicalDetails = (key) => {
+            const k = String(key || '').toLowerCase();
+            
+            if (k.includes('qmsg') || k.includes('msg')) {
+              return 'Queue mesaj sayısı, IBM MQ queue\'larında bekleyen mesajların toplamını gösterir. Bu değer queue depth ile ilişkilidir ve MQ queue manager\'ın mesaj işleme kapasitesini yansıtır.';
+            }
+            
+            if (k.includes('comlv') || k.includes('com_lv')) {
+              return 'Commit level, MQ transaction yönetiminde kullanılan bir kavramdır. Queue manager\'ın transaction commit seviyesini belirler ve veri tutarlılığını sağlar.';
+            }
+            
+            if (k.includes('getr') || k.includes('get')) {
+              return 'GET operasyonları, queue\'lardan mesaj almak için kullanılan temel MQ işlemleridir. Bu işlemler queue manager tarafından yönetilir ve mesaj işleme performansını etkiler.';
+            }
+            
+            if (k.includes('put') || k.includes('send')) {
+              return 'PUT operasyonları, queue\'lara mesaj göndermek için kullanılan temel MQ işlemleridir. Bu işlemler queue manager tarafından yönetilir ve mesaj gönderme performansını etkiler.';
+            }
+            
+            if (k.includes('retry')) {
+              return 'Retry sayısı, başarısız MQ işlemlerinin yeniden deneme sayısını gösterir. Yüksek retry değerleri network sorunları veya queue manager erişim problemlerini işaret edebilir.';
+            }
+            
+            if (k.includes('depth')) {
+              return 'Queue depth, bir queue\'da bekleyen mesaj sayısını gösterir. Bu değer queue\'nun kapasitesi ve mesaj işleme hızı ile doğrudan ilişkilidir.';
+            }
+            
+            if (k.includes('channel') && !k.includes('message')) {
+              return 'Channel sayısı, Queue Manager\'lar arasındaki iletişim kanallarını gösterir. MQ channel\'lar, distributed queue manager\'lar arasında mesaj transferi için kullanılır.';
+            }
+            
+            if (k.startsWith('qm') || k.includes('queue_manager')) {
+              return 'Queue Manager, IBM MQ sisteminin merkezi bileşenidir. Queue\'ları yönetir, mesaj işlemlerini koordine eder ve sistem durumunu izler. Queue Manager durumu, tüm MQ operasyonlarının sağlığını gösterir.';
+            }
+            
+            if (k.includes('queue') || (k.startsWith('q') && !k.includes('msg'))) {
+              return 'Queue, MQ sisteminde mesajların saklandığı ve işlendiği yapıdır. Queue durumu, mesaj işleme kapasitesi ve sistem performansı hakkında bilgi sağlar.';
+            }
+            
+            if (k.includes('count') || k.includes('num') || k.includes('total')) {
+              return 'Sayısal metrikler, MQ sisteminin aktivite seviyesini ve işlem hacmini gösterir. Bu metrikler kapasite planlama ve performans analizi için kritik öneme sahiptir.';
+            }
+            
+            if (k.includes('free') || k.includes('used') || k.includes('buffer')) {
+              return 'Bellek metrikleri, MQ sisteminin kaynak kullanımını gösterir. Buffer ve bellek yönetimi, queue manager performansını doğrudan etkiler.';
+            }
+            
+            if (k.includes('page') || k.includes('pageset')) {
+              return 'Page set metrikleri, MQ queue manager\'ın disk tabanlı bellek yönetimini gösterir. Page set durumu, sistem kapasitesi ve performansı hakkında bilgi sağlar.';
+            }
+            
+            if (k.includes('event') || k.includes('listener')) {
+              return 'Event ve listener metrikleri, MQ sisteminin olay yönetimi ve monitoring yeteneklerini gösterir. Bu metrikler sistem durumu ve performans izleme için kullanılır.';
+            }
+            
+            if (k.includes('time') || k.includes('date') || k.includes('timestamp')) {
+              return 'Zaman damgası bilgisi, MQ kayıtlarının oluşturulma veya güncellenme zamanını gösterir. Bu bilgi, veri analizi ve trend izleme için kritik öneme sahiptir.';
+            }
+            
+            return 'Bu metrik, IBM MQ sisteminin teknik altyapısı ve çalışma mekanizmaları hakkında detaylı bilgi sağlar. Queue manager\'ın iç işleyişi ve sistem bileşenleri arasındaki etkileşimleri gösterir.';
+          };
+
+          // Key'e göre Neden Önemli?
+          const getWhyImportant = (key) => {
+            const k = String(key || '').toLowerCase();
+            
+            if (k.includes('qmsg') || k.includes('msg')) {
+              return 'Queue mesaj sayısı, sistem performansı ve kapasite planlama için kritik öneme sahiptir. Yüksek mesaj sayıları, queue\'ların dolu olduğunu ve mesaj işleme gecikmelerini gösterir. Bu bilgi, kapasite artırma veya queue yapılandırması değişiklikleri için gereklidir.';
+            }
+            
+            if (k.includes('comlv') || k.includes('com_lv')) {
+              return 'Commit level, transaction yönetimi ve veri tutarlılığı için kritik öneme sahiptir. Yanlış commit level ayarları, veri kaybı veya tutarsızlıklara neden olabilir. Bu metrik, transaction yönetimi stratejilerinin doğru uygulanmasını sağlar.';
+            }
+            
+            if (k.includes('getr') || k.includes('get')) {
+              return 'GET operasyonları, mesaj işleme performansını doğrudan etkiler. Yüksek GET sayıları, sistemin aktif olduğunu gösterir ancak aynı zamanda queue\'ların boşalma hızını da yansıtır. Bu bilgi, performans optimizasyonu için gereklidir.';
+            }
+            
+            if (k.includes('put') || k.includes('send')) {
+              return 'PUT operasyonları, mesaj gönderme performansını ve sistem yükünü gösterir. Yüksek PUT sayıları, sistemin yoğun kullanıldığını gösterir. Bu metrik, kapasite planlama ve yük dengeleme için kritik öneme sahiptir.';
+            }
+            
+            if (k.includes('retry')) {
+              return 'Retry sayısı, sistem sağlığı ve güvenilirliği için önemli bir göstergedir. Yüksek retry değerleri, sistem sorunlarının erken tespiti için kritik öneme sahiptir. Bu bilgi, proaktif sorun giderme ve sistem stabilitesini sağlamak için gereklidir.';
+            }
+            
+            if (k.includes('depth')) {
+              return 'Queue depth, sistem performansı ve mesaj işleme kapasitesi için kritik öneme sahiptir. Yüksek queue depth değerleri, mesaj birikimini ve potansiyel performans sorunlarını gösterir. Bu bilgi, kapasite planlama ve performans optimizasyonu için gereklidir.';
+            }
+            
+            if (k.includes('channel') && !k.includes('message')) {
+              return 'Channel sayısı, distributed MQ sistemlerinin sağlığı için kritik öneme sahiptir. Channel durumu, Queue Manager\'lar arasındaki iletişimin sağlığını gösterir. Bu bilgi, network sorunlarının tespiti ve sistem bütünlüğünün korunması için gereklidir.';
+            }
+            
+            if (k.startsWith('qm') || k.includes('queue_manager')) {
+              return 'Queue Manager durumu, tüm MQ sisteminin sağlığını gösterir. Bu metrik, sistem performansı, kapasite planlama ve proaktif sorun giderme için kritik öneme sahiptir. Queue Manager durumu, sistem yönetimi ve optimizasyon kararları için temel bilgi sağlar.';
+            }
+            
+            if (k.includes('queue') || (k.startsWith('q') && !k.includes('msg'))) {
+              return 'Queue durumu, mesaj işleme kapasitesi ve sistem performansı için kritik öneme sahiptir. Queue metrikleri, kapasite planlama, performans optimizasyonu ve sorun giderme için gereklidir. Bu bilgi, sistem yönetimi ve operasyonel kararlar için temel oluşturur.';
+            }
+            
+            if (k.includes('count') || k.includes('num') || k.includes('total')) {
+              return 'Sayısal metrikler, sistem aktivitesi ve işlem hacmi hakkında bilgi sağlar. Bu metrikler, kapasite planlama, performans analizi ve trend izleme için kritik öneme sahiptir. Sistem yönetimi ve optimizasyon kararları için temel oluşturur.';
+            }
+            
+            if (k.includes('free') || k.includes('used') || k.includes('buffer')) {
+              return 'Bellek metrikleri, sistem kaynak kullanımı ve performans için kritik öneme sahiptir. Yüksek bellek kullanımı, sistem performansını etkileyebilir ve kapasite artırma gereksinimini işaret edebilir. Bu bilgi, kaynak yönetimi ve performans optimizasyonu için gereklidir.';
+            }
+            
+            if (k.includes('page') || k.includes('pageset')) {
+              return 'Page set metrikleri, sistem kapasitesi ve performansı için kritik öneme sahiptir. Page set durumu, disk tabanlı bellek yönetimi ve sistem kapasitesi hakkında bilgi sağlar. Bu bilgi, kapasite planlama ve performans optimizasyonu için gereklidir.';
+            }
+            
+            if (k.includes('event') || k.includes('listener')) {
+              return 'Event ve listener metrikleri, sistem izleme ve proaktif sorun giderme için kritik öneme sahiptir. Bu metrikler, sistem durumu ve performans izleme yeteneklerini gösterir. Sistem yönetimi ve operasyonel kararlar için temel oluşturur.';
+            }
+            
+            if (k.includes('time') || k.includes('date') || k.includes('timestamp')) {
+              return 'Zaman damgası bilgisi, veri analizi ve trend izleme için kritik öneme sahiptir. Bu bilgi, performans analizi, kapasite planlama ve sorun giderme için gereklidir. Zaman bazlı analizler, sistem davranışı ve trend tespiti için temel oluşturur.';
+            }
+            
+            return 'Bu metrik, MQ sisteminin sağlığı, performansı ve operasyonel durumu hakkında kritik bilgiler sağlar. Sistem yönetimi, kapasite planlama ve performans optimizasyonu için gereklidir. Bu bilgi, proaktif sorun giderme ve sistem stabilitesini sağlamak için temel oluşturur.';
+          };
           
           return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[130]">
-              <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[130]" onClick={closeInfo}>
+              <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                 <div className="p-6">
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-2xl font-bold text-gray-800">
-                      {getDisplayLabelForActive(infoModal)} Hakkında
+                      {getDisplayLabelForActive(infoModal)}
                     </h3>
                     <button onClick={closeInfo} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
                   </div>
-                  <div className="space-y-6">
+
+                  {/* Info Content */}
+                  <div className="space-y-4">
                     <div className="bg-blue-50 rounded-lg p-4">
                       <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
                       <p className="text-blue-800 text-sm">
                         {getFieldDescription(infoModal)}
                       </p>
                     </div>
-                  </div>
-                  <div className="flex justify-end mt-6">
-                    <button onClick={closeInfo} className="px-4 py-2 text-sm font-medium text-white bg-cyan-600 rounded-md hover:bg-cyan-700">
-                      Kapat
-                    </button>
+                    <div className="bg-green-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                      <p className="text-green-800 text-sm">
+                        {getTechnicalDetails(infoModal)}
+                      </p>
+                    </div>
+                    <div className="bg-yellow-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                      <p className="text-yellow-800 text-sm">
+                        {getWhyImportant(infoModal)}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

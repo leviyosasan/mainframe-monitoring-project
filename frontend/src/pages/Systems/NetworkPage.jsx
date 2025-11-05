@@ -6373,10 +6373,22 @@ const NetworkPage = () => {
                     {/* VTMBUFF Info Modals */}
                     {infoModal === 'vtmbuffSystem' && (
                       <div className="space-y-4">
-                        <div className="bg-teal-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-teal-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             VTAM buffer yönetim sisteminin adını gösterir. Buffer allocation ve memory management işlemlerini takip eder.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            VTAM buffer yönetimi, sistem adı bilgisi ile buffer allocation işlemlerini izler. Bu bilgi, VTAM buffer yönetim sisteminin hangi sistem üzerinde çalıştığını ve buffer allocation'ların hangi sistem bağlamında gerçekleştiğini gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Sistem adı, VTAM buffer yönetimi için kritik öneme sahiptir. Multi-system ortamlarında buffer allocation'ların hangi sistemde gerçekleştiğini anlamak, sistem yönetimi ve performans optimizasyonu için gereklidir. Bu bilgi, sistem bazlı buffer kullanım analizi ve kapasite planlama için temel oluşturur.
                           </p>
                         </div>
                       </div>
@@ -6384,10 +6396,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'vtmbuffIobufSize' && (
                       <div className="space-y-4">
-                        <div className="bg-teal-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-teal-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             IOBuf (Input/Output Buffer) boyutunu gösterir. VTAM'ın veri alış-veriş işlemleri için kullandığı buffer alanının büyüklüğünü ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            IOBuf, VTAM'ın I/O işlemleri için kullandığı buffer alanının boyutunu gösterir. Bu buffer, VTAM'ın network üzerinden veri alış-veriş işlemlerini gerçekleştirmek için kullanılır. Buffer boyutu, I/O performansını ve veri transfer kapasitesini doğrudan etkiler.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            IOBuf boyutu, VTAM'ın I/O performansı için kritik öneme sahiptir. Yetersiz buffer boyutu, I/O gecikmelerine ve performans sorunlarına neden olabilir. Bu metrik, buffer optimizasyonu ve kapasite planlama için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6395,10 +6419,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'vtmbuffIobufTimes' && (
                       <div className="space-y-4">
-                        <div className="bg-teal-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-teal-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             IOBuf buffer'ın kaç kez genişletildiğini gösterir. Yüksek değerler bellek baskısını işaret eder.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            IOBuf Times Expanded, VTAM'ın I/O buffer'ının başlangıç boyutundan daha büyük bir alana ihtiyaç duyduğunda kaç kez genişletildiğini gösterir. Bu değer, buffer'ın dinamik olarak genişletilme sayısını ölçer ve bellek yönetimi performansını yansıtır.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Yüksek genişletme sayıları, IOBuf'un başlangıç boyutunun yetersiz olduğunu gösterir. Bu durum, bellek baskısı ve performans sorunlarına işaret edebilir. Bu metrik, buffer boyut optimizasyonu ve bellek yönetimi için kritik öneme sahiptir.
                           </p>
                         </div>
                       </div>
@@ -6406,10 +6442,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'vtmbuffLpbufSize' && (
                       <div className="space-y-4">
-                        <div className="bg-teal-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-teal-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             LPBuf (Line Protocol Buffer) boyutunu gösterir. Line protokol işlemleri için kullanılan buffer boyutunu ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            LPBuf, VTAM'ın line protokol işlemleri için kullandığı buffer alanının boyutunu gösterir. Line protokol, VTAM'ın network üzerinden veri transferi için kullandığı protokol katmanıdır. Buffer boyutu, line protokol performansını ve veri transfer kapasitesini etkiler.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            LPBuf boyutu, line protokol performansı için kritik öneme sahiptir. Yetersiz buffer boyutu, line protokol gecikmelerine ve veri transfer sorunlarına neden olabilir. Bu metrik, line protokol optimizasyonu ve kapasite planlama için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6417,10 +6465,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'vtmbuffLpbufTimes' && (
                       <div className="space-y-4">
-                        <div className="bg-teal-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-teal-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             LPBuf buffer'ın kaç kez genişletildiğini gösterir. Line protokol buffer büyüklüğünün yetersizliğini işaret eder.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            LPBuf Times Expanded, VTAM'ın line protokol buffer'ının başlangıç boyutundan daha büyük bir alana ihtiyaç duyduğunda kaç kez genişletildiğini gösterir. Bu değer, line protokol buffer'ının dinamik olarak genişletilme sayısını ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Yüksek genişletme sayıları, LPBuf'un başlangıç boyutunun yetersiz olduğunu gösterir. Bu durum, line protokol performansı ve bellek yönetimi için sorun oluşturabilir. Bu metrik, buffer boyut optimizasyonu için kritik öneme sahiptir.
                           </p>
                         </div>
                       </div>
@@ -6428,10 +6488,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'vtmbuffLfbufSize' && (
                       <div className="space-y-4">
-                        <div className="bg-teal-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-teal-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             LFBuf (Logon Frame Buffer) boyutunu gösterir. Logon ve authentication işlemleri için buffer boyutunu ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            LFBuf, VTAM'ın logon ve authentication işlemleri için kullandığı buffer alanının boyutunu gösterir. Logon frame buffer, VTAM'ın kullanıcı oturum açma işlemlerini gerçekleştirmek için kullandığı buffer alanıdır. Buffer boyutu, logon performansını ve authentication kapasitesini etkiler.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            LFBuf boyutu, logon ve authentication performansı için kritik öneme sahiptir. Yetersiz buffer boyutu, logon gecikmelerine ve authentication sorunlarına neden olabilir. Bu metrik, logon performans optimizasyonu ve kapasite planlama için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6439,10 +6511,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'vtmbuffLfbufTimes' && (
                       <div className="space-y-4">
-                        <div className="bg-teal-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-teal-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             LFBuf buffer'ın kaç kez genişletildiğini gösterir. Logon buffer yetersizliklerini işaret eder.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            LFBuf Times Expanded, VTAM'ın logon frame buffer'ının başlangıç boyutundan daha büyük bir alana ihtiyaç duyduğunda kaç kez genişletildiğini gösterir. Bu değer, logon buffer'ının dinamik olarak genişletilme sayısını ölçer ve bellek yönetimi performansını yansıtır.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Yüksek genişletme sayıları, LFBuf'un başlangıç boyutunun yetersiz olduğunu gösterir. Bu durum, logon performansı ve bellek yönetimi için sorun oluşturabilir. Bu metrik, logon buffer optimizasyonu ve bellek yönetimi için kritik öneme sahiptir.
                           </p>
                         </div>
                       </div>
@@ -6451,10 +6535,22 @@ const NetworkPage = () => {
                     {/* CONNSRPZ Info Modals */}
                     {infoModal === 'connsrpzForeignIp' && (
                       <div className="space-y-4">
-                        <div className="bg-amber-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-amber-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             Karşı tarafın (remote host) IP adresini gösterir. Bağlantının hedef IP bilgisini verir.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Foreign IP Address, TCP/IP bağlantısının karşı tarafının (remote host) IP adresini gösterir. Bu alan, bağlantının hangi IP adresine kurulduğunu belirtir ve network trafik analizi için temel bilgi sağlar. IPv4 veya IPv6 formatında olabilir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Foreign IP adresi, network bağlantı analizi ve güvenlik izleme için kritik öneme sahiptir. Bu bilgi, hangi IP adreslerine bağlantı kurulduğunu görmek, network trafik analizi yapmak ve güvenlik politikalarını uygulamak için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6462,10 +6558,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'connsrpzActiveConns' && (
                       <div className="space-y-4">
-                        <div className="bg-amber-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-amber-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             Aktif TCP/IP bağlantılarının sayısını gösterir. Aynı anda açık olan bağlantıları ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Active Connections, belirli bir foreign IP adresine karşı aynı anda açık olan TCP/IP bağlantılarının sayısını gösterir. Bu değer, network yükü ve bağlantı yoğunluğu hakkında bilgi sağlar. Yüksek bağlantı sayıları, yoğun network trafiğini gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Aktif bağlantı sayısı, network yükü ve kapasite planlama için kritik öneme sahiptir. Yüksek bağlantı sayıları, network kaynaklarının yoğun kullanıldığını gösterir ve kapasite artırma gereksinimini işaret edebilir. Bu metrik, network performans optimizasyonu için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6473,10 +6581,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'connsrpzRtt' && (
                       <div className="space-y-4">
-                        <div className="bg-amber-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-amber-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             Round Trip Time (RTT) değerini milisaniye olarak gösterir. Ağ gecikme süresini ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Round Trip Time (RTT), bir paketin gönderilmesi ve yanıt alınması arasında geçen süreyi milisaniye cinsinden gösterir. Bu değer, network latency'sini ölçer ve ağ performansını değerlendirmek için kullanılır. Ortalama ve maksimum RTT değerleri, network gecikme analizi için kritiktir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            RTT değeri, network performansı ve kullanıcı deneyimi için kritik öneme sahiptir. Yüksek RTT değerleri, network gecikmelerini ve potansiyel performans sorunlarını gösterir. Bu metrik, network optimizasyonu ve sorun giderme için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6484,10 +6604,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'connsrpzBytesIn' && (
                       <div className="space-y-4">
-                        <div className="bg-amber-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-amber-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             Gelen veri miktarını byte cinsinden gösterir. Bağlantı üzerinden alınan toplam veriyi ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Bytes In, TCP/IP bağlantısı üzerinden alınan (inbound) toplam veri miktarını byte cinsinden gösterir. Bu değer, network üzerinden gelen veri trafiğini ölçer ve network yükü analizi için kritik öneme sahiptir. Interval bazlı veya toplam değer olarak hesaplanabilir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Bytes In, network trafik analizi ve kapasite planlama için kritik öneme sahiptir. Yüksek inbound trafik, network bant genişliği kullanımını ve sistem yükünü gösterir. Bu metrik, network optimizasyonu ve kapasite planlama için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6495,10 +6627,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'connsrpzBytesOut' && (
                       <div className="space-y-4">
-                        <div className="bg-amber-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-amber-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             Giden veri miktarını byte cinsinden gösterir. Bağlantı üzerinden gönderilen toplam veriyi ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Bytes Out, TCP/IP bağlantısı üzerinden gönderilen (outbound) toplam veri miktarını byte cinsinden gösterir. Bu değer, network üzerinden giden veri trafiğini ölçer ve outbound network yükü analizi için kritik öneme sahiptir. Interval bazlı veya toplam değer olarak hesaplanabilir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Bytes Out, network trafik analizi ve kapasite planlama için kritik öneme sahiptir. Yüksek outbound trafik, network bant genişliği kullanımını ve sistem yükünü gösterir. Bu metrik, network optimizasyonu ve kapasite planlama için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6506,10 +6650,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'connsrpzStack' && (
                       <div className="space-y-4">
-                        <div className="bg-amber-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-amber-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             Bağlantının ait olduğu TCP/IP stack adını gösterir. Hangi stack üzerinden bağlantı kurulduğunu belirtir.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Stack Name, TCP/IP bağlantısının hangi TCP/IP stack'i üzerinden kurulduğunu gösterir. z/OS sistemlerinde birden fazla TCP/IP stack'i olabilir ve her stack farklı network konfigürasyonlarına sahip olabilir. Bu bilgi, bağlantıların hangi stack üzerinden yönetildiğini belirler.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Stack adı, network yönetimi ve bağlantı analizi için kritik öneme sahiptir. Multi-stack ortamlarında hangi stack'in hangi bağlantıları yönettiğini anlamak, network yönetimi ve performans optimizasyonu için gereklidir. Bu bilgi, stack bazlı network analizi için temel oluşturur.
                           </p>
                         </div>
                       </div>
@@ -6517,10 +6673,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'connsrpzRemoteHost' && (
                       <div className="space-y-4">
-                        <div className="bg-amber-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-amber-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             Uzak host'un adını gösterir. Bağlantının hedef host bilgisini verir.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Remote Host Name, TCP/IP bağlantısının karşı tarafının (remote host) host adını gösterir. Bu alan, bağlantının hangi host adına kurulduğunu belirtir ve DNS çözümlemesi ile IP adresinden host adına dönüştürülmüş bilgiyi içerir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Remote host adı, network bağlantı analizi ve güvenlik izleme için kritik öneme sahiptir. Bu bilgi, hangi host'lara bağlantı kurulduğunu görmek, network trafik analizi yapmak ve güvenlik politikalarını uygulamak için gereklidir. Host adı, IP adresinden daha okunabilir ve anlaşılır bir bilgi sağlar.
                           </p>
                         </div>
                       </div>
@@ -6529,10 +6697,22 @@ const NetworkPage = () => {
                     {/* TCPSTOR Info Modals */}
                     {infoModal === 'tcpstorStep' && (
                       <div className="space-y-4">
-                        <div className="bg-orange-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-orange-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             TCP/IP storage yönetiminin step adını gösterir. Memory management için step bilgisini verir.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Step Name, TCP/IP storage yönetiminin hangi MVS step'i içinde çalıştığını gösterir. Bu bilgi, TCP/IP storage yönetiminin JCL/JOB akışındaki konumunu belirler ve step bazlı bellek yönetimi analizi için kritik öneme sahiptir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Step adı, TCP/IP storage yönetimini JCL/JOB akışı ile ilişkilendirmek için kritik öneme sahiptir. Bu bilgi, step bazlı bellek kullanım analizi ve performans optimizasyonu için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6540,10 +6720,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'tcpstorSystem' && (
                       <div className="space-y-4">
-                        <div className="bg-orange-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-orange-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             TCP/IP storage yönetiminin sistem bilgisini gösterir. Hangi sistem üzerinde storage yönetimi yapıldığını belirtir.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            System Name, TCP/IP storage yönetiminin hangi MVS sisteminde çalıştığını gösterir. Bu bilgi, sysplex ortamlarında hangi sistemde storage yönetimi yapıldığını belirler ve sistem bazlı bellek yönetimi analizi için kritik öneme sahiptir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Sistem adı, TCP/IP storage yönetimini sysplex ortamında doğru sistemle ilişkilendirmek için kritik öneme sahiptir. Bu bilgi, sistem bazlı bellek kullanım analizi ve performans optimizasyonu için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6551,10 +6743,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'tcpstorEcsaCurrent' && (
                       <div className="space-y-4">
-                        <div className="bg-orange-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-orange-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             ECSA (Extended Common Storage Area) mevcut kullanımını gösterir. TCP/IP için ayrılmış mevcut bellek miktarını ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            ECSA Current, TCP/IP storage yönetimi için ayrılmış Extended Common Storage Area (ECSA) belleğinin mevcut kullanımını gösterir. ECSA, z/OS sistemlerinde birden fazla address space tarafından paylaşılan bellek alanıdır. Bu değer, TCP/IP için ayrılmış ECSA belleğinin ne kadarının kullanıldığını gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            ECSA Current, TCP/IP bellek yönetimi ve kapasite planlama için kritik öneme sahiptir. Yüksek ECSA kullanımı, bellek baskısını ve potansiyel performans sorunlarını gösterir. Bu metrik, bellek optimizasyonu ve kapasite planlama için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6562,10 +6766,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'tcpstorEcsaMax' && (
                       <div className="space-y-4">
-                        <div className="bg-orange-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-orange-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             ECSA maksimum kullanımını gösterir. TCP/IP için ayrılmış bellek limitini ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            ECSA Max, TCP/IP storage yönetimi için ayrılmış Extended Common Storage Area (ECSA) belleğinin maksimum kullanımını gösterir. Bu değer, TCP/IP için ayrılmış ECSA belleğinin geçmişteki tepe noktasını gösterir ve bellek kullanım trendlerini analiz etmek için kullanılır.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            ECSA Max, TCP/IP bellek kullanım trendlerini anlamak ve kapasite planlama yapmak için kritik öneme sahiptir. Bu değer, sistemin geçmişteki bellek kullanım tepe noktalarını gösterir ve gelecekteki bellek gereksinimlerini tahmin etmek için kullanılır.
                           </p>
                         </div>
                       </div>
@@ -6573,10 +6789,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'tcpstorEcsaLimit' && (
                       <div className="space-y-4">
-                        <div className="bg-orange-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-orange-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             ECSA limit değerini gösterir. TCP/IP için maksimum ayrılabilir bellek limitini ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            ECSA Limit, TCP/IP storage yönetimi için ayrılmış Extended Common Storage Area (ECSA) belleğinin maksimum limitini gösterir. Bu değer, TCP/IP için ayrılabilecek maksimum ECSA miktarını belirler ve bellek yönetimi politikalarını uygulamak için kullanılır.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            ECSA Limit, TCP/IP bellek yönetimi ve kaynak koruması için kritik öneme sahiptir. Limit aşımı, bellek yetersizliği ve performans sorunlarına neden olabilir. Bu metrik, bellek limit yönetimi ve kapasite planlama için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6584,10 +6812,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'tcpstorEcsaFree' && (
                       <div className="space-y-4">
-                        <div className="bg-orange-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-orange-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             ECSA boş bellek miktarını gösterir. TCP/IP için kullanılabilir serbest bellek alanını ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            ECSA Free, TCP/IP storage yönetimi için ayrılmış Extended Common Storage Area (ECSA) belleğinin boş (kullanılabilir) miktarını gösterir. Bu değer, ECSA Limit ile ECSA Current arasındaki farkı gösterir ve TCP/IP için ne kadar ek bellek ayrılabileceğini belirler.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            ECSA Free, TCP/IP bellek yönetimi ve kapasite planlama için kritik öneme sahiptir. Düşük ECSA Free değerleri, bellek baskısını ve potansiyel bellek yetersizliğini gösterir. Bu metrik, bellek optimizasyonu ve kapasite artırma gereksinimini belirlemek için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6595,10 +6835,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'tcpstorPrivateCurrent' && (
                       <div className="space-y-4">
-                        <div className="bg-orange-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-orange-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             Private memory mevcut kullanımını gösterir. TCP/IP için özel bellek alanının mevcut kullanımını ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Private Current, TCP/IP storage yönetimi için ayrılmış private (özel) belleğin mevcut kullanımını gösterir. Private bellek, TCP/IP address space'ine özel olan ve diğer address space'ler tarafından paylaşılmayan bellek alanıdır. Bu değer, TCP/IP için ayrılmış private belleğin ne kadarının kullanıldığını gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Private Current, TCP/IP bellek yönetimi ve address space yönetimi için kritik öneme sahiptir. Yüksek private bellek kullanımı, address space bellek baskısını gösterir. Bu metrik, bellek optimizasyonu ve address space yönetimi için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6606,10 +6858,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'tcpstorPrivateMax' && (
                       <div className="space-y-4">
-                        <div className="bg-orange-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-orange-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             Private memory maksimum kullanımını gösterir. TCP/IP için özel bellek alanının maksimum limitini ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Private Max, TCP/IP storage yönetimi için ayrılmış private (özel) belleğin maksimum kullanımını gösterir. Bu değer, TCP/IP için ayrılmış private belleğin geçmişteki tepe noktasını gösterir ve private bellek kullanım trendlerini analiz etmek için kullanılır.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Private Max, TCP/IP private bellek kullanım trendlerini anlamak ve address space bellek yönetimi için kritik öneme sahiptir. Bu değer, sistemin geçmişteki private bellek kullanım tepe noktalarını gösterir ve gelecekteki bellek gereksinimlerini tahmin etmek için kullanılır.
                           </p>
                         </div>
                       </div>
