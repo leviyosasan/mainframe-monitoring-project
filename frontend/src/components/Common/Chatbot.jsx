@@ -2586,6 +2586,69 @@ const Chatbot = () => {
     setIsLoading(true)
     setIsTyping(true)
 
+    // Özel durum: "Storage" veya "Storage Management" yazıldığında tüm Storage dataset'lerini listele
+    if (lowerMessage === 'storage' || lowerMessage === 'storage management' || 
+        normalizeKey(lowerMessage) === 'storage' || normalizeKey(lowerMessage) === 'storagemanagement') {
+      const storageDatasets = []
+      Object.entries(datasetConfigs).forEach(([key, cfg]) => {
+        if (cfg.title && cfg.title.toLowerCase().includes('storage')) {
+          const primaryAlias = cfg.primaryAliases?.[0] || key
+          storageDatasets.push({ title: cfg.title, alias: primaryAlias })
+        }
+      })
+      
+      if (storageDatasets.length > 0) {
+        const datasetList = storageDatasets.map(ds => `• ${ds.title}`).join('\n')
+        const botMessage = `📦 Storage Management Dataset'leri:\n\n${datasetList}`
+        setMessages(prev => [...prev, { text: botMessage, sender: 'bot', timestamp: getMessageTime() }])
+        setIsLoading(false)
+        setIsTyping(false)
+        return
+      }
+    }
+
+    // Özel durum: "MQ" veya "MQ Message Queue" yazıldığında tüm MQ dataset'lerini listele
+    if (lowerMessage === 'mq' || lowerMessage === 'mq message queue' || 
+        normalizeKey(lowerMessage) === 'mq' || normalizeKey(lowerMessage) === 'mqmessagequeue') {
+      const mqDatasets = []
+      Object.entries(datasetConfigs).forEach(([key, cfg]) => {
+        if (cfg.title && cfg.title.toLowerCase().startsWith('mq ')) {
+          const primaryAlias = cfg.primaryAliases?.[0] || key
+          mqDatasets.push({ title: cfg.title, alias: primaryAlias })
+        }
+      })
+      
+      if (mqDatasets.length > 0) {
+        const datasetList = mqDatasets.map(ds => `• ${ds.title}`).join('\n')
+        const botMessage = `📦 MQ Message Queue Dataset'leri:\n\n${datasetList}`
+        setMessages(prev => [...prev, { text: botMessage, sender: 'bot', timestamp: getMessageTime() }])
+        setIsLoading(false)
+        setIsTyping(false)
+        return
+      }
+    }
+
+    // Özel durum: "Network" veya "Network Management" yazıldığında tüm Network dataset'lerini listele
+    if (lowerMessage === 'network' || lowerMessage === 'network management' || 
+        normalizeKey(lowerMessage) === 'network' || normalizeKey(lowerMessage) === 'networkmanagement') {
+      const networkDatasets = []
+      Object.entries(datasetConfigs).forEach(([key, cfg]) => {
+        if (cfg.title && cfg.title.toLowerCase().startsWith('network ')) {
+          const primaryAlias = cfg.primaryAliases?.[0] || key
+          networkDatasets.push({ title: cfg.title, alias: primaryAlias })
+        }
+      })
+      
+      if (networkDatasets.length > 0) {
+        const datasetList = networkDatasets.map(ds => `• ${ds.title}`).join('\n')
+        const botMessage = `📦 Network Management Dataset'leri:\n\n${datasetList}`
+        setMessages(prev => [...prev, { text: botMessage, sender: 'bot', timestamp: getMessageTime() }])
+        setIsLoading(false)
+        setIsTyping(false)
+        return
+      }
+    }
+
     // Tüm async işlemleri try-catch ile koru
     try {
       // Çok kısa mesajlar için basit, profesyonel mesaj
