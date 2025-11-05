@@ -324,6 +324,14 @@ const Chatbot = () => {
           // Label mesajı içeriyor (kısmi eşleşme - daha uzun label'lar öncelikli)
           else if (lab.includes(msgNorm)) {
             score = 40 + (msgNorm.length / 100) // Daha uzun mesajlar daha yüksek skor
+            // Eğer mesaj label'ın başlangıcı ise, bonus ver (örn: "Page Data Set" -> "Page Data Set Number")
+            if (lab.startsWith(msgNorm)) {
+              score += 20
+            }
+          }
+          // Label'in başlangıcı mesaj ile eşleşiyor mu? (örn: "Page Data Set" -> "Page Data Set Number")
+          else if (lab.startsWith(msgNorm) && msgNorm.length >= 3) {
+            score = 35 + (msgNorm.length / 10) // Başlangıç eşleşmesi bonus
           }
           // Fuzzy match
           else if (fuzzyMatch(msgNorm, lab)) {
@@ -1648,15 +1656,19 @@ const Chatbot = () => {
       const keys = getAllKeys(rows)
       const getDisplayLabel = cfg?.getDisplayLabel || ((key) => key)
       
+      // Dataset adını mesajdan çıkar ve geri kalanı kolon adı olarak ara
+      const { dataset: extractedDataset, columnPart } = extractDatasetAndColumn(lowerMessage)
+      const columnSearchText = columnPart || lowerMessage
+      
       // MQ ve ZOS dataset'leri için özel parse fonksiyonu varsa kullan
       let target = null
       if (cfg?.parseQuery) {
-        target = cfg.parseQuery(lowerMessage)
+        target = cfg.parseQuery(columnSearchText)
       }
       
       // Parse query ile bulunamadıysa, genel kolon arama yap (getDisplayLabel ile)
       if (!target || !target.col) {
-        const picked = pickColumnByMessage(lowerMessage, keys, getDisplayLabel)
+        const picked = pickColumnByMessage(columnSearchText, keys, getDisplayLabel)
         if (picked) {
           target = { col: picked, label: getDisplayLabel(picked) }
         }
@@ -2321,6 +2333,75 @@ const Chatbot = () => {
     }
   }
 
+  // Dataset adını ve kolon adını mesajdan ayıran fonksiyon
+  const extractDatasetAndColumn = (lowerMessage) => {
+    const words = lowerMessage.split(/\s+/).filter(Boolean)
+    if (words.length === 0) return { dataset: null, columnPart: null, fullMatch: null }
+    
+    // Önce tam mesaj eşleşmesini kontrol et (çok kelimeli alias'lar için)
+    const lowerMessageNormalized = normalizeKey(lowerMessage)
+    const fullMatches = []
+    
+    for (const [key, cfg] of Object.entries(datasetConfigs)) {
+      for (const alias of cfg.aliases) {
+        const aliasLower = alias.toLowerCase()
+        const aliasNormalized = normalizeKey(aliasLower)
+        
+        // Tam mesaj eşleşmesi
+        if (lowerMessage === aliasLower || lowerMessageNormalized === aliasNormalized) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          fullMatches.push({ key, cfg, alias: aliasLower, isPrimary, aliasLength: aliasLower.length })
+        }
+        // Mesaj alias ile başlıyor mu? (örn: "storage frminfo central Average SQA Frames")
+        else if (lowerMessage.startsWith(aliasLower + ' ') || lowerMessageNormalized.startsWith(aliasNormalized + ' ')) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          const columnPart = lowerMessage.substring(aliasLower.length).trim()
+          if (columnPart.length > 0) {
+            fullMatches.push({ key, cfg, alias: aliasLower, isPrimary, aliasLength: aliasLower.length, columnPart })
+          }
+        }
+      }
+    }
+    
+    if (fullMatches.length > 0) {
+      // En uzun ve primary alias'a sahip olanı seç
+      fullMatches.sort((a, b) => {
+        if (a.isPrimary !== b.isPrimary) return b.isPrimary ? 1 : -1
+        return b.aliasLength - a.aliasLength
+      })
+      const best = fullMatches[0]
+      return {
+        dataset: { key: best.key, title: best.cfg.title, fetch: best.cfg.fetch },
+        columnPart: best.columnPart || null,
+        fullMatch: best
+      }
+    }
+    
+    // İlk kelime veya kelimeler ile dataset eşleştirmesi
+    for (let i = 1; i <= Math.min(words.length, 3); i++) {
+      const prefix = words.slice(0, i).join(' ')
+      const prefixNormalized = normalizeKey(prefix)
+      
+      for (const [key, cfg] of Object.entries(datasetConfigs)) {
+        for (const alias of cfg.aliases) {
+          const aliasLower = alias.toLowerCase()
+          const aliasNormalized = normalizeKey(aliasLower)
+          
+          if (prefix === aliasLower || prefixNormalized === aliasNormalized) {
+            const columnPart = words.slice(i).join(' ').trim()
+            return {
+              dataset: { key, title: cfg.title, fetch: cfg.fetch },
+              columnPart: columnPart.length > 0 ? columnPart : null,
+              fullMatch: null
+            }
+          }
+        }
+      }
+    }
+    
+    return { dataset: null, columnPart: null, fullMatch: null }
+  }
+
   const resolveDatasetFromMessage = (lowerMessage) => {
     // İlk kelimeye öncelik ver
     const words = lowerMessage.split(/\s+/).filter(Boolean)
@@ -2679,6 +2760,15 @@ const Chatbot = () => {
       return
     }
 
+    // Dataset ve kolon parse et (extractDatasetAndColumn ile)
+    const { dataset: extractedDataset, columnPart } = extractDatasetAndColumn(lowerMessage)
+    
+    if (extractedDataset) {
+      // Dataset bulundu, queryDataset'i çağır (columnPart varsa kolon araması yapılacak)
+      await queryDataset(lowerMessage, extractedDataset.fetch, extractedDataset.title, extractedDataset.key)
+      return
+    }
+    
     // Network datasets (alias-aware) - Tam mesaj eşleşmesine öncelik ver
     const words = lowerMessage.split(/\s+/).filter(Boolean)
     const firstWord = words[0] || ''
@@ -2695,6 +2785,12 @@ const Chatbot = () => {
         
         // Tam mesaj eşleşmesi (normalize edilmiş ve orijinal)
         if (lowerMessage === aliasLower || lowerMessageNormalized === aliasNormalized) {
+          const isPrimary = cfg.primaryAliases?.includes(alias) || false
+          const aliasLength = aliasLower.length
+          fullMatches.push({ key, cfg, isPrimary, aliasLength, alias: aliasLower })
+        }
+        // Mesaj alias ile başlıyor mu? (örn: "storage frminfo central Average SQA Frames")
+        else if (lowerMessage.startsWith(aliasLower + ' ') || lowerMessageNormalized.startsWith(aliasNormalized + ' ')) {
           const isPrimary = cfg.primaryAliases?.includes(alias) || false
           const aliasLength = aliasLower.length
           fullMatches.push({ key, cfg, isPrimary, aliasLength, alias: aliasLower })
