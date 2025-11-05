@@ -1746,27 +1746,35 @@ const Chatbot = () => {
           const allLists = Array.from(uniqueAliases)
           
           let hasAliasMatch = false
+          let bestMatch = null
+          let bestMatchScore = 0
           
-          // Eşleşen alias'ları bul ve önerilere ekle
+          // Eşleşen alias'ları bul ve en iyi eşleşmeyi seç
           allLists.forEach(a => {
             const an = normalizeKey(a)
             const matches = allowIncludes ? an.includes(needle) : an.startsWith(needle)
             if (matches) {
               hasAliasMatch = true
-              // TÜM dataset'ler için her zaman cfg.title kullan (web uygulamasındaki kart isimleriyle birebir aynı olması için)
-              // Çok kelimeli alias'lar için insertText'i alias olarak kullan (örn: "mq w2over")
-              const isMultiWord = a.split(/\s+/).length > 1
-              const displayText = cfg.title // Her zaman web uygulamasındaki kart adını kullan
-              const insertText = isMultiWord ? a : key
               
-              // Aynı key için tekrar eden önerileri önle (ama çok kelimeli alias'lar için farklı öneriler ekle)
-              const uniqueKey = isMultiWord ? `${key}:${a}` : key
-              if (!seenKeys.has(uniqueKey)) {
-                seenKeys.add(uniqueKey)
-                sugs.push({ type: 'dataset', datasetKey: key, display: displayText, insertText: insertText })
+              // Skor hesapla: primary alias daha yüksek skor, exact match daha yüksek skor
+              const isPrimary = primaryList.includes(a)
+              const isExactMatch = an === needle
+              const score = (isPrimary ? 100 : 50) + (isExactMatch ? 50 : 0) + an.length
+              
+              if (score > bestMatchScore) {
+                bestMatchScore = score
+                const isMultiWord = a.split(/\s+/).length > 1
+                const insertText = isMultiWord ? a : key
+                bestMatch = { key, display: cfg.title, insertText }
               }
             }
           })
+          
+          // En iyi eşleşmeyi ekle (sadece bir tane)
+          if (bestMatch && !seenKeys.has(bestMatch.key)) {
+            seenKeys.add(bestMatch.key)
+            sugs.push({ type: 'dataset', datasetKey: bestMatch.key, display: bestMatch.display, insertText: bestMatch.insertText })
+          }
           
           // Eğer alias'ta eşleşme yoksa, title'da ara (örn: "Network" -> "Network Stacks", "Network TCPCONF")
           if (!hasAliasMatch && cfg.title) {
