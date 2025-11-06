@@ -31,6 +31,22 @@ const NetworkPage = () => {
   const [filteredTcpstorData, setFilteredTcpstorData] = useState([]);
   const [isFiltered, setIsFiltered] = useState(false);
   const [chartData, setChartData] = useState([]);
+  const [dbConnected, setDbConnected] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const checkDb = async () => {
+      try {
+        const res = await databaseAPI.testConnection({});
+        const ok = !!(res?.data?.success || res?.status === 200);
+        if (!cancelled) setDbConnected(ok);
+      } catch (e) {
+        if (!cancelled) setDbConnected(false);
+      }
+    };
+    checkDb();
+    return () => { cancelled = true; };
+  }, []);
   
   // Stacks sıralama state'leri
   const [stacksSortColumn, setStacksSortColumn] = useState(null);
@@ -203,6 +219,44 @@ const NetworkPage = () => {
     
     // Eşleşme yoksa toTitleCase kullan
     return toTitleCase(columnName);
+  };
+
+  // VTMBUFF için grafik anahtarlarını okunaklı başlıklara çevir
+  const getVtmbuffColumnDisplayName = (chartKey) => {
+    const map = {
+      vtmbuffIOBufSize: 'IOBuf Size',
+      vtmbuffLPBufSize: 'LPBuf Size',
+      vtmbuffLFBufSize: 'LFBuf Size',
+      vtmbuffIOBufTimesExpanded: 'IOBuf Times Expanded',
+      vtmbuffLPBufTimesExpanded: 'LPBuf Times Expanded',
+      vtmbuffLFBufTimesExpanded: 'LFBuf Times Expanded',
+    };
+    return map[chartKey] || toTitleCase(chartKey);
+  };
+
+  // TCPSTOR için grafik anahtarlarını okunaklı başlıklara çevir
+  const getTcpstorColumnDisplayName = (chartKey) => {
+    const map = {
+      tcpstorEcsaCurrent: 'ECSA Current',
+      tcpstorEcsaMax: 'ECSA Max',
+      tcpstorEcsaLimit: 'ECSA Limit',
+      tcpstorEcsaFree: 'ECSA Free',
+      tcpstorPrivateCurrent: 'Private Current',
+      tcpstorPrivateMax: 'Private Max',
+    };
+    return map[chartKey] || toTitleCase(chartKey);
+  };
+
+  // CONNSRPZ için grafik anahtarlarını okunaklı başlıklara çevir
+  const getConnsrpzColumnDisplayName = (chartKey) => {
+    const map = {
+      connsrpzActiveConns: 'Active Conns',
+      connsrpzAvgRtt: 'Average RTT (ms)',
+      connsrpzMaxRtt: 'Max RTT (ms)',
+      connsrpzBytesIn: 'Bytes In',
+      connsrpzBytesOut: 'Bytes Out',
+    };
+    return map[chartKey] || toTitleCase(chartKey);
   };
 
   // Modal'a göre ham veriyi al
@@ -513,59 +567,101 @@ const NetworkPage = () => {
         ].join(','))
       ].join('\n');
     } else if (activeModal === 'tcpconf') {
-      headers = ['Job Name', 'Step Name', 'Target Field', 'System Name', 'Created At', 'Updated At'];
+      headers = [
+        'Job Name', 'Stack Name', 'Def Receive Bufsize', 'Def Send Bufsize', 'Def Max Receive Bufsize',
+        'Maximum Queue Depth', 'Max Retran Time', 'Min Retran Time', 'Roundtrip Gain', 'Variance Gain',
+        'Variance Multiple', 'Default Keepalive', 'Delay ACK', 'Restrict Low Port', 'Send Garbage',
+        'TCP Timestamp', 'TTLS', 'Finwait2 Time', 'System Name', 'Created At', 'Updated At'
+      ];
       csvData = [
         headers.join(','),
         ...data.map(row => [
           row.job_name || '',
-          row.step_name || '',
-          row.target_field || '',
+          row.stack_name || '',
+          row.def_receive_bufsize || '',
+          row.def_send_bufsize || '',
+          row.def_max_receive_bufsize || '',
+          row.maximum_queue_depth || '',
+          row.max_retran_time || '',
+          row.min_retran_time || '',
+          row.roundtrip_gain || '',
+          row.variance_gain || '',
+          row.variance_multiple || '',
+          row.default_keepalive || '',
+          row.delay_ack || '',
+          row.restrict_low_port || '',
+          row.send_garbage || '',
+          row.tcp_timestamp || '',
+          row.ttls || '',
+          row.finwait2time || '',
           row.system_name || '',
-          row.created_at || '',
-          row.updated_at || ''
+          row.created_at ? new Date(row.created_at).toLocaleString('tr-TR') : '',
+          row.updated_at ? new Date(row.updated_at).toLocaleString('tr-TR') : ''
         ].join(','))
       ].join('\n');
     } else if (activeModal === 'tcpcons') {
-      headers = ['Foreign IP Address', 'Foreign Port', 'Local IP Address', 'Local Port', 'State', 'System Name', 'Created At', 'Updated At'];
+      headers = [
+        'Foreign IP', 'Remote Port', 'Local Port', 'Application', 'Type of Open',
+        'Bytes In', 'Bytes Out', 'Connection Status', 'Remote Host', 'System Name', 'Created At', 'Updated At'
+      ];
       csvData = [
         headers.join(','),
         ...data.map(row => [
           row.foreign_ip_address || '',
-          row.foreign_port || '',
-          row.local_ip_address || '',
+          row.remote_port || '',
           row.local_port || '',
-          row.state || '',
+          row.application_name || '',
+          row.type_of_open || '',
+          row.interval_bytes_in || '',
+          row.interval_bytes_out || '',
+          row.connection_status || '',
+          row.remote_host_name || '',
           row.system_name || '',
-          row.created_at || '',
-          row.updated_at || ''
+          row.created_at ? new Date(row.created_at).toLocaleString('tr-TR') : '',
+          row.updated_at ? new Date(row.updated_at).toLocaleString('tr-TR') : ''
         ].join(','))
       ].join('\n');
     } else if (activeModal === 'udpconf') {
-      headers = ['Job Name', 'Step Name', 'Target Field', 'System Name', 'Created At', 'Updated At'];
+      headers = [
+        'Job Name', 'Stack Name', 'Def Recv Bufsize', 'Def Send Bufsize', 'Check Summing',
+        'Restrict Low Port', 'UDP Queue Limit', 'System Name', 'Created At', 'Updated At'
+      ];
       csvData = [
         headers.join(','),
         ...data.map(row => [
           row.job_name || '',
-          row.step_name || '',
-          row.target_field || '',
+          row.stack_name || '',
+          row.def_recv_bufsize || '',
+          row.def_send_bufsize || '',
+          row.check_summing || '',
+          row.restrict_low_port || '',
+          row.udp_queue_limit || '',
           row.system_name || '',
-          row.created_at || '',
-          row.updated_at || ''
+          row.created_at ? new Date(row.created_at).toLocaleString('tr-TR') : '',
+          row.updated_at ? new Date(row.updated_at).toLocaleString('tr-TR') : ''
         ].join(','))
       ].join('\n');
     } else if (activeModal === 'actcons') {
-      headers = ['Foreign IP Address', 'Foreign Port', 'Local IP Address', 'Local Port', 'State', 'System Name', 'Created At', 'Updated At'];
+      headers = [
+        'Foreign IP', 'Remote Port', 'Local IP', 'Local Port', 'Application', 'Type of Open',
+        'Bytes In', 'Bytes Out', 'Connection Status', 'Remote Host', 'System Name', 'Created At', 'Updated At'
+      ];
       csvData = [
         headers.join(','),
         ...data.map(row => [
           row.foreign_ip_address || '',
-          row.foreign_port || '',
+          row.remote_port || '',
           row.local_ip_address || '',
           row.local_port || '',
-          row.state || '',
+          row.application_name || '',
+          row.type_of_open || '',
+          row.interval_bytes_in || '',
+          row.interval_bytes_out || '',
+          row.connection_status || '',
+          row.remote_host_name || '',
           row.system_name || '',
-          row.created_at || '',
-          row.updated_at || ''
+          row.created_at ? new Date(row.created_at).toLocaleString('tr-TR') : '',
+          row.updated_at ? new Date(row.updated_at).toLocaleString('tr-TR') : ''
         ].join(','))
       ].join('\n');
     } else if (activeModal === 'VTMBUFF') {
@@ -677,18 +773,20 @@ const NetworkPage = () => {
 
       loadScripts().then(() => {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        // Geniş tablolar için yatay A4
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
-        // Başlık ekle
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text(`${filename} Raporu`, 14, 22);
-        
-        // Tarih ekle
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        const currentDate = new Date().toLocaleString('tr-TR');
-        doc.text(`Oluşturulma Tarihi: ${currentDate}`, 14, 30);
+        const drawPageHeader = (title) => {
+          doc.setFontSize(16);
+          doc.setFont(undefined, 'bold');
+          doc.text(`${title} Raporu`, 14, 18);
+          doc.setFontSize(10);
+          doc.setFont(undefined, 'normal');
+          const currentDate = new Date().toLocaleString('tr-TR');
+          doc.text(`Oluşturulma Tarihi: ${currentDate}`, 14, 25);
+        };
+
+        drawPageHeader(filename);
 
         // Veri türüne göre tablo verilerini hazırla
         let tableData = [];
@@ -744,48 +842,90 @@ const NetworkPage = () => {
             row.time || '-'
           ]);
         } else if (activeModal === 'tcpconf') {
-          headers = ['Job Name', 'Step Name', 'Target Field', 'System Name', 'Created At', 'Updated At'];
+          headers = [
+            'Job Name', 'Stack Name', 'Def Receive Bufsize', 'Def Send Bufsize', 'Def Max Receive Bufsize',
+            'Maximum Queue Depth', 'Max Retran Time', 'Min Retran Time', 'Roundtrip Gain', 'Variance Gain',
+            'Variance Multiple', 'Default Keepalive', 'Delay ACK', 'Restrict Low Port', 'Send Garbage',
+            'TCP Timestamp', 'TTLS', 'Finwait2 Time', 'System Name', 'Created At', 'Updated At'
+          ];
           tableData = data.map(row => [
             row.job_name || '-',
-            row.step_name || '-',
-            row.target_field || '-',
+            row.stack_name || '-',
+            row.def_receive_bufsize || '-',
+            row.def_send_bufsize || '-',
+            row.def_max_receive_bufsize || '-',
+            row.maximum_queue_depth || '-',
+            row.max_retran_time || '-',
+            row.min_retran_time || '-',
+            row.roundtrip_gain || '-',
+            row.variance_gain || '-',
+            row.variance_multiple || '-',
+            row.default_keepalive || '-',
+            row.delay_ack || '-',
+            row.restrict_low_port || '-',
+            row.send_garbage || '-',
+            row.tcp_timestamp || '-',
+            row.ttls || '-',
+            row.finwait2time || '-',
             row.system_name || '-',
-            row.created_at || '-',
-            row.updated_at || '-'
+            row.created_at ? new Date(row.created_at).toLocaleString('tr-TR') : '-',
+            row.updated_at ? new Date(row.updated_at).toLocaleString('tr-TR') : '-'
           ]);
         } else if (activeModal === 'tcpcons') {
-          headers = ['Foreign IP Address', 'Foreign Port', 'Local IP Address', 'Local Port', 'State', 'System Name', 'Created At', 'Updated At'];
+          headers = [
+            'Foreign IP', 'Remote Port', 'Local Port', 'Application', 'Type of Open',
+            'Bytes In', 'Bytes Out', 'Connection Status', 'Remote Host', 'System Name', 'Created At', 'Updated At'
+          ];
           tableData = data.map(row => [
             row.foreign_ip_address || '-',
-            row.foreign_port || '-',
-            row.local_ip_address || '-',
+            row.remote_port || '-',
             row.local_port || '-',
-            row.state || '-',
+            row.application_name || '-',
+            row.type_of_open || '-',
+            row.interval_bytes_in || '-',
+            row.interval_bytes_out || '-',
+            row.connection_status || '-',
+            row.remote_host_name || '-',
             row.system_name || '-',
-            row.created_at || '-',
-            row.updated_at || '-'
+            row.created_at ? new Date(row.created_at).toLocaleString('tr-TR') : '-',
+            row.updated_at ? new Date(row.updated_at).toLocaleString('tr-TR') : '-'
           ]);
         } else if (activeModal === 'udpconf') {
-          headers = ['Job Name', 'Step Name', 'Target Field', 'System Name', 'Created At', 'Updated At'];
+          headers = [
+            'Job Name', 'Stack Name', 'Def Recv Bufsize', 'Def Send Bufsize', 'Check Summing',
+            'Restrict Low Port', 'UDP Queue Limit', 'System Name', 'Created At', 'Updated At'
+          ];
           tableData = data.map(row => [
             row.job_name || '-',
-            row.step_name || '-',
-            row.target_field || '-',
+            row.stack_name || '-',
+            row.def_recv_bufsize || '-',
+            row.def_send_bufsize || '-',
+            row.check_summing || '-',
+            row.restrict_low_port || '-',
+            row.udp_queue_limit || '-',
             row.system_name || '-',
-            row.created_at || '-',
-            row.updated_at || '-'
+            row.created_at ? new Date(row.created_at).toLocaleString('tr-TR') : '-',
+            row.updated_at ? new Date(row.updated_at).toLocaleString('tr-TR') : '-'
           ]);
         } else if (activeModal === 'actcons') {
-          headers = ['Foreign IP Address', 'Foreign Port', 'Local IP Address', 'Local Port', 'State', 'System Name', 'Created At', 'Updated At'];
+          headers = [
+            'Foreign IP', 'Remote Port', 'Local IP', 'Local Port', 'Application', 'Type of Open',
+            'Bytes In', 'Bytes Out', 'Connection Status', 'Remote Host', 'System Name', 'Created At', 'Updated At'
+          ];
           tableData = data.map(row => [
             row.foreign_ip_address || '-',
-            row.foreign_port || '-',
+            row.remote_port || '-',
             row.local_ip_address || '-',
             row.local_port || '-',
-            row.state || '-',
+            row.application_name || '-',
+            row.type_of_open || '-',
+            row.interval_bytes_in || '-',
+            row.interval_bytes_out || '-',
+            row.connection_status || '-',
+            row.remote_host_name || '-',
             row.system_name || '-',
-            row.created_at || '-',
-            row.updated_at || '-'
+            row.created_at ? new Date(row.created_at).toLocaleString('tr-TR') : '-',
+            row.updated_at ? new Date(row.updated_at).toLocaleString('tr-TR') : '-'
           ]);
         } else if (activeModal === 'VTMBUFF') {
           headers = ['System', 'IOBuf Size', 'IOBuf Times Expanded', 'LPBuf Size', 'LPBuf Times Expanded', 'LFBuf Size', 'LFBuf Times Expanded', 'Timestamp'];
@@ -827,26 +967,56 @@ const NetworkPage = () => {
           ]);
         }
         
-        // Tablo oluştur
-        doc.autoTable({
-          head: [headers],
-          body: tableData,
-          startY: 40,
-          styles: {
-            fontSize: 8,
-            cellPadding: 2,
-            overflow: 'linebreak',
-            halign: 'left'
-          },
-          headStyles: {
-            fillColor: [242, 242, 242],
-            textColor: [0, 0, 0],
-            fontStyle: 'bold'
-          },
-          alternateRowStyles: {
-            fillColor: [249, 249, 249]
+        // Geniş tabloları sayfalara böl (sığmayan sütunları sonraki sayfada devam ettir)
+        const maxColsPerPage = 9; // A4 landscape için makul sütun sayısı
+        const pages = Math.max(1, Math.ceil(headers.length / maxColsPerPage));
+
+        for (let pageIndex = 0; pageIndex < pages; pageIndex++) {
+          if (pageIndex > 0) {
+            doc.addPage({ orientation: 'landscape' });
+            drawPageHeader(filename);
           }
-        });
+
+          const startCol = pageIndex * maxColsPerPage;
+          const endCol = Math.min(headers.length, startCol + maxColsPerPage);
+          const slicedHeaders = headers.slice(startCol, endCol);
+          const slicedBody = tableData.map(row => row.slice(startCol, endCol));
+
+          doc.autoTable({
+            head: [slicedHeaders],
+            body: slicedBody,
+            startY: 32,
+            styles: {
+              fontSize: 7,
+              cellPadding: 2,
+              overflow: 'linebreak',
+              halign: 'left'
+            },
+            columnStyles: Object.fromEntries(
+              slicedHeaders.map((_, i) => [i, { cellWidth: 'wrap' }])
+            ),
+            headStyles: {
+              fillColor: [242, 242, 242],
+              textColor: [0, 0, 0],
+              fontStyle: 'bold'
+            },
+            alternateRowStyles: {
+              fillColor: [249, 249, 249]
+            },
+            margin: { top: 28, left: 10, right: 10, bottom: 15 },
+            didDrawPage: (data) => {
+              // Sayfa altbilgisi
+              const pageCount = doc.getNumberOfPages();
+              doc.setFontSize(9);
+              doc.text(
+                `Sayfa ${data.pageNumber}/${pageCount} • Bölüm ${pageIndex + 1}/${pages}`,
+                doc.internal.pageSize.getWidth() - 10,
+                doc.internal.pageSize.getHeight() - 6,
+                { align: 'right' }
+              );
+            }
+          });
+        }
 
         // PDF'i indir
         const fileName = `${filename}_${new Date().toISOString().split('T')[0]}.pdf`;
@@ -2117,7 +2287,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('STACKS')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-blue-100 rounded-xl mb-6 mx-auto group-hover:bg-blue-200"><svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h4M8 7a2 2 0 012-2h4a2 2 0 012 2v8a2 2 0 01-2 2h-4a2 2 0 01-2-2V7z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a2 2 0 00-2-2h-4a2 2 0 00-2 2v8a2 2 0 002 2h4a2 2 0 002-2V7z"></path></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">STACKS</h2><p className="text-gray-500 text-sm font-medium">Genel STACK Bilgileri</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">STACKS</h2><p className="text-gray-500 text-sm font-medium">Genel STACK Bilgileri</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
 
@@ -2125,7 +2295,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('STACKCPU')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-green-100 rounded-xl mb-6 mx-auto group-hover:bg-green-200"><svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">STACKCPU</h2><p className="text-gray-500 text-sm font-medium">CPU ve Paket İstatistikleri</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">STACKCPU</h2><p className="text-gray-500 text-sm font-medium">CPU ve Paket İstatistikleri</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
 
@@ -2133,7 +2303,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('vtamcsa')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-purple-100 rounded-xl mb-6 mx-auto group-hover:bg-purple-200"><svg className="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">VTAMCSA</h2><p className="text-gray-500 text-sm font-medium">VTAM ve CSA Yönetimi</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">VTAMCSA</h2><p className="text-gray-500 text-sm font-medium">VTAM ve CSA Yönetimi</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
 
@@ -2141,7 +2311,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('tcpconf')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-indigo-100 rounded-xl mb-6 mx-auto group-hover:bg-indigo-200"><svg className="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">TCPCONF</h2><p className="text-gray-500 text-sm font-medium">TCP/IP Yapılandırma</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">TCPCONF</h2><p className="text-gray-500 text-sm font-medium">TCP/IP Yapılandırma</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
 
@@ -2149,7 +2319,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('tcpcons')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-teal-100 rounded-xl mb-6 mx-auto group-hover:bg-teal-200"><svg className="w-7 h-7 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">TCPCONS</h2><p className="text-gray-500 text-sm font-medium">TCP/IP Bağlantı Durumu</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">TCPCONS</h2><p className="text-gray-500 text-sm font-medium">TCP/IP Bağlantı Durumu</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
 
@@ -2157,7 +2327,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('udpconf')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-amber-100 rounded-xl mb-6 mx-auto group-hover:bg-amber-200"><svg className="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">UDPCONF</h2><p className="text-gray-500 text-sm font-medium">UDP Yapılandırma</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">UDPCONF</h2><p className="text-gray-500 text-sm font-medium">UDP Yapılandırma</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
 
@@ -2165,7 +2335,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('actcons')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-rose-100 rounded-xl mb-6 mx-auto group-hover:bg-rose-200"><svg className="w-7 h-7 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">ACTCONS</h2><p className="text-gray-500 text-sm font-medium">Aktif Bağlantı Durumu</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">ACTCONS</h2><p className="text-gray-500 text-sm font-medium">Aktif Bağlantı Durumu</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
 
@@ -2173,7 +2343,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('VTMBUFF')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-red-100 rounded-xl mb-6 mx-auto group-hover:bg-red-200"><svg className="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h-4m-2 0H7" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">VTMBUFF</h2><p className="text-gray-500 text-sm font-medium">VTAM Buffer İstatistikleri</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">VTMBUFF</h2><p className="text-gray-500 text-sm font-medium">VTAM Buffer İstatistikleri</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
 
@@ -2181,7 +2351,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('connsrpz')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-pink-100 rounded-xl mb-6 mx-auto group-hover:bg-pink-200"><svg className="w-7 h-7 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M12 20.005v-5.292a4 4 0 00-4-4h-2M18 15.713a4 4 0 00-4-4h-2" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">CONNSRPZ</h2><p className="text-gray-500 text-sm font-medium">Connection Hızı ve Durumu</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">CONNSRPZ</h2><p className="text-gray-500 text-sm font-medium">Connection Hızı ve Durumu</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
 
@@ -2189,7 +2359,7 @@ const NetworkPage = () => {
           <div onClick={() => openModal('tcpstor')} className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
             <div className="p-8">
               <div className="flex items-center justify-center w-14 h-14 bg-sky-100 rounded-xl mb-6 mx-auto group-hover:bg-sky-200"><svg className="w-7 h-7 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 012-2h10a2 2 0 012 2M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg></div>
-              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">TCPSTOR</h2><p className="text-gray-500 text-sm font-medium">TCP Storage Yönetimi</p><div className="mt-4 flex items-center justify-center"><div className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"><div className="w-2 h-2 bg-gray-400 rounded-full"></div><span className="text-xs font-medium text-gray-600">Aktif</span></div></div></div>
+              <div className="text-center"><h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-gray-700">TCPSTOR</h2><p className="text-gray-500 text-sm font-medium">TCP Storage Yönetimi</p><div className="mt-4 flex items-center justify-center"><div className={`flex items-center space-x-2 rounded-full px-3 py-1 ${dbConnected ? 'bg-green-100' : 'bg-gray-100'}`}><div className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div><span className={`text-xs font-medium ${dbConnected ? 'text-green-700' : 'text-gray-600'}`}>{dbConnected ? 'Aktif' : 'Pasif'}</span></div></div></div>
             </div>
           </div>
         </div>
@@ -4782,6 +4952,18 @@ const NetworkPage = () => {
                         return getVtamcsaColumnDisplayName(selectedChart) || toTitleCase(selectedChart);
                       }
                       
+                      if (activeModal === 'VTMBUFF') {
+                        return getVtmbuffColumnDisplayName(selectedChart);
+                      }
+
+                      if (activeModal === 'tcpstor') {
+                        return getTcpstorColumnDisplayName(selectedChart);
+                      }
+
+                      if (activeModal === 'connsrpz') {
+                        return getConnsrpzColumnDisplayName(selectedChart);
+                      }
+                      
                       return toTitleCase(selectedChart);
                     })()}
                   </h3>
@@ -5106,7 +5288,18 @@ const NetworkPage = () => {
 
                   {chartTab === 'threshold' && activeModal !== 'STACKS' && (
                     <div className="space-y-6">
-                      <h4 className="text-lg font-semibold text-gray-800">{selectedChart} için Threshold Ayarları</h4>
+                      <h4 className="text-lg font-semibold text-gray-800">{
+                        (() => {
+                          if (!selectedChart) return 'Grafik';
+                          if (activeModal === 'VTMBUFF') return getVtmbuffColumnDisplayName(selectedChart);
+                          if (activeModal === 'tcpstor') return getTcpstorColumnDisplayName(selectedChart);
+                          if (activeModal === 'connsrpz') return getConnsrpzColumnDisplayName(selectedChart);
+                          if (activeModal === 'STACKS') return getStacksColumnDisplayName(selectedChart);
+                          if (activeModal === 'STACKCPU') return getStackCpuColumnDisplayName(selectedChart);
+                          if (activeModal === 'vtamcsa') return getVtamcsaColumnDisplayName(selectedChart);
+                          return toTitleCase(selectedChart);
+                        })()
+                      } için Threshold Ayarları</h4>
                       {/* Basit Threshold içeriği */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-gray-50 rounded-lg p-6">
@@ -5254,7 +5447,18 @@ const NetworkPage = () => {
                               <div className="bg-white rounded-lg border border-gray-200 p-6">
                                 {(activeModal !== 'STACKCPU' && activeModal !== 'vtamcsa') && (
                                   <div className="flex justify-between items-center mb-4">
-                                    <h4 className="text-lg font-semibold text-gray-800">{selectedChart}</h4>
+                                    <h4 className="text-lg font-semibold text-gray-800">{
+                                      (() => {
+                                        if (!selectedChart) return '';
+                                        if (activeModal === 'VTMBUFF') return getVtmbuffColumnDisplayName(selectedChart);
+                                        if (activeModal === 'tcpstor') return getTcpstorColumnDisplayName(selectedChart);
+                                        if (activeModal === 'connsrpz') return getConnsrpzColumnDisplayName(selectedChart);
+                                        if (activeModal === 'STACKS') return getStacksColumnDisplayName(selectedChart);
+                                        if (activeModal === 'STACKCPU') return getStackCpuColumnDisplayName(selectedChart);
+                                        if (activeModal === 'vtamcsa') return getVtamcsaColumnDisplayName(selectedChart);
+                                        return toTitleCase(selectedChart);
+                                      })()
+                                    }</h4>
                                     <button onClick={() => {
                                       openChart(selectedChart);
                                     }} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">Yenile</button>
@@ -5353,7 +5557,43 @@ const NetworkPage = () => {
                       )}
                     </div>
                   )}
-                  {chartTab === 'threshold' && activeModal !== 'STACKS' && ( <div className="space-y-6"><h4 className="text-lg font-semibold text-gray-800">{selectedChart} için Threshold Ayarları</h4> {/* Basit Threshold içeriği */} <div className="grid grid-cols-1 md:grid-cols-2 gap-6"><div className="bg-gray-50 rounded-lg p-6"><h5 className="font-semibold text-gray-800 mb-4">Uyarı Eşikleri</h5><div className="space-y-3"><div className="flex justify-between items-center"><span className="text-sm text-gray-600">Kritik Eşik</span><input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" defaultValue="90"/></div><div className="flex justify-between items-center"><span className="text-sm text-gray-600">Uyarı Eşiği</span><input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" defaultValue="75"/></div></div></div><div className="bg-gray-50 rounded-lg p-6"><h5 className="font-semibold text-gray-800 mb-4">Bildirim Ayarları</h5><div className="space-y-3"><label className="flex items-center"><input type="checkbox" className="mr-2" defaultChecked /><span className="text-sm text-gray-600">E-posta</span></label><label className="flex items-center"><input type="checkbox" className="mr-2" /><span className="text-sm text-gray-600">SMS</span></label></div></div></div><div className="flex justify-end space-x-3 mt-6"><button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">İptal</button><button className={`px-4 py-2 text-sm font-medium text-white bg-${modalColor}-600 border border-transparent rounded-md hover:bg-${modalColor}-700`}>Kaydet</button></div></div> )}
+                  {chartTab === 'threshold' && activeModal !== 'STACKS' && (
+                    <div className="space-y-6">
+                      <h4 className="text-lg font-semibold text-gray-800">{
+                        (() => {
+                          if (!selectedChart) return 'Grafik';
+                          if (activeModal === 'VTMBUFF') return getVtmbuffColumnDisplayName(selectedChart);
+                          if (activeModal === 'tcpstor') return getTcpstorColumnDisplayName(selectedChart);
+                          if (activeModal === 'connsrpz') return getConnsrpzColumnDisplayName(selectedChart);
+                          if (activeModal === 'STACKS') return getStacksColumnDisplayName(selectedChart);
+                          if (activeModal === 'STACKCPU') return getStackCpuColumnDisplayName(selectedChart);
+                          if (activeModal === 'vtamcsa') return getVtamcsaColumnDisplayName(selectedChart);
+                          return toTitleCase(selectedChart);
+                        })()
+                      } için Threshold Ayarları</h4>
+                      {/* Basit Threshold içeriği */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="bg-gray-50 rounded-lg p-6">
+                          <h5 className="font-semibold text-gray-800 mb-4">Uyarı Eşikleri</h5>
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center"><span className="text-sm text-gray-600">Kritik Eşik</span><input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" defaultValue="90"/></div>
+                            <div className="flex justify-between items-center"><span className="text-sm text-gray-600">Uyarı Eşiği</span><input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded text-sm" defaultValue="75"/></div>
+                          </div>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-6">
+                          <h5 className="font-semibold text-gray-800 mb-4">Bildirim Ayarları</h5>
+                          <div className="space-y-3">
+                            <label className="flex items-center"><input type="checkbox" className="mr-2" defaultChecked /><span className="text-sm text-gray-600">E-posta</span></label>
+                            <label className="flex items-center"><input type="checkbox" className="mr-2" /><span className="text-sm text-gray-600">SMS</span></label>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-end space-x-3 mt-6">
+                        <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">İptal</button>
+                        <button className={`px-4 py-2 text-sm font-medium text-white bg-${modalColor}-600 border border-transparent rounded-md hover:bg-${modalColor}-700`}>Kaydet</button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -6133,10 +6373,22 @@ const NetworkPage = () => {
                     {/* VTMBUFF Info Modals */}
                     {infoModal === 'vtmbuffSystem' && (
                       <div className="space-y-4">
-                        <div className="bg-teal-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-teal-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             VTAM buffer yönetim sisteminin adını gösterir. Buffer allocation ve memory management işlemlerini takip eder.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            VTAM buffer yönetimi, sistem adı bilgisi ile buffer allocation işlemlerini izler. Bu bilgi, VTAM buffer yönetim sisteminin hangi sistem üzerinde çalıştığını ve buffer allocation'ların hangi sistem bağlamında gerçekleştiğini gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Sistem adı, VTAM buffer yönetimi için kritik öneme sahiptir. Multi-system ortamlarında buffer allocation'ların hangi sistemde gerçekleştiğini anlamak, sistem yönetimi ve performans optimizasyonu için gereklidir. Bu bilgi, sistem bazlı buffer kullanım analizi ve kapasite planlama için temel oluşturur.
                           </p>
                         </div>
                       </div>
@@ -6144,10 +6396,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'vtmbuffIobufSize' && (
                       <div className="space-y-4">
-                        <div className="bg-teal-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-teal-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             IOBuf (Input/Output Buffer) boyutunu gösterir. VTAM'ın veri alış-veriş işlemleri için kullandığı buffer alanının büyüklüğünü ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            IOBuf, VTAM'ın I/O işlemleri için kullandığı buffer alanının boyutunu gösterir. Bu buffer, VTAM'ın network üzerinden veri alış-veriş işlemlerini gerçekleştirmek için kullanılır. Buffer boyutu, I/O performansını ve veri transfer kapasitesini doğrudan etkiler.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            IOBuf boyutu, VTAM'ın I/O performansı için kritik öneme sahiptir. Yetersiz buffer boyutu, I/O gecikmelerine ve performans sorunlarına neden olabilir. Bu metrik, buffer optimizasyonu ve kapasite planlama için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6155,10 +6419,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'vtmbuffIobufTimes' && (
                       <div className="space-y-4">
-                        <div className="bg-teal-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-teal-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             IOBuf buffer'ın kaç kez genişletildiğini gösterir. Yüksek değerler bellek baskısını işaret eder.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            IOBuf Times Expanded, VTAM'ın I/O buffer'ının başlangıç boyutundan daha büyük bir alana ihtiyaç duyduğunda kaç kez genişletildiğini gösterir. Bu değer, buffer'ın dinamik olarak genişletilme sayısını ölçer ve bellek yönetimi performansını yansıtır.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Yüksek genişletme sayıları, IOBuf'un başlangıç boyutunun yetersiz olduğunu gösterir. Bu durum, bellek baskısı ve performans sorunlarına işaret edebilir. Bu metrik, buffer boyut optimizasyonu ve bellek yönetimi için kritik öneme sahiptir.
                           </p>
                         </div>
                       </div>
@@ -6166,10 +6442,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'vtmbuffLpbufSize' && (
                       <div className="space-y-4">
-                        <div className="bg-teal-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-teal-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             LPBuf (Line Protocol Buffer) boyutunu gösterir. Line protokol işlemleri için kullanılan buffer boyutunu ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            LPBuf, VTAM'ın line protokol işlemleri için kullandığı buffer alanının boyutunu gösterir. Line protokol, VTAM'ın network üzerinden veri transferi için kullandığı protokol katmanıdır. Buffer boyutu, line protokol performansını ve veri transfer kapasitesini etkiler.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            LPBuf boyutu, line protokol performansı için kritik öneme sahiptir. Yetersiz buffer boyutu, line protokol gecikmelerine ve veri transfer sorunlarına neden olabilir. Bu metrik, line protokol optimizasyonu ve kapasite planlama için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6177,10 +6465,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'vtmbuffLpbufTimes' && (
                       <div className="space-y-4">
-                        <div className="bg-teal-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-teal-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             LPBuf buffer'ın kaç kez genişletildiğini gösterir. Line protokol buffer büyüklüğünün yetersizliğini işaret eder.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            LPBuf Times Expanded, VTAM'ın line protokol buffer'ının başlangıç boyutundan daha büyük bir alana ihtiyaç duyduğunda kaç kez genişletildiğini gösterir. Bu değer, line protokol buffer'ının dinamik olarak genişletilme sayısını ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Yüksek genişletme sayıları, LPBuf'un başlangıç boyutunun yetersiz olduğunu gösterir. Bu durum, line protokol performansı ve bellek yönetimi için sorun oluşturabilir. Bu metrik, buffer boyut optimizasyonu için kritik öneme sahiptir.
                           </p>
                         </div>
                       </div>
@@ -6188,10 +6488,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'vtmbuffLfbufSize' && (
                       <div className="space-y-4">
-                        <div className="bg-teal-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-teal-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             LFBuf (Logon Frame Buffer) boyutunu gösterir. Logon ve authentication işlemleri için buffer boyutunu ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            LFBuf, VTAM'ın logon ve authentication işlemleri için kullandığı buffer alanının boyutunu gösterir. Logon frame buffer, VTAM'ın kullanıcı oturum açma işlemlerini gerçekleştirmek için kullandığı buffer alanıdır. Buffer boyutu, logon performansını ve authentication kapasitesini etkiler.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            LFBuf boyutu, logon ve authentication performansı için kritik öneme sahiptir. Yetersiz buffer boyutu, logon gecikmelerine ve authentication sorunlarına neden olabilir. Bu metrik, logon performans optimizasyonu ve kapasite planlama için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6199,10 +6511,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'vtmbuffLfbufTimes' && (
                       <div className="space-y-4">
-                        <div className="bg-teal-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-teal-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-teal-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             LFBuf buffer'ın kaç kez genişletildiğini gösterir. Logon buffer yetersizliklerini işaret eder.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            LFBuf Times Expanded, VTAM'ın logon frame buffer'ının başlangıç boyutundan daha büyük bir alana ihtiyaç duyduğunda kaç kez genişletildiğini gösterir. Bu değer, logon buffer'ının dinamik olarak genişletilme sayısını ölçer ve bellek yönetimi performansını yansıtır.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Yüksek genişletme sayıları, LFBuf'un başlangıç boyutunun yetersiz olduğunu gösterir. Bu durum, logon performansı ve bellek yönetimi için sorun oluşturabilir. Bu metrik, logon buffer optimizasyonu ve bellek yönetimi için kritik öneme sahiptir.
                           </p>
                         </div>
                       </div>
@@ -6211,10 +6535,22 @@ const NetworkPage = () => {
                     {/* CONNSRPZ Info Modals */}
                     {infoModal === 'connsrpzForeignIp' && (
                       <div className="space-y-4">
-                        <div className="bg-amber-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-amber-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             Karşı tarafın (remote host) IP adresini gösterir. Bağlantının hedef IP bilgisini verir.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Foreign IP Address, TCP/IP bağlantısının karşı tarafının (remote host) IP adresini gösterir. Bu alan, bağlantının hangi IP adresine kurulduğunu belirtir ve network trafik analizi için temel bilgi sağlar. IPv4 veya IPv6 formatında olabilir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Foreign IP adresi, network bağlantı analizi ve güvenlik izleme için kritik öneme sahiptir. Bu bilgi, hangi IP adreslerine bağlantı kurulduğunu görmek, network trafik analizi yapmak ve güvenlik politikalarını uygulamak için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6222,10 +6558,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'connsrpzActiveConns' && (
                       <div className="space-y-4">
-                        <div className="bg-amber-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-amber-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             Aktif TCP/IP bağlantılarının sayısını gösterir. Aynı anda açık olan bağlantıları ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Active Connections, belirli bir foreign IP adresine karşı aynı anda açık olan TCP/IP bağlantılarının sayısını gösterir. Bu değer, network yükü ve bağlantı yoğunluğu hakkında bilgi sağlar. Yüksek bağlantı sayıları, yoğun network trafiğini gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Aktif bağlantı sayısı, network yükü ve kapasite planlama için kritik öneme sahiptir. Yüksek bağlantı sayıları, network kaynaklarının yoğun kullanıldığını gösterir ve kapasite artırma gereksinimini işaret edebilir. Bu metrik, network performans optimizasyonu için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6233,10 +6581,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'connsrpzRtt' && (
                       <div className="space-y-4">
-                        <div className="bg-amber-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-amber-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             Round Trip Time (RTT) değerini milisaniye olarak gösterir. Ağ gecikme süresini ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Round Trip Time (RTT), bir paketin gönderilmesi ve yanıt alınması arasında geçen süreyi milisaniye cinsinden gösterir. Bu değer, network latency'sini ölçer ve ağ performansını değerlendirmek için kullanılır. Ortalama ve maksimum RTT değerleri, network gecikme analizi için kritiktir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            RTT değeri, network performansı ve kullanıcı deneyimi için kritik öneme sahiptir. Yüksek RTT değerleri, network gecikmelerini ve potansiyel performans sorunlarını gösterir. Bu metrik, network optimizasyonu ve sorun giderme için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6244,10 +6604,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'connsrpzBytesIn' && (
                       <div className="space-y-4">
-                        <div className="bg-amber-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-amber-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             Gelen veri miktarını byte cinsinden gösterir. Bağlantı üzerinden alınan toplam veriyi ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Bytes In, TCP/IP bağlantısı üzerinden alınan (inbound) toplam veri miktarını byte cinsinden gösterir. Bu değer, network üzerinden gelen veri trafiğini ölçer ve network yükü analizi için kritik öneme sahiptir. Interval bazlı veya toplam değer olarak hesaplanabilir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Bytes In, network trafik analizi ve kapasite planlama için kritik öneme sahiptir. Yüksek inbound trafik, network bant genişliği kullanımını ve sistem yükünü gösterir. Bu metrik, network optimizasyonu ve kapasite planlama için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6255,10 +6627,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'connsrpzBytesOut' && (
                       <div className="space-y-4">
-                        <div className="bg-amber-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-amber-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             Giden veri miktarını byte cinsinden gösterir. Bağlantı üzerinden gönderilen toplam veriyi ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Bytes Out, TCP/IP bağlantısı üzerinden gönderilen (outbound) toplam veri miktarını byte cinsinden gösterir. Bu değer, network üzerinden giden veri trafiğini ölçer ve outbound network yükü analizi için kritik öneme sahiptir. Interval bazlı veya toplam değer olarak hesaplanabilir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Bytes Out, network trafik analizi ve kapasite planlama için kritik öneme sahiptir. Yüksek outbound trafik, network bant genişliği kullanımını ve sistem yükünü gösterir. Bu metrik, network optimizasyonu ve kapasite planlama için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6266,10 +6650,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'connsrpzStack' && (
                       <div className="space-y-4">
-                        <div className="bg-amber-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-amber-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             Bağlantının ait olduğu TCP/IP stack adını gösterir. Hangi stack üzerinden bağlantı kurulduğunu belirtir.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Stack Name, TCP/IP bağlantısının hangi TCP/IP stack'i üzerinden kurulduğunu gösterir. z/OS sistemlerinde birden fazla TCP/IP stack'i olabilir ve her stack farklı network konfigürasyonlarına sahip olabilir. Bu bilgi, bağlantıların hangi stack üzerinden yönetildiğini belirler.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Stack adı, network yönetimi ve bağlantı analizi için kritik öneme sahiptir. Multi-stack ortamlarında hangi stack'in hangi bağlantıları yönettiğini anlamak, network yönetimi ve performans optimizasyonu için gereklidir. Bu bilgi, stack bazlı network analizi için temel oluşturur.
                           </p>
                         </div>
                       </div>
@@ -6277,10 +6673,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'connsrpzRemoteHost' && (
                       <div className="space-y-4">
-                        <div className="bg-amber-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-amber-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-amber-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             Uzak host'un adını gösterir. Bağlantının hedef host bilgisini verir.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Remote Host Name, TCP/IP bağlantısının karşı tarafının (remote host) host adını gösterir. Bu alan, bağlantının hangi host adına kurulduğunu belirtir ve DNS çözümlemesi ile IP adresinden host adına dönüştürülmüş bilgiyi içerir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Remote host adı, network bağlantı analizi ve güvenlik izleme için kritik öneme sahiptir. Bu bilgi, hangi host'lara bağlantı kurulduğunu görmek, network trafik analizi yapmak ve güvenlik politikalarını uygulamak için gereklidir. Host adı, IP adresinden daha okunabilir ve anlaşılır bir bilgi sağlar.
                           </p>
                         </div>
                       </div>
@@ -6289,10 +6697,22 @@ const NetworkPage = () => {
                     {/* TCPSTOR Info Modals */}
                     {infoModal === 'tcpstorStep' && (
                       <div className="space-y-4">
-                        <div className="bg-orange-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-orange-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             TCP/IP storage yönetiminin step adını gösterir. Memory management için step bilgisini verir.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Step Name, TCP/IP storage yönetiminin hangi MVS step'i içinde çalıştığını gösterir. Bu bilgi, TCP/IP storage yönetiminin JCL/JOB akışındaki konumunu belirler ve step bazlı bellek yönetimi analizi için kritik öneme sahiptir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Step adı, TCP/IP storage yönetimini JCL/JOB akışı ile ilişkilendirmek için kritik öneme sahiptir. Bu bilgi, step bazlı bellek kullanım analizi ve performans optimizasyonu için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6300,10 +6720,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'tcpstorSystem' && (
                       <div className="space-y-4">
-                        <div className="bg-orange-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-orange-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             TCP/IP storage yönetiminin sistem bilgisini gösterir. Hangi sistem üzerinde storage yönetimi yapıldığını belirtir.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            System Name, TCP/IP storage yönetiminin hangi MVS sisteminde çalıştığını gösterir. Bu bilgi, sysplex ortamlarında hangi sistemde storage yönetimi yapıldığını belirler ve sistem bazlı bellek yönetimi analizi için kritik öneme sahiptir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Sistem adı, TCP/IP storage yönetimini sysplex ortamında doğru sistemle ilişkilendirmek için kritik öneme sahiptir. Bu bilgi, sistem bazlı bellek kullanım analizi ve performans optimizasyonu için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6311,10 +6743,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'tcpstorEcsaCurrent' && (
                       <div className="space-y-4">
-                        <div className="bg-orange-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-orange-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             ECSA (Extended Common Storage Area) mevcut kullanımını gösterir. TCP/IP için ayrılmış mevcut bellek miktarını ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            ECSA Current, TCP/IP storage yönetimi için ayrılmış Extended Common Storage Area (ECSA) belleğinin mevcut kullanımını gösterir. ECSA, z/OS sistemlerinde birden fazla address space tarafından paylaşılan bellek alanıdır. Bu değer, TCP/IP için ayrılmış ECSA belleğinin ne kadarının kullanıldığını gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            ECSA Current, TCP/IP bellek yönetimi ve kapasite planlama için kritik öneme sahiptir. Yüksek ECSA kullanımı, bellek baskısını ve potansiyel performans sorunlarını gösterir. Bu metrik, bellek optimizasyonu ve kapasite planlama için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6322,10 +6766,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'tcpstorEcsaMax' && (
                       <div className="space-y-4">
-                        <div className="bg-orange-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-orange-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             ECSA maksimum kullanımını gösterir. TCP/IP için ayrılmış bellek limitini ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            ECSA Max, TCP/IP storage yönetimi için ayrılmış Extended Common Storage Area (ECSA) belleğinin maksimum kullanımını gösterir. Bu değer, TCP/IP için ayrılmış ECSA belleğinin geçmişteki tepe noktasını gösterir ve bellek kullanım trendlerini analiz etmek için kullanılır.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            ECSA Max, TCP/IP bellek kullanım trendlerini anlamak ve kapasite planlama yapmak için kritik öneme sahiptir. Bu değer, sistemin geçmişteki bellek kullanım tepe noktalarını gösterir ve gelecekteki bellek gereksinimlerini tahmin etmek için kullanılır.
                           </p>
                         </div>
                       </div>
@@ -6333,10 +6789,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'tcpstorEcsaLimit' && (
                       <div className="space-y-4">
-                        <div className="bg-orange-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-orange-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             ECSA limit değerini gösterir. TCP/IP için maksimum ayrılabilir bellek limitini ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            ECSA Limit, TCP/IP storage yönetimi için ayrılmış Extended Common Storage Area (ECSA) belleğinin maksimum limitini gösterir. Bu değer, TCP/IP için ayrılabilecek maksimum ECSA miktarını belirler ve bellek yönetimi politikalarını uygulamak için kullanılır.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            ECSA Limit, TCP/IP bellek yönetimi ve kaynak koruması için kritik öneme sahiptir. Limit aşımı, bellek yetersizliği ve performans sorunlarına neden olabilir. Bu metrik, bellek limit yönetimi ve kapasite planlama için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6344,10 +6812,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'tcpstorEcsaFree' && (
                       <div className="space-y-4">
-                        <div className="bg-orange-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-orange-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             ECSA boş bellek miktarını gösterir. TCP/IP için kullanılabilir serbest bellek alanını ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            ECSA Free, TCP/IP storage yönetimi için ayrılmış Extended Common Storage Area (ECSA) belleğinin boş (kullanılabilir) miktarını gösterir. Bu değer, ECSA Limit ile ECSA Current arasındaki farkı gösterir ve TCP/IP için ne kadar ek bellek ayrılabileceğini belirler.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            ECSA Free, TCP/IP bellek yönetimi ve kapasite planlama için kritik öneme sahiptir. Düşük ECSA Free değerleri, bellek baskısını ve potansiyel bellek yetersizliğini gösterir. Bu metrik, bellek optimizasyonu ve kapasite artırma gereksinimini belirlemek için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6355,10 +6835,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'tcpstorPrivateCurrent' && (
                       <div className="space-y-4">
-                        <div className="bg-orange-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-orange-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             Private memory mevcut kullanımını gösterir. TCP/IP için özel bellek alanının mevcut kullanımını ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Private Current, TCP/IP storage yönetimi için ayrılmış private (özel) belleğin mevcut kullanımını gösterir. Private bellek, TCP/IP address space'ine özel olan ve diğer address space'ler tarafından paylaşılmayan bellek alanıdır. Bu değer, TCP/IP için ayrılmış private belleğin ne kadarının kullanıldığını gösterir.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Private Current, TCP/IP bellek yönetimi ve address space yönetimi için kritik öneme sahiptir. Yüksek private bellek kullanımı, address space bellek baskısını gösterir. Bu metrik, bellek optimizasyonu ve address space yönetimi için gereklidir.
                           </p>
                         </div>
                       </div>
@@ -6366,10 +6858,22 @@ const NetworkPage = () => {
 
                     {infoModal === 'tcpstorPrivateMax' && (
                       <div className="space-y-4">
-                        <div className="bg-orange-50 rounded-lg p-4">
-                          <h4 className="font-semibold text-orange-900 mb-2">Ne Ölçer?</h4>
-                          <p className="text-orange-800 text-sm">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">Ne Ölçer?</h4>
+                          <p className="text-blue-800 text-sm">
                             Private memory maksimum kullanımını gösterir. TCP/IP için özel bellek alanının maksimum limitini ölçer.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">Teknik Detaylar</h4>
+                          <p className="text-green-800 text-sm">
+                            Private Max, TCP/IP storage yönetimi için ayrılmış private (özel) belleğin maksimum kullanımını gösterir. Bu değer, TCP/IP için ayrılmış private belleğin geçmişteki tepe noktasını gösterir ve private bellek kullanım trendlerini analiz etmek için kullanılır.
+                          </p>
+                        </div>
+                        <div className="bg-yellow-50 rounded-lg p-4">
+                          <h4 className="font-semibold text-yellow-900 mb-2">Neden Önemli?</h4>
+                          <p className="text-yellow-800 text-sm">
+                            Private Max, TCP/IP private bellek kullanım trendlerini anlamak ve address space bellek yönetimi için kritik öneme sahiptir. Bu değer, sistemin geçmişteki private bellek kullanım tepe noktalarını gösterir ve gelecekteki bellek gereksinimlerini tahmin etmek için kullanılır.
                           </p>
                         </div>
                       </div>

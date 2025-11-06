@@ -2,6 +2,195 @@ import React, { useState, useEffect } from 'react';
 import { databaseAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 
+// Display label overrides for FRMINFO_FIXED
+const FRMINFO_FIXED_LABELS = {
+  sqa_avg: 'Average SQA Frames',
+  sqa_min: 'Minimum SQA Frames',
+  sqa_max: 'Maximum SQA Frames',
+  lpa_avg: 'Average LPA Frames',
+  lpa_min: 'Minimum LPA Frames',
+  lpa_max: 'Maximum LPA Frames',
+  csa_avg: 'Average CSA Frames',
+  lsqa_avg: 'Average LSQA Frames',
+  lsqa_min: 'Minimum LSQA Frames',
+  lsqa_max: 'Maximum LSQA Frames',
+  private_avg: 'Average Private Frames',
+  private_min: 'Minimum Private Frames',
+  private_max: 'Maximum Private Frames',
+  fixed_below_16m_avg: 'Average Fixed <16M',
+  fixed_below_16m_min: 'Minimum Fixed <16M',
+  fixed_below_16m_max: 'Maximum Fixed <16M',
+  fixed_total_avg: 'Average Fixed Total',
+  fixed_total_min: 'Minimum Fixed Total',
+  fixed_total_max: 'Maximum Fixed Total',
+  fixed_percentage: 'Fixed Frames Average Percentage'
+};
+
+// Display label overrides for FRMINFO_HIGH_VIRTUAL
+const FRMINFO_HIGH_VIRTUAL_LABELS = {
+  hv_common_avg: 'Average High Virtual Common Frames',
+  hv_common_min: 'Minimum High Virtual Common Frames',
+  hv_common_max: 'Maximum High Virtual Common Frames',
+  hv_shared_avg: 'Average High Virtual Shared Frames',
+  hv_shared_min: 'Minimum High Virtual Shared Frames',
+  hv_shared_max: 'Maximum High Virtual Shared Frames'
+};
+
+// Display label overrides for FRMINFO_CENTER
+const FRMINFO_CENTER_LABELS = {
+  // SQA
+  spispcav: 'Average SQA Frames',
+  spispcmn: 'Minimum SQA Frames',
+  spispcmx: 'Maximum SQA Frames',
+  // LPA
+  spilpfav: 'Average LPA Frames',
+  spilpfmn: 'Minimum LPA Frames',
+  spilpfmx: 'Maximum LPA Frames',
+  // CSA
+  spicpfav: 'Average CSA Frames',
+  spicpfmn: 'Minimum CSA Frames',
+  spicpfmx: 'Maximum CSA Frames',
+  // LSQA
+  spiqpcav: 'Average LSQA Frames',
+  spiqpcmn: 'Minimum LSQA Frames',
+  spiqpcmx: 'Maximum LSQA Frames',
+  // Private
+  spiapfav: 'Average Private Frames',
+  spiapfmn: 'Minimum Private Frames',
+  spiapfmx: 'Maximum Private Frames',
+  // Available frames
+  spiafcav: 'Available Frames (Average)',
+  spiafcmn: 'Available Frames (Minimum)',
+  // Central Total
+  spitfuav: 'Average Central Total',
+  spiafumn: 'Minimum Central Total',
+  spiafumx: 'Maximum Central Total',
+  // Percentage
+  spitcpct: 'Central Frames Average Percentage'
+};
+
+// Display label overrides for SYSFRMIZ
+const SYSFRMIZ_LABELS = {
+  spgid: 'SMF ID',
+  spiuonlf: 'LPAR Online Storage (Average)',
+  spluicav: 'Current UIC',
+  spifinav: 'Average Nucleus Frames (Average)',
+  sprefncp: '% Nucleus Frames (Average)',
+  spispcav: 'Average SQA Frames (Average)',
+  spreasrp: '% SQA Frames (Average)',
+  spilpfav: 'Average LPA Frames (Average)',
+  sprealpp: '% LPA Frames (Average)',
+  spicpfav: 'Average CSA Frames (Average)',
+  spreavpp: '% CSA Frames (Average)',
+  spiqpcav: 'Average LSQA Frames (Average)',
+  sprelsqp: '% LSQA Frames (Average)',
+  spiapfav: 'Average Private Frames (Average)',
+  spreprvp: '% Private Frames (Average)',
+  spiafcav: 'Available Frames (Average)',
+  spreavlp: '% Available Frames (Average)',
+  spihvcav: 'Average High Virtual Common Frames',
+  sprecmnp: '% High Virtual Common Frames',
+  spihvsav: 'Average High Virtual Shared Frames',
+  spreshrp: '% High Virtual Shared Frames'
+};
+
+// Info texts for metrics (extendable)
+const INFO_TEXTS = {
+  // CSASUM
+  csa_in_use_percent: {
+    title: 'CSA Kullanım Yüzdesi',
+    what: 'CSA (Common Storage Area) alanının ne kadarının kullanıldığını gösterir.',
+    why: 'Yüksek kullanım, bellek yönetimi baskısı ve olası performans sorunlarına neden olabilir.'
+  },
+  ecsa_in_use_percent: {
+    title: 'ECSA Kullanım Yüzdesi',
+    what: 'ECSA (Extended CSA) kullanım oranını gösterir.',
+    why: 'Süreğen yüksek oranlar adresleme hatalarına ve alan yetersizliğine yol açabilir.'
+  },
+  rucsa_in_use_percent: {
+    title: 'RUCSA Kullanım Yüzdesi',
+    what: 'RUCSA alanının doluluk oranını gösterir.',
+    why: 'Yüksek doluluk, sistem bileşenlerinin alan bulmasını zorlaştırır.'
+  },
+  sqa_in_use_percent: {
+    title: 'SQA Kullanım Yüzdesi',
+    what: 'SQA (Subpool) alanlarının toplam kullanım oranını gösterir.',
+    why: 'Yüksek değerler bellek tahsis başarısızlıklarına neden olabilir.'
+  },
+  total_cs_used_percent: {
+    title: 'Toplam CS Kullanımı',
+    what: 'Tüm ortak depolama alanlarının toplam kullanım yüzdesi.',
+    why: 'Genel kapasite baskısını ve ölçek ihtiyacını gösterir.'
+  },
+  percent_used_high_shared_storage: {
+    title: 'High Shared Storage Kullanımı',
+    what: 'Yüksek adres alanındaki paylaşımlı depolama kullanım oranı.',
+    why: 'Aşırı kullanım, tahsis gecikmelerine ve servis bozulmalarına yol açabilir.'
+  },
+  // FRMINFO_FIXED (Türkçe başlıklar)
+  sqa_avg: { title: 'Sabit SQA Çerçeveleri (Ortalama)', what: 'Aralık boyunca SQA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+  sqa_min: { title: 'Sabit SQA Çerçeveleri (Minimum)', what: 'Aralık boyunca SQA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+  sqa_max: { title: 'Sabit SQA Çerçeveleri (Maksimum)', what: 'Aralık boyunca SQA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+  lpa_avg: { title: 'Sabit LPA Çerçeveleri (Ortalama)', what: 'Aralık boyunca LPA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+  lpa_min: { title: 'Sabit LPA Çerçeveleri (Minimum)', what: 'Aralık boyunca LPA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+  lpa_max: { title: 'Sabit LPA Çerçeveleri (Maksimum)', what: 'Aralık boyunca LPA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+  csa_avg: { title: 'Sabit CSA Çerçeveleri (Ortalama)', what: 'Aralık boyunca CSA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+  lsqa_avg: { title: 'Sabit LSQA Çerçeveleri (Ortalama)', what: 'Aralık boyunca LSQA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+  lsqa_min: { title: 'Sabit LSQA Çerçeveleri (Minimum)', what: 'Aralık boyunca LSQA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+  lsqa_max: { title: 'Sabit LSQA Çerçeveleri (Maksimum)', what: 'Aralık boyunca LSQA sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+  private_avg: { title: 'Sabit Private Çerçeveler (Ortalama)', what: 'Aralık boyunca Private Area adres alanı sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+  private_min: { title: 'Sabit Private Çerçeveler (Minimum)', what: 'Aralık boyunca Private Area adres alanı sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+  private_max: { title: 'Sabit Private Çerçeveler (Maksimum)', what: 'Aralık boyunca Private Area adres alanı sayfalarının işgal ettiği sabit merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+  fixed_below_16m_avg: { title: '16MB Altı Sabit Çerçeveler (Ortalama)', what: 'Aralık boyunca 16MB altında kalan sabit merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+  fixed_below_16m_min: { title: '16MB Altı Sabit Çerçeveler (Minimum)', what: 'Aralık boyunca 16MB altında kalan sabit merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+  fixed_below_16m_max: { title: '16MB Altı Sabit Çerçeveler (Maksimum)', what: 'Aralık boyunca 16MB altında kalan sabit merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+  fixed_total_avg: { title: 'Toplam Sabit Çerçeveler (Ortalama)', what: 'Aralık boyunca sabitlenen tüm merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+  fixed_total_min: { title: 'Toplam Sabit Çerçeveler (Minimum)', what: 'Aralık boyunca sabitlenen tüm merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+  fixed_total_max: { title: 'Toplam Sabit Çerçeveler (Maksimum)', what: 'Aralık boyunca sabitlenen tüm merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+  fixed_percentage: { title: 'Sabit Çerçeveler Ortalama Yüzdesi', what: 'Aralık boyunca kullanılan kullanılabilir depolama çerçeveleri içindeki sabit çerçevelerin ortalama yüzdesidir.' },
+  // FRMINFO_CENTER (Türkçe başlıklar)
+  spispcav: { title: 'Ortalama SQA Çerçeveleri', what: 'Aralık boyunca SQA sayfalarının işgal ettiği merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+  spispcmn: { title: 'Minimum SQA Çerçeveleri', what: 'Aralık boyunca SQA sayfalarının işgal ettiği merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+  spispcmx: { title: 'Maksimum SQA Çerçeveleri', what: 'Aralık boyunca SQA sayfalarının işgal ettiği merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+  spilpfav: { title: 'Ortalama LPA Çerçeveleri', what: 'Aralık boyunca LPA sayfalarının işgal ettiği merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+  spilpfmn: { title: 'Minimum LPA Çerçeveleri', what: 'Aralık boyunca LPA sayfalarının işgal ettiği merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+  spilpfmx: { title: 'Maksimum LPA Çerçeveleri', what: 'Aralık boyunca LPA sayfalarının işgal ettiği merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+  spicpfav: { title: 'Ortalama CSA Çerçeveleri', what: 'Aralık boyunca CSA sayfalarının işgal ettiği merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+  spicpfmn: { title: 'Minimum CSA Çerçeveleri', what: 'Aralık boyunca CSA sayfalarının işgal ettiği merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+  spicpfmx: { title: 'Maksimum CSA Çerçeveleri', what: 'Aralık boyunca CSA sayfalarının işgal ettiği merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+  spiqpcav: { title: 'Ortalama LSQA Çerçeveleri', what: 'Aralık boyunca LSQA sayfalarının işgal ettiği merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+  spiqpcmn: { title: 'Minimum LSQA Çerçeveleri', what: 'Aralık boyunca LSQA sayfalarının işgal ettiği merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+  spiqpcmx: { title: 'Maksimum LSQA Çerçeveleri', what: 'Aralık boyunca LSQA sayfalarının işgal ettiği merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+  spiapfav: { title: 'Ortalama Private Çerçeveler', what: 'Aralık boyunca Private Area adres alanı sayfalarının işgal ettiği merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+  spiapfmn: { title: 'Minimum Private Çerçeveler', what: 'Aralık boyunca Private Area adres alanı sayfalarının işgal ettiği merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+  spiapfmx: { title: 'Maksimum Private Çerçeveler', what: 'Aralık boyunca Private Area adres alanı sayfalarının işgal ettiği merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+  spiafcav: { title: 'Kullanılabilir Çerçeveler (Ortalama)', what: 'Aralık boyunca kullanılabilir merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+  spiafcmn: { title: 'Kullanılabilir Çerçeveler (Minimum)', what: 'Aralık boyunca kullanılabilir merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+  spitfuav: { title: 'Ortalama Merkezi Toplam', what: 'Aralık boyunca kullanılan tüm merkezi depolama çerçevelerinin ortalama sayısıdır.' },
+  spiafumn: { title: 'Minimum Merkezi Toplam', what: 'Aralık boyunca kullanılan tüm merkezi depolama çerçevelerinin en düşük sayısıdır.' },
+  spiafumx: { title: 'Maksimum Merkezi Toplam', what: 'Aralık boyunca kullanılan tüm merkezi depolama çerçevelerinin en yüksek sayısıdır.' },
+  spitcpct: { title: 'Merkezi Çerçeveler Ortalama Yüzdesi', what: 'Aralık boyunca kullanılan merkezi depolama çerçevelerinin ortalama yüzde oranıdır.' },
+  // FRMINFO_HIGH_VIRTUAL
+  hv_common_avg: { title: 'Average High Virtual Common Frames – SPIHVCAV', what: 'The Average High Virtual Common Frames field contains the average number of central storage frames that were occupied by High Virtual Common storage during the interval.' },
+  hv_common_min: { title: 'Minimum High Virtual Common Frames – SPIHVCMN', what: 'The Minimum High Virtual Common Frames field contains the minimum number of central storage frames that were occupied by High Virtual Common storage during the interval.' },
+  hv_common_max: { title: 'Maximum High Virtual Common Frames – SPIHVCMX', what: 'The Maximum High Virtual Common Frames field contains the maximum number of central storage frames that were occupied by High Virtual Common storage during the interval.' },
+  hv_shared_avg: { title: 'Average High Virtual Shared Frames – SPIHVSAV', what: 'The Average High Virtual Shared Frames field contains the average number of central storage frames that were occupied by High Virtual Shared Memory Objects during the interval.' },
+  hv_shared_min: { title: 'Minimum High Virtual Shared Frames – SPIHVSMN', what: 'The Minimum High Virtual Shared Frames field contains the minimum number of central storage frames that were occupied by High Virtual Shared Memory Objects during the interval.' },
+  hv_shared_max: { title: 'Maximum High Virtual Shared Frames – SPIHVSMX', what: 'The Maximum High Virtual Shared Frames field contains the maximum number of central storage frames that were occupied by High Virtual Shared Memory Objects during the interval.' },
+  // SYSFRMIZ (örnek)
+  spl: { title: 'SPL', what: 'System Private Lines kapasitesi/ayar metriği.', why: 'Kaynak sınırlamaları performansı etkileyebilir.' },
+  spiuonlf: { title: 'SPIUONLF', what: 'In-use on-line frame sayısı.', why: 'Artış, yük yoğunluğunu gösterir.' },
+  spifinav: { title: 'SPIFINAV', what: 'Available frames göstergesi.', why: 'Düşük değer, tahsis başarısızlık riskini artırır.' },
+  // Varsayılan
+  default: {
+    title: 'Metrik Hakkında',
+    what: 'Bu kart, ilgili metrik için güncel değeri ve kısa trend bilgisini gösterir.',
+    why: 'Metrik, kapasite ve performans takibi için önemlidir. Eşik aşımı olası riskleri işaret eder.'
+  }
+};
+
+  // tabs moved to module scope
+
 const StoragePage = () => {
   // State management
   const [activeModal, setActiveModal] = useState(null);
@@ -78,97 +267,7 @@ const StoragePage = () => {
     return () => clearInterval(id);
   }, []);
 
-  // Display label overrides for FRMINFO_FIXED
-  const FRMINFO_FIXED_LABELS = {
-    sqa_avg: 'Average SQA Frames',
-    sqa_min: 'Minimum SQA Frames',
-    sqa_max: 'Maximum SQA Frames',
-    lpa_avg: 'Average LPA Frames',
-    lpa_min: 'Minimum LPA Frames',
-    lpa_max: 'Maximum LPA Frames',
-    csa_avg: 'Average CSA Frames',
-    lsqa_avg: 'Average LSQA Frames',
-    lsqa_min: 'Minimum LSQA Frames',
-    lsqa_max: 'Maximum LSQA Frames',
-    private_avg: 'Average Private Frames',
-    private_min: 'Minimum Private Frames',
-    private_max: 'Maximum Private Frames',
-    fixed_below_16m_avg: 'Average Fixed <16M',
-    fixed_below_16m_min: 'Minimum Fixed <16M',
-    fixed_below_16m_max: 'Maximum Fixed <16M',
-    fixed_total_avg: 'Average Fixed Total',
-    fixed_total_min: 'Minimum Fixed Total',
-    fixed_total_max: 'Maximum Fixed Total',
-    fixed_percentage: 'Fixed Frames Average Percentage'
-  };
-
-  // Display label overrides for FRMINFO_HIGH_VIRTUAL
-  const FRMINFO_HIGH_VIRTUAL_LABELS = {
-    hv_common_avg: 'Average High Virtual Common Frames',
-    hv_common_min: 'Minimum High Virtual Common Frames',
-    hv_common_max: 'Maximum High Virtual Common Frames',
-    hv_shared_avg: 'Average High Virtual Shared Frames',
-    hv_shared_min: 'Minimum High Virtual Shared Frames',
-    hv_shared_max: 'Maximum High Virtual Shared Frames'
-  };
-
-  // Display label overrides for FRMINFO_CENTER
-  const FRMINFO_CENTER_LABELS = {
-    // SQA
-    spispcav: 'Average SQA Frames',
-    spispcmn: 'Minimum SQA Frames',
-    spispcmx: 'Maximum SQA Frames',
-    // LPA
-    spilpfav: 'Average LPA Frames',
-    spilpfmn: 'Minimum LPA Frames',
-    spilpfmx: 'Maximum LPA Frames',
-    // CSA
-    spicpfav: 'Average CSA Frames',
-    spicpfmn: 'Minimum CSA Frames',
-    spicpfmx: 'Maximum CSA Frames',
-    // LSQA
-    spiqpcav: 'Average LSQA Frames',
-    spiqpcmn: 'Minimum LSQA Frames',
-    spiqpcmx: 'Maximum LSQA Frames',
-    // Private
-    spiapfav: 'Average Private Frames',
-    spiapfmn: 'Minimum Private Frames',
-    spiapfmx: 'Maximum Private Frames',
-    // Available frames
-    spiafcav: 'Available Frames (Average)',
-    spiafcmn: 'Available Frames (Minimum)',
-    // Central Total
-    spitfuav: 'Average Central Total',
-    spiafumn: 'Minimum Central Total',
-    spiafumx: 'Maximum Central Total',
-    // Percentage
-    spitcpct: 'Central Frames Average Percentage'
-  };
-
-  // Display label overrides for SYSFRMIZ
-  const SYSFRMIZ_LABELS = {
-    spgid: 'SMF ID',
-    spiuonlf: 'LPAR Online Storage (Average)',
-    spluicav: 'Current UIC',
-    spifinav: 'Average Nucleus Frames (Average)',
-    sprefncp: '% Nucleus Frames (Average)',
-    spispcav: 'Average SQA Frames (Average)',
-    spreasrp: '% SQA Frames (Average)',
-    spilpfav: 'Average LPA Frames (Average)',
-    sprealpp: '% LPA Frames (Average)',
-    spicpfav: 'Average CSA Frames (Average)',
-    spreavpp: '% CSA Frames (Average)',
-    spiqpcav: 'Average LSQA Frames (Average)',
-    sprelsqp: '% LSQA Frames (Average)',
-    spiapfav: 'Average Private Frames (Average)',
-    spreprvp: '% Private Frames (Average)',
-    spiafcav: 'Available Frames (Average)',
-    spreavlp: '% Available Frames (Average)',
-    spihvcav: 'Average High Virtual Common Frames',
-    sprecmnp: '% High Virtual Common Frames',
-    spihvsav: 'Average High Virtual Shared Frames',
-    spreshrp: '% High Virtual Shared Frames'
-  };
+  
 
   // Context-aware display name
   const getDisplayName = (columnName) => {
@@ -251,32 +350,7 @@ const StoragePage = () => {
       return value.toString();
     }
     
-    // Tarih/saat sütunları için özel format
-    if (columnName === 'bmctime') {
-      if (value instanceof Date) {
-        return value.toLocaleString('tr-TR', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        });
-      }
-      // String olarak gelen tarih için
-      if (typeof value === 'string') {
-        const date = new Date(value);
-        return date.toLocaleString('tr-TR', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        });
-      }
-      return value.toString();
-    }
+    // (bmctime already handled with timestamp above)
     
     if (columnName === 'time') {
       if (value instanceof Date) {
@@ -351,22 +425,15 @@ const StoragePage = () => {
   const fetchFrminfoCenterData = async () => {
     setIsLoading(true);
     try {
-      console.log('=== FRMINFO CENTRAL DEBUG ===');
-      console.log('Calling API...');
       const response = await databaseAPI.getMainviewStorageFrminfoCenter({});
-      console.log('Response received:', response);
       if (response.data.success) {
         setFrminfoCenterData(response.data.data);
         toast.success(`FRMINFO Central verileri yüklendi (${response.data.data.length} kayıt)`);
       } else {
         toast.error('FRMINFO Central veri yüklenirken hata oluştu');
       }
-      console.log('=== END FRMINFO CENTRAL DEBUG ===');
     } catch (error) {
       console.error('FRMINFO Central veri yüklenirken hata:', error);
-      console.error('Error details:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-      console.error('Error config:', error.config);
       toast.error(`FRMINFO Central veri yüklenirken hata oluştu: ${error.response?.data?.error || error.message}`);
     } finally {
       setIsLoading(false);
@@ -377,27 +444,14 @@ const StoragePage = () => {
     setIsLoading(true);
     try {
       const response = await databaseAPI.getMainviewStorageFrminfofixed({});
-      console.log('=== FRONTEND DEBUG ===');
-      console.log('Response:', response);
-      console.log('Response data:', response.data);
       if (response.data.success) {
-        console.log('Data received:', response.data.data);
-        if (response.data.data.length > 0) {
-          console.log('First row in frontend:', response.data.data[0]);
-          console.log('First row keys:', Object.keys(response.data.data[0]));
-          console.log('First row timestamp:', response.data.data[0].timestamp);
-          console.log('First row system_name:', response.data.data[0].system_name);
-          console.log('First row server_name:', response.data.data[0].server_name);
-        }
         setFrminfoFixedData(response.data.data);
         toast.success(`FRMINFO Fixed verileri yüklendi (${response.data.data.length} kayıt)`);
       } else {
         toast.error('FRMINFO Fixed veri yüklenirken hata oluştu');
       }
-      console.log('=== END FRONTEND DEBUG ===');
     } catch (error) {
       console.error('FRMINFO Fixed veri yüklenirken hata:', error);
-      console.error('Error details:', error.response?.data);
       toast.error(`FRMINFO Fixed veri yüklenirken hata oluştu: ${error.response?.data?.error || error.message}`);
     } finally {
       setIsLoading(false);
@@ -600,24 +654,9 @@ const StoragePage = () => {
       .catch(() => toast.error('PDF oluşturulurken bir hata oluştu'));
   };
 
-  // Tabs configuration
-  const tabs = [
-    { id: 'table', name: 'Tablo', icon: '📊' },
-    { id: 'chart', name: 'Grafik', icon: '📈' }
-  ];
+  
 
-  // Modal color system
-  const getModalColor = (modal = activeModal) => {
-    switch(modal) {
-      case 'CSASUM': return 'blue';
-      case 'FRMINFO_CENTER': return 'green';
-      case 'FRMINFO_FIXED': return 'purple';
-      case 'FRMINFO_HIGH_VIRTUAL': return 'orange';
-      case 'SYSFRMIZ': return 'indigo';
-      default: return 'blue';
-    }
-  };
-  const modalColor = getModalColor();
+  // (removed unused modal color helpers)
 
   // Modal functions
   const openModal = (modalType) => {
@@ -881,7 +920,25 @@ const StoragePage = () => {
       );
     }
 
-    return data.map((row, index) => (
+    const rows = (() => {
+      if (!sortColumn) return data;
+      const copy = [...data];
+      copy.sort((a, b) => {
+        const av = a?.[sortColumn];
+        const bv = b?.[sortColumn];
+        const na = Number(av);
+        const nb = Number(bv);
+        if (Number.isFinite(na) && Number.isFinite(nb)) {
+          return sortDirection === 'asc' ? na - nb : nb - na;
+        }
+        const sa = String(av ?? '');
+        const sb = String(bv ?? '');
+        return sortDirection === 'asc' ? sa.localeCompare(sb) : sb.localeCompare(sa);
+      });
+      return copy;
+    })();
+
+    return rows.map((row, index) => (
       <tr key={index} className="hover:bg-gray-50">
         {Object.entries(row).map(([columnName, value], cellIndex) => (
           <td key={cellIndex} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -1216,9 +1273,7 @@ const StoragePage = () => {
                       {/* CSASUM için Grafik Kartları */}
                       {activeModal === 'CSASUM' && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          {getCsasumNumericColumns().map((colKey, idx) => {
-                            const palette = ['bg-green-400', 'bg-blue-400', 'bg-purple-400', 'bg-orange-400', 'bg-red-400', 'bg-indigo-400', 'bg-yellow-400', 'bg-pink-400', 'bg-cyan-400', 'bg-teal-400'];
-                            const dotColor = palette[idx % palette.length];
+                          {getCsasumNumericColumns().map((colKey) => {
                             const value = getCurrentData()?.[0]?.[colKey];
                             const isNumeric = Number.isFinite(Number(value));
                             const isAlert = Number(value) > 80;
@@ -1273,9 +1328,7 @@ const StoragePage = () => {
                       {/* FRMINFO_CENTER için Grafik Kartları - Tüm sayısal sütunlar */}
                       {activeModal === 'FRMINFO_CENTER' && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          {getFrminfoCenterNumericColumns().map((colKey, idx) => {
-                            const palette = ['bg-green-400', 'bg-blue-400', 'bg-purple-400', 'bg-orange-400', 'bg-red-400', 'bg-indigo-400', 'bg-yellow-400', 'bg-pink-400', 'bg-cyan-400', 'bg-teal-400'];
-                            const dotColor = palette[idx % palette.length];
+                          {getFrminfoCenterNumericColumns().map((colKey) => {
                             const value = getCurrentData()?.[0]?.[colKey];
                             const isNumeric = Number.isFinite(Number(value));
                             const isAlert = Number(value) > 80;
@@ -1330,11 +1383,8 @@ const StoragePage = () => {
                       {/* FRMINFO_FIXED için Grafik Kartları */}
                       {activeModal === 'FRMINFO_FIXED' && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          {getFrminfoFixedNumericColumns().map((colKey, idx) => {
-                            const palette = ['bg-green-400', 'bg-blue-400', 'bg-purple-400', 'bg-orange-400', 'bg-red-400', 'bg-indigo-400', 'bg-yellow-400', 'bg-pink-400', 'bg-cyan-400', 'bg-teal-400'];
-                            const dotColor = palette[idx % palette.length];
+                          {getFrminfoFixedNumericColumns().map((colKey) => {
                             const value = getCurrentData()?.[0]?.[colKey];
-                            const isPercent = /percent|pct|percentage/i.test(colKey);
                             const isNumeric = Number.isFinite(Number(value));
                             const isAlert = Number(value) > 80;
                             return (
@@ -1351,7 +1401,7 @@ const StoragePage = () => {
                                   </div>
                                   <h5 className="font-bold text-gray-800 group-hover:text-gray-600 text-lg mb-2">{getDisplayName(colKey)}</h5>
                                   <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${isAlert ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
-                                    {value !== undefined && value !== null && value !== '' ? `${formatValue(value, colKey)}${isPercent ? '' : ''}` : '-'}
+                                    {value !== undefined && value !== null && value !== '' ? `${formatValue(value, colKey)}` : '-'}
                                   </div>
                                 </div>
                               </div>
@@ -1753,9 +1803,7 @@ const StoragePage = () => {
                       {/* SYSFRMIZ için Grafik Kartları */}
                       {activeModal === 'SYSFRMIZ' && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          {getSysfrmizNumericColumns().map((colKey, idx) => {
-                            const palette = ['bg-green-400', 'bg-blue-400', 'bg-purple-400', 'bg-orange-400', 'bg-red-400', 'bg-indigo-400', 'bg-yellow-400', 'bg-pink-400', 'bg-cyan-400', 'bg-teal-400'];
-                            const dotColor = palette[idx % palette.length];
+                          {getSysfrmizNumericColumns().map((colKey) => {
                             const value = getCurrentData()?.[0]?.[colKey];
                             const isNumeric = Number.isFinite(Number(value));
                             const isAlert = Number(value) > 80;

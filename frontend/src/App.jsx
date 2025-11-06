@@ -14,9 +14,31 @@ import PostgreSQLPage from './pages/Systems/PostgreSQLPage'
 import AlertsPage from './pages/Alerts/AlertsPage'
 import SMTPPage from './pages/SMTP/SMTPPage'
 
+// Admin imports
+import AdminLoginPage from './pages/Admin/AdminLoginPage'
+import AdminDashboardPage from './pages/Admin/AdminDashboardPage'
+import AdminCardManagementPage from './pages/Admin/AdminCardManagementPage'
+import AdminLayout from './components/Admin/AdminLayout'
+import AdminProtectedRoute from './components/Admin/AdminProtectedRoute'
+
 function App() {
   return (
     <Routes>
+      {/* Admin Routes */}
+      <Route path="/admin" element={<AdminLoginPage />} />
+      <Route
+        path="/admin/*"
+        element={
+          <AdminProtectedRoute>
+            <AdminLayout />
+          </AdminProtectedRoute>
+        }
+      >
+        <Route path="dashboard" element={<AdminDashboardPage />} />
+        <Route path="card-management" element={<AdminCardManagementPage />} />
+      </Route>
+
+      {/* User Routes */}
       <Route element={<Layout />}>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />

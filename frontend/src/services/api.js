@@ -63,10 +63,15 @@ api.interceptors.response.use(
       }
     }
 
-    // Hata mesajlarını göster
+    // Hata mesajlarını göster (sadece kritik sunucu hataları için toast göster)
+    // Chatbot kendi hata mesajlarını gösteriyor, bu yüzden chatbot istekleri için toast gösterme
     const errorMessage = error.response?.data?.message || 'Bir hata oluştu'
+    const isChatbotRequest = originalRequest.url?.includes('/database/') && 
+                              (originalRequest.url?.includes('mainview') || originalRequest.url?.includes('check-table'))
     
-    if (error.response?.status !== 401) {
+    // Sadece kritik sunucu hataları (500, 502, 503, 504) için toast göster ve chatbot istekleri değilse
+    const isCriticalError = error.response?.status >= 500 && error.response?.status < 600
+    if (error.response?.status !== 401 && !isChatbotRequest && isCriticalError) {
       toast.error(errorMessage)
     }
 

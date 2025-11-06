@@ -1,7 +1,10 @@
-import { Home, Activity, Settings, Monitor, Zap, Database, BarChart3, Mail, Globe, HardDrive, Terminal, FileText, Server, AlertTriangle, Mailbox } from 'lucide-react'
+import { Home, Settings, Monitor, Zap, Database, BarChart3, Mail, Globe, HardDrive, Terminal, FileText, Server, AlertTriangle, Mailbox, ChevronLeft, ChevronRight } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
+import { useState } from 'react'
 
 const Navbar = () => {
+  const [isExpanded, setIsExpanded] = useState(false)
+
   const menuItems = [
     { to: '/dashboard', icon: Home, label: 'Dashboard' },
     { to: '/zos', icon: Monitor, label: 'z/OS' },
@@ -16,15 +19,36 @@ const Navbar = () => {
   ]
 
   return (
-    <aside className="fixed top-0 left-0 z-40 w-16 h-screen bg-gray-900 border-r border-gray-700 shadow-lg">
+    <aside className={`fixed top-0 left-0 z-40 h-screen bg-gray-900 border-r border-gray-700 shadow-lg transition-all duration-300 ${isExpanded ? 'w-56' : 'w-16'}`}>
       <div className="h-full flex flex-col">
         {/* Logo Section */}
         <div className="px-2 py-4 border-b border-gray-700">
-          <div className="flex items-center justify-center">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center shadow-lg">
-              <Activity className="w-4 h-4 text-white" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <img src="/img/logo.png" alt="Chronis Logo" className="w-10 h-10 rounded-lg shadow-lg flex-shrink-0" />
+              {isExpanded && (
+                <div className="overflow-hidden">
+                  <h1 className="text-white font-bold text-sm whitespace-nowrap">Chronis</h1>
+                  <p className="text-gray-400 text-xs whitespace-nowrap">Monitoring</p>
+                </div>
+              )}
             </div>
           </div>
+        </div>
+
+        {/* Sidebar Toggle Button */}
+        <div className="px-2 py-2 border-b border-gray-700">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="w-full flex items-center justify-center p-2 text-gray-300 hover:bg-gray-800 rounded-lg transition-colors"
+            title={isExpanded ? 'Daralt' : 'Genişlet'}
+          >
+            {isExpanded ? (
+              <ChevronLeft className="w-5 h-5" />
+            ) : (
+              <ChevronRight className="w-5 h-5" />
+            )}
+          </button>
         </div>
 
         {/* Navigation Menu */}
@@ -35,14 +59,18 @@ const Navbar = () => {
                 <NavLink
                   to={item.to}
                   className={({ isActive }) =>
-                    `flex items-center justify-center p-2 rounded-lg transition-all duration-200 ${
+                    `flex items-center ${isExpanded ? 'justify-start px-4 space-x-3' : 'justify-center'} p-2 rounded-lg transition-all duration-200 ${
                       isActive
                         ? 'bg-primary-600 text-white'
                         : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                     }`
                   }
+                  title={!isExpanded ? item.label : ''}
                 >
-                  <item.icon className="w-5 h-5" />
+                  <item.icon className="w-5 h-5 flex-shrink-0" />
+                  {isExpanded && (
+                    <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>
+                  )}
                 </NavLink>
               </li>
             ))}
@@ -54,51 +82,61 @@ const Navbar = () => {
           <NavLink
             to="/postgresql"
             className={({ isActive }) =>
-              `w-full flex items-center justify-center p-2 rounded-lg transition-all duration-200 ${
+              `w-full flex items-center ${isExpanded ? 'justify-start px-4 space-x-3' : 'justify-center'} p-2 rounded-lg transition-all duration-200 ${
                 isActive
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-300 hover:bg-gray-700 hover:text-white'
               }`
             }
+            title={!isExpanded ? 'PostgreSQL' : ''}
           >
-            <Server className="w-5 h-5" />
+            <Server className="w-5 h-5 flex-shrink-0" />
+            {isExpanded && <span className="text-sm font-medium whitespace-nowrap">PostgreSQL</span>}
           </NavLink>
           
           {/* SMTP */}
           <NavLink
             to="/smtp"
             className={({ isActive }) =>
-              `w-full flex items-center justify-center p-2 rounded-lg transition-all duration-200 ${
+              `w-full flex items-center ${isExpanded ? 'justify-start px-4 space-x-3' : 'justify-center'} p-2 rounded-lg transition-all duration-200 ${
                 isActive
                   ? 'bg-purple-600 text-white'
                   : 'text-gray-300 hover:bg-gray-700 hover:text-white'
               }`
             }
+            title={!isExpanded ? 'SMTP' : ''}
           >
-            <Mailbox className="w-5 h-5" />
+            <Mailbox className="w-5 h-5 flex-shrink-0" />
+            {isExpanded && <span className="text-sm font-medium whitespace-nowrap">SMTP</span>}
           </NavLink>
           
           {/* Uyarılar */}
           <NavLink
             to="/alerts"
             className={({ isActive }) =>
-              `w-full flex items-center justify-center p-2 rounded-lg transition-all duration-200 relative ${
+              `w-full flex items-center ${isExpanded ? 'justify-start px-4 space-x-3' : 'justify-center'} p-2 rounded-lg transition-all duration-200 relative ${
                 isActive
                   ? 'bg-red-600 text-white'
                   : 'text-gray-300 hover:bg-gray-700 hover:text-white'
               }`
             }
+            title={!isExpanded ? 'Uyarılar (3)' : ''}
           >
-            <AlertTriangle className="w-5 h-5" />
+            <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+            {isExpanded && <span className="text-sm font-medium whitespace-nowrap">Uyarılar</span>}
             {/* Uyarı Badge */}
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+            <span className={`${isExpanded ? 'ml-auto' : 'absolute -top-1 -right-1'} bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold`}>
               3
             </span>
           </NavLink>
           
           {/* Ayarlar */}
-          <button className="w-full flex items-center justify-center p-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-all duration-200">
-            <Settings className="w-5 h-5" />
+          <button 
+            className={`w-full flex items-center ${isExpanded ? 'justify-start px-4 space-x-3' : 'justify-center'} p-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-all duration-200`}
+            title={!isExpanded ? 'Ayarlar' : ''}
+          >
+            <Settings className="w-5 h-5 flex-shrink-0" />
+            {isExpanded && <span className="text-sm font-medium whitespace-nowrap">Ayarlar</span>}
           </button>
         </div>
       </div>

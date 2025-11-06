@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, ArrowRight, Cpu, Database, Zap, BarChart3, Mail, Globe, HardDrive, Terminal, FileText, Server, AlertTriangle, Mailbox } from 'lucide-react';
 
@@ -7,163 +7,200 @@ const DashboardPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
-  
-  const mainviewCards = [
-    {
-      id: 'zos',
-      title: 'z/OS',
-      icon: '🖥️',
-      path: '/zos',
-      bgColor: 'bg-slate-50',
-      borderColor: 'border-slate-200',
-      hoverColor: 'hover:bg-slate-100',
-      textColor: 'text-slate-800',
-      iconBg: 'bg-slate-200'
-    },
-    {
-      id: 'cics',
-      title: 'CICS',
-      icon: '⚡',
-      path: '/cics',
-      bgColor: 'bg-slate-50',
-      borderColor: 'border-slate-200',
-      hoverColor: 'hover:bg-slate-100',
-      textColor: 'text-slate-800',
-      iconBg: 'bg-slate-200'
-    },
-    {
-      id: 'db2',
-      title: 'DB2',
-      icon: '🗄️',
-      path: '/db2',
-      bgColor: 'bg-slate-50',
-      borderColor: 'border-slate-200',
-      hoverColor: 'hover:bg-slate-100',
-      textColor: 'text-slate-800',
-      iconBg: 'bg-slate-200'
-    },
-    {
-      id: 'ims',
-      title: 'IMS',
-      icon: '📊',
-      path: '/ims',
-      bgColor: 'bg-slate-50',
-      borderColor: 'border-slate-200',
-      hoverColor: 'hover:bg-slate-100',
-      textColor: 'text-slate-800',
-      iconBg: 'bg-slate-200'
-    },
-    {
-      id: 'mq',
-      title: 'MQ',
-      icon: '📨',
-      path: '/mq',
-      bgColor: 'bg-slate-50',
-      borderColor: 'border-slate-200',
-      hoverColor: 'hover:bg-slate-100',
-      textColor: 'text-slate-800',
-      iconBg: 'bg-slate-200'
-    },
-    {
-      id: 'network',
-      title: 'Network',
-      icon: '🌐',
-      path: '/network',
-      bgColor: 'bg-slate-50',
-      borderColor: 'border-slate-200',
-      hoverColor: 'hover:bg-slate-100',
-      textColor: 'text-slate-800',
-      iconBg: 'bg-slate-200'
-    },
-    {
-      id: 'storage',
-      title: 'Storage',
-      icon: '💾',
-      path: '/storage',
-      bgColor: 'bg-slate-50',
-      borderColor: 'border-slate-200',
-      hoverColor: 'hover:bg-slate-100',
-      textColor: 'text-slate-800',
-      iconBg: 'bg-slate-200'
-    },
-    {
-      id: 'uss',
-      title: 'USS',
-      icon: '🐧',
-      path: '/uss',
-      bgColor: 'bg-slate-50',
-      borderColor: 'border-slate-200',
-      hoverColor: 'hover:bg-slate-100',
-      textColor: 'text-slate-800',
-      iconBg: 'bg-slate-200'
-    },
-    {
-      id: 'rmf',
-      title: 'CMF',
-      icon: '📋',
-      path: '/rmf',
-      bgColor: 'bg-slate-50',
-      borderColor: 'border-slate-200',
-      hoverColor: 'hover:bg-slate-100',
-      textColor: 'text-slate-800',
-      iconBg: 'bg-slate-200'
-    }
-  ];
 
-  // Sayfa içindeki kartlar
-  const pageCards = {
-    'zos': [
-      { id: 'cpu', title: 'CPU', icon: Cpu, description: 'CPU performans ve kullanım', keywords: ['cpu', 'işlemci', 'performans', 'busy', 'utilization'] },
-      { id: 'addressSpace', title: 'Address Space', icon: Database, description: 'Adres Alanı Yönetimi', keywords: ['address', 'space', 'adres', 'alan'] },
-      { id: 'spool', title: 'Spool', icon: FileText, description: 'İş Kuyruğu Yönetimi', keywords: ['spool', 'kuyruk', 'iş', 'job'] }
-    ],
-    'cics': [
-      { id: 'transactions', title: 'Transactions', icon: Zap, description: 'CICS İşlem Yönetimi', keywords: ['transaction', 'işlem', 'cics'] },
-      { id: 'programs', title: 'Programs', icon: FileText, description: 'Program Yönetimi', keywords: ['program', 'programlar'] },
-      { id: 'resources', title: 'Resources', icon: Database, description: 'Kaynak Yönetimi', keywords: ['resource', 'kaynak'] }
-    ],
-    'db2': [
-      { id: 'databases', title: 'Databases', icon: Database, description: 'Veritabanı Yönetimi', keywords: ['database', 'veritabanı', 'db2'] },
-      { id: 'tables', title: 'Tables', icon: BarChart3, description: 'Tablo Yönetimi', keywords: ['table', 'tablo'] },
-      { id: 'connections', title: 'Connections', icon: Globe, description: 'Bağlantı Yönetimi', keywords: ['connection', 'bağlantı'] }
-    ],
-    'ims': [
-      { id: 'databases', title: 'Databases', icon: Database, description: 'IMS Veritabanı Yönetimi', keywords: ['database', 'veritabanı', 'ims'] },
-      { id: 'transactions', title: 'Transactions', icon: Zap, description: 'IMS İşlem Yönetimi', keywords: ['transaction', 'işlem'] },
-      { id: 'regions', title: 'Regions', icon: Server, description: 'Bölge Yönetimi', keywords: ['region', 'bölge'] }
-    ],
-    'mq': [
-      { id: 'queues', title: 'Queues', icon: Mail, description: 'Kuyruk Yönetimi', keywords: ['queue', 'kuyruk', 'mq'] },
-      { id: 'channels', title: 'Channels', icon: Globe, description: 'Kanal Yönetimi', keywords: ['channel', 'kanal'] },
-      { id: 'messages', title: 'Messages', icon: FileText, description: 'Mesaj Yönetimi', keywords: ['message', 'mesaj'] }
-    ],
-    'network': [
-      { id: 'stacks', title: 'STACKS', icon: Server, description: 'Genel STACK Bilgileri', keywords: ['stacks', 'stack', 'genel', 'bilgi'] },
-      { id: 'stackcpu', title: 'STACKCPU', icon: Cpu, description: 'CPU ve Paket İstatistikleri', keywords: ['stackcpu', 'cpu', 'paket', 'istatistik'] },
-      { id: 'vtamcsa', title: 'VTAMCSA', icon: Database, description: 'VTAM ve CSA Yönetimi', keywords: ['vtamcsa', 'vtam', 'csa', 'yönetim'] },
-      { id: 'tcpconf', title: 'TCPCONF', icon: Globe, description: 'TCP/IP Yapılandırma', keywords: ['tcpconf', 'tcp', 'ip', 'yapılandırma', 'config'] },
-      { id: 'tcpcons', title: 'TCPCONS', icon: Zap, description: 'TCP/IP Bağlantı Durumu', keywords: ['tcpcons', 'tcp', 'bağlantı', 'durum', 'connection'] },
-      { id: 'udfconf', title: 'UDFCONF', icon: AlertTriangle, description: 'UDP Yapılandırma', keywords: ['udfconf', 'udp', 'yapılandırma', 'config'] },
-      { id: 'actcons', title: 'ACTCONS', icon: Server, description: 'Aktif Bağlantı Durumu', keywords: ['actcons', 'aktif', 'bağlantı', 'durum'] },
-      { id: 'vtmbuff', title: 'VTMBUFF', icon: BarChart3, description: 'VTAM Buffer İstatistikleri', keywords: ['vtmbuff', 'vtam', 'buffer', 'istatistik'] },
-      { id: 'connsrpz', title: 'CONNSRPZ', icon: Globe, description: 'Connection Hızı ve Durumu', keywords: ['connsrpz', 'connection', 'hız', 'durum', 'speed'] },
-      { id: 'tcpstor', title: 'TCPSTOR', icon: HardDrive, description: 'TCP Storage Yönetimi', keywords: ['tcpstor', 'tcp', 'storage', 'depolama', 'yönetim'] }
-    ],
-    'storage': [
-      { id: 'volumes', title: 'Volumes', icon: HardDrive, description: 'Depolama Birimleri', keywords: ['volume', 'depolama', 'storage'] },
-      { id: 'datasets', title: 'Datasets', icon: Database, description: 'Veri Setleri', keywords: ['dataset', 'veri', 'set'] },
-      { id: 'backup', title: 'Backup', icon: FileText, description: 'Yedekleme Yönetimi', keywords: ['backup', 'yedek'] }
-    ],
-    'uss': [
-      { id: 'files', title: 'Files', icon: FileText, description: 'Dosya Yönetimi', keywords: ['file', 'dosya', 'uss'] },
-      { id: 'processes', title: 'Processes', icon: Terminal, description: 'İşlem Yönetimi', keywords: ['process', 'işlem'] },
-      { id: 'users', title: 'Users', icon: Server, description: 'Kullanıcı Yönetimi', keywords: ['user', 'kullanıcı'] }
-    ],
-    'rmf': [
-      { id: 'reports', title: 'Reports', icon: FileText, description: 'RMF Raporları', keywords: ['report', 'rapor', 'rmf'] },
-      { id: 'performance', title: 'Performance', icon: BarChart3, description: 'Performans Analizi', keywords: ['performance', 'performans'] },
-      { id: 'monitoring', title: 'Monitoring', icon: AlertTriangle, description: 'İzleme Yönetimi', keywords: ['monitoring', 'izleme'] }
+  // Admin tarafından oluşturulan kartları yükle
+  const [mainviewCards, setMainviewCards] = useState(() => {
+    const saved = localStorage.getItem('dashboard-cards')
+    if (saved) {
+      const cards = JSON.parse(saved)
+      // Her karta görsel özellikleri ekle
+      return cards.map(card => ({
+        ...card,
+        bgColor: 'bg-slate-50',
+        borderColor: 'border-slate-200',
+        hoverColor: 'hover:bg-slate-100',
+        textColor: 'text-slate-800',
+        iconBg: 'bg-slate-200'
+      }))
+    }
+
+    // Varsayılan kartlar
+    return [
+      { 
+        id: 'zos', 
+        title: 'z/OS', 
+        icon: '🖥️', 
+        path: '/zos', 
+        visible: true,
+        bgColor: 'bg-slate-50',
+        borderColor: 'border-slate-200',
+        hoverColor: 'hover:bg-slate-100',
+        textColor: 'text-slate-800',
+        iconBg: 'bg-slate-200'
+      },
+      { 
+        id: 'cics', 
+        title: 'CICS', 
+        icon: '⚡', 
+        path: '/cics', 
+        visible: true,
+        bgColor: 'bg-slate-50',
+        borderColor: 'border-slate-200',
+        hoverColor: 'hover:bg-slate-100',
+        textColor: 'text-slate-800',
+        iconBg: 'bg-slate-200'
+      },
+      { 
+        id: 'db2', 
+        title: 'DB2', 
+        icon: '🗄️', 
+        path: '/db2', 
+        visible: true,
+        bgColor: 'bg-slate-50',
+        borderColor: 'border-slate-200',
+        hoverColor: 'hover:bg-slate-100',
+        textColor: 'text-slate-800',
+        iconBg: 'bg-slate-200'
+      },
+      { 
+        id: 'mq', 
+        title: 'MQ', 
+        icon: '📊', 
+        path: '/mq', 
+        visible: true,
+        bgColor: 'bg-slate-50',
+        borderColor: 'border-slate-200',
+        hoverColor: 'hover:bg-slate-100',
+        textColor: 'text-slate-800',
+        iconBg: 'bg-slate-200'
+      },
+      { 
+        id: 'tso', 
+        title: 'TSO', 
+        icon: '📨', 
+        path: '/tso', 
+        visible: true,
+        bgColor: 'bg-slate-50',
+        borderColor: 'border-slate-200',
+        hoverColor: 'hover:bg-slate-100',
+        textColor: 'text-slate-800',
+        iconBg: 'bg-slate-200'
+      },
+      { 
+        id: 'network', 
+        title: 'Network', 
+        icon: '🌐', 
+        path: '/network', 
+        visible: true,
+        bgColor: 'bg-slate-50',
+        borderColor: 'border-slate-200',
+        hoverColor: 'hover:bg-slate-100',
+        textColor: 'text-slate-800',
+        iconBg: 'bg-slate-200'
+      },
+      { 
+        id: 'storage', 
+        title: 'Storage', 
+        icon: '💾', 
+        path: '/storage', 
+        visible: true,
+        bgColor: 'bg-slate-50',
+        borderColor: 'border-slate-200',
+        hoverColor: 'hover:bg-slate-100',
+        textColor: 'text-slate-800',
+        iconBg: 'bg-slate-200'
+      },
+      { 
+        id: 'uss', 
+        title: 'USS', 
+        icon: '🐧', 
+        path: '/uss', 
+        visible: true,
+        bgColor: 'bg-slate-50',
+        borderColor: 'border-slate-200',
+        hoverColor: 'hover:bg-slate-100',
+        textColor: 'text-slate-800',
+        iconBg: 'bg-slate-200'
+      },
+      { 
+        id: 'rmf', 
+        title: 'RMF', 
+        icon: '📋', 
+        path: '/rmf', 
+        visible: true,
+        bgColor: 'bg-slate-50',
+        borderColor: 'border-slate-200',
+        hoverColor: 'hover:bg-slate-100',
+        textColor: 'text-slate-800',
+        iconBg: 'bg-slate-200'
+      },
     ]
+  })
+
+  // localStorage değişikliklerini dinle (admin değişikliklerini canlı görmek için)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem('dashboard-cards')
+      if (saved) {
+        const cards = JSON.parse(saved)
+        setMainviewCards(cards.map(card => ({
+          ...card,
+          bgColor: 'bg-slate-50',
+          borderColor: 'border-slate-200',
+          hoverColor: 'hover:bg-slate-100',
+          textColor: 'text-slate-800',
+          iconBg: 'bg-slate-200'
+        })))
+      }
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+
+    // Aynı tab'de değişiklikler için interval kontrolü
+    const interval = setInterval(() => {
+      handleStorageChange()
+    }, 1000)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      clearInterval(interval)
+    }
+  }, []);
+
+  // Sayfa içindeki kartlar (arama için)
+  const pageCards = {
+    zos: [
+      { id: 'cpu', title: 'CPU Kullanımı', icon: Cpu, description: 'İşlemci kullanım oranları', keywords: ['cpu', 'işlemci', 'processor', 'usage'] },
+      { id: 'memory', title: 'Bellek Kullanımı', icon: Database, description: 'Bellek istatistikleri', keywords: ['memory', 'bellek', 'ram'] },
+    ],
+    cics: [
+      { id: 'transactions', title: 'İşlemler', icon: Zap, description: 'CICS işlem istatistikleri', keywords: ['transaction', 'işlem', 'cics'] },
+      { id: 'performance', title: 'Performans', icon: BarChart3, description: 'CICS performans metrikleri', keywords: ['performance', 'performans', 'metrics'] },
+    ],
+    db2: [
+      { id: 'queries', title: 'Sorgular', icon: Database, description: 'Veritabanı sorgu istatistikleri', keywords: ['query', 'sorgu', 'database', 'veritabanı'] },
+      { id: 'connections', title: 'Bağlantılar', icon: Globe, description: 'Aktif bağlantılar', keywords: ['connection', 'bağlantı', 'active'] },
+    ],
+    mq: [
+      { id: 'queues', title: 'Kuyruklar', icon: BarChart3, description: 'MQ kuyruk durumları', keywords: ['queue', 'kuyruk', 'mq'] },
+      { id: 'messages', title: 'Mesajlar', icon: Mail, description: 'Mesaj istatistikleri', keywords: ['message', 'mesaj', 'msg'] },
+    ],
+    network: [
+      { id: 'bandwidth', title: 'Bant Genişliği', icon: Globe, description: 'Ağ trafiği', keywords: ['bandwidth', 'network', 'ağ', 'trafik', 'traffic'] },
+      { id: 'connections-net', title: 'Bağlantılar', icon: Globe, description: 'Aktif ağ bağlantıları', keywords: ['connection', 'bağlantı', 'network', 'ağ'] },
+    ],
+    storage: [
+      { id: 'disk', title: 'Disk Kullanımı', icon: HardDrive, description: 'Disk alanı istatistikleri', keywords: ['disk', 'storage', 'depolama', 'alan', 'space'] },
+      { id: 'io', title: 'I/O İstatistikleri', icon: BarChart3, description: 'Giriş/Çıkış metrikleri', keywords: ['io', 'input', 'output', 'giriş', 'çıkış'] },
+    ],
+    uss: [
+      { id: 'processes', title: 'Süreçler', icon: Terminal, description: 'USS süreç listesi', keywords: ['process', 'süreç', 'uss'] },
+      { id: 'files', title: 'Dosyalar', icon: FileText, description: 'Dosya sistemi durumu', keywords: ['file', 'dosya', 'filesystem'] },
+    ],
+    rmf: [
+      { id: 'reports', title: 'Raporlar', icon: FileText, description: 'RMF raporları', keywords: ['report', 'rapor', 'rmf'] },
+      { id: 'metrics', title: 'Metrikler', icon: BarChart3, description: 'Sistem metrikleri', keywords: ['metric', 'metrik', 'statistics', 'istatistik'] },
+    ],
   };
 
   // Arama fonksiyonu
@@ -173,20 +210,24 @@ const DashboardPage = () => {
     const term = searchTerm.toLowerCase();
     const results = { pages: [], cards: [] };
 
-    // Sayfaları ara
+    // Sayfaları ara (sadece görünür olanları)
     mainviewCards.forEach(page => {
-      if (page.title.toLowerCase().includes(term)) {
+      if (page.title.toLowerCase().includes(term) && page.visible !== false) {
         results.pages.push(page);
       }
     });
 
-    // Sayfa içindeki kartları ara
+    // Sayfa içindeki kartları ara (sadece görünür sayfaların kartlarını)
     Object.entries(pageCards).forEach(([pageId, cards]) => {
+      // Sayfa görünür değilse kartlarını da gösterme
+      const page = mainviewCards.find(p => p.id === pageId)
+      if (page && page.visible === false) return;
+
       cards.forEach(card => {
         const matchesTitle = card.title.toLowerCase().includes(term);
         const matchesDescription = card.description.toLowerCase().includes(term);
         const matchesKeywords = card.keywords.some(keyword => keyword.includes(term));
-        
+
         if (matchesTitle || matchesDescription || matchesKeywords) {
           const pageInfo = mainviewCards.find(p => p.id === pageId);
           results.cards.push({
@@ -205,9 +246,10 @@ const DashboardPage = () => {
   const results = searchResults();
   const hasResults = results.pages.length > 0 || results.cards.length > 0;
 
-  // Filter cards based on search term
+  // Filter cards based on search term and admin visibility settings
   const filteredCards = mainviewCards.filter(card =>
-    card.title.toLowerCase().includes(searchTerm.toLowerCase())
+    card.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    card.visible !== false
   );
 
   return (
@@ -331,69 +373,62 @@ const DashboardPage = () => {
       </div>
 
       {/* Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCards.map((card) => (
             <div
               key={card.id}
               className="relative group cursor-pointer"
               onClick={() => navigate(card.path)}
             >
-              {/* Glassmorphism Card */}
-              <div className="relative bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl p-7 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-105 hover:bg-white/90">
+              {/* Card Container */}
+              <div className={`relative ${card.bgColor} ${card.borderColor} border-2 rounded-xl p-6 shadow-md hover:shadow-xl transition-all duration-300 ${card.hoverColor}`}>
                 {/* Gradient Overlay */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${card.bgColor} opacity-20 rounded-xl group-hover:opacity-30 transition-opacity duration-500`}></div>
+                <div className={`absolute inset-0 bg-gradient-to-br ${card.bgColor} opacity-50 rounded-xl`}></div>
                 
                 {/* Content */}
                 <div className="relative z-10">
                   {/* Header */}
-                  <div className="flex items-center justify-between mb-5">
-                    <div className={`w-14 h-14 ${card.iconBg} rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 group-hover:rotate-2 transition-all duration-500`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className={`w-12 h-12 ${card.iconBg} rounded-lg flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-300`}>
                       <span className="text-2xl">{card.icon}</span>
                     </div>
-                    <div className="flex items-center space-x-1.5">
-                      <div className={`w-1.5 h-1.5 ${card.iconBg} rounded-full group-hover:scale-125 transition-all duration-300`}></div>
-                      <div className={`w-1 h-1 ${card.iconBg} rounded-full opacity-60 group-hover:opacity-100 transition-all duration-300`}></div>
+                    <div className="flex items-center space-x-1">
+                      <div className={`w-2 h-2 ${card.iconBg} rounded-full animate-pulse`}></div>
+                      <div className={`w-1.5 h-1.5 ${card.iconBg} rounded-full opacity-70`}></div>
                     </div>
                   </div>
-                  
+
                   {/* Title */}
-                  <h3 className={`text-xl font-bold mb-4 ${card.textColor} group-hover:translate-y-[-1px] transition-transform duration-300`}>
+                  <h3 className={`text-xl font-bold mb-3 ${card.textColor}`}>
                     {card.title}
                   </h3>
-                  
-                  {/* Status Indicator */}
-                  <div className="flex items-center mb-5">
-                    <div className={`w-2.5 h-2.5 ${card.iconBg} rounded-full mr-2 group-hover:scale-110 transition-transform duration-300`}></div>
-                    <span className={`text-sm font-medium ${card.textColor} opacity-80`}>
-                      Sistem Durumu
-                    </span>
+
+                  {/* Status */}
+                  <div className="flex items-center mb-4">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2 shadow-sm"></div>
+                    <span className="text-sm font-medium text-gray-600">Çevrimiçi</span>
                   </div>
-                  
+
                   {/* Footer */}
-                  <div className="flex items-center justify-between">
-                    <span className={`text-sm font-medium ${card.textColor} opacity-70 group-hover:opacity-100 transition-opacity duration-300`}>
-                      Sisteme Eriş
-                    </span>
-                    <div className={`w-7 h-7 ${card.iconBg} rounded-full flex items-center justify-center group-hover:translate-x-1 group-hover:scale-110 transition-all duration-300`}>
-                      <svg 
-                        className={`w-3.5 h-3.5 ${card.textColor}`}
-                        fill="none" 
-                        stroke="currentColor" 
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                    <span className="text-sm font-medium text-gray-600">Sisteme Giriş</span>
+                    <div className={`w-7 h-7 ${card.iconBg} rounded-full flex items-center justify-center shadow-sm group-hover:translate-x-1 transition-transform duration-300`}>
+                      <svg
+                        className="w-4 h-4 text-gray-700"
+                        fill="none"
+                        stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
-                        <path 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round" 
-                          strokeWidth={2.5} 
-                          d="M13 7l5 5m0 0l-5 5m5-5H6" 
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 7l5 5m0 0l-5 5m5-5H6"
                         />
                       </svg>
                     </div>
                   </div>
                 </div>
-                
-                {/* Hover Glow Effect */}
-                <div className={`absolute inset-0 ${card.bgColor} opacity-0 group-hover:opacity-5 rounded-xl transition-opacity duration-500`}></div>
               </div>
             </div>
           ))}
@@ -403,4 +438,3 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage
-
