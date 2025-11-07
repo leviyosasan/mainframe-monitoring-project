@@ -1,5 +1,5 @@
 const express = require('express');
-const { testConnection, getMainviewMvsSysover, getMainviewMvsJespool,
+const { testConnection, getAllTables, getTableColumns, getTableData, getMainviewMvsSysover, getMainviewMvsJespool,
   checkTableExists,checkTableExistsJespool, getMainviewMvsJCPU, checkTableExistsJCPU, getLatestCpuData, checkTableExistsStacks, 
   getMainviewNetworkStacks, checkTableExistsStackCPU, getMainviewNetworkStackCPU, checkTableExistsVtamcsa, 
   getMainviewNetworkVtamcsa, getMainviewNetworkTcpconf, checkTableExiststcpconf,
@@ -47,6 +47,15 @@ const router = express.Router();
 
 // Test database connection
 router.post('/test-connection', testConnection);
+
+// Get all tables
+router.post('/get-all-tables', getAllTables);
+
+// Get table columns
+router.post('/get-table-columns', getTableColumns);
+
+// Get table data
+router.post('/get-table-data', getTableData);
 
 // Get mainview_mvs_sysover data
 router.post('/mainview-mvs-sysover', getMainviewMvsSysover);

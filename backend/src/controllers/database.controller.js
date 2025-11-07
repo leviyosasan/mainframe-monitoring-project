@@ -2880,8 +2880,158 @@ const getMainviewCmfSyscpc = async (req, res) => {
   } finally { if (pool) await pool.end(); }
 };
 
+// Get all tables from database
+const getAllTables = async (req, res) => {
+  let pool = null;
+  
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body : DEFAULT_CONFIG.database;
+    pool = new Pool(config);
+    const client = await pool.connect();
+    
+    const tablesResult = await client.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' 
+      ORDER BY table_name
+    `);
+    
+    const tables = tablesResult.rows.map(row => row.table_name);
+    client.release();
+    
+    res.status(200).json({
+      success: true,
+      message: 'Tablolar başarıyla getirildi',
+      tables: tables
+    });
+    
+  } catch (error) {
+    console.error('Get tables error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Tablolar getirilemedi',
+      error: error.message
+    });
+  } finally {
+    if (pool) {
+      await pool.end();
+    }
+  }
+};
+
+// Get columns for a specific table
+const getTableColumns = async (req, res) => {
+  let pool = null;
+  
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body.config : DEFAULT_CONFIG.database;
+    const tableName = req.body.tableName;
+    
+    if (!tableName) {
+      return res.status(400).json({
+        success: false,
+        message: 'Tablo adı gerekli'
+      });
+    }
+    
+    pool = new Pool(config);
+    const client = await pool.connect();
+    
+    const columnsResult = await client.query(`
+      SELECT 
+        column_name,
+        data_type,
+        is_nullable,
+        column_default
+      FROM information_schema.columns 
+      WHERE table_schema = 'public' 
+        AND table_name = $1
+      ORDER BY ordinal_position
+    `, [tableName]);
+    
+    client.release();
+    
+    res.status(200).json({
+      success: true,
+      message: 'Kolonlar başarıyla getirildi',
+      tableName: tableName,
+      columns: columnsResult.rows
+    });
+    
+  } catch (error) {
+    console.error('Get columns error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Kolonlar getirilemedi',
+      error: error.message
+    });
+  } finally {
+    if (pool) {
+      await pool.end();
+    }
+  }
+};
+
+// Get table data with selected columns
+const getTableData = async (req, res) => {
+  let pool = null;
+  
+  try {
+    const config = req.body && Object.keys(req.body).length > 0 ? req.body.config : DEFAULT_CONFIG.database;
+    const { tableName, columns, limit = 100 } = req.body;
+    
+    if (!tableName || !columns || columns.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Tablo adı ve kolonlar gerekli'
+      });
+    }
+    
+    pool = new Pool(config);
+    const client = await pool.connect();
+    
+    // SQL injection koruması için column isimlerini kontrol et
+    const validColumns = columns.filter(col => /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(col));
+    if (validColumns.length === 0) {
+      client.release();
+      return res.status(400).json({
+        success: false,
+        message: 'Geçerli kolon adı bulunamadı'
+      });
+    }
+    
+    const columnsStr = validColumns.map(col => `"${col}"`).join(', ');
+    const query = `SELECT ${columnsStr} FROM "${tableName}" LIMIT $1`;
+    
+    const result = await client.query(query, [limit]);
+    client.release();
+    
+    res.status(200).json({
+      success: true,
+      message: 'Veriler başarıyla getirildi',
+      data: result.rows,
+      count: result.rows.length
+    });
+    
+  } catch (error) {
+    console.error('Get table data error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Veriler getirilemedi',
+      error: error.message
+    });
+  } finally {
+    if (pool) {
+      await pool.end();
+    }
+  }
+};
+
 module.exports = {
   testConnection,
+  getAllTables,
+  getTableColumns,
+  getTableData,
   getMainviewMvsSysover,
   getMainviewMvsJespool,
   checkTableExists,
