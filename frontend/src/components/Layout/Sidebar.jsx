@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Users, Settings, User } from 'lucide-react'
+import { LayoutDashboard, Users, Settings, User, BarChart3 } from 'lucide-react'
 
 const Sidebar = () => {
   // Geçici: Login atlandığı için tüm menüleri göster
   const navItems = [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/analiz', icon: BarChart3, label: 'Analiz' },
     { to: '/profile', icon: User, label: 'Profil' },
     { to: '/users', icon: Users, label: 'Kullanıcılar' },
     { to: '/settings', icon: Settings, label: 'Ayarlar' },

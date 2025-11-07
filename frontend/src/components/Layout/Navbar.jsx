@@ -1,4 +1,4 @@
-import { Home, Settings, Monitor, Zap, Database, BarChart3, Mail, Globe, HardDrive, Terminal, FileText, Server, AlertTriangle, Mailbox, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Home, Settings, Monitor, Zap, Database, BarChart3, Mail, Globe, HardDrive, Terminal, FileText, Server, AlertTriangle, Mailbox, ChevronLeft, ChevronRight, TrendingUp, Sliders } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 
@@ -12,6 +12,8 @@ const Navbar = ({ isExpanded, setIsExpanded }) => {
 
   const menuItems = [
     { to: '/dashboard', icon: Home, label: 'Dashboard' },
+    { to: '/analiz', icon: TrendingUp, label: 'Analiz' },
+    { to: '/ozellestir', icon: Sliders, label: 'Özelleştir' },
     { to: '/zos', icon: Monitor, label: 'z/OS' },
     { to: '/cics', icon: Zap, label: 'CICS' },
     { to: '/db2', icon: Database, label: 'DB2' },

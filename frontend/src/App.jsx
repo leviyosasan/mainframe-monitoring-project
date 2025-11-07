@@ -15,6 +15,8 @@ import MSSQLPage from './pages/Systems/MSSQLPage'
 import AllDatabasesPage from './pages/Systems/AllDatabasesPage'
 import AlertsPage from './pages/Alerts/AlertsPage'
 import SMTPPage from './pages/SMTP/SMTPPage'
+import AnalizPage from './pages/Analiz/AnalizPage'
+import OzellestirPage from './pages/Ozellestir/OzellestirPage'
 
 // Admin imports
 import AdminLoginPage from './pages/Admin/AdminLoginPage'
@@ -58,6 +60,8 @@ function App() {
         <Route path="/databases" element={<AllDatabasesPage />} />
         <Route path="/smtp" element={<SMTPPage />} />
         <Route path="/alerts" element={<AlertsPage />} />
+        <Route path="/analiz" element={<AnalizPage />} />
+        <Route path="/ozellestir" element={<OzellestirPage />} />
         <Route path="*" element={<DashboardPage />} />
       </Route>
     </Routes>

@@ -65,9 +65,15 @@ api.interceptors.response.use(
 
     // Hata mesajlarını göster (sadece kritik sunucu hataları için toast göster)
     // Chatbot kendi hata mesajlarını gösteriyor, bu yüzden chatbot istekleri için toast gösterme
-    const errorMessage = error.response?.data?.message || 'Bir hata oluştu'
+    const errorMessage = error.response?.data?.message || error.message || 'Bir hata oluştu'
     const isChatbotRequest = originalRequest.url?.includes('/database/') && 
                               (originalRequest.url?.includes('mainview') || originalRequest.url?.includes('check-table'))
+    
+    // Aktif bağlantı hatası için özel mesaj göster
+    if (errorMessage.includes('Aktif bağlantı bulunamadı')) {
+      toast.error('Aktif bağlantı bulunamadı. Lütfen PostgreSQL sayfasından aktif bir bağlantı ekleyin.')
+      return Promise.reject(error)
+    }
     
     // Sadece kritik sunucu hataları (500, 502, 503, 504) için toast göster ve chatbot istekleri değilse
     const isCriticalError = error.response?.status >= 500 && error.response?.status < 600
@@ -79,144 +85,205 @@ api.interceptors.response.use(
   }
 )
 
+// Aktif bağlantıları al
+const getActiveConnections = () => {
+  try {
+    const savedConnections = localStorage.getItem('postgresql_connections');
+    if (savedConnections) {
+      const connections = JSON.parse(savedConnections);
+      return connections.filter(conn => conn.active === true);
+    }
+  } catch (error) {
+    console.error('Bağlantılar yüklenirken hata:', error);
+  }
+  return [];
+};
+
+// İlk aktif bağlantıyı al veya varsayılan config döndür
+const getConnectionConfig = () => {
+  const activeConnections = getActiveConnections();
+  if (activeConnections.length > 0) {
+    const connection = activeConnections[0]; // İlk aktif bağlantıyı kullan
+    return {
+      host: connection.host,
+      port: connection.port,
+      database: connection.database,
+      user: connection.user,
+      password: connection.password
+    };
+  }
+  // Aktif bağlantı yoksa null döndür
+  return null;
+};
+
+// Database API çağrıları için wrapper - aktif bağlantı kontrolü yapar
+const dbApiCall = (endpoint, config) => {
+  const connectionConfig = config || getConnectionConfig();
+  if (!connectionConfig) {
+    return Promise.reject(new Error('Aktif bağlantı bulunamadı. Lütfen PostgreSQL sayfasından aktif bir bağlantı ekleyin.'));
+  }
+  return api.post(endpoint, connectionConfig);
+};
+
 // Database API functions
 export const databaseAPI = {
   // Test database connection
   testConnection: (config) => api.post('/database/test-connection', config),
   
+  // Get all tables
+  getAllTables: (config) => dbApiCall('/database/get-all-tables', config),
+  
+  // Get table columns
+  getTableColumns: (tableName, config) => {
+    const connectionConfig = config || getConnectionConfig();
+    if (!connectionConfig) {
+      return Promise.reject(new Error('Aktif bağlantı bulunamadı. Lütfen PostgreSQL sayfasından aktif bir bağlantı ekleyin.'));
+    }
+    return api.post('/database/get-table-columns', { tableName, config: connectionConfig });
+  },
+  
+  // Get table data
+  getTableData: (tableName, columns, limit, config) => {
+    const connectionConfig = config || getConnectionConfig();
+    if (!connectionConfig) {
+      return Promise.reject(new Error('Aktif bağlantı bulunamadı. Lütfen PostgreSQL sayfasından aktif bir bağlantı ekleyin.'));
+    }
+    return api.post('/database/get-table-data', { tableName, columns, limit, config: connectionConfig });
+  },
+  
   // Get mainview_mvs_sysover data
-  getMainviewMvsSysover: (config) => api.post('/database/mainview-mvs-sysover', config),
+  getMainviewMvsSysover: (config) => dbApiCall('/database/mainview-mvs-sysover', config),
 
   //Get mainview_mvs_jespool data
-  getMainviewMvsJespool: (config) => api.post('/database/mainview-mvs-jespool', config),
+  getMainviewMvsJespool: (config) => dbApiCall('/database/mainview-mvs-jespool', config),
   
   // Check table exists and get info
-  checkTableExists: (config) => api.post('/database/check-table', config),
+  checkTableExists: (config) => dbApiCall('/database/check-table', config),
 
   // Check table exists and get info
-  checkTableExistsJespool: (config) => api.post('/database/check-table-jespool', config),
+  checkTableExistsJespool: (config) => dbApiCall('/database/check-table-jespool', config),
 
-  checkTableExistsJCPU: (config) => api.post('/database/check-table-jcpu', config),
+  checkTableExistsJCPU: (config) => dbApiCall('/database/check-table-jcpu', config),
   
-  getMainviewMvsJCPU: (config) => api.post('/database/mainview-mvs-jcpu', config),
+  getMainviewMvsJCPU: (config) => dbApiCall('/database/mainview-mvs-jcpu', config),
 
-  getLatestCpuData: (config) => api.post('/database/latest-cpu', config),
+  getLatestCpuData: (config) => dbApiCall('/database/latest-cpu', config),
 
-  getMainviewNetworkStacks: (config) => api.post('/database/mainview-network-stacks', config),
+  getMainviewNetworkStacks: (config) => dbApiCall('/database/mainview-network-stacks', config),
   
-  checkTableExistsStacks: (config) => api.post('/database/check-table-stacks', config),
+  checkTableExistsStacks: (config) => dbApiCall('/database/check-table-stacks', config),
 
-  getMainviewNetworkStackCPU: (config) => api.post('/database/mainview-network-stackcpu', config),
+  getMainviewNetworkStackCPU: (config) => dbApiCall('/database/mainview-network-stackcpu', config),
   
-  checkTableExistsStackCPU: (config) => api.post('/database/check-table-stackcpu', config),
+  checkTableExistsStackCPU: (config) => dbApiCall('/database/check-table-stackcpu', config),
 
-  getMainviewNetworkVtamcsa: (config) => api.post('/database/mainview-network-vtamcsa', config),
+  getMainviewNetworkVtamcsa: (config) => dbApiCall('/database/mainview-network-vtamcsa', config),
   
-  checkTableExistsVtamcsa: (config) => api.post('/database/check-table-vtamcsa', config),
+  checkTableExistsVtamcsa: (config) => dbApiCall('/database/check-table-vtamcsa', config),
 
   // VTMBUFF
-  getMainviewNetworkVtmbuff: (config) => api.post('/database/mainview-network-vtmbuff', config),
-  checkTableExistsVtmbuff: (config) => api.post('/database/check-table-vtmbuff', config),
+  getMainviewNetworkVtmbuff: (config) => dbApiCall('/database/mainview-network-vtmbuff', config),
+  checkTableExistsVtmbuff: (config) => dbApiCall('/database/check-table-vtmbuff', config),
 
   // TCPSTOR
-  getMainviewNetworkTcpstor: (config) => api.post('/database/mainview-network-tcpstor', config),
-  checkTableExistsTcpstor: (config) => api.post('/database/check-table-tcpstor', config),
+  getMainviewNetworkTcpstor: (config) => dbApiCall('/database/mainview-network-tcpstor', config),
+  checkTableExistsTcpstor: (config) => dbApiCall('/database/check-table-tcpstor', config),
 
   // CONNSRPZ
-  getMainviewNetworkConnsrpz: (config) => api.post('/database/mainview-network-connsrpz', config),
-  checkTableExistsConnsrpz: (config) => api.post('/database/check-table-connsrpz', config),
+  getMainviewNetworkConnsrpz: (config) => dbApiCall('/database/mainview-network-connsrpz', config),
+  checkTableExistsConnsrpz: (config) => dbApiCall('/database/check-table-connsrpz', config),
 
     // Get mainview_network_tcpconf data
-    getMainviewNetworkTcpconf: (config) => api.post('/database/mainview-network-tcpconf', config),
+    getMainviewNetworkTcpconf: (config) => dbApiCall('/database/mainview-network-tcpconf', config),
  
     // Check table exists for tcpconf
-    checkTableExiststcpconf: (config) => api.post('/database/check-table-tcpconf', config),
+    checkTableExiststcpconf: (config) => dbApiCall('/database/check-table-tcpconf', config),
    
     // Get mainview_network_tcpcons data
-    getMainviewNetworktcpcons: (config) => api.post('/database/mainview-network-tcpcons', config),
+    getMainviewNetworktcpcons: (config) => dbApiCall('/database/mainview-network-tcpcons', config),
    
     // Check table exists for tcpcons
-    checkTableExiststcpcons: (config) => api.post('/database/check-table-tcpcons', config),
+    checkTableExiststcpcons: (config) => dbApiCall('/database/check-table-tcpcons', config),
    
     // Get mainview_network_udpconf data
-    getMainviewNetworkUdpconf: (config) => api.post('/database/mainview-network-udpconf', config),
+    getMainviewNetworkUdpconf: (config) => dbApiCall('/database/mainview-network-udpconf', config),
    
     // Check table exists for udpconf
-    checkTableExistsudpconf: (config) => api.post('/database/check-table-udpconf', config),
+    checkTableExistsudpconf: (config) => dbApiCall('/database/check-table-udpconf', config),
    
     // Get mainview_network_actcons data
-    getMainviewNetworkactcons: (config) => api.post('/database/mainview-network-actcons', config),
+    getMainviewNetworkactcons: (config) => dbApiCall('/database/mainview-network-actcons', config),
    
     // Check table exists for actcons
-    checkTableExistsactcons: (config) => api.post('/database/check-table-actcons', config),
+    checkTableExistsactcons: (config) => dbApiCall('/database/check-table-actcons', config),
 
     // ZFS
-    getMainviewUSSZFS: (config) => api.post('/database/mainview-uss-zfs', config),
-    checkTableExistsZFS: (config) => api.post('/database/check-table-zfs', config),
+    getMainviewUSSZFS: (config) => dbApiCall('/database/mainview-uss-zfs', config),
+    checkTableExistsZFS: (config) => dbApiCall('/database/check-table-zfs', config),
 
     // MQ - Message Queue
-    getMainviewMQConnz: (config) => api.post('/database/mainview-mq-connz', config),
-    checkTableExistsMQConnz: (config) => api.post('/database/check-table-mq-connz', config),
+    getMainviewMQConnz: (config) => dbApiCall('/database/mainview-mq-connz', config),
+    checkTableExistsMQConnz: (config) => dbApiCall('/database/check-table-mq-connz', config),
 
-    getMainviewMQQm: (config) => api.post('/database/mainview-mq-qm', config),
-    checkTableExistsMQQm: (config) => api.post('/database/check-table-mq-qm', config),
+    getMainviewMQQm: (config) => dbApiCall('/database/mainview-mq-qm', config),
+    checkTableExistsMQQm: (config) => dbApiCall('/database/check-table-mq-qm', config),
 
-    getMainviewMQW2over: (config) => api.post('/database/mainview-mq-w2over', config),
-    checkTableExistsMQW2over: (config) => api.post('/database/check-table-mq-w2over', config),
+    getMainviewMQW2over: (config) => dbApiCall('/database/mainview-mq-w2over', config),
+    checkTableExistsMQW2over: (config) => dbApiCall('/database/check-table-mq-w2over', config),
 
     // Storage
-    getMainviewStorageCsasum: (config) => api.post('/database/mainview-storage-csasum', config),
-    checkTableExistsCsasum: (config) => api.post('/database/check-table-csasum', config),
+    getMainviewStorageCsasum: (config) => dbApiCall('/database/mainview-storage-csasum', config),
+    checkTableExistsCsasum: (config) => dbApiCall('/database/check-table-csasum', config),
 
-    getMainviewStorageFrminfoCenter: (config) => api.post('/database/mainview-storage-frminfo-central', config),
-    checkTableExistsFrminfoCenter: (config) => api.post('/database/check-table-frminfo-central', config),
+    getMainviewStorageFrminfoCenter: (config) => dbApiCall('/database/mainview-storage-frminfo-central', config),
+    checkTableExistsFrminfoCenter: (config) => dbApiCall('/database/check-table-frminfo-central', config),
     
-    getMainviewStorageFrminfofixed: (config) => api.post('/database/mainview-storage-frminfo-fixed', config),
-    checkTableExistsFrminfofixed: (config) => api.post('/database/check-table-frminfo-fixed', config),
+    getMainviewStorageFrminfofixed: (config) => dbApiCall('/database/mainview-storage-frminfo-fixed', config),
+    checkTableExistsFrminfofixed: (config) => dbApiCall('/database/check-table-frminfo-fixed', config),
     
-    getMainviewStorageFrminfoHighVirtual: (config) => api.post('/database/mainview-storage-frminfo-high-virtual', config),
-    checkTableExistsFrminfoHighVirtual: (config) => api.post('/database/check-table-frminfo-high-virtual', config),
+    getMainviewStorageFrminfoHighVirtual: (config) => dbApiCall('/database/mainview-storage-frminfo-high-virtual', config),
+    checkTableExistsFrminfoHighVirtual: (config) => dbApiCall('/database/check-table-frminfo-high-virtual', config),
     
-    getMainviewStoragesysfrmiz: (config) => api.post('/database/mainview-storage-sysfrmiz', config),
-    checkTableExistsSysfrmiz: (config) => api.post('/database/check-table-sysfrmiz', config),
+    getMainviewStoragesysfrmiz: (config) => dbApiCall('/database/mainview-storage-sysfrmiz', config),
+    checkTableExistsSysfrmiz: (config) => dbApiCall('/database/check-table-sysfrmiz', config),
 
     // RMF tables
-    getMainviewRmfPgspp: (config) => api.post('/database/mainview-rmf-pgspp', config),
-    checkTableExistsRmfPgspp: (config) => api.post('/database/check-table-rmf-pgspp', config),
+    getMainviewRmfPgspp: (config) => dbApiCall('/database/mainview-rmf-pgspp', config),
+    checkTableExistsRmfPgspp: (config) => dbApiCall('/database/check-table-rmf-pgspp', config),
     
-    getMainviewRmfArd: (config) => api.post('/database/mainview-rmf-ard', config),
-    checkTableExistsRmfArd: (config) => api.post('/database/check-table-rmf-ard', config),
+    getMainviewRmfArd: (config) => dbApiCall('/database/mainview-rmf-ard', config),
+    checkTableExistsRmfArd: (config) => dbApiCall('/database/check-table-rmf-ard', config),
     
-    getMainviewRmfTrx: (config) => api.post('/database/mainview-rmf-trx', config),
-    checkTableExistsRmfTrx: (config) => api.post('/database/check-table-rmf-trx', config),
+    getMainviewRmfTrx: (config) => dbApiCall('/database/mainview-rmf-trx', config),
+    checkTableExistsRmfTrx: (config) => dbApiCall('/database/check-table-rmf-trx', config),
     
-    getMainviewRmfAsrm: (config) => api.post('/database/mainview-rmf-asrm', config),
-    checkTableExistsRmfAsrm: (config) => api.post('/database/check-table-rmf-asrm', config),
+    getMainviewRmfAsrm: (config) => dbApiCall('/database/mainview-rmf-asrm', config),
+    checkTableExistsRmfAsrm: (config) => dbApiCall('/database/check-table-rmf-asrm', config),
     
-    getMainviewRmfSrcs: (config) => api.post('/database/mainview-rmf-srcs', config),
-    checkTableExistsRmfSrcs: (config) => api.post('/database/check-table-rmf-srcs', config),
+    getMainviewRmfSrcs: (config) => dbApiCall('/database/mainview-rmf-srcs', config),
+    checkTableExistsRmfSrcs: (config) => dbApiCall('/database/check-table-rmf-srcs', config),
     
-    getMainviewRmfAsd: (config) => api.post('/database/mainview-rmf-asd', config),
-    checkTableExistsRmfAsd: (config) => api.post('/database/check-table-rmf-asd', config),
+    getMainviewRmfAsd: (config) => dbApiCall('/database/mainview-rmf-asd', config),
+    checkTableExistsRmfAsd: (config) => dbApiCall('/database/check-table-rmf-asd', config),
     
-    getMainviewRmfSpag: (config) => api.post('/database/mainview-rmf-spag', config),
-    checkTableExistsRmfSpag: (config) => api.post('/database/check-table-rmf-spag', config),
-    
+    getMainviewRmfSpag: (config) => dbApiCall('/database/mainview-rmf-spag', config),
+    checkTableExistsRmfSpag: (config) => dbApiCall('/database/check-table-rmf-spag', config),
+
     // CMF tables
-    getMainviewCmfDspcz: (config) => api.post('/database/mainview-cmf-dspcz', config),
-    checkTableExistsCmfDspcz: (config) => api.post('/database/check-table-cmf-dspcz', config),
+    getMainviewCmfDspcz: (config) => dbApiCall('/database/mainview-cmf-dspcz', config),
+    checkTableExistsCmfDspcz: (config) => dbApiCall('/database/check-table-cmf-dspcz', config),
     
-    getMainviewCmfXcfsys: (config) => api.post('/database/mainview-cmf-xcfsys', config),
-    checkTableExistsCmfXcfsys: (config) => api.post('/database/check-table-cmf-xcfsys', config),
+    getMainviewCmfXcfsys: (config) => dbApiCall('/database/mainview-cmf-xcfsys', config),
+    checkTableExistsCmfXcfsys: (config) => dbApiCall('/database/check-table-cmf-xcfsys', config),
     
-    getMainviewCmfJcsa: (config) => api.post('/database/mainview-cmf-jcsa', config),
-    checkTableExistsCmfJcsa: (config) => api.post('/database/check-table-cmf-jcsa', config),
+    getMainviewCmfJcsa: (config) => dbApiCall('/database/mainview-cmf-jcsa', config),
+    checkTableExistsCmfJcsa: (config) => dbApiCall('/database/check-table-cmf-jcsa', config),
     
-    getMainviewCmfXcfmbr: (config) => api.post('/database/mainview-cmf-xcfmbr', config),
-    checkTableExistsCmfXcfmbr: (config) => api.post('/database/check-table-cmf-xcfmbr', config),
+    getMainviewCmfXcfmbr: (config) => dbApiCall('/database/mainview-cmf-xcfmbr', config),
+    checkTableExistsCmfXcfmbr: (config) => dbApiCall('/database/check-table-cmf-xcfmbr', config),
     
-    getMainviewCmfSyscpc: (config) => api.post('/database/mainview-cmf-syscpc', config),
-    checkTableExistsCmfSyscpc: (config) => api.post('/database/check-table-cmf-syscpc', config),
+    getMainviewCmfSyscpc: (config) => dbApiCall('/database/mainview-cmf-syscpc', config),
+    checkTableExistsCmfSyscpc: (config) => dbApiCall('/database/check-table-cmf-syscpc', config),
 
 }
 
