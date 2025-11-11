@@ -18,7 +18,7 @@ const Layout = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar isExpanded={isExpanded} setIsExpanded={setIsExpanded} />
-      <main className={`${isExpanded ? 'ml-56' : 'ml-16'} transition-all duration-300 p-8`}>
+      <main className={`${isExpanded ? 'ml-48' : 'ml-14'} transition-all duration-300 p-8`}>
         <div className="max-w-7xl mx-auto">
           <Outlet />
         </div>

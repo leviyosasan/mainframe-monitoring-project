@@ -19,6 +19,7 @@ import AlertsPage from './pages/Alerts/AlertsPage'
 import SMTPPage from './pages/SMTP/SMTPPage'
 import AnalizPage from './pages/Analiz/AnalizPage'
 import OzellestirPage from './pages/Ozellestir/OzellestirPage'
+import UygulamalarPage from './pages/Uygulamalar/UygulamalarPage'
 import ProfilePage from './pages/Profile/ProfilePage'
 import LoginPage from './pages/Auth/LoginPage'
 import RegisterPage from './pages/Auth/RegisterPage'
@@ -70,6 +71,7 @@ function App() {
       >
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="profile" element={<ProfilePage />} />
+        <Route path="uygulamalar" element={<UygulamalarPage />} />
         <Route 
           path="zos" 
           element={
