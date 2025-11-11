@@ -6,15 +6,35 @@ const DEFAULT_APP_CONFIG = {
   port: process.env.DB_PORT || 5432,
   database: process.env.DB_NAME || 'mainview',
   user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || '12345678'
+  password: process.env.DB_PASSWORD || '12345678',
+  // Connection pool ayarları
+  max: 20, // Maximum number of clients in the pool
+  min: 2, // Minimum number of clients in the pool
+  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+  connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection cannot be established
+  allowExitOnIdle: false, // Don't exit process when pool is idle
 };
 
 // Create a singleton pool for application database (users, custom_folders, custom_dashboards)
 const appPool = new Pool(DEFAULT_APP_CONFIG);
 
-appPool.on('error', (err) => {
-  console.error('Unexpected error on idle client', err);
-  process.exit(-1);
+// Error handler - sadece logla, process'i kapatma
+appPool.on('error', (err, client) => {
+  console.error('Unexpected error on idle database client', err);
+  // Process'i kapatmak yerine sadece logla
+  // Eğer client varsa, bağlantıyı kapat
+  if (client) {
+    client.release();
+  }
+});
+
+// Pool bağlantı durumu loglama
+appPool.on('connect', () => {
+  console.log('✅ Database connection established');
+});
+
+appPool.on('remove', () => {
+  console.log('🔌 Database connection removed');
 });
 
 module.exports = appPool;

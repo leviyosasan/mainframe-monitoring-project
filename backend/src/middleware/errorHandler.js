@@ -32,6 +32,32 @@ const errorHandler = (err, req, res, next) => {
     message = 'Geçersiz ID formatı';
   }
 
+  // PostgreSQL errors
+  if (err.code === 'ECONNREFUSED' || err.code === 'ENOTFOUND') {
+    statusCode = HTTP_STATUS.SERVICE_UNAVAILABLE;
+    message = 'Veritabanı bağlantısı kurulamadı';
+  }
+
+  if (err.code === '23505') { // Unique violation
+    statusCode = HTTP_STATUS.CONFLICT;
+    message = 'Bu kayıt zaten mevcut';
+  }
+
+  if (err.code === '23503') { // Foreign key violation
+    statusCode = HTTP_STATUS.BAD_REQUEST;
+    message = 'İlişkili kayıt bulunamadı';
+  }
+
+  if (err.code === '23502') { // Not null violation
+    statusCode = HTTP_STATUS.BAD_REQUEST;
+    message = 'Zorunlu alanlar eksik';
+  }
+
+  if (err.code === '42P01') { // Undefined table
+    statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR;
+    message = 'Veritabanı tablosu bulunamadı';
+  }
+
   // JWT errors
   if (err.name === 'JsonWebTokenError') {
     statusCode = HTTP_STATUS.UNAUTHORIZED;

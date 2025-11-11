@@ -134,10 +134,12 @@ exports.updateUserPermissions = asyncHandler(async (req, res) => {
     throw new AppError('Kullanıcı bulunamadı', HTTP_STATUS.NOT_FOUND);
   }
 
-  // Transaction başlat
-  await pool.query('BEGIN');
-
+  // Transaction için client al
+  const client = await pool.connect();
+  
   try {
+    await client.query('BEGIN');
+
     // Her izin için güncelleme yap
     for (const perm of permissions) {
       const { pageId, hasAccess } = perm;
@@ -149,7 +151,7 @@ exports.updateUserPermissions = asyncHandler(async (req, res) => {
       }
 
       // İzni güncelle veya ekle
-      await pool.query(
+      await client.query(
         `INSERT INTO user_permissions (user_id, page_id, has_access, updated_at)
          VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
          ON CONFLICT (user_id, page_id)
@@ -158,15 +160,18 @@ exports.updateUserPermissions = asyncHandler(async (req, res) => {
       );
     }
 
-    await pool.query('COMMIT');
+    await client.query('COMMIT');
 
     res.json({
       success: true,
       message: 'İzinler başarıyla güncellendi',
     });
   } catch (error) {
-    await pool.query('ROLLBACK');
+    await client.query('ROLLBACK');
     throw error;
+  } finally {
+    // Client'i her zaman release et
+    client.release();
   }
 });
 
