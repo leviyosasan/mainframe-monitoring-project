@@ -1,7 +1,7 @@
 import { Outlet, useNavigate, NavLink } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { useAdminAuthStore } from '../../store/adminAuthStore'
-import { LogOut, Settings, User, Bell, LayoutDashboard, Eye, ChevronLeft, ChevronRight } from 'lucide-react'
+import { LogOut, Settings, User, Bell, LayoutDashboard, Eye, ChevronLeft, ChevronRight, Users, Shield } from 'lucide-react'
 
 const AdminLayout = () => {
   const navigate = useNavigate()
@@ -29,7 +29,9 @@ const AdminLayout = () => {
 
   const menuItems = [
     { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/admin/card-management', icon: Eye, label: 'Kart Yönetimi' }
+    { to: '/admin/card-management', icon: Eye, label: 'Kart Yönetimi' },
+    { to: '/admin/user-management', icon: Users, label: 'Kullanıcı Yönetimi' },
+    { to: '/admin/permission-management', icon: Shield, label: 'Yetkilendirme Yönetimi' }
   ]
 
   return (

@@ -19,7 +19,7 @@ export const useAuth = () => {
         navigate('/dashboard')
       },
       onError: (error) => {
-        toast.error(error.response?.data?.message || 'Giriş başarısız')
+        // Hata mesajı LoginPage'de gösterilecek
       },
     }
   )
@@ -47,11 +47,12 @@ export const useAuth = () => {
       onSuccess: () => {
         logoutStore()
         toast.success('Çıkış yapıldı')
-        navigate('/login')
+        navigate('/')
       },
       onError: () => {
+        // Hata olsa bile logout yap (örneğin token geçersizse)
         logoutStore()
-        navigate('/login')
+        navigate('/')
       },
     }
   )
@@ -72,6 +73,7 @@ export const useAuth = () => {
   return {
     login: loginMutation.mutate,
     isLoggingIn: loginMutation.isLoading,
+    loginError: loginMutation.error,
     register: registerMutation.mutate,
     isRegistering: registerMutation.isLoading,
     logout: logoutMutation.mutate,

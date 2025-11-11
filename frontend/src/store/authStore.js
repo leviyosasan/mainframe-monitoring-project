@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 
 export const useAuthStore = create(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       accessToken: null,
       refreshToken: null,
@@ -23,7 +23,11 @@ export const useAuthStore = create(
       },
 
       updateTokens: (accessToken, refreshToken) => {
-        set({ accessToken, refreshToken })
+        set({ 
+          accessToken, 
+          refreshToken,
+          isAuthenticated: true 
+        })
       },
 
       logout: () => {
@@ -38,6 +42,12 @@ export const useAuthStore = create(
     {
       name: 'auth-storage',
       getStorage: () => localStorage,
+      // State restore edildiğinde isAuthenticated'ı accessToken'a göre ayarla
+      onRehydrateStorage: () => (state) => {
+        if (state && state.accessToken) {
+          state.isAuthenticated = true
+        }
+      },
     }
   )
 )

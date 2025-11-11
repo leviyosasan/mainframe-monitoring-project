@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { useAuthStore } from '../store/authStore'
+import { useAdminAuthStore } from '../store/adminAuthStore'
 import toast from 'react-hot-toast'
 
 // Base URL
@@ -13,13 +14,21 @@ const api = axios.create({
   },
 })
 
-// Request interceptor - Token ekleme
+// Request interceptor - Token ekleme (hem normal hem admin token desteği)
 api.interceptors.request.use(
   (config) => {
-    const { accessToken } = useAuthStore.getState()
+    // Önce admin token'ı kontrol et
+    const { token: adminToken } = useAdminAuthStore.getState()
     
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`
+    if (adminToken) {
+      config.headers.Authorization = `Bearer ${adminToken}`
+    } else {
+      // Admin token yoksa normal kullanıcı token'ını kullan
+      const { accessToken } = useAuthStore.getState()
+      
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`
+      }
     }
     
     return config
@@ -35,8 +44,40 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
-    // Token yenileme
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Token yenileme (session kontrolü yapılmışsa yenileme yapma)
+    // Login/Register endpoint'leri için token yenileme yapma
+    const isAuthEndpoint = originalRequest.url?.includes('/auth/login') || 
+                          originalRequest.url?.includes('/auth/register')
+    
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
+      const errorMessage = error.response?.data?.message || ''
+      
+      // Admin token kontrolü
+      const { token: adminToken } = useAdminAuthStore.getState()
+      
+      if (adminToken) {
+        // Admin token varsa ve 401 hatası geldiyse, admin logout yap
+        if (errorMessage.includes('başka bir cihazda aktif') || errorMessage.includes('Oturum geçersiz') || errorMessage.includes('Yetkilendirme')) {
+          useAdminAuthStore.getState().logout()
+          toast.error('Oturum süresi doldu. Lütfen tekrar giriş yapın.')
+          window.location.href = '/admin'
+          return Promise.reject(error)
+        }
+        // Admin için token yenileme yapma, direkt logout
+        useAdminAuthStore.getState().logout()
+        window.location.href = '/admin'
+        return Promise.reject(error)
+      }
+      
+      // Normal kullanıcı için session hatası kontrolü
+      if (errorMessage.includes('başka bir cihazda aktif') || errorMessage.includes('Oturum geçersiz')) {
+        const { useAuthStore } = await import('../store/authStore')
+        useAuthStore.getState().logout()
+        toast.error('Bu hesap başka bir cihazda aktif. Lütfen tekrar giriş yapın.')
+        window.location.href = '/'
+        return Promise.reject(error)
+      }
+
       originalRequest._retry = true
 
       try {
@@ -58,7 +99,7 @@ api.interceptors.response.use(
         return api(originalRequest)
       } catch (refreshError) {
         useAuthStore.getState().logout()
-        window.location.href = '/login'
+        window.location.href = '/'
         return Promise.reject(refreshError)
       }
     }

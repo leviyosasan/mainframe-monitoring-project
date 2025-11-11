@@ -1,19 +1,27 @@
-import { Home, Settings, Monitor, Zap, Database, BarChart3, Mail, Globe, HardDrive, Terminal, FileText, Server, AlertTriangle, Mailbox, ChevronLeft, ChevronRight, TrendingUp, Sliders } from 'lucide-react'
+import { Home, Monitor, Zap, Database, BarChart3, Mail, Globe, HardDrive, Terminal, FileText, Server, AlertTriangle, Mailbox, ChevronLeft, ChevronRight, TrendingUp, Sliders, LogOut } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import { useAuth } from '../../hooks/useAuth'
+import { useAuthStore } from '../../store/authStore'
 
 const Navbar = ({ isExpanded, setIsExpanded }) => {
   const [isDbOpen, setIsDbOpen] = useState(false)
+  const { logout } = useAuth()
+  const { user } = useAuthStore()
 
   useEffect(() => {
     // Sidebar durum değiştiğinde alt menüyü kapat
     setIsDbOpen(false)
   }, [isExpanded])
 
+  const handleLogout = () => {
+    logout()
+  }
+
   const menuItems = [
     { to: '/dashboard', icon: Home, label: 'Dashboard' },
-    { to: '/analiz', icon: TrendingUp, label: 'Analiz' },
-    { to: '/ozellestir', icon: Sliders, label: 'Özelleştir' },
+    { to: '/analiz', icon: TrendingUp, label: 'Chronalyze' },
+    { to: '/ozellestir', icon: Sliders, label: 'Chronizer' },
     { to: '/zos', icon: Monitor, label: 'z/OS' },
     { to: '/cics', icon: Zap, label: 'CICS' },
     { to: '/db2', icon: Database, label: 'DB2' },
@@ -213,13 +221,42 @@ const Navbar = ({ isExpanded, setIsExpanded }) => {
             </span>
           </NavLink>
           
-          {/* Ayarlar */}
+          {/* Kullanıcı Bilgisi */}
+          <div className={`border-t border-gray-700 pt-2 mt-2 ${isExpanded ? 'px-2' : 'px-1'}`}>
+            <NavLink
+              to="/profile"
+              className={({ isActive }) =>
+                `w-full flex items-center ${isExpanded ? 'justify-start px-3 space-x-3' : 'justify-center'} p-2 rounded-lg transition-all duration-200 ${
+                  isActive
+                    ? 'bg-primary-600 text-white'
+                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                }`
+              }
+              title={!isExpanded ? 'Profil' : ''}
+            >
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-semibold text-white">
+                  {user?.firstName?.[0] || ''}
+                  {user?.lastName?.[0] || ''}
+                </span>
+              </div>
+              {isExpanded && (
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium truncate">{user?.firstName} {user?.lastName}</div>
+                  <div className="text-xs text-gray-400 truncate">{user?.email}</div>
+                </div>
+              )}
+            </NavLink>
+          </div>
+
+          {/* Çıkış Yap */}
           <button 
-            className={`w-full flex items-center ${isExpanded ? 'justify-start px-4 space-x-3' : 'justify-center'} p-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-all duration-200`}
-            title={!isExpanded ? 'Ayarlar' : ''}
+            onClick={handleLogout}
+            className={`w-full flex items-center ${isExpanded ? 'justify-start px-4 space-x-3' : 'justify-center'} p-2 text-red-400 hover:bg-red-900/20 hover:text-red-300 rounded-lg transition-all duration-200`}
+            title={!isExpanded ? 'Çıkış Yap' : ''}
           >
-            <Settings className="w-5 h-5 flex-shrink-0" />
-            {isExpanded && <span className="text-sm font-medium whitespace-nowrap">Ayarlar</span>}
+            <LogOut className="w-5 h-5 flex-shrink-0" />
+            {isExpanded && <span className="text-sm font-medium whitespace-nowrap">Çıkış Yap</span>}
           </button>
         </div>
       </div>

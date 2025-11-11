@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, ArrowRight, Cpu, Database, Zap, BarChart3, Mail, Globe, HardDrive, Terminal, FileText, Server, AlertTriangle, Mailbox } from 'lucide-react';
+import { useUserPermissions } from '../../hooks/useUserPermissions';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const { hasPermission, isLoading: permissionsLoading } = useUserPermissions();
 
   // Admin tarafından oluşturulan kartları yükle
   const [mainviewCards, setMainviewCards] = useState(() => {
@@ -210,18 +212,24 @@ const DashboardPage = () => {
     const term = searchTerm.toLowerCase();
     const results = { pages: [], cards: [] };
 
-    // Sayfaları ara (sadece görünür olanları)
+    // Sayfaları ara (sadece görünür ve izinli olanları)
     mainviewCards.forEach(page => {
-      if (page.title.toLowerCase().includes(term) && page.visible !== false) {
+      const pageId = page.path?.replace('/', '') || page.id;
+      if (
+        page.title.toLowerCase().includes(term) && 
+        page.visible !== false &&
+        hasPermission(pageId)
+      ) {
         results.pages.push(page);
       }
     });
 
-    // Sayfa içindeki kartları ara (sadece görünür sayfaların kartlarını)
+    // Sayfa içindeki kartları ara (sadece görünür ve izinli sayfaların kartlarını)
     Object.entries(pageCards).forEach(([pageId, cards]) => {
-      // Sayfa görünür değilse kartlarını da gösterme
+      // Sayfa görünür değilse veya izin yoksa kartlarını da gösterme
       const page = mainviewCards.find(p => p.id === pageId)
       if (page && page.visible === false) return;
+      if (!hasPermission(pageId)) return;
 
       cards.forEach(card => {
         const matchesTitle = card.title.toLowerCase().includes(term);
@@ -246,11 +254,39 @@ const DashboardPage = () => {
   const results = searchResults();
   const hasResults = results.pages.length > 0 || results.cards.length > 0;
 
-  // Filter cards based on search term and admin visibility settings
-  const filteredCards = mainviewCards.filter(card =>
-    card.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    card.visible !== false
-  );
+  // Filter cards based on search term, admin visibility settings, and user permissions
+  const filteredCards = useMemo(() => {
+    if (permissionsLoading) return [];
+    
+    return mainviewCards.filter(card => {
+      // Admin görünürlük kontrolü
+      if (card.visible === false) return false;
+      
+      // Arama filtresi
+      if (searchTerm && !card.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return false;
+      }
+      
+      // İzin kontrolü - path'den pageId çıkar
+      const pageId = card.path?.replace('/', '') || card.id;
+      if (!hasPermission(pageId)) {
+        return false;
+      }
+      
+      return true;
+    });
+  }, [mainviewCards, searchTerm, hasPermission, permissionsLoading]);
+
+  if (permissionsLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-6 relative">
@@ -373,6 +409,19 @@ const DashboardPage = () => {
       </div>
 
       {/* Cards Grid */}
+      {filteredCards.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20">
+          <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+            <Server className="w-12 h-12 text-gray-400" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Erişilebilir Sayfa Bulunamadı</h3>
+          <p className="text-gray-500 text-center max-w-md">
+            {searchTerm 
+              ? 'Arama kriterlerinize uygun sayfa bulunamadı.' 
+              : 'Henüz size erişim izni verilmiş sayfa bulunmuyor. Lütfen yöneticinizle iletişime geçin.'}
+          </p>
+        </div>
+      ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCards.map((card) => (
             <div
@@ -433,6 +482,7 @@ const DashboardPage = () => {
             </div>
           ))}
         </div>
+      )}
     </div>
   );
 };

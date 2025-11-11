@@ -1,15 +1,24 @@
 import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, Users, Settings, User, BarChart3 } from 'lucide-react'
+import { useUserPermissions } from '../../hooks/useUserPermissions'
 
 const Sidebar = () => {
-  // Geçici: Login atlandığı için tüm menüleri göster
-  const navItems = [
-    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/analiz', icon: BarChart3, label: 'Analiz' },
-    { to: '/profile', icon: User, label: 'Profil' },
-    { to: '/users', icon: Users, label: 'Kullanıcılar' },
-    { to: '/settings', icon: Settings, label: 'Ayarlar' },
+  const { hasPermission, isAdmin } = useUserPermissions()
+
+  // Menü öğeleri - izin kontrolü ile
+  const allNavItems = [
+    { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', pageId: null }, // Dashboard her zaman erişilebilir
+    { to: '/analiz', icon: BarChart3, label: 'Analiz', pageId: 'analiz' },
+    { to: '/profile', icon: User, label: 'Profil', pageId: null }, // Profil her zaman erişilebilir
+    { to: '/users', icon: Users, label: 'Kullanıcılar', pageId: null }, // Kullanıcılar sayfası varsa eklenebilir
+    { to: '/settings', icon: Settings, label: 'Ayarlar', pageId: null }, // Ayarlar her zaman erişilebilir
   ]
+
+  // İzin kontrolü ile filtrele
+  const navItems = allNavItems.filter((item) => {
+    if (!item.pageId) return true // pageId yoksa her zaman göster
+    return hasPermission(item.pageId)
+  })
 
   return (
     <aside className="fixed top-0 left-0 z-40 w-12 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 lg:translate-x-0">
