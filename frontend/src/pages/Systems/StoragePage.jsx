@@ -189,7 +189,11 @@ const INFO_TEXTS = {
   }
 };
 
-  // tabs moved to module scope
+// Tabs definition
+const tabs = [
+  { id: 'table', name: 'Tablo', icon: '📊' },
+  { id: 'chart', name: 'Grafik', icon: '📈' }
+];
 
 const StoragePage = () => {
   // State management
